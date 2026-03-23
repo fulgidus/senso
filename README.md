@@ -83,3 +83,37 @@ OGR Torino
 Corso Castelfidardo, 22, 10128 Torino TO, Italy
 
 > Src: [Punkathon Hackathon Annuncio](https://luma.com/nzjeiyaz)
+
+## Phase 1 Local Runtime
+
+Follow these steps on a fresh machine.
+
+1. Clone repository and enter project root.
+2. Copy environment template:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Start all Phase 1 services (frontend + API + Postgres):
+
+   ```bash
+   docker compose up --build
+   ```
+
+4. Open the app:
+   - Frontend: http://localhost:3000
+   - API: http://localhost:8000
+   - API health endpoint: http://localhost:8000/health
+
+5. Run auth smoke checks (in a new terminal):
+
+   ```bash
+   bash scripts/smoke-auth.sh
+   ```
+
+Expected output:
+
+```text
+Smoke checks passed: /health and /auth/signup are reachable.
+```

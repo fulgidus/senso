@@ -1,0 +1,1 @@
+- Plan 01-03 Task 1 verification blocked locally: `docker compose config` cannot run because `docker` CLI is not installed in this environment (`command not found: docker`).
