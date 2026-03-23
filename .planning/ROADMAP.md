@@ -30,7 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. User can sign in with Google OAuth and reach the same authenticated experience.
   3. User stays signed in after browser refresh without re-authenticating.
   4. A fresh machine can run the product locally via documented reproducible setup for judging.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
+- [ ] 01-02-PLAN.md — Build Vite React auth UX with localStorage session persistence and Google fallback.
+- [ ] 01-03-PLAN.md — Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
 **UI hint**: yes
 
 ### Phase 2: Financial Input Ingestion
