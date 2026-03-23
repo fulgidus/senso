@@ -10,7 +10,7 @@
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                         Experience Layer (Next.js)                          │
+│                         Experience Layer (ReactJS)                          │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  Web UI (chat + cards)  │  Voice Input Adapter (Web Speech STT)            │
 │  Auth UI (email+OAuth)  │  Voice Output Player (ElevenLabs audio stream)   │
