@@ -12,7 +12,7 @@ This roadmap delivers a reliable one-day hackathon demo by sequencing work from 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Runtime & Account Foundation** - Reproducible local run and persistent user access.
+- [x] **Phase 1: Runtime & Account Foundation** - Reproducible local run and persistent user access.
 - [ ] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts.
 - [ ] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data.
 - [ ] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement.
@@ -32,9 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A fresh machine can run the product locally via documented reproducible setup for judging.
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
-- [ ] 01-02-PLAN.md — Build Vite React auth UX with localStorage session persistence and Google fallback.
-- [ ] 01-03-PLAN.md — Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
+- [x] 01-01-PLAN.md — Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
+- [x] 01-02-PLAN.md — Build Vite React auth UX with localStorage session persistence and Google fallback.
+- [x] 01-03-PLAN.md — Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
 **UI hint**: yes
 
 ### Phase 2: Financial Input Ingestion
@@ -100,7 +100,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Runtime & Account Foundation | 0/TBD | Not started | - |
+| 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
 | 2. Financial Input Ingestion | 0/TBD | Not started | - |
 | 3. Financial Profile Clarity | 0/TBD | Not started | - |
 | 4. Safe Grounded Text Coaching | 0/TBD | Not started | - |

@@ -54,7 +54,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 - [ ] **DEMO-01**: Team can complete an end-to-end scripted demo flow in under 90 seconds.
 - [ ] **DEMO-02**: Demo flow includes upload -> profile summary -> voice question -> grounded spoken recommendation -> learning/action cards.
-- [ ] **DEMO-03**: Product can run locally through a reproducible setup suitable for hackathon judging.
+- [x] **DEMO-03**: Product can run locally through a reproducible setup suitable for hackathon judging.
 
 ## v2 Requirements
 
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 4 | Pending |
 | DEMO-01 | Phase 6 | Pending |
 | DEMO-02 | Phase 6 | Pending |
-| DEMO-03 | Phase 1 | Pending |
+| DEMO-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
