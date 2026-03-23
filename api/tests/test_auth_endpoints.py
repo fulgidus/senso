@@ -90,9 +90,24 @@ def test_google_start_returns_fallback_when_provider_not_configured(client):
     assert payload["reason"] == "google_unavailable"
 
 
+def test_google_start_returns_auth_url_when_provider_configured(client, monkeypatch):
+    monkeypatch.setenv("GOOGLE_CLIENT_ID", "client-id-123")
+    monkeypatch.setenv("GOOGLE_CLIENT_SECRET", "client-secret-abc")
+    monkeypatch.setenv("GOOGLE_REDIRECT_URI", "https://example.com/auth/callback")
+
+    response = client.get("/auth/google/start")
+    assert response.status_code == 200
+    payload = response.json()
+    assert "authUrl" in payload
+    assert "client_id=client-id-123" in payload["authUrl"]
+    assert (
+        "redirect_uri=https%3A%2F%2Fexample.com%2Fauth%2Fcallback" in payload["authUrl"]
+    )
+
+
 def test_google_callback_returns_fallback_on_failure(client):
     response = client.get("/auth/google/callback", params={"code": "x", "state": "y"})
-    assert response.status_code in (400, 503)
+    assert response.status_code == 503
     payload = response.json()
     assert payload["fallback"] == "email_password"
     assert payload["reason"] == "google_unavailable"

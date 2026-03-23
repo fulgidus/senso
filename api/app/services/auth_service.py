@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from urllib.parse import urlencode
 from uuid import uuid4
 
 from app.core.config import Settings
@@ -100,18 +101,22 @@ class AuthService:
                 "google_unavailable", "Google OAuth is unavailable", status_code=503
             )
 
-        client_id = self.settings.google_client_id
-        redirect_uri = self.settings.google_redirect_uri
+        client_id = self.settings.google_client_id or ""
+        redirect_uri = self.settings.google_redirect_uri or ""
         state = str(uuid4())
-        return (
-            "https://accounts.google.com/o/oauth2/v2/auth"
-            f"?client_id={client_id}&redirect_uri={redirect_uri}"
-            "&response_type=code&scope=openid%20email%20profile"
-            f"&state={state}"
+        query = urlencode(
+            {
+                "client_id": client_id,
+                "redirect_uri": redirect_uri,
+                "response_type": "code",
+                "scope": "openid email profile",
+                "state": state,
+            }
         )
+        return f"https://accounts.google.com/o/oauth2/v2/auth?{query}"
 
     def exchange_google_callback(self, *, code: str, state: str) -> AuthResponseDTO:
-        if not self.settings.google_enabled:
+        if not self.settings.google_enabled or not code or not state:
             raise AuthError(
                 "google_unavailable", "Google OAuth is unavailable", status_code=503
             )
