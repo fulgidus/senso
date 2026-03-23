@@ -1,0 +1,64 @@
+{
+    "personas": [
+        {
+            "id": "mentore-saggio",
+            "name": "Il Mentore Saggio",
+            "description": "Calmo, diretto, ti dà i fatti e poi la strada. Come un professore che vuole davvero che tu ce la faccia.",
+            "icon": "🦉",
+            "soulFile": "soul/mentore-saggio.md",
+            "available": true,
+            "elevenlabs": {
+                "voiceId": "placeholder-mentore",
+                "stability": 0.75,
+                "similarityBoost": 0.8,
+                "style": 0.3,
+                "useSpeakerBoost": true
+            }
+        },
+        {
+            "id": "amico-sarcastico",
+            "name": "L'Amico Sarcastico",
+            "description": "Ti prende in giro con affetto quando stai per fare una cazzata. Ironico, ma sempre dalla tua parte.",
+            "icon": "😏",
+            "soulFile": "soul/amico-sarcastico.md",
+            "available": true,
+            "elevenlabs": {
+                "voiceId": "placeholder-amico",
+                "stability": 0.55,
+                "similarityBoost": 0.75,
+                "style": 0.6,
+                "useSpeakerBoost": true
+            }
+        },
+        {
+            "id": "hartman",
+            "name": "Il Sergente Hartman",
+            "description": "Niente sconti, niente scuse. Duro come il Sergente Hartman di Full Metal Jacket, ma il tuo portafoglio ti ringrazierà.",
+            "icon": "🪖",
+            "soulFile": "soul/hartman.md",
+            "available": true,
+            "elevenlabs": {
+                "voiceId": "placeholder-hartman",
+                "stability": 0.85,
+                "similarityBoost": 0.9,
+                "style": 0.8,
+                "useSpeakerBoost": true
+            }
+        },
+        {
+            "id": "cheerleader",
+            "name": "La Cheerleader",
+            "description": "Entusiasta, positiva, celebra ogni progresso. Trasforma ogni piccola scelta giusta in una vittoria.",
+            "icon": "🎉",
+            "soulFile": "soul/cheerleader.md",
+            "available": true,
+            "elevenlabs": {
+                "voiceId": "placeholder-cheerleader",
+                "stability": 0.5,
+                "similarityBoost": 0.7,
+                "style": 0.7,
+                "useSpeakerBoost": true
+            }
+        }
+    ]
+}

@@ -1,0 +1,127 @@
+# hard-boundaries.yml
+#
+# Regex di sicurezza applicate sull'I/O dell'LLM.
+# Questo file copre SOLO minacce di sicurezza tecnica.
+# Comportamento, tono e contenuti off-limits stanno in boundaries.md (istruzioni LLM).
+# Argomenti liberamente trattabili stanno in allowlist.md.
+#
+# ─── SEVERITY ────────────────────────────────────────────────────────────────
+#   censor    : censura il match con [***], la risposta continua
+#   warn      : censura il match, logga warning, invia alert interno
+#   block     : blocca l'intera risposta, restituisce substituteMessage
+#   temp_ban  : blocca, logga, segnala sessione per revisione umana
+#   hard_ban  : blocca, logga, termina sessione immediatamente
+#
+# ─── SCOPE ───────────────────────────────────────────────────────────────────
+#   input     : applicato sul messaggio in arrivo dall'utente
+#   output    : applicato sulla risposta dell'LLM prima di inviarla
+#   both      : applicato su entrambi
+#
+# ─── MATCH MODE ──────────────────────────────────────────────────────────────
+#   any                  : scatta su qualsiasi match (default)
+#   exclude_user_profile : scatta SOLO se il match NON corrisponde a un campo
+#                          in session.userProfile — usato per PII di terze parti
+#   user_profile_only    : scatta SOLO se il match corrisponde a un campo in
+#                          session.userProfile E non era stato esplicitamente
+#                          richiesto — usato per rilevare leak passivi
+#
+# I gruppi sono valutati in ordine di gravità decrescente:
+#   hard_ban → temp_ban → block → warn → censor
+# ─────────────────────────────────────────────────────────────────────────────
+
+groups:
+
+  # ─────────────────────────────────────────────
+  # PROMPT INJECTION / JAILBREAK
+  # Tentativi di sovrascrivere il system prompt o alterare il comportamento
+  # del modello, sia in input (utente malizioso) che in output (RAG poisoning).
+  # ─────────────────────────────────────────────
+  - name: prompt_injection
+    severity: temp_ban
+    scope: both
+    description: Rilevamento di tentativi di prompt injection
+    substituteMessage: "Non riesco a rispondere a questa richiesta."
+    patterns:
+      - "ignore (all |previous |prior |above |your )?(instructions|prompt|context|rules)"
+      - "disregard (your |all |previous )?(instructions|guidelines|prompt)"
+      - "you are now (a|an|acting as|playing)"
+      - "pretend (you are|to be|that you)"
+      - "new (system|instructions|prompt|persona|role):"
+      - "\\[SYSTEM\\]"
+      - "\\[INST\\]"
+      - "<\\|system\\|>"
+      - "forget (everything|all instructions|your instructions|you are)"
+      - "your (true|real|actual) (self|instructions|purpose|goal) (is|are)"
+      # RAG poisoning via documenti uploadati
+      - "---\\s*(system|assistant|user)\\s*---"
+      - "# (new|updated|override) (instructions|system prompt|context)"
+
+  # ─────────────────────────────────────────────
+  # CREDENTIAL / SECRET LEAKAGE
+  # Credenziali, token e segreti tecnici nell'output — sempre hard_ban,
+  # indipendentemente da chi sono: non devono mai uscire.
+  # ─────────────────────────────────────────────
+  - name: credential_leakage
+    severity: hard_ban
+    scope: output
+    description: Credenziali o token tecnici nell'output — bloccato immediatamente
+    substituteMessage: "Risposta bloccata per sicurezza. La sessione è stata segnalata."
+    patterns:
+      # API key / token / bearer
+      - "(password|passwd|secret|api[_\\-.]?key|token|bearer)[\\s:=]+[\"']?[\\w\\-\\.]{8,}"
+      # JWT
+      - "eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"
+      # URL con parametri sospetti (exfil via redirect)
+      - "https?://[^\\s]+[?&](data|payload|token|dump|export)=[^\\s]+"
+      # Numeri carta di credito (Luhn-like)
+      - "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12})\\b"
+
+  # ─────────────────────────────────────────────
+  # PII DI TERZE PARTI
+  # PII nell'output che NON appartengono all'utente della sessione.
+  # matchMode: exclude_user_profile → il check bypassa i campi del profilo utente,
+  # così l'utente può chiedere i propri dati senza trigger.
+  # ─────────────────────────────────────────────
+  - name: third_party_pii
+    severity: block
+    scope: output
+    matchMode: exclude_user_profile
+    description: PII di terze parti nell'output — bloccato
+    substituteMessage: "Non posso includere dati personali di terze parti nella risposta."
+    patterns:
+      # IBAN
+      - "[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}"
+      # Codice fiscale italiano
+      - "[A-Z]{6}\\d{2}[A-Z]\\d{2}[A-Z]\\d{3}[A-Z]"
+      # Email
+      - "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}"
+      # Numero di telefono italiano
+      - "\\b(\\+39[\\s\\-]?)?3\\d{2}[\\s\\-]?\\d{6,7}\\b"
+      # Indirizzo fisico
+      - "\\b(via|viale|corso|piazza|largo|vicolo)\\s+[a-zA-Z\\s]+,?\\s+\\d+"
+
+  # ─────────────────────────────────────────────
+  # LEAK PASSIVO DI PII DELL'UTENTE
+  # L'LLM riproduce dati dell'utente senza che siano stati esplicitamente richiesti.
+  # Segnale di possibile RAG poisoning o injection tramite documenti uploadati.
+  # matchMode: user_profile_only → scatta solo sui dati del profilo della sessione.
+  # Non blocca: se l'utente chiede i propri dati, la risposta è legittima.
+  # ─────────────────────────────────────────────
+  - name: own_pii_unsolicited
+    severity: warn
+    scope: output
+    matchMode: user_profile_only
+    requiresContext: unsolicited  # non scatta se il match risponde a una richiesta esplicita
+    description: >
+      L'LLM riproduce PII dell'utente senza che fossero stati richiesti —
+      possibile segnale di injection via documenti uploadati. Solo log + alert, non blocca.
+    substituteMessage: null
+    # I pattern qui sono simbolici: il match engine li incrocia con i campi
+    # effettivi di session.userProfile (iban, cf, phone, email, address).
+    # Non servono regex esplicite — il runtime usa i valori reali del profilo.
+    userProfileFields:
+      - iban
+      - codiceFiscale
+      - telefono
+      - email
+      - indirizzo
