@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "/home/fulgidus/Documents/senso/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "/home/fulgidus/Documents/senso/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}
