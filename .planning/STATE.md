@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: planning
 stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-03-23T22:42:42.202Z"
-last_activity: 2026-03-23 — Initial roadmap, phase mapping, and traceability created
+last_updated: "2026-03-23T22:59:37.711Z"
+last_activity: 2026-03-23
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 1 of 6 (Runtime & Account Foundation)
-Plan: 0 of TBD in current phase
+Plan: 1 of 3 in current phase
 Status: Ready to plan
-Last activity: 2026-03-23 — Initial roadmap, phase mapping, and traceability created
+Last activity: 2026-03-23
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,6 +51,8 @@ Progress: [░░░░░░░░░░] 0%
 - Last 5 plans: -
 - Trend: Stable
 
+| Phase 01 P01 | 6 | 3 tasks | 14 files |
+
 ## Accumulated Context
 
 ### Decisions
@@ -60,6 +62,8 @@ Recent decisions affecting current work:
 
 - [Roadmap Init]: Sequence optimized for one-day demo reliability: foundation -> ingestion -> profile -> safe text coaching -> voice -> demo hardening.
 - [Roadmap Init]: Safety constraints merged into coaching phase to ensure no unsafe coaching path exists before voice rollout.
+- [Phase 01]: FastAPI owns auth/session with 15m access JWT plus rotating 7-day refresh tokens for persistent login.
+- [Phase 01]: Google OAuth endpoints return deterministic email_password fallback payload when provider config/exchange is unavailable.
 
 ### Pending Todos
 

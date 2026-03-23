@@ -9,9 +9,9 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can create an account with email and password.
-- [ ] **AUTH-02**: User can sign in with Google OAuth.
-- [ ] **AUTH-03**: User session persists across browser refresh.
+- [x] **AUTH-01**: User can create an account with email and password.
+- [x] **AUTH-02**: User can sign in with Google OAuth.
+- [x] **AUTH-03**: User session persists across browser refresh.
 
 ### Ingestion
 
@@ -84,9 +84,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | INGT-01 | Phase 2 | Pending |
 | INGT-02 | Phase 2 | Pending |
 | INGT-03 | Phase 2 | Pending |
