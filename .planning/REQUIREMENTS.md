@@ -84,36 +84,36 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| AUTH-03 | TBD | Pending |
-| INGT-01 | TBD | Pending |
-| INGT-02 | TBD | Pending |
-| INGT-03 | TBD | Pending |
-| PROF-01 | TBD | Pending |
-| PROF-02 | TBD | Pending |
-| PROF-03 | TBD | Pending |
-| COCH-01 | TBD | Pending |
-| COCH-02 | TBD | Pending |
-| COCH-03 | TBD | Pending |
-| COCH-04 | TBD | Pending |
-| COCH-05 | TBD | Pending |
-| VOIC-01 | TBD | Pending |
-| VOIC-02 | TBD | Pending |
-| ACTN-01 | TBD | Pending |
-| ACTN-02 | TBD | Pending |
-| ACTN-03 | TBD | Pending |
-| SAFE-01 | TBD | Pending |
-| SAFE-02 | TBD | Pending |
-| SAFE-03 | TBD | Pending |
-| DEMO-01 | TBD | Pending |
-| DEMO-02 | TBD | Pending |
-| DEMO-03 | TBD | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| INGT-01 | Phase 2 | Pending |
+| INGT-02 | Phase 2 | Pending |
+| INGT-03 | Phase 2 | Pending |
+| PROF-01 | Phase 3 | Pending |
+| PROF-02 | Phase 3 | Pending |
+| PROF-03 | Phase 3 | Pending |
+| COCH-01 | Phase 4 | Pending |
+| COCH-02 | Phase 5 | Pending |
+| COCH-03 | Phase 4 | Pending |
+| COCH-04 | Phase 4 | Pending |
+| COCH-05 | Phase 4 | Pending |
+| VOIC-01 | Phase 5 | Pending |
+| VOIC-02 | Phase 5 | Pending |
+| ACTN-01 | Phase 6 | Pending |
+| ACTN-02 | Phase 6 | Pending |
+| ACTN-03 | Phase 6 | Pending |
+| SAFE-01 | Phase 4 | Pending |
+| SAFE-02 | Phase 4 | Pending |
+| SAFE-03 | Phase 4 | Pending |
+| DEMO-01 | Phase 6 | Pending |
+| DEMO-02 | Phase 6 | Pending |
+| DEMO-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-23*
