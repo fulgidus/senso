@@ -45,7 +45,13 @@ Plans:
   1. User can upload a bank CSV and see structured transactions extracted from that file.
   2. User can upload a payslip/receipt image or PDF and see key financial fields extracted.
   3. User can review extracted values and confirm/correct them before recommendations are generated.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 02-01-PLAN.md — Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
+- [ ] 02-02-PLAN.md — Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
+- [ ] 02-03-PLAN.md — API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
+- [ ] 02-04-PLAN.md — Implement builtin extraction modules for all sample financial document types.
+- [ ] 02-05-PLAN.md — Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
 **UI hint**: yes
 
 ### Phase 3: Financial Profile Clarity
@@ -101,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
-| 2. Financial Input Ingestion | 0/TBD | Not started | - |
+| 2. Financial Input Ingestion | 0/5 | Not started | - |
 | 3. Financial Profile Clarity | 0/TBD | Not started | - |
 | 4. Safe Grounded Text Coaching | 0/TBD | Not started | - |
 | 5. Voice Coaching Loop | 0/TBD | Not started | - |
