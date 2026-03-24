@@ -149,6 +149,10 @@ None - no external service configuration required.
 - FINGERPRINT patterns verified against real sample files — registry matching will work correctly
 - PDF modules will benefit from pytesseract being available in Docker container (D-41 already specifies `apt-get install tesseract-ocr` in Dockerfile)
 
+## Self-Check: PASSED
+
+All 9 files created and exist on disk. Commits b103e84, 87e7214, 92beeb3 all verified in git log.
+
 ---
 *Phase: 02-financial-input-ingestion*
 *Completed: 2026-03-24*
