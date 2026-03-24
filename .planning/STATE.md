@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 02-financial-input-ingestion-03-PLAN.md
-last_updated: "2026-03-24T22:31:26.421Z"
+stopped_at: "Checkpoint: human-verify at task 3 of 02-financial-input-ingestion-05-PLAN.md"
+last_updated: "2026-03-24T22:38:20.593Z"
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -52,6 +52,7 @@ Plan: 5 of 5
 | Phase 02-financial-input-ingestion P02 | 2min | 2 tasks | 7 files |
 | Phase 02-financial-input-ingestion P04 | 4min | 2 tasks | 10 files |
 | Phase 02-financial-input-ingestion P03 | 15 | 2 tasks | 7 files |
+| Phase 02-financial-input-ingestion P05 | 3min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Recent decisions affecting current work:
 - [Phase 02-financial-input-ingestion]: Used FastAPI dependency_overrides (not patch()) to mock get_minio_client in tests — only correct approach for Depends()-injected deps
 - [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup — avoids __import__ hack in plan sample
 - [Phase 02-financial-input-ingestion]: IngestionError mirrors AuthError pattern (code, message, status_code) for consistent HTTP error shape across all services
+- [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case field names to match FastAPI model_dump output — API get_extracted returns raw payload_json dict with snake_case keys; using camelCase causes runtime failures
 
 ### Pending Todos
 
@@ -82,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T22:31:26.418Z
-Stopped at: Completed 02-financial-input-ingestion-03-PLAN.md
+Last session: 2026-03-24T22:38:08.476Z
+Stopped at: Checkpoint: human-verify at task 3 of 02-financial-input-ingestion-05-PLAN.md
 Resume file: None

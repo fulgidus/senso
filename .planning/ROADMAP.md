@@ -51,7 +51,7 @@ Plans:
 - [x] 02-02-PLAN.md — Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
 - [x] 02-03-PLAN.md — API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
 - [x] 02-04-PLAN.md — Implement builtin extraction modules for all sample financial document types.
-- [ ] 02-05-PLAN.md — Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
+- [x] 02-05-PLAN.md — Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
 **UI hint**: yes
 
 ### Phase 3: Financial Profile Clarity
