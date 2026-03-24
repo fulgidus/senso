@@ -17,7 +17,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 - [x] **INGT-01**: User can upload a bank statement CSV and the system extracts structured transactions.
 - [x] **INGT-02**: User can upload a payslip or receipt image/PDF and the system extracts key financial fields.
-- [ ] **INGT-03**: User can review extracted data before it is used for recommendations.
+- [x] **INGT-03**: User can review extracted data before it is used for recommendations.
 
 ### Financial Profile
 
@@ -89,7 +89,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Complete |
 | INGT-01 | Phase 2 | Complete |
 | INGT-02 | Phase 2 | Complete |
-| INGT-03 | Phase 2 | Pending |
+| INGT-03 | Phase 2 | Complete |
 | PROF-01 | Phase 3 | Pending |
 | PROF-02 | Phase 3 | Pending |
 | PROF-03 | Phase 3 | Pending |

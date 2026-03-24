@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-03-24T22:30:17.396Z"
+stopped_at: Completed 02-financial-input-ingestion-03-PLAN.md
+last_updated: "2026-03-24T22:31:26.421Z"
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 02 (financial-input-ingestion) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Plan: 4 of 5
 | Phase 02-financial-input-ingestion P01 | 15min | 2 tasks | 12 files |
 | Phase 02-financial-input-ingestion P02 | 2min | 2 tasks | 7 files |
 | Phase 02-financial-input-ingestion P04 | 4min | 2 tasks | 10 files |
+| Phase 02-financial-input-ingestion P03 | 15 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Phase runtime is standardized on docker-compose frontend/api/postgres with scripted smoke checks for judge setup.
 - [Phase 02-financial-input-ingestion]: SQLite for tests + repository-as-functions pattern for DB layer — File-based SQLite allows cross-request session reuse in tests; functional repository avoids over-engineering
 - [Phase 02-financial-input-ingestion]: LLMClient uses lazy provider imports inside methods to avoid import-time failures when SDKs are not installed — Enables clean test environments without requiring google-genai/openai packages installed at module load time
+- [Phase 02-financial-input-ingestion]: Used FastAPI dependency_overrides (not patch()) to mock get_minio_client in tests — only correct approach for Depends()-injected deps
+- [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup — avoids __import__ hack in plan sample
+- [Phase 02-financial-input-ingestion]: IngestionError mirrors AuthError pattern (code, message, status_code) for consistent HTTP error shape across all services
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T22:30:17.393Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-03-24T22:31:26.418Z
+Stopped at: Completed 02-financial-input-ingestion-03-PLAN.md
 Resume file: None
