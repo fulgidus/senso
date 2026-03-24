@@ -47,7 +47,7 @@ Plans:
   3. User can review extracted values and confirm/correct them before recommendations are generated.
 **Plans**: 5 plans
 Plans:
-- [ ] 02-01-PLAN.md — Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
+- [x] 02-01-PLAN.md — Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
 - [ ] 02-02-PLAN.md — Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
 - [ ] 02-03-PLAN.md — API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
 - [ ] 02-04-PLAN.md — Implement builtin extraction modules for all sample financial document types.
