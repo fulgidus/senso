@@ -7,3 +7,12 @@ __pycache__/
 *.env
 *.env.*
 !.env.example
+
+# Frontend artifacts
+node_modules/
+dist/
+dist-ssr/
+*.local
+senso/node_modules/
+senso/dist/
+senso/dist-ssr/
