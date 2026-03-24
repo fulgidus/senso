@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import os
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,7 @@ class Settings:
     google_client_secret: str | None
     google_redirect_uri: str | None
     frontend_url: str
+    frontend_origins: tuple[str, ...]
 
     @property
     def google_enabled(self) -> bool:
@@ -23,6 +25,24 @@ class Settings:
 
 
 def get_settings() -> Settings:
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    raw_origins = os.getenv("FRONTEND_ORIGINS")
+
+    def normalize_origin(value: str) -> str:
+        parsed = urlparse(value.strip())
+        if parsed.scheme and parsed.netloc:
+            return f"{parsed.scheme}://{parsed.netloc}"
+        return value.strip().rstrip("/")
+
+    if raw_origins:
+        frontend_origins = tuple(
+            normalize_origin(origin)
+            for origin in raw_origins.split(",")
+            if origin.strip()
+        )
+    else:
+        frontend_origins = (normalize_origin(frontend_url),)
+
     return Settings(
         jwt_secret=os.getenv(
             "JWT_SECRET", "dev-secret-change-me-please-use-at-least-32-bytes"
@@ -35,5 +55,6 @@ def get_settings() -> Settings:
         google_client_id=os.getenv("GOOGLE_CLIENT_ID"),
         google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
         google_redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
-        frontend_url=os.getenv("FRONTEND_URL", "http://localhost:3000"),
+        frontend_url=frontend_url,
+        frontend_origins=frontend_origins,
     )

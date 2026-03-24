@@ -111,3 +111,30 @@ def test_google_callback_returns_fallback_on_failure(client):
     payload = response.json()
     assert payload["fallback"] == "email_password"
     assert payload["reason"] == "google_unavailable"
+
+
+def test_cors_preflight_allows_configured_origin_for_auth_signup(client):
+    response = client.options(
+        "/auth/signup",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+    assert "POST" in response.headers["access-control-allow-methods"]
+
+
+def test_cors_preflight_rejects_non_configured_origin_for_auth_login(client):
+    response = client.options(
+        "/auth/login",
+        headers={
+            "Origin": "https://malicious.example",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "access-control-allow-origin" not in response.headers
