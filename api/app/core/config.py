@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from urllib.parse import urlparse
 
 
@@ -14,6 +14,16 @@ class Settings:
     google_redirect_uri: str | None
     frontend_url: str
     frontend_origins: tuple[str, ...]
+    # MinIO object storage fields
+    minio_endpoint: str
+    minio_access_key: str
+    minio_secret_key: str
+    minio_bucket: str
+    # LLM provider fields
+    gemini_api_key: str | None
+    openai_api_key: str | None
+    # Database URL
+    database_url: str
 
     @property
     def google_enabled(self) -> bool:
@@ -57,4 +67,16 @@ def get_settings() -> Settings:
         google_redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
         frontend_url=frontend_url,
         frontend_origins=frontend_origins,
+        # MinIO fields
+        minio_endpoint=os.getenv("MINIO_ENDPOINT_URL", "http://minio:9000"),
+        minio_access_key=os.getenv("MINIO_ROOT_USER", "minioadmin"),
+        minio_secret_key=os.getenv("MINIO_ROOT_PASSWORD", "minioadmin"),
+        minio_bucket=os.getenv("MINIO_BUCKET", "senso-uploads"),
+        # LLM provider fields
+        gemini_api_key=os.getenv("GEMINI_API_KEY"),
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        # Database URL
+        database_url=os.getenv(
+            "DATABASE_URL", "postgresql://senso:senso@postgres:5432/senso"
+        ),
     )

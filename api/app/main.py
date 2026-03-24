@@ -1,12 +1,21 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.core.config import get_settings
+from app.db.session import create_tables
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_tables()
+    yield
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="S.E.N.S.O. API", version="0.1.0")
+    app = FastAPI(title="S.E.N.S.O. API", version="0.1.0", lifespan=lifespan)
     settings = get_settings()
 
     app.add_middleware(
