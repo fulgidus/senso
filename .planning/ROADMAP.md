@@ -13,7 +13,7 @@ This roadmap delivers a reliable one-day hackathon demo by sequencing work from 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Runtime & Account Foundation** - Reproducible local run and persistent user access.
-- [ ] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts.
+- [x] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts. (completed 2026-03-24)
 - [ ] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data.
 - [ ] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement.
 - [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
@@ -107,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
-| 2. Financial Input Ingestion | 0/5 | Not started | - |
+| 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
 | 3. Financial Profile Clarity | 0/TBD | Not started | - |
 | 4. Safe Grounded Text Coaching | 0/TBD | Not started | - |
 | 5. Voice Coaching Loop | 0/TBD | Not started | - |
