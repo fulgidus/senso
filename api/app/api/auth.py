@@ -1,9 +1,10 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
+from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
-from app.db.session import db
+from app.db.session import get_db
 from app.schemas.auth import (
     AuthFallbackDTO,
     AuthResponseDTO,
@@ -18,7 +19,7 @@ from app.services.auth_service import AuthError, AuthService
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def get_auth_service() -> AuthService:
+def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     return AuthService(db=db, settings=get_settings())
 
 

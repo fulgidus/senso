@@ -2,6 +2,8 @@ from datetime import UTC, datetime
 from urllib.parse import urlencode
 from uuid import uuid4
 
+from sqlalchemy.orm import Session
+
 from app.core.config import Settings
 from app.core.security import (
     decode_token,
@@ -10,8 +12,8 @@ from app.core.security import (
     mint_refresh_token,
     verify_password,
 )
+from app.db import repository
 from app.db.models import RefreshSession, User
-from app.db.session import InMemoryDB
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UserDTO
 
 
@@ -24,25 +26,24 @@ class AuthError(Exception):
 
 
 class AuthService:
-    def __init__(self, db: InMemoryDB, settings: Settings) -> None:
+    def __init__(self, db: Session, settings: Settings) -> None:
         self.db = db
         self.settings = settings
 
     def signup(self, *, email: str, password: str) -> AuthResponseDTO:
-        if self.db.get_user_by_email(email) is not None:
+        if repository.get_user_by_email(self.db, email) is not None:
             raise AuthError("email_in_use", "Email already registered", status_code=409)
 
         user = User(
             id=str(uuid4()),
             email=email.lower(),
             password_hash=hash_password(password),
-            created_at=datetime.now(UTC),
         )
-        self.db.create_user(user)
+        repository.create_user(self.db, user)
         return self._issue_auth_response(user)
 
     def login(self, *, email: str, password: str) -> AuthResponseDTO:
-        user = self.db.get_user_by_email(email)
+        user = repository.get_user_by_email(self.db, email)
         if user is None or not verify_password(password, user.password_hash):
             raise AuthError(
                 "invalid_credentials", "Invalid email or password", status_code=401
@@ -54,7 +55,7 @@ class AuthService:
         if claims.get("type") != "refresh":
             raise AuthError("invalid_token", "Invalid refresh token", status_code=401)
 
-        session = self.db.get_refresh_session_by_jti(claims["jti"])
+        session = repository.get_refresh_session_by_jti(self.db, claims["jti"])
         if session is None:
             raise AuthError(
                 "invalid_token", "Refresh token not recognized", status_code=401
@@ -63,14 +64,19 @@ class AuthService:
             raise AuthError(
                 "token_revoked", "Refresh token already used", status_code=401
             )
-        if session.expires_at <= datetime.now(UTC):
+        # Handle timezone-naive datetimes from SQLite test env (strip tz for comparison)
+        expires_at = session.expires_at
+        now = datetime.now(UTC)
+        if expires_at.tzinfo is None:
+            now = datetime.utcnow()  # noqa: DTZ003
+        if expires_at <= now:
             raise AuthError("token_expired", "Refresh token expired", status_code=401)
 
-        user = self.db.get_user_by_id(session.user_id)
+        user = repository.get_user_by_id(self.db, session.user_id)
         if user is None:
             raise AuthError("invalid_token", "User not found", status_code=401)
 
-        self.db.revoke_refresh_session(session.token_jti)
+        repository.revoke_refresh_session(self.db, session.token_jti)
         return self._issue_tokens(user)
 
     def get_current_user(self, *, access_token: str) -> UserDTO:
@@ -78,7 +84,7 @@ class AuthService:
         if claims.get("type") != "access":
             raise AuthError("invalid_token", "Invalid access token", status_code=401)
 
-        user = self.db.get_user_by_id(claims["sub"])
+        user = repository.get_user_by_id(self.db, claims["sub"])
         if user is None:
             raise AuthError("invalid_token", "User not found", status_code=401)
         return UserDTO(id=user.id, email=user.email)
@@ -88,12 +94,12 @@ class AuthService:
         if claims.get("type") != "refresh":
             raise AuthError("invalid_token", "Invalid refresh token", status_code=401)
 
-        session = self.db.get_refresh_session_by_jti(claims["jti"])
+        session = repository.get_refresh_session_by_jti(self.db, claims["jti"])
         if session is None:
             raise AuthError(
                 "invalid_token", "Refresh token not recognized", status_code=401
             )
-        self.db.revoke_refresh_session(session.token_jti)
+        repository.revoke_refresh_session(self.db, session.token_jti)
 
     def get_google_auth_url(self) -> str:
         if not self.settings.google_enabled:
@@ -150,13 +156,14 @@ class AuthService:
             ttl_seconds=self.settings.refresh_token_ttl_seconds,
             jti=refresh_jti,
         )
-        self.db.create_refresh_session(
+        repository.create_refresh_session(
+            self.db,
             RefreshSession(
                 id=str(uuid4()),
                 user_id=user.id,
                 token_jti=refresh_jti,
                 expires_at=refresh_expires_at,
-            )
+            ),
         )
 
         return AuthTokensDTO(
