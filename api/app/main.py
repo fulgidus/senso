@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.ingestion import router as ingestion_router
+from app.api.profile import router as profile_router
 from app.core.config import get_settings
 from app.db.session import create_tables
 
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(ingestion_router)
     app.include_router(admin_router)
+    app.include_router(profile_router)
 
     @app.get("/health")
     def healthcheck() -> dict[str, str]:
