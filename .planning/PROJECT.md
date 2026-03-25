@@ -12,7 +12,8 @@ Help users make better financial decisions in the moment by combining their real
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Users can upload core financial inputs (bank CSV, payslip, receipts/screens) and receive a structured financial profile. *(Validated in Phase 2: Financial Input Ingestion)*
+- [x] Users receive a financial profile showing income, recurring expenses, monthly margin, and spending breakdown by category. *(Validated in Phase 3: Financial Profile Clarity)*
 
 ### Active
 
@@ -76,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-23 after initialization*
+*Last updated: 2026-03-25 after Phase 3 completion — financial profile clarity backend + UI shipped*
