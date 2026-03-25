@@ -100,6 +100,16 @@ None - no external service configuration required.
 - Frontend can now call POST /ingestion/confirm-all and redirect to ProcessingScreen polling GET /profile/status
 - Ready for Plan 03-03 (processing screen / status polling UI)
 
+## Self-Check: PASSED
+
+- ✅ `api/app/services/ingestion_service.py` — exists
+- ✅ `api/app/api/ingestion.py` — exists
+- ✅ `api/tests/test_ingestion_endpoints.py` — exists
+- ✅ `03-02-SUMMARY.md` — exists
+- ✅ Commit `d6a3307` — feat(03-02): add confirm_all_uploads to IngestionService
+- ✅ Commit `929edb3` — feat(03-02): add POST /ingestion/confirm-all endpoint + tests
+- ✅ 45/45 tests pass
+
 ---
 *Phase: 03-financial-profile-clarity*
 *Completed: 2026-03-25*
