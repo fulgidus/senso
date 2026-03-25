@@ -10,9 +10,10 @@ import { RetryDialog } from "./RetryDialog"
 type Props = {
   user: User
   onSignOut: () => Promise<void>
+  onConfirmAll?: () => void
 }
 
-export function IngestionScreen({ user, onSignOut }: Props) {
+export function IngestionScreen({ user, onSignOut, onConfirmAll }: Props) {
   const token = readAccessToken()
   const {
     uploads,
@@ -90,7 +91,7 @@ export function IngestionScreen({ user, onSignOut }: Props) {
           onReport={(id) => void report(id)}
           onRemove={(id) => void remove(id)}
           onConfirmOne={(id) => void confirmOne(id)}
-          onConfirmAll={() => void confirmAll()}
+          onConfirmAll={() => { void confirmAll(); onConfirmAll?.() }}
         />
       </section>
 
