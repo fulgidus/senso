@@ -286,3 +286,43 @@ def test_delete_upload_returns_204(client_with_mock_minio):
     )
 
     assert del_resp.status_code == 204
+
+
+def test_confirm_all_without_token_returns_401(client):
+    resp = client.post("/ingestion/confirm-all")
+    assert resp.status_code == 401
+
+
+def test_confirm_all_with_no_uploads_returns_zero_confirmed(client):
+    resp = client.post(
+        "/auth/signup", json={"email": "ca@ex.com", "password": "Test1234!"}
+    )
+    token = resp.json()["accessToken"]
+
+    resp = client.post(
+        "/ingestion/confirm-all", headers={"authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["confirmed_count"] == 0
+    assert data["categorization_status"] == "queued"
+
+
+def test_confirm_all_queues_categorization_job(client):
+    resp = client.post(
+        "/auth/signup", json={"email": "caj@ex.com", "password": "Test1234!"}
+    )
+    token = resp.json()["accessToken"]
+
+    # Trigger confirm-all
+    client.post("/ingestion/confirm-all", headers={"authorization": f"Bearer {token}"})
+
+    # Check that profile/status shows queued (background job may have already run in test)
+    resp = client.get("/profile/status", headers={"authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    assert resp.json()["status"] in (
+        "queued",
+        "complete",
+        "categorizing",
+        "generating_insights",
+    )

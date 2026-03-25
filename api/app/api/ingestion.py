@@ -195,3 +195,30 @@ def delete_upload(
         service.delete_upload(user_id=current_user.id, upload_id=upload_id)
     except IngestionError as err:
         _raise_ingestion_http(err)
+
+
+def _get_profile_service(db: Session = Depends(get_db)):
+    from app.services.profile_service import ProfileService
+
+    return ProfileService(db=db)
+
+
+@router.post("/confirm-all")
+def confirm_all(
+    background_tasks: BackgroundTasks,
+    current_user: UserDTO = Depends(get_current_user),
+    service: IngestionService = Depends(get_ingestion_service),
+    profile_service=Depends(_get_profile_service),
+):
+    try:
+        result = service.confirm_all_uploads(user_id=current_user.id)
+        profile_service.trigger_categorization_for_user(
+            user_id=current_user.id,
+            background_tasks=background_tasks,
+        )
+        return {
+            "confirmed_count": result["confirmed_count"],
+            "categorization_status": "queued",
+        }
+    except Exception as err:
+        raise HTTPException(status_code=500, detail=str(err))
