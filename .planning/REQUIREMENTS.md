@@ -21,9 +21,9 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Financial Profile
 
-- [ ] **PROF-01**: User can view a post-upload summary of income, recurring expenses, and available monthly margin.
-- [ ] **PROF-02**: System categorizes transactions into understandable spending categories.
-- [ ] **PROF-03**: System highlights at least one high-impact spending pattern from user data.
+- [x] **PROF-01**: User can view a post-upload summary of income, recurring expenses, and available monthly margin.
+- [x] **PROF-02**: System categorizes transactions into understandable spending categories.
+- [x] **PROF-03**: System highlights at least one high-impact spending pattern from user data.
 
 ### Coaching
 
@@ -90,9 +90,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INGT-01 | Phase 2 | Complete |
 | INGT-02 | Phase 2 | Complete |
 | INGT-03 | Phase 2 | Complete |
-| PROF-01 | Phase 3 | Pending |
-| PROF-02 | Phase 3 | Pending |
-| PROF-03 | Phase 3 | Pending |
+| PROF-01 | Phase 3 | Complete |
+| PROF-02 | Phase 3 | Complete |
+| PROF-03 | Phase 3 | Complete |
 | COCH-01 | Phase 4 | Pending |
 | COCH-02 | Phase 5 | Pending |
 | COCH-03 | Phase 4 | Pending |

@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Runtime & Account Foundation** - Reproducible local run and persistent user access.
 - [x] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts. (completed 2026-03-24)
-- [ ] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data.
+- [x] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data. (completed 2026-03-25)
 - [ ] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement.
 - [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
 - [ ] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable.
@@ -62,7 +62,12 @@ Plans:
   1. User can view a profile summary showing income, recurring expenses, and monthly margin.
   2. User can see transactions organized into clear spending categories.
   3. User can see at least one highlighted high-impact spending pattern derived from their own data.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 03-01-PLAN.md — Backend models, categorization service, profile endpoints, and tests.
+- [x] 03-02-PLAN.md — Confirm-all endpoint wired to categorization trigger.
+- [x] 03-03-PLAN.md — Frontend processing flow: profile API client, useProfileStatus hook, ProcessingScreen, AuthedHome routing.
+- [x] 03-04-PLAN.md — Full profile UI: ProfileScreen, OnboardingChoiceScreen, QuestionnaireScreen, AuthedHome 5-screen routing.
 **UI hint**: yes
 
 ### Phase 4: Safe Grounded Text Coaching
@@ -108,7 +113,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
 | 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
-| 3. Financial Profile Clarity | 0/TBD | Not started | - |
+| 3. Financial Profile Clarity | 4/4 | Complete   | 2026-03-25 |
 | 4. Safe Grounded Text Coaching | 0/TBD | Not started | - |
 | 5. Voice Coaching Loop | 0/TBD | Not started | - |
 | 6. Learn+Act Cards & Demo Hardening | 0/TBD | Not started | - |
