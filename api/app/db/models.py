@@ -117,6 +117,7 @@ class Transaction(Base):
     currency: str = Column(String(3), nullable=False, default="EUR")
     description: str = Column(String(1024), nullable=False, default="")
     category: str | None = Column(String(128), nullable=True, default=None)
+    tags: list = Column(JSON, nullable=False, default=list)
     type: str = Column(String(16), nullable=False)  # "income" | "expense" | "transfer"
     source_module: str | None = Column(String(128), nullable=True, default=None)
     created_at: datetime = Column(
@@ -138,3 +139,66 @@ class ExtractionReport(Base):
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
     user_note: str | None = Column(Text, nullable=True, default=None)
+
+
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    income_summary: dict = Column(JSON, nullable=False, default=dict)
+    monthly_expenses: float = Column(Float, nullable=True, default=None)
+    monthly_margin: float = Column(Float, nullable=True, default=None)
+    category_totals: dict = Column(JSON, nullable=False, default=dict)
+    insight_cards: list = Column(JSON, nullable=False, default=list)
+    questionnaire_answers: dict = Column(JSON, nullable=True, default=None)
+    data_sources: list = Column(JSON, nullable=False, default=list)
+    confirmed: bool = Column(Boolean, nullable=False, default=False)
+    profile_generated_at: datetime = Column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+    updated_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+
+class CategorizationJob(Base):
+    __tablename__ = "categorization_jobs"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    status: str = Column(String(32), nullable=False, default="queued")
+    # "queued" | "categorizing" | "generating_insights" | "complete" | "failed"
+    error_message: str | None = Column(Text, nullable=True, default=None)
+    started_at: datetime | None = Column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+    completed_at: datetime | None = Column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+
+class TagVocabulary(Base):
+    __tablename__ = "tag_vocabulary"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    tag: str = Column(String(64), unique=True, nullable=False, index=True)
+    description: str | None = Column(String(255), nullable=True, default=None)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
