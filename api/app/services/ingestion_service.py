@@ -230,6 +230,22 @@ class IngestionService:
         self.db.commit()
         return {"confirmed": True}
 
+    def confirm_all_uploads(self, user_id: str) -> dict:
+        """Confirm all uploads in success state for a user. Returns count confirmed."""
+        uploads = (
+            self.db.query(Upload)
+            .filter(
+                Upload.user_id == user_id,
+                Upload.extraction_status == "success",
+                Upload.confirmed == False,  # noqa: E712
+            )
+            .all()
+        )
+        for upload in uploads:
+            upload.confirmed = True
+        self.db.commit()
+        return {"confirmed_count": len(uploads)}
+
     def retry_upload(self, user_id: str, upload_id: str, hint: str | None) -> dict:
         upload = self._get_upload_for_user(user_id, upload_id)
         llm_client = get_llm_client()
