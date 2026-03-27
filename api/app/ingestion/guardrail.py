@@ -51,3 +51,27 @@ def check_hint_safety(
     t.start()
     t.join(timeout=timeout + 0.5)  # slight buffer over LLM timeout
     return result
+
+
+def check_coaching_input(text: str) -> tuple[bool, str]:
+    """
+    Check coaching user input for safety violations.
+    Returns (safe: bool, reason: str).
+    Wraps SafetyScanner.scan_input() from the coaching safety module.
+    On scanner failure: logs warning and returns (True, "") — never blocks on scanner error.
+    """
+    try:
+        from app.coaching.safety import SafetyScanner
+
+        scanner = SafetyScanner()
+        result = scanner.scan_input(text)
+        if not result.safe:
+            return False, result.reason
+        return True, ""
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "check_coaching_input scanner error: %s", exc
+        )
+        return True, ""
