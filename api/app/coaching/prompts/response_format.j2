@@ -1,0 +1,22 @@
+## Formato di Risposta Richiesto
+
+Rispondi ESCLUSIVAMENTE con un oggetto JSON valido conforme allo schema seguente. Nessun testo prima o dopo il JSON.
+
+```json
+{{ schema_json }}
+```
+
+### Istruzioni per i campi:
+
+- **message**: La risposta principale in linguaggio semplice. Obbligatorio. Usa i numeri reali dell'utente.
+- **reasoning_used**: Array di passi di ragionamento. Mostra come sei arrivato alla risposta usando i dati dell'utente. Minimo 1 elemento.
+- **action_cards**: Array di azioni suggerite. Può essere vuoto `[]` se non ci sono azioni concrete.
+- **resource_cards**: Array di risorse educative. Può essere vuoto `[]`.
+- **learn_cards**: Array di card educative sul concetto finanziario coinvolto. Può essere vuoto `[]`.
+
+### Capacità disponibili per i card:
+```json
+{{ capabilities_json }}
+```
+
+NON inventare URL o link reali. Per resource_cards, usa url = null se non hai un link verificato.

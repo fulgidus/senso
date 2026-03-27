@@ -1,0 +1,33 @@
+## Profilo Finanziario dell'Utente
+
+{% if income_summary %}
+**Reddito mensile netto:** €{{ "%.2f"|format(income_summary.amount) }} (fonte: {{ income_summary.source }})
+{% else %}
+**Reddito mensile netto:** non disponibile
+{% endif %}
+
+{% if monthly_expenses is not none %}
+**Spese mensili totali:** €{{ "%.2f"|format(monthly_expenses) }}
+{% else %}
+**Spese mensili totali:** non disponibili
+{% endif %}
+
+{% if monthly_margin is not none %}
+**Margine mensile disponibile:** €{{ "%.2f"|format(monthly_margin) }}
+{% else %}
+**Margine mensile disponibile:** non calcolabile
+{% endif %}
+
+{% if category_totals %}
+**Ripartizione spese per categoria:**
+{% for category, amount in category_totals.items() %}
+- {{ category }}: €{{ "%.2f"|format(amount) }}
+{% endfor %}
+{% endif %}
+
+{% if insight_cards %}
+**Pattern significativi rilevati:**
+{% for card in insight_cards %}
+- {{ card.headline }}: {{ card.data_point }}
+{% endfor %}
+{% endif %}
