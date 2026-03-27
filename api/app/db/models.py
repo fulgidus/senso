@@ -15,7 +15,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -29,6 +29,11 @@ class User(Base):
     is_admin: bool = Column(Boolean, nullable=False, default=False)
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    chat_sessions = relationship(
+        "ChatSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
 
@@ -159,6 +164,8 @@ class UserProfile(Base):
     insight_cards: list = Column(JSON, nullable=False, default=list)
     questionnaire_answers: dict = Column(JSON, nullable=True, default=None)
     data_sources: list = Column(JSON, nullable=False, default=list)
+    extraordinary_income_total: float = Column(Float, nullable=True, default=None)
+    months_covered: float = Column(Float, nullable=True, default=None)
     confirmed: bool = Column(Boolean, nullable=False, default=False)
     profile_generated_at: datetime = Column(
         DateTime(timezone=True), nullable=True, default=None
@@ -202,3 +209,67 @@ class TagVocabulary(Base):
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
+
+
+# ── Coaching models ──────────────────────────────────────────────────────────
+
+
+class ChatSession(Base):
+    """
+    A coaching conversation session for a user.
+    Persists conversation context across multiple messages.
+    NOTE: In production, create a DB migration for this table.
+    """
+
+    __tablename__ = "chat_sessions"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    persona_id: str = Column(String(64), default="mentore-saggio", nullable=False)
+    locale: str = Column(String(2), default="it", nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    updated_at: datetime = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
+
+    messages = relationship(
+        "ChatMessage",
+        back_populates="session",
+        order_by="ChatMessage.created_at",
+        cascade="all, delete-orphan",
+    )
+    user = relationship("User", back_populates="chat_sessions")
+
+
+class ChatMessage(Base):
+    """
+    A single message within a coaching session.
+    role: 'user' or 'assistant'
+    """
+
+    __tablename__ = "chat_messages"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    session_id: str = Column(
+        String(36),
+        ForeignKey("chat_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    role: str = Column(String(16), nullable=False)  # "user" | "assistant"
+    content: str = Column(Text, nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    session = relationship("ChatSession", back_populates="messages")
