@@ -1,0 +1,95 @@
+from datetime import datetime
+from typing import Literal, Optional
+from pydantic import BaseModel, Field, field_validator
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000)
+    session_id: Optional[str] = None
+    persona_id: str = Field(default="mentore-saggio")
+    locale: Literal["it", "en"] = Field(default="it")
+
+    @field_validator("message")
+    @classmethod
+    def message_not_empty(cls, v: str) -> str:
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("Message cannot be empty or whitespace only")
+        return stripped
+
+    model_config = {"populate_by_name": True}
+
+
+class ChatMessageDTO(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+    created_at: Optional[datetime] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class ReasoningStep(BaseModel):
+    step: str
+    detail: str
+
+    model_config = {"populate_by_name": True}
+
+
+class ActionCard(BaseModel):
+    title: str
+    description: str
+    action_type: str
+    cta_label: Optional[str] = None
+    payload: Optional[dict] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class ResourceCard(BaseModel):
+    title: str
+    summary: str
+    resource_type: str
+    url: Optional[str] = None
+    estimated_read_minutes: Optional[int] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class LearnCard(BaseModel):
+    concept: str
+    plain_explanation: str
+    example: Optional[str] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class CoachingResponseDTO(BaseModel):
+    message: str
+    reasoning_used: list[ReasoningStep] = Field(default_factory=list)
+    action_cards: list[ActionCard] = Field(default_factory=list)
+    resource_cards: list[ResourceCard] = Field(default_factory=list)
+    learn_cards: list[LearnCard] = Field(default_factory=list)
+    session_id: str  # always returned — new or existing session
+
+    model_config = {"populate_by_name": True}
+
+
+class SessionSummaryDTO(BaseModel):
+    id: str
+    created_at: datetime
+    message_count: int
+    last_message_preview: Optional[str] = None
+    locale: str
+    persona_id: str
+
+    model_config = {"populate_by_name": True}
+
+
+class PersonaDTO(BaseModel):
+    id: str
+    name: str
+    description: str
+    icon: str
+    available: bool
+
+    model_config = {"populate_by_name": True}
