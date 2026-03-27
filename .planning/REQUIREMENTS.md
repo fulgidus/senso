@@ -27,9 +27,9 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Coaching
 
-- [ ] **COCH-01**: User can ask a purchase/decision question by text input.
+- [x] **COCH-01**: User can ask a purchase/decision question by text input.
 - [ ] **COCH-02**: User can ask a purchase/decision question by voice input.
-- [ ] **COCH-03**: AI response is personalized using the user financial profile and relevant retrieved context.
+- [x] **COCH-03**: AI response is personalized using the user financial profile and relevant retrieved context.
 - [ ] **COCH-04**: AI response includes explicit reasoning with user-specific numbers used in the recommendation.
 - [ ] **COCH-05**: User can ask follow-up clarification questions and receive coherent contextual responses.
 
@@ -46,9 +46,9 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Safety and Boundaries
 
-- [ ] **SAFE-01**: System enforces persona-independent safety boundaries defined by project policies.
-- [ ] **SAFE-02**: System rejects or sanitizes prompt-injection attempts from uploaded/user-provided text before response generation.
-- [ ] **SAFE-03**: Responses avoid regulated investment-picking language and maintain educational/coaching framing.
+- [x] **SAFE-01**: System enforces persona-independent safety boundaries defined by project policies.
+- [x] **SAFE-02**: System rejects or sanitizes prompt-injection attempts from uploaded/user-provided text before response generation.
+- [x] **SAFE-03**: Responses avoid regulated investment-picking language and maintain educational/coaching framing.
 
 ### Demo Readiness
 
@@ -93,9 +93,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROF-01 | Phase 3 | Complete |
 | PROF-02 | Phase 3 | Complete |
 | PROF-03 | Phase 3 | Complete |
-| COCH-01 | Phase 4 | Pending |
+| COCH-01 | Phase 4 | Complete |
 | COCH-02 | Phase 5 | Pending |
-| COCH-03 | Phase 4 | Pending |
+| COCH-03 | Phase 4 | Complete |
 | COCH-04 | Phase 4 | Pending |
 | COCH-05 | Phase 4 | Pending |
 | VOIC-01 | Phase 5 | Pending |
@@ -103,9 +103,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACTN-01 | Phase 6 | Pending |
 | ACTN-02 | Phase 6 | Pending |
 | ACTN-03 | Phase 6 | Pending |
-| SAFE-01 | Phase 4 | Pending |
-| SAFE-02 | Phase 4 | Pending |
-| SAFE-03 | Phase 4 | Pending |
+| SAFE-01 | Phase 4 | Complete |
+| SAFE-02 | Phase 4 | Complete |
+| SAFE-03 | Phase 4 | Complete |
 | DEMO-01 | Phase 6 | Pending |
 | DEMO-02 | Phase 6 | Pending |
 | DEMO-03 | Phase 1 | Complete |

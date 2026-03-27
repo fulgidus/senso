@@ -79,7 +79,13 @@ Plans:
   2. Response explicitly shows user-specific numbers and reasoning used to reach the recommendation.
   3. User can ask follow-up clarifications and receive coherent context-aware answers.
   4. Unsafe or injection-style inputs are sanitized/rejected, and outputs remain within educational safety boundaries.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 04-01-PLAN.md — Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
+- [ ] 04-02-PLAN.md — Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
+- [ ] 04-03-PLAN.md — Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
+- [ ] 04-04-PLAN.md — Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
+**UI hint**: yes
 
 ### Phase 5: Voice Coaching Loop
 **Goal**: Users can complete the same coaching interaction via voice with resilient text fallback.
@@ -104,16 +110,28 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 7: Streaming & Nice-to-Have Polish
+**Goal**: Improve coaching UX and production-readiness with streaming responses, persona choice, persistent history, and full PII safety cross-check.
+**Depends on**: Phase 6
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Coaching responses stream token-by-token via Server-Sent Events (EventSource) with graceful full-response fallback.
+  2. User can select a coaching persona from the picker UI; selected persona is persisted across sessions.
+  3. Conversation history is persisted in the database and loaded on returning to the chat screen.
+  4. own_pii_unsolicited safety check performs full profile cross-check against live session userProfile fields (not pattern-only).
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
 | 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
 | 3. Financial Profile Clarity | 4/4 | Complete   | 2026-03-25 |
-| 4. Safe Grounded Text Coaching | 0/TBD | Not started | - |
+| 4. Safe Grounded Text Coaching | 1/4 | In Progress|  |
 | 5. Voice Coaching Loop | 0/TBD | Not started | - |
 | 6. Learn+Act Cards & Demo Hardening | 0/TBD | Not started | - |
+| 7. Streaming & Nice-to-Have Polish | 0/TBD | Not started | - |
