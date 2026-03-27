@@ -42,8 +42,8 @@ groups:
     description: Rilevamento di tentativi di prompt injection
     substituteMessage: "Non riesco a rispondere a questa richiesta."
     patterns:
-      - "ignore (all |previous |prior |above |your )?(instructions|prompt|context|rules)"
-      - "disregard (your |all |previous )?(instructions|guidelines|prompt)"
+      - "ignore (all |previous |prior |above |your )*(instructions|prompt|context|rules)"
+      - "disregard (your |all |previous )*(instructions|guidelines|prompt)"
       - "you are now (a|an|acting as|playing)"
       - "pretend (you are|to be|that you)"
       - "new (system|instructions|prompt|persona|role):"
