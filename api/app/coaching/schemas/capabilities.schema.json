@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "capabilities",
+  "title": "CoachingCapabilities",
+  "description": "Capability shapes available to the coaching LLM when constructing its response. These are NOT tool calls — they describe what the LLM can reference in action_cards, resource_cards, and learn_cards.",
+  "type": "object",
+  "properties": {
+    "memory": {
+      "description": "User profile context already loaded into system prompt. No separate call needed.",
+      "type": "object",
+      "properties": {
+        "income_summary": { "type": "object" },
+        "monthly_margin": { "type": "number" },
+        "monthly_expenses": { "type": "number" },
+        "category_totals": { "type": "object" },
+        "insight_cards": { "type": "array" }
+      }
+    },
+    "funnel": {
+      "description": "A guided multi-step action flow the user can follow.",
+      "type": "object",
+      "properties": {
+        "funnel_id": { "type": "string" },
+        "title": { "type": "string" },
+        "steps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "tutorial": {
+      "description": "A step-by-step educational guide on a financial concept.",
+      "type": "object",
+      "properties": {
+        "tutorial_id": { "type": "string" },
+        "concept": { "type": "string" },
+        "steps": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "article": {
+      "description": "An educational article about a financial topic.",
+      "type": "object",
+      "properties": {
+        "article_id": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    },
+    "related_service": {
+      "description": "A financial product or service relevant to the user's situation.",
+      "type": "object",
+      "properties": {
+        "service_id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "cta_url": { "type": "string" }
+      }
+    },
+    "rag_hint": {
+      "description": "A snippet retrieved from the educational knowledge base.",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

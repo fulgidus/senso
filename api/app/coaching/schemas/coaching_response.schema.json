@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "coaching_response",
+  "title": "CoachingResponse",
+  "description": "Full colloquial coaching response with message, reasoning, and optional cards.",
+  "type": "object",
+  "required": ["message", "reasoning_used"],
+  "additionalProperties": false,
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Main coaching reply in plain language. Required. Must be written in the locale specified in the request."
+    },
+    "reasoning_used": {
+      "type": "array",
+      "description": "Ordered list of reasoning steps the coach used to reach the answer. Show the user's own numbers.",
+      "items": {
+        "type": "object",
+        "required": ["step", "detail"],
+        "additionalProperties": false,
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "Short label for this reasoning step (e.g. 'Check monthly margin')"
+          },
+          "detail": {
+            "type": "string",
+            "description": "One sentence explanation referencing the user's actual data."
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "action_cards": {
+      "type": "array",
+      "description": "Suggested immediate actions the user can take. May be empty.",
+      "items": {
+        "type": "object",
+        "required": ["title", "description", "action_type"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "action_type": {
+            "type": "string",
+            "enum": ["funnel", "comparison", "calculator", "reminder", "external_link"]
+          },
+          "cta_label": { "type": "string" },
+          "payload": { "type": "object" }
+        }
+      }
+    },
+    "resource_cards": {
+      "type": "array",
+      "description": "Relevant educational articles or external resources.",
+      "items": {
+        "type": "object",
+        "required": ["title", "summary", "resource_type"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "resource_type": {
+            "type": "string",
+            "enum": ["article", "tutorial", "video", "tool"]
+          },
+          "url": { "type": "string", "format": "uri" },
+          "estimated_read_minutes": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "learn_cards": {
+      "type": "array",
+      "description": "Short educational microlearning cards on the financial concept involved.",
+      "items": {
+        "type": "object",
+        "required": ["concept", "plain_explanation"],
+        "additionalProperties": false,
+        "properties": {
+          "concept": { "type": "string", "description": "Name of the financial concept" },
+          "plain_explanation": { "type": "string", "description": "1-2 sentences, jargon-free" },
+          "example": { "type": "string" }
+        }
+      }
+    }
+  }
+}
