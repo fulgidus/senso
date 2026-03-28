@@ -10,7 +10,11 @@
         "openMenu": "Apri menu",
         "closeMenu": "Chiudi menu",
         "menuLabel": "Menu navigazione",
-        "logout": "Esci"
+        "logout": "Esci",
+        "userMenuLabel": "Menu utente",
+        "languageMenuLabel": "Seleziona lingua",
+        "languageCode": "it",
+        "languageFullName": "Italiano"
     },
     "avatar": {
         "ariaLabel": "Avatar di {{name}}"
@@ -327,6 +331,8 @@
         "themeShortcutHint": "Premi",
         "themeShortcutKey": "D",
         "themeShortcutSuffix": "in qualsiasi schermata per cambiare tema rapidamente",
+        "topbarButtons": "Barra di navigazione in alto",
+        "topbarButtonsHint": "Mostra i link di navigazione nella barra superiore (solo desktop). Quando attivo, l'hamburger è nascosto su desktop.",
         "voiceGender": "Voce preferita",
         "voiceGenderHint": "Scegli il genere della voce del coach. \"Indifferente\" usa il default della persona.",
         "voiceGenderMasculine": "Maschile",

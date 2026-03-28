@@ -10,7 +10,11 @@
         "openMenu": "Open menu",
         "closeMenu": "Close menu",
         "menuLabel": "Navigation menu",
-        "logout": "Log out"
+        "logout": "Log out",
+        "userMenuLabel": "User menu",
+        "languageMenuLabel": "Select language",
+        "languageCode": "en",
+        "languageFullName": "English"
     },
     "avatar": {
         "ariaLabel": "Avatar of {{name}}"
@@ -327,6 +331,8 @@
         "themeShortcutHint": "Press",
         "themeShortcutKey": "D",
         "themeShortcutSuffix": "on any screen to quickly change the theme",
+        "topbarButtons": "Top navigation bar",
+        "topbarButtonsHint": "Show navigation links in the top bar (desktop only). When enabled, the hamburger is hidden on desktop.",
         "voiceGender": "Preferred voice",
         "voiceGenderHint": "Choose the coach voice gender. \"Indifferent\" uses the persona's default.",
         "voiceGenderMasculine": "Masculine",

@@ -9,6 +9,7 @@ import { readAccessToken } from "@/features/auth/storage"
 import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
 import type { VoiceGender } from "@/features/auth/types"
+import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -30,6 +31,7 @@ export function SettingsScreen() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [topbarButtons, setTopbarButtonsState] = useState(readTopbarButtons)
 
   const isDirty =
     firstName.trim() !== (user.firstName ?? "") ||
@@ -64,6 +66,14 @@ export function SettingsScreen() {
     { value: "dark",  label: t("settings.themeDark") },
     { value: "system", label: t("settings.themeSystem") },
   ]
+
+  const handleTopbarToggle = (value: boolean) => {
+    writeTopbarButtons(value)
+    setTopbarButtonsState(value)
+    // Live-update the AppShell without reload via the window bridge
+    const bridge = (window as unknown as Record<string, unknown>)["__sensoSetTopbarButtons"]
+    if (typeof bridge === "function") (bridge as (v: boolean) => void)(value)
+  }
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-10 space-y-8">
@@ -182,6 +192,32 @@ export function SettingsScreen() {
           <p className="mt-2 text-xs text-muted-foreground">
             {t("settings.themeShortcutHint")} <kbd className="rounded border border-border px-1 py-0.5 font-mono text-xs">{t("settings.themeShortcutKey")}</kbd> {t("settings.themeShortcutSuffix")}
           </p>
+        </div>
+
+        {/* Top bar navigation toggle */}
+        <div className="pt-4 border-t border-border space-y-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("settings.topbarButtons")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.topbarButtonsHint")}</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={topbarButtons}
+              onClick={() => handleTopbarToggle(!topbarButtons)}
+              className={[
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                topbarButtons ? "bg-primary" : "bg-muted",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                  topbarButtons ? "translate-x-6" : "translate-x-1",
+                ].join(" ")}
+              />
+            </button>
+          </div>
         </div>
       </section>
 
