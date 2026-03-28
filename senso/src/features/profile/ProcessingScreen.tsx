@@ -63,7 +63,7 @@ type Props = {
   onComplete: () => void
 }
 
-export function ProcessingScreen({ user, token, onBack, onComplete }: Props) {
+export function ProcessingScreen({ token, onBack, onComplete }: Props) {
   const { status, errorMessage } = useProfileStatus({
     token,
     onComplete,
@@ -73,16 +73,7 @@ export function ProcessingScreen({ user, token, onBack, onComplete }: Props) {
   const isFailed = status === "failed"
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10">
-      {/* Header — matches IngestionScreen pattern */}
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">S.E.N.S.O.</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
-        </div>
-        <div />
-      </div>
-
+    <main className="mx-auto w-full max-w-4xl px-6 py-6">
       {/* Processing card — narrower, centered */}
       <div className="mx-auto max-w-[480px]">
         <div className="rounded-2xl border border-border bg-card p-6">

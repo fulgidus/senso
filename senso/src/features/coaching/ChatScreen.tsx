@@ -203,21 +203,14 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
-        <button
-          onClick={onNavigateBack}
-          className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-          aria-label="Torna al profilo"
-        >
-          ← Profilo
-        </button>
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background">
+      {/* Sub-header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background">
         <div className="flex-1">
-          <h1 className="font-semibold text-sm">Il Mentore Saggio</h1>
+          <h2 className="font-semibold text-sm">Il Mentore Saggio</h2>
           <p className="text-xs text-muted-foreground">Coach finanziario</p>
         </div>
-      </header>
+      </div>
 
       {/* Message list */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">

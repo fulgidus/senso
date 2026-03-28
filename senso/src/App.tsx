@@ -34,13 +34,12 @@ function IngestionPage({ user }: { user: User }) {
     void getProfileStatus(token).then((data) => {
       if (["queued", "categorizing", "generating_insights"].includes(data.status)) {
         setPhase("processing")
-      } else if (data.status === "complete") {
-        void navigate("/profile", { replace: true })
       } else if (data.status === "not_started") {
         setPhase("onboarding")
       }
+      // complete → stay on ingestion (user can navigate via sidebar)
     }).catch(() => { /* stay on ingestion */ })
-  }, [token, navigate])
+  }, [token])
 
   const handleConfirmAll = useCallback(async () => {
     if (!token) return

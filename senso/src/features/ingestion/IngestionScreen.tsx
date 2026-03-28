@@ -9,11 +9,11 @@ import { RetryDialog } from "./RetryDialog"
 
 type Props = {
   user: User
-  onSignOut: () => Promise<void>
+  onSignOut?: () => Promise<void>
   onConfirmAll?: () => void
 }
 
-export function IngestionScreen({ user, onSignOut, onConfirmAll }: Props) {
+export function IngestionScreen({ user, onConfirmAll }: Props) {
   const token = readAccessToken()
   const {
     uploads,
@@ -41,21 +41,12 @@ export function IngestionScreen({ user, onSignOut, onConfirmAll }: Props) {
   )
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">S.E.N.S.O.</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Welcome, {user.email}. Upload your financial documents to get started.
-          </p>
-        </div>
-        <button
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => void onSignOut()}
-        >
-          Sign out
-        </button>
+    <main className="mx-auto w-full max-w-4xl px-6 py-6">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-foreground">Carica documenti</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Benvenuto, {user.email}. Carica i tuoi documenti finanziari per iniziare.
+        </p>
       </div>
 
       {/* Upload zone */}
