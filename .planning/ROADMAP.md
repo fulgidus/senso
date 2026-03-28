@@ -97,10 +97,10 @@ Plans:
   3. If speech recognition fails or is unavailable, user can continue seamlessly with typed input.
 **Plans**: 5 plans
 Plans:
-- [ ] 05-01-PLAN.md — Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
-- [ ] 05-02-PLAN.md — Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
+- [x] 05-01-PLAN.md — Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
+- [x] 05-02-PLAN.md — Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
 - [ ] 05-03-PLAN.md — A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
-- [ ] 05-04-PLAN.md — Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
+- [x] 05-04-PLAN.md — Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
 - [ ] 05-05-PLAN.md — Frontend voice output (TTS): fetchTTSAudio, useTTS hook, VoicePlayButton in AssistantBubble, ElevenLabs + speechSynthesis fallback.
 **UI hint**: yes
 
