@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .bg { fill: #3F72AF; }
+    .fg { fill: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #5B9BD5; }
+      .fg { fill: #112D4E; }
+    }
+  </style>
+  <circle cx="16" cy="16" r="16" class="bg"/>
+  <text x="16" y="22" font-size="18" text-anchor="middle" font-family="ui-monospace, 'Courier New', monospace" font-weight="900" class="fg">S</text>
+</svg>
