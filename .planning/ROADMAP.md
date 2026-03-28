@@ -84,7 +84,7 @@ Plans:
 - [x] 04-01-PLAN.md — Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
 - [x] 04-02-PLAN.md — Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
 - [ ] 04-03-PLAN.md — Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
-- [ ] 04-04-PLAN.md — Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
+- [x] 04-04-PLAN.md — Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
 **UI hint**: yes
 
 ### Phase 5: Voice Coaching Loop
