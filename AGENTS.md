@@ -103,7 +103,17 @@ S.E.N.S.O. is a voice-first AI financial education assistant for young adults (1
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+### Running Services / Tests
+
+**Always use Docker Compose to run the stack.** Never invoke `uv run`, `python`, or `pnpm` directly on the host for server startup, test execution, or build verification. Use the Docker Compose constellation instead.
+
+```bash
+# Run backend tests
+docker compose run --rm api uv run pytest
+
+# Run frontend build check
+docker compose run --rm frontend pnpm build
+```
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
