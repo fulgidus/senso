@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-03-28T15:13:44.858Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-03-28T15:20:00.673Z"
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 21
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -64,6 +64,7 @@ Plan: 5 of 5
 | Phase 05-voice-coaching-loop P01 | 6min | 2 tasks | 5 files |
 | Phase 05-voice-coaching-loop P03 | 8min | 2 tasks | 5 files |
 | Phase 05-voice-coaching-loop P04 | 6min | 2 tasks | 3 files |
+| Phase 05-voice-coaching-loop P05 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 05-voice-coaching-loop]: Used patch.object(TTSService, 'speak') for integration tests instead of dependency_overrides — avoids SQLite DB isolation issues — Settings override caused 'no such table' errors in subsequent tests due to conftest reset_db fixture interaction
 - [Phase 05-voice-coaching-loop]: Lit LitElement without decorators — erasableSyntaxOnly tsconfig requires manual property getter/setter and customElements.define() instead of @property and @customElement
 - [Phase 05-voice-coaching-loop]: Custom Web Speech API type declarations in useVoiceInput.ts — TypeScript tsconfig.app.json lib does not include SpeechRecognition globals; explicit interface declarations are portable and don't require tsconfig changes
+- [Phase 05-voice-coaching-loop]: fetchTTSAudio uses native fetch (not apiRequest) because response is binary audio/mpeg, not JSON — Enables binary Blob response handling; apiRequest<T> is JSON-typed
+- [Phase 05-voice-coaching-loop]: canPlay tied to speechSynthesis availability — ElevenLabs backend is optional; play button shown when browser synthesis exists — Demo-resilient per D-V6: voice output works even without ElevenLabs key via browser speechSynthesis fallback
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T15:13:44.855Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-03-28T15:19:43.075Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None
