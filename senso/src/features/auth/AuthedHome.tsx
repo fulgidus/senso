@@ -6,12 +6,13 @@ import { ProcessingScreen } from "@/features/profile/ProcessingScreen"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
 import { OnboardingChoiceScreen } from "@/features/profile/OnboardingChoiceScreen"
 import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
+import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
-type Screen = "ingestion" | "processing" | "profile" | "onboarding" | "questionnaire"
+type Screen = "ingestion" | "processing" | "profile" | "onboarding" | "questionnaire" | "chat"
 type QuestionnaireMode = "quick" | "thorough"
 
 type AuthedHomeProps = {
@@ -37,8 +38,10 @@ export function AuthedHome({ user, onSignOut }: AuthedHomeProps) {
           setScreen("processing")
         } else if (data.status === "complete") {
           setScreen("profile")
+        } else if (data.status === "not_started") {
+          setScreen("onboarding")
         }
-        // else: not_started or failed → stay on ingestion
+        // failed → stay on ingestion
       })
       .catch(() => {
         // Stay on ingestion
@@ -83,12 +86,21 @@ export function AuthedHome({ user, onSignOut }: AuthedHomeProps) {
         />
       )
 
+    case "chat":
+      return (
+        <ChatScreen
+          onNavigateBack={() => setScreen("profile")}
+          locale="it"
+        />
+      )
+
     case "profile":
       return (
         <ProfileScreen
           user={user}
           token={token}
           onAddDocuments={() => setScreen("ingestion")}
+          onNavigateToChat={() => setScreen("chat")}
           onSignOut={onSignOut}
         />
       )

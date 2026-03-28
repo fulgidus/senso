@@ -77,10 +77,11 @@ type Props = {
   user: User
   token: string
   onAddDocuments: () => void
+  onNavigateToChat: () => void
   onSignOut: () => Promise<void>
 }
 
-export function ProfileScreen({ user, token, onAddDocuments, onSignOut }: Props) {
+export function ProfileScreen({ user, token, onAddDocuments, onNavigateToChat, onSignOut }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -397,6 +398,24 @@ export function ProfileScreen({ user, token, onAddDocuments, onSignOut }: Props)
               ))}
             </div>
           )}
+        </section>
+
+        {/* Ask the Coach CTA */}
+        <section className="rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col items-center text-center gap-3">
+          <p className="text-2xl">🦉</p>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Hai una domanda sui tuoi soldi?</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Chiedi al tuo Mentore Saggio: posso permettermi questa spesa? Come sto andando?
+            </p>
+          </div>
+          <Button
+            variant="default"
+            onClick={onNavigateToChat}
+            className="w-full sm:w-auto"
+          >
+            🦉 Chiedi al coach
+          </Button>
         </section>
 
         {/* Confirm / Correct Section */}
