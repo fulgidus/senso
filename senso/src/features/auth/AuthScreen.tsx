@@ -17,6 +17,7 @@ export function AuthScreen({
   mode,
   loading,
   error,
+  googleFallback,
   onModeChange,
   onSubmit,
 }: AuthScreenProps) {
@@ -29,10 +30,10 @@ export function AuthScreen({
   }
 
   const isLogin = mode === "login"
-  const heading = isLogin ? "Welcome back" : "Create your account"
+  const heading = isLogin ? "Bentornato" : "Crea il tuo account"
   const body = isLogin
-    ? "Sign in to access your financial coaching workspace."
-    : "Sign up to get started with your financial coaching workspace."
+    ? "Accedi per continuare il tuo percorso finanziario."
+    : "Registrati per iniziare il tuo percorso finanziario."
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-6 py-12">
@@ -50,7 +51,7 @@ export function AuthScreen({
             }`}
             onClick={() => onModeChange("login")}
           >
-            Sign in
+            Accedi
           </button>
           <button
             type="button"
@@ -59,7 +60,7 @@ export function AuthScreen({
             }`}
             onClick={() => onModeChange("signup")}
           >
-            Sign up
+            Registrati
           </button>
         </div>
 
@@ -88,7 +89,9 @@ export function AuthScreen({
           </label>
 
           <Button className="h-11 w-full text-sm font-semibold" disabled={loading}>
-            {isLogin ? "Sign in" : "Create account"}
+            {loading
+              ? isLogin ? "Accesso in corso…" : "Registrazione in corso…"
+              : isLogin ? "Accedi" : "Crea account"}
           </Button>
         </form>
 
@@ -96,10 +99,16 @@ export function AuthScreen({
           variant="outline"
           className="mt-4 h-11 w-full text-sm font-semibold opacity-50 cursor-not-allowed"
           disabled
-          title="Google sign-in is not available yet"
+          title="Accesso con Google non disponibile"
         >
-          Continue with Google
+          Continua con Google
         </Button>
+
+        {googleFallback && (
+          <p className="mt-4 rounded-md border border-amber-300/50 bg-amber-50/50 px-3 py-2 text-sm leading-[1.5] text-amber-700 dark:border-amber-700/30 dark:bg-amber-900/20 dark:text-amber-400">
+            {googleFallback}
+          </p>
+        )}
 
         {error && (
           <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm leading-[1.5] text-destructive">

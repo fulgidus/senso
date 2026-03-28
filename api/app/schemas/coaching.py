@@ -70,17 +70,38 @@ class CoachingResponseDTO(BaseModel):
     resource_cards: list[ResourceCard] = Field(default_factory=list)
     learn_cards: list[LearnCard] = Field(default_factory=list)
     session_id: str  # always returned — new or existing session
+    debug: Optional[dict] = None  # only populated when LLM_DEBUG=true
 
     model_config = {"populate_by_name": True}
 
 
 class SessionSummaryDTO(BaseModel):
     id: str
+    name: str
     created_at: datetime
+    updated_at: datetime
     message_count: int
     last_message_preview: Optional[str] = None
     locale: str
     persona_id: str
+
+    model_config = {"populate_by_name": True}
+
+
+class RenameSessionRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120)
+
+    model_config = {"populate_by_name": True}
+
+
+class NameConversationRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000)
+
+    model_config = {"populate_by_name": True}
+
+
+class NameConversationResponse(BaseModel):
+    name: str
 
     model_config = {"populate_by_name": True}
 
@@ -90,6 +111,12 @@ class PersonaDTO(BaseModel):
     name: str
     description: str
     icon: str
-    available: bool
+    available: bool = True
+
+    model_config = {"populate_by_name": True}
+
+
+class WelcomeResponseDTO(BaseModel):
+    message: str
 
     model_config = {"populate_by_name": True}

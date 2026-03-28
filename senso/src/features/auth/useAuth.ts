@@ -7,6 +7,7 @@ import {
   signup,
   startGoogle,
 } from "@/features/auth/session"
+import { ApiClientError } from "@/lib/api-client"
 import type { User } from "@/features/auth/types"
 
 type AuthMode = "signup" | "login"
@@ -29,8 +30,37 @@ const initialState: AuthState = {
   googleFallback: null,
 }
 
-export const ERROR_COPY =
-  "We couldn’t complete sign-in right now. Try again, or use email and password to continue."
+function loginErrorMessage(err: unknown): string {
+  if (err instanceof ApiClientError) {
+    const code = (err.data as { code?: string } | null)?.code
+    if (err.status === 401 || code === "invalid_credentials") {
+      return "Email o password non corretti."
+    }
+    if (err.status === 429) {
+      return "Troppi tentativi. Aspetta qualche minuto e riprova."
+    }
+    if (err.status >= 500) {
+      return "Il server non risponde. Riprova tra poco."
+    }
+  }
+  return "Accesso non riuscito. Controlla la connessione e riprova."
+}
+
+function signupErrorMessage(err: unknown): string {
+  if (err instanceof ApiClientError) {
+    const code = (err.data as { code?: string } | null)?.code
+    if (err.status === 409 || code === "email_in_use") {
+      return "Questa email è già registrata. Prova ad accedere."
+    }
+    if (err.status === 422) {
+      return "Dati non validi. Controlla email e password (minimo 8 caratteri)."
+    }
+    if (err.status >= 500) {
+      return "Il server non risponde. Riprova tra poco."
+    }
+  }
+  return "Registrazione non riuscita. Controlla la connessione e riprova."
+}
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>(initialState)
@@ -74,8 +104,10 @@ export function useAuth() {
           user: result.user,
           googleFallback: null,
         }))
-      } catch {
-        setState((current) => ({ ...current, loading: false, error: ERROR_COPY }))
+      } catch (err) {
+        const message =
+          state.mode === "signup" ? signupErrorMessage(err) : loginErrorMessage(err)
+        setState((current) => ({ ...current, loading: false, error: message }))
       }
     },
     [state.mode],
@@ -93,17 +125,26 @@ export function useAuth() {
       setState((current) => ({
         ...current,
         loading: false,
-        googleFallback: ERROR_COPY,
+        googleFallback: "Accesso con Google non disponibile. Usa email e password.",
       }))
     } catch {
-      setState((current) => ({ ...current, loading: false, error: ERROR_COPY }))
+      setState((current) => ({
+        ...current,
+        loading: false,
+        error: "Accesso con Google non riuscito. Usa email e password.",
+      }))
     }
   }, [])
 
+  const updateUser = useCallback((updated: Partial<User>) => {
+    setState((current) => ({
+      ...current,
+      user: current.user ? { ...current.user, ...updated } : current.user,
+    }))
+  }, [])
+
   const signOut = useCallback(async () => {
-    const confirmed = window.confirm(
-      "Sign out: Are you sure you want to sign out on this device?",
-    )
+    const confirmed = window.confirm("Vuoi davvero uscire dal tuo account su questo dispositivo?")
     if (!confirmed) {
       return
     }
@@ -123,8 +164,9 @@ export function useAuth() {
       submit,
       beginGoogle,
       signOut,
+      updateUser,
       isAuthenticated: Boolean(state.user),
     }),
-    [beginGoogle, setMode, signOut, state, submit],
+    [beginGoogle, setMode, signOut, updateUser, state, submit],
   )
 }

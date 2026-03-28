@@ -12,6 +12,7 @@ from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,
     SignupRequest,
+    UpdateMeRequest,
     UserDTO,
 )
 from app.services.auth_service import AuthError, AuthService
@@ -75,6 +76,24 @@ def me(
     try:
         user: UserDTO = service.get_current_user(access_token=token)
         return {"user": user.model_dump()}
+    except AuthError as err:
+        _raise_http(err)
+
+
+@router.patch("/me", response_model=UserDTO)
+def update_me(
+    payload: UpdateMeRequest,
+    service: Annotated[AuthService, Depends(get_auth_service)],
+    authorization: Annotated[str | None, Header()] = None,
+):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token"
+        )
+    token = authorization.split(" ", 1)[1]
+    try:
+        user: UserDTO = service.get_current_user(access_token=token)
+        return service.update_me(user_id=user.id, payload=payload)
     except AuthError as err:
         _raise_http(err)
 

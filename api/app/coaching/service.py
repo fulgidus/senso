@@ -16,7 +16,7 @@ Stateful session persistence is handled at the API layer (Plan 04-02).
 import json
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import jsonschema
 from jinja2 import Environment, FileSystemLoader
@@ -77,12 +77,82 @@ class CoachingService:
         with open(PERSONAS_DIR / "config.json", encoding="utf-8") as f:
             self._persona_config = json.load(f)
 
+    def generate_conversation_name(self, first_user_message: str) -> str:
+        """
+        Generate a short (3-6 word) conversation title from the first user message.
+        Uses a fast LLM call. Falls back to a truncated message on failure.
+        """
+        prompt = (
+            "Dai un titolo breve (massimo 5 parole) a questa conversazione. "
+            "Rispondi SOLO con il titolo, senza punteggiatura finale, senza virgolette.\n\n"
+            f"Primo messaggio: {first_user_message[:300]}"
+        )
+        try:
+            raw = self.llm.complete(
+                prompt=prompt,
+                system="Sei un assistente che genera titoli brevi per conversazioni finanziarie.",
+                json_mode=False,
+                timeout=10.0,
+            )
+            name = raw.strip().strip('"').strip("'")
+            return name[:120] if name else first_user_message[:60]
+        except LLMError:
+            return first_user_message[:60]
+
+    def get_welcome(
+        self,
+        user_id: str,
+        first_name: str | None = None,
+        locale: str = _DEFAULT_LOCALE,
+    ) -> str:
+        """
+        Generate a short, warm, personalised welcome message for the chat screen.
+        Uses the LLM directly — no profile required (graceful fallback if unavailable).
+
+        Returns a plain string.
+        """
+        locale = locale if locale in _SUPPORTED_LOCALES else _DEFAULT_LOCALE
+        name_part = f" {first_name}" if first_name else ""
+        if locale == "en":
+            prompt = (
+                f"You are a warm and friendly financial education coach. "
+                f"Write a short (2-3 sentences), encouraging welcome message for a user named{name_part or ' a user'} "
+                f"who has just opened the chat. "
+                f"Do not ask questions. Be warm, concise, and motivating. "
+                f"Do not include any JSON — plain text only."
+            )
+        else:
+            prompt = (
+                f"Sei un coach educativo finanziario amichevole e motivante. "
+                f"Scrivi un breve messaggio di benvenuto (2-3 frasi) per{name_part or ' un utente'} "
+                f"che ha appena aperto la chat. "
+                f"Non fare domande. Sii caloroso, conciso e incoraggiante. "
+                f"Solo testo — nessun JSON."
+            )
+
+        soul_text = self._load_soul(_DEFAULT_PERSONA_ID)
+        system_prompt = self._render_system(soul_text, locale)
+
+        try:
+            raw = self.llm.complete(
+                prompt=prompt,
+                system=system_prompt,
+                json_mode=False,
+                timeout=20.0,
+            )
+            return raw.strip()
+        except LLMError:
+            if locale == "en":
+                return f"Hi{name_part}! I'm your financial coach. Ask me anything about your budget, spending, or financial goals."
+            return f"Ciao{name_part}! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+
     def chat(
         self,
         user_id: str,
         messages: list[dict],
         locale: str = _DEFAULT_LOCALE,
         persona_id: str = _DEFAULT_PERSONA_ID,
+        debug: bool = False,
     ) -> dict:
         """
         Core coaching interaction.
@@ -93,9 +163,10 @@ class CoachingService:
                       The last message should be the new user message.
             locale: Response language — 'it' (default) or 'en'.
             persona_id: Persona to use — Phase 4 only accepts 'mentore-saggio'.
+            debug: When True, attach debug payload to returned dict.
 
         Returns:
-            A validated CoachingResponse dict.
+            A validated CoachingResponse dict, optionally with '_debug' key.
 
         Raises:
             CoachingError: On LLM failure, schema validation failure, or missing profile.
@@ -123,6 +194,7 @@ class CoachingService:
         prompt = self._build_prompt(messages, context_block, response_format)
 
         # Call LLM
+        raw: str = ""
         try:
             raw = self.llm.complete(
                 prompt=prompt,
@@ -137,6 +209,7 @@ class CoachingService:
             ) from exc
 
         # Parse JSON
+        schema_valid = True
         try:
             response_data = json.loads(raw)
         except json.JSONDecodeError as exc:
@@ -152,6 +225,7 @@ class CoachingService:
             jsonschema.validate(instance=response_data, schema=self._response_schema)
         except jsonschema.ValidationError as exc:
             logger.warning("CoachingService schema validation failed: %s", exc.message)
+            schema_valid = False
             # Attempt partial repair: ensure required fields exist
             response_data = self._repair_response(response_data)
 
@@ -170,7 +244,57 @@ class CoachingService:
                 blocked["message"] = scan_result.substitute_message
             return blocked
 
+        if debug:
+            response_data["_debug"] = self._build_debug_payload(
+                system_prompt=system_prompt,
+                context_block=context_block,
+                prompt=prompt,
+                raw_llm_response=raw,
+                schema_valid=schema_valid,
+                profile_dto=profile_dto,
+            )
+
         return response_data
+
+    def _build_debug_payload(
+        self,
+        system_prompt: str,
+        context_block: str,
+        prompt: str,
+        raw_llm_response: str,
+        schema_valid: bool,
+        profile_dto: Any,
+    ) -> dict:
+        """Build a debug info dict to attach to the response when LLM_DEBUG=true."""
+        profile_snapshot: dict = {}
+        try:
+            profile_snapshot = (
+                profile_dto.model_dump() if hasattr(profile_dto, "model_dump") else {}
+            )
+        except Exception:
+            pass
+
+        trace_dict: dict = {}
+        try:
+            trace = getattr(self.llm, "last_call_trace", None)
+            if trace is not None:
+                trace_dict = trace.to_dict()
+        except Exception:
+            pass
+
+        return {
+            "system_prompt": system_prompt,
+            "context_block": context_block,
+            "full_prompt": prompt,
+            "raw_llm_response": raw_llm_response,
+            # legacy field kept for backwards compat
+            "model_used": trace_dict.get("model_used")
+            or getattr(self.llm, "last_provider_used", "unknown"),
+            "schema_valid": schema_valid,
+            "profile_snapshot": profile_snapshot,
+            # new richer fields
+            "call_trace": trace_dict,
+        }
 
     def _load_soul(self, persona_id: str) -> str:
         for persona in self._persona_config.get("personas", []):

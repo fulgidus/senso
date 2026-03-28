@@ -4,6 +4,13 @@ from pydantic import BaseModel, EmailStr, Field
 class UserDTO(BaseModel):
     id: str
     email: EmailStr
+    first_name: str | None = None
+    last_name: str | None = None
+
+
+class UpdateMeRequest(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
 
 
 class AuthTokensDTO(BaseModel):

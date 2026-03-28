@@ -37,6 +37,8 @@ def _add_missing_columns() -> None:
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS extraordinary_income_total FLOAT",
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS months_covered FLOAT",
         "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS source_module VARCHAR(128)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

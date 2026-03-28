@@ -14,7 +14,7 @@ from app.core.security import (
 )
 from app.db import repository
 from app.db.models import RefreshSession, User
-from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UserDTO
+from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
 
 
 class AuthError(Exception):
@@ -87,7 +87,12 @@ class AuthService:
         user = repository.get_user_by_id(self.db, claims["sub"])
         if user is None:
             raise AuthError("invalid_token", "User not found", status_code=401)
-        return UserDTO(id=user.id, email=user.email)
+        return UserDTO(
+            id=user.id,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
 
     def logout(self, *, refresh_token: str) -> None:
         claims = self._decode(refresh_token)
@@ -133,10 +138,32 @@ class AuthService:
     def _issue_auth_response(self, user: User) -> AuthResponseDTO:
         tokens = self._issue_tokens(user)
         return AuthResponseDTO(
-            user=UserDTO(id=user.id, email=user.email),
+            user=UserDTO(
+                id=user.id,
+                email=user.email,
+                first_name=user.first_name,
+                last_name=user.last_name,
+            ),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
             expiresIn=tokens.expires_in,
+        )
+
+    def update_me(self, *, user_id: str, payload: UpdateMeRequest) -> UserDTO:
+        user = repository.get_user_by_id(self.db, user_id)
+        if user is None:
+            raise AuthError("user_not_found", "User not found", status_code=404)
+        if payload.first_name is not None:
+            user.first_name = payload.first_name.strip() or None
+        if payload.last_name is not None:
+            user.last_name = payload.last_name.strip() or None
+        self.db.commit()
+        self.db.refresh(user)
+        return UserDTO(
+            id=user.id,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
         )
 
     def _issue_tokens(self, user: User) -> AuthTokensDTO:

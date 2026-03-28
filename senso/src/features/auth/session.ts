@@ -14,24 +14,37 @@ import type {
   GoogleStartResult,
   MePayload,
   RefreshPayload,
+  User,
 } from "./types"
 
 const backendBaseUrl = getBackendBaseUrl()
 
 export async function signup(email: string, password: string): Promise<AuthPayload> {
-  const payload = await apiRequest<AuthPayload>(backendBaseUrl, "/auth/signup", {
+  const raw = await apiRequest<{ user: { id: string; email: string; first_name?: string | null; last_name?: string | null }; accessToken: string; refreshToken: string; expiresIn: number }>(backendBaseUrl, "/auth/signup", {
     method: "POST",
     body: { email, password },
   })
+  const payload: AuthPayload = {
+    user: { id: raw.user.id, email: raw.user.email, firstName: raw.user.first_name ?? null, lastName: raw.user.last_name ?? null },
+    accessToken: raw.accessToken,
+    refreshToken: raw.refreshToken,
+    expiresIn: raw.expiresIn,
+  }
   writeTokens(payload)
   return payload
 }
 
 export async function login(email: string, password: string): Promise<AuthPayload> {
-  const payload = await apiRequest<AuthPayload>(backendBaseUrl, "/auth/login", {
+  const raw = await apiRequest<{ user: { id: string; email: string; first_name?: string | null; last_name?: string | null }; accessToken: string; refreshToken: string; expiresIn: number }>(backendBaseUrl, "/auth/login", {
     method: "POST",
     body: { email, password },
   })
+  const payload: AuthPayload = {
+    user: { id: raw.user.id, email: raw.user.email, firstName: raw.user.first_name ?? null, lastName: raw.user.last_name ?? null },
+    accessToken: raw.accessToken,
+    refreshToken: raw.refreshToken,
+    expiresIn: raw.expiresIn,
+  }
   writeTokens(payload)
   return payload
 }
@@ -107,6 +120,27 @@ export async function startGoogle(): Promise<GoogleStartResult> {
   }
 }
 
+export async function updateMe(
+  accessToken: string,
+  data: { firstName?: string | null; lastName?: string | null },
+): Promise<User> {
+  const raw = await apiRequest<{ id: string; email: string; first_name?: string | null; last_name?: string | null }>(
+    backendBaseUrl,
+    "/auth/me",
+    {
+      method: "PATCH",
+      token: accessToken,
+      body: { first_name: data.firstName, last_name: data.lastName },
+    },
+  )
+  return {
+    id: raw.id,
+    email: raw.email,
+    firstName: raw.first_name ?? null,
+    lastName: raw.last_name ?? null,
+  }
+}
+
 async function refresh(refreshToken: string): Promise<RefreshPayload> {
   const payload = await apiRequest<RefreshPayload>(backendBaseUrl, "/auth/refresh", {
     method: "POST",
@@ -117,7 +151,15 @@ async function refresh(refreshToken: string): Promise<RefreshPayload> {
 }
 
 async function getMe(accessToken: string): Promise<MePayload> {
-  return apiRequest<MePayload>(backendBaseUrl, "/auth/me", {
+  const raw = await apiRequest<{ user: { id: string; email: string; first_name?: string | null; last_name?: string | null } }>(backendBaseUrl, "/auth/me", {
     token: accessToken,
   })
+  return {
+    user: {
+      id: raw.user.id,
+      email: raw.user.email,
+      firstName: raw.user.first_name ?? null,
+      lastName: raw.user.last_name ?? null,
+    },
+  }
 }

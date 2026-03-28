@@ -4,6 +4,7 @@ import type { User } from "@/features/auth/types"
 export type AuthContextValue = {
   user: User
   signOut: () => Promise<void>
+  updateUser: (updated: Partial<User>) => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

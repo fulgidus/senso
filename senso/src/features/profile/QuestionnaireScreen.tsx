@@ -14,30 +14,30 @@ type Props = {
 type PartialAnswers = Partial<QuestionnaireAnswers>
 
 const EMPLOYMENT_OPTIONS = [
-  { label: "Employed", value: "employed" },
-  { label: "Self-employed", value: "self_employed" },
-  { label: "Student", value: "student" },
-  { label: "Other", value: "other" },
+  { label: "Dipendente", value: "employed" },
+  { label: "Autonomo / Freelance", value: "self_employed" },
+  { label: "Studente", value: "student" },
+  { label: "Altro", value: "other" },
 ] as const
 
 const INCOME_SOURCE_OPTIONS = [
-  { label: "Side work", value: "side_work" },
-  { label: "Rental income", value: "rental_income" },
-  { label: "Investments", value: "investments" },
-  { label: "Benefits", value: "benefits" },
-  { label: "None", value: "none" },
+  { label: "Lavoro extra", value: "side_work" },
+  { label: "Affitti", value: "rental_income" },
+  { label: "Investimenti", value: "investments" },
+  { label: "Sussidi / Assegni", value: "benefits" },
+  { label: "Nessuna", value: "none" },
 ]
 
 const SAVINGS_OPTIONS = [
-  { label: "Not saving", value: "not_saving" },
-  { label: "Occasional savings", value: "occasional" },
-  { label: "Regular savings", value: "regular" },
+  { label: "Non risparmio", value: "not_saving" },
+  { label: "Risparmio occasionale", value: "occasional" },
+  { label: "Risparmio regolare", value: "regular" },
 ] as const
 
 const GOAL_OPTIONS = [
-  { label: "Save more", value: "save_more" },
-  { label: "Reduce debt", value: "reduce_debt" },
-  { label: "Just track spending", value: "just_track" },
+  { label: "Risparmiare di più", value: "save_more" },
+  { label: "Ridurre i debiti", value: "reduce_debt" },
+  { label: "Monitorare le spese", value: "just_track" },
 ] as const
 
 function OptionPill({
@@ -110,7 +110,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         })
         onComplete()
       } catch {
-        setError("Profile not saved. Check your connection and try again.")
+        setError("Profilo non salvato. Controlla la connessione e riprova.")
       } finally {
         setLoading(false)
       }
@@ -123,7 +123,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              What&apos;s your employment status?
+              Qual è la tua situazione lavorativa?
             </h2>
             <div className="flex flex-wrap gap-2">
               {EMPLOYMENT_OPTIONS.map((opt) => (
@@ -141,7 +141,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              What&apos;s your monthly net income?
+              Qual è il tuo reddito netto mensile?
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-foreground">
@@ -164,7 +164,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              What&apos;s your primary currency?
+              Qual è la tua valuta principale?
             </h2>
             <select
               value={answers.currency ?? "EUR"}
@@ -172,10 +172,10 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="EUR">EUR — Euro</option>
-              <option value="USD">USD — US Dollar</option>
-              <option value="GBP">GBP — British Pound</option>
-              <option value="CHF">CHF — Swiss Franc</option>
-              <option value="other">Other</option>
+              <option value="USD">USD — Dollaro americano</option>
+              <option value="GBP">GBP — Sterlina britannica</option>
+              <option value="CHF">CHF — Franco svizzero</option>
+              <option value="other">Altra valuta</option>
             </select>
           </div>
         )
@@ -183,10 +183,10 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Estimated fixed monthly costs?
+              Costi fissi mensili stimati?
             </h2>
             <p className="mb-3 text-sm text-muted-foreground">
-              Rent, utilities, subscriptions — all regular bills combined.
+              Affitto, utenze, abbonamenti — tutte le spese ricorrenti combinate.
             </p>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">€</span>
@@ -207,7 +207,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Any other income sources?
+              Hai altre fonti di reddito?
             </h2>
             <div className="flex flex-wrap gap-2">
               {INCOME_SOURCE_OPTIONS.map((opt) => (
@@ -225,7 +225,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              How many people in your household?
+              Quante persone nel tuo nucleo familiare?
             </h2>
             <div className="flex items-center gap-4">
               <Button
@@ -255,7 +255,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              How often do you save?
+              Con che frequenza risparmi?
             </h2>
             <div className="flex flex-wrap gap-2">
               {SAVINGS_OPTIONS.map((opt) => (
@@ -273,7 +273,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              What&apos;s your main financial goal?
+              Qual è il tuo principale obiettivo finanziario?
             </h2>
             <div className="flex flex-wrap gap-2">
               {GOAL_OPTIONS.map((opt) => (
@@ -297,7 +297,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
       <div className="mb-8 flex items-start justify-between">
         <h1 className="text-2xl font-bold text-foreground">S.E.N.S.O.</h1>
         <span className="text-sm text-muted-foreground">
-          Question {step + 1} of {totalQuestions}
+          Domanda {step + 1} di {totalQuestions}
         </span>
       </div>
 
@@ -312,14 +312,14 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
               variant="ghost"
               onClick={step === 0 ? onBack : () => setStep((s) => s - 1)}
             >
-              Back
+              Indietro
             </Button>
             <Button
               variant="default"
               disabled={!canAdvance() || loading}
               onClick={() => void handleNext()}
             >
-              {loading ? "Saving..." : step === totalQuestions - 1 ? "Finish" : "Next"}
+              {loading ? "Salvataggio..." : step === totalQuestions - 1 ? "Fine" : "Avanti"}
             </Button>
           </div>
         </div>

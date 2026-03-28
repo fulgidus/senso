@@ -9,37 +9,47 @@ import { ProcessingScreen } from "@/features/profile/ProcessingScreen"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
 import { OnboardingChoiceScreen } from "@/features/profile/OnboardingChoiceScreen"
 import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
+import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import type { User } from "@/features/auth/types"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
 // ── Ingestion page (handles internal processing/onboarding/questionnaire state) ──
 
-type IngestionPhase = "ingestion" | "processing" | "onboarding" | "questionnaire"
+type IngestionPhase = "profile_setup" | "ingestion" | "processing" | "onboarding" | "questionnaire"
 type QuestionnaireMode = "quick" | "thorough"
 
 function IngestionPage({ user }: { user: User }) {
   const token = readAccessToken()
   const navigate = useNavigate()
-  const [phase, setPhase] = useState<IngestionPhase>("ingestion")
+  const { updateUser } = useAuthContext()
+  // If user has no first name, start at profile_setup; otherwise check categorization status
+  const [phase, setPhase] = useState<IngestionPhase>(
+    !user.firstName ? "profile_setup" : "ingestion",
+  )
   const [questionnaireMode, setQuestionnaireMode] = useState<QuestionnaireMode>("quick")
 
   useEffect(() => {
-    if (!token) return
+    // Only check profile status if we're past the profile_setup phase
+    if (!token || phase === "profile_setup") return
     void getProfileStatus(token).then((data) => {
       if (["queued", "categorizing", "generating_insights"].includes(data.status)) {
         setPhase("processing")
       } else if (data.status === "not_started") {
         setPhase("onboarding")
+      } else if (data.status === "complete") {
+        void navigate("/chat", { replace: true })
       }
-      // complete → stay on ingestion (user can navigate via sidebar)
+      // failed / other → stay on ingestion
     }).catch(() => { /* stay on ingestion */ })
-  }, [token])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, phase === "profile_setup"])
 
   const handleConfirmAll = useCallback(async () => {
     if (!token) return
@@ -56,6 +66,17 @@ function IngestionPage({ user }: { user: User }) {
   }, [token])
 
   if (!token) return null
+
+  if (phase === "profile_setup") {
+    return (
+      <ProfileSetupScreen
+        onComplete={(firstName, lastName) => {
+          updateUser({ firstName, lastName })
+          setPhase("ingestion")
+        }}
+      />
+    )
+  }
 
   if (phase === "processing") {
     return (
@@ -118,9 +139,9 @@ function ProfilePage({ user }: { user: User }) {
 
 // ── Protected app wrapper (renders shell + routes only when authenticated) ──
 
-function AuthedRoutes({ user, signOut }: { user: User; signOut: () => Promise<void> }) {
+function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () => Promise<void>; updateUser: (updated: Partial<User>) => void }) {
   return (
-    <AuthContext.Provider value={{ user, signOut }}>
+    <AuthContext.Provider value={{ user, signOut, updateUser }}>
       <AppShell>
         <Routes>
           <Route path="/" element={<IngestionPage user={user} />} />
@@ -163,7 +184,7 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <AuthedRoutes user={auth.user} signOut={auth.signOut} />
+      <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
     </BrowserRouter>
   )
 }

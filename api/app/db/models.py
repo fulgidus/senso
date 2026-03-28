@@ -26,6 +26,8 @@ class User(Base):
     id: str = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
     email: str = Column(String(255), unique=True, nullable=False, index=True)
     password_hash: str = Column(String(255), nullable=False)
+    first_name: str | None = Column(String(100), nullable=True, default=None)
+    last_name: str | None = Column(String(100), nullable=True, default=None)
     is_admin: bool = Column(Boolean, nullable=False, default=False)
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
@@ -230,6 +232,7 @@ class ChatSession(Base):
         nullable=False,
         index=True,
     )
+    name: str | None = Column(String(120), nullable=True, default=None)
     persona_id: str = Column(String(64), default="mentore-saggio", nullable=False)
     locale: str = Column(String(2), default="it", nullable=False)
     created_at: datetime = Column(

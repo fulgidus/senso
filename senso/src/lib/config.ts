@@ -22,3 +22,7 @@ export function getBackendBaseUrl(): string {
 
   return value.replace(/\/$/, "")
 }
+
+// Feature toggles — set in .env, default false in production
+export const SHOW_REASONING: boolean = import.meta.env.VITE_SHOW_REASONING === "true"
+export const LLM_DEBUG: boolean = import.meta.env.VITE_LLM_DEBUG === "true"

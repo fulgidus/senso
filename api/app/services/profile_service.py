@@ -49,7 +49,35 @@ class ProfileService:
         )
 
     def save_questionnaire(self, user_id: str, answers: dict) -> dict:
-        upsert_user_profile(self.db, user_id, questionnaire_answers=answers)
+        # Eagerly derive financial fields from questionnaire so coaching sees real data
+        # even before a full document ingestion + categorization run.
+        updates: dict = {"questionnaire_answers": answers}
+
+        monthly_net_income = answers.get("monthlyNetIncome") or answers.get(
+            "monthly_net_income"
+        )
+        employment_type = answers.get("employmentType") or answers.get(
+            "employment_type", "questionnaire"
+        )
+        currency = answers.get("currency", "EUR")
+        fixed_monthly_costs = answers.get("fixedMonthlyCosts") or answers.get(
+            "fixed_monthly_costs"
+        )
+
+        if monthly_net_income is not None:
+            updates["income_summary"] = {
+                "amount": float(monthly_net_income),
+                "currency": currency,
+                "source": "questionnaire",
+                "employment_type": employment_type,
+            }
+            if fixed_monthly_costs is not None:
+                updates["monthly_expenses"] = float(fixed_monthly_costs)
+                updates["monthly_margin"] = float(monthly_net_income) - float(
+                    fixed_monthly_costs
+                )
+
+        upsert_user_profile(self.db, user_id, **updates)
         return {"status": "saved"}
 
     def confirm_profile(
