@@ -1,0 +1,43 @@
+{
+  "coaching": {
+    "thinking": {
+      "masculine": "Il {{name}} sta pensando...",
+      "feminine": "La {{name}} sta pensando...",
+      "neutral": "{{name}} sta pensando..."
+    },
+    "fallbackWelcome": {
+      "masculine": "Ciao! Sono il tuo {{name}}. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari.",
+      "feminine": "Ciao! Sono la tua {{name}}. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari.",
+      "neutral": "Ciao! Sono {{name}}. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+    },
+    "personaLabel": {
+      "masculine": "Il {{name}}",
+      "feminine": "La {{name}}",
+      "neutral": "{{name}}"
+    }
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "subtitle": "Gestisci il tuo account e le preferenze",
+    "account": "Account",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "required": "*",
+    "saving": "Salvataggio...",
+    "save": "Salva",
+    "saveSuccess": "Salvato!",
+    "saveError": "Errore durante il salvataggio. Riprova.",
+    "theme": "Aspetto",
+    "themeLight": "Chiaro",
+    "themeDark": "Scuro",
+    "themeSystem": "Sistema",
+    "voiceGender": "Voce preferita",
+    "voiceGenderHint": "Scegli il genere della voce del coach. \"Indifferente\" usa il default della persona.",
+    "voiceGenderMasculine": "Maschile",
+    "voiceGenderFeminine": "Femminile",
+    "voiceGenderNeutral": "Neutro",
+    "voiceGenderIndifferent": "Indifferente",
+    "logout": "Esci",
+    "logoutConfirm": "Sei sicuro di voler uscire?"
+  }
+}

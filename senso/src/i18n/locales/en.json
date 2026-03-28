@@ -1,0 +1,43 @@
+{
+  "coaching": {
+    "thinking": {
+      "masculine": "{{name}} is thinking...",
+      "feminine": "{{name}} is thinking...",
+      "neutral": "{{name}} is thinking..."
+    },
+    "fallbackWelcome": {
+      "masculine": "Hi! I'm your {{name}}. Ask me anything about your budget, spending, or financial goals.",
+      "feminine": "Hi! I'm your {{name}}. Ask me anything about your budget, spending, or financial goals.",
+      "neutral": "Hi! I'm {{name}}. Ask me anything about your budget, spending, or financial goals."
+    },
+    "personaLabel": {
+      "masculine": "{{name}}",
+      "feminine": "{{name}}",
+      "neutral": "{{name}}"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "account": "Account",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "required": "*",
+    "saving": "Saving...",
+    "save": "Save",
+    "saveSuccess": "Saved!",
+    "saveError": "Error while saving. Please try again.",
+    "theme": "Appearance",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "voiceGender": "Preferred voice",
+    "voiceGenderHint": "Choose the coach voice gender. \"Indifferent\" uses the persona's default.",
+    "voiceGenderMasculine": "Masculine",
+    "voiceGenderFeminine": "Feminine",
+    "voiceGenderNeutral": "Neutral",
+    "voiceGenderIndifferent": "Indifferent",
+    "logout": "Log out",
+    "logoutConfirm": "Are you sure you want to log out?"
+  }
+}
