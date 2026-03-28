@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
-import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, Home } from "lucide-react"
+import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
@@ -281,7 +281,6 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   const NAV_ITEMS: NavItem[] = [
-    { to: "/", label: t("nav.home"), icon: <Home className="h-5 w-5" /> },
     { to: "/profile", label: t("nav.profile"), icon: <User className="h-5 w-5" /> },
     { to: "/chat", label: t("nav.coach"), icon: <MessageCircle className="h-5 w-5" /> },
   ]
