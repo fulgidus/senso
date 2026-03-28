@@ -63,8 +63,8 @@ function IngestionPage({ user }: { user: User }) {
   const handleQuestionnaireComplete = useCallback(async () => {
     if (!token) return
     // Questionnaire directly builds the profile - no background job needed.
-    // Navigate straight to /profile without going through ProcessingScreen.
-    void navigate("/profile", { replace: true })
+    // Navigate straight to /chat, same as the file-ingestion path.
+    void navigate("/chat", { replace: true })
   }, [token, navigate])
 
   if (!token) return null
@@ -86,7 +86,7 @@ function IngestionPage({ user }: { user: User }) {
         user={user}
         token={token}
         onBack={() => setPhase("ingestion")}
-        onComplete={() => void navigate("/profile", { replace: true })}
+        onComplete={() => void navigate("/chat", { replace: true })}
       />
     )
   }
