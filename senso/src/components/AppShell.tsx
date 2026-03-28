@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { NavLink, useNavigate } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 import { Home, User, MessageCircle, Settings, LogOut, X, Menu } from "lucide-react"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
@@ -89,7 +89,6 @@ export function AppShell({ children }: AppShellProps) {
   const { user, signOut } = useAuthContext()
   const [open, setOpen] = useState(false)
   const [showTopNav, setShowTopNav] = useState(false)
-  const navigate = useNavigate()
   const sidebarRef = useRef<HTMLDivElement>(null)
   const topBarRef = useRef<HTMLElement>(null)
   const navContainerRef = useRef<HTMLDivElement>(null)

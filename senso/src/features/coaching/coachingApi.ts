@@ -222,6 +222,34 @@ export async function generateConversationName(firstUserMessage: string): Promis
   }
 }
 
+// ── TTS ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetch TTS audio from POST /coaching/tts.
+ * Uses native fetch (not apiRequest) because response is binary audio/mpeg.
+ * Throws CoachingApiError("tts_unavailable", ..., 503) on failure.
+ */
+export async function fetchTTSAudio(text: string, locale: "it" | "en" = "it"): Promise<Blob> {
+  const token = readAccessToken()
+  const resp = await fetch(`${API_BASE}/coaching/tts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ text, locale }),
+  })
+  if (!resp.ok) {
+    let code = "tts_unavailable"
+    try {
+      const body = await resp.json()
+      code = body?.detail?.code ?? "tts_unavailable"
+    } catch {}
+    throw new CoachingApiError(code, `TTS failed (${resp.status})`, resp.status)
+  }
+  return resp.blob()
+}
+
 // ── Personas ──────────────────────────────────────────────────────────────────
 
 export async function getPersonas(): Promise<Persona[]> {
