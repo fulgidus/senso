@@ -18,11 +18,19 @@ import {
   type InsightCard,
   type UserProfile,
 } from "@/lib/profile-api"
+import { ApiClientError } from "@/lib/api-client"
 
-const SOURCE_LABELS: Record<string, string> = {
-  payslip: "from payslip",
-  questionnaire: "from questionnaire",
-  estimated_from_transactions: "estimated from transactions",
+const DATA_SOURCE_LABELS: Record<string, string> = {
+  bank_statement: "estratto conto",
+  payslip: "busta paga",
+  questionnaire: "questionario",
+}
+
+function formatDataSources(sources: string[]): string {
+  if (!sources.length) return ""
+  return sources
+    .map((s) => DATA_SOURCE_LABELS[s] ?? s)
+    .join(", ")
 }
 
 const CHART_COLORS = [
@@ -79,9 +87,10 @@ type Props = {
   onAddDocuments: () => void
   onNavigateToChat: () => void
   onSignOut?: () => Promise<void>
+  onNoProfile?: () => void
 }
 
-export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat }: Props) {
+export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile }: Props) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -99,11 +108,15 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         setIncomeEdit(String(p.incomeSummary?.amount ?? ""))
         setExpensesEdit(String(p.monthlyExpenses ?? ""))
       })
-      .catch(() =>
-        setError("Couldn't load your profile. Check your connection and refresh."),
-      )
+      .catch((err) => {
+        if (err instanceof ApiClientError && err.status === 404) {
+          onNoProfile?.()
+        } else {
+          setError("Impossibile caricare il profilo. Controlla la connessione e riprova.")
+        }
+      })
       .finally(() => setLoading(false))
-  }, [token])
+  }, [token, onNoProfile])
 
   const handleSaveProfile = async () => {
     if (!profile) return
@@ -140,7 +153,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     return (
       <main className="mx-auto w-full max-w-4xl px-6 py-6">
         <p className="text-sm text-destructive">
-          {error ?? "Couldn't load your profile. Check your connection and refresh."}
+          {error ?? "Impossibile caricare il profilo. Controlla la connessione e riprova."}
         </p>
       </main>
     )
@@ -149,9 +162,9 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const chartData = getCategoryChartData(profile.categoryTotals)
   const incomeAvailable = !!profile.incomeSummary?.amount
   const confirmedDate = profile.profileGeneratedAt
-    ? new Date(profile.profileGeneratedAt).toLocaleDateString("en-GB")
+    ? new Date(profile.profileGeneratedAt).toLocaleDateString("it-IT")
     : ""
-  const documentCount = profile.dataSources.length
+  const dataSourcesLabel = formatDataSources(profile.dataSources)
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
@@ -159,8 +172,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         <h2 className="text-xl font-semibold text-foreground">Il tuo profilo finanziario</h2>
         {confirmedDate && (
           <p className="text-sm text-muted-foreground">
-            Based on {documentCount} document{documentCount !== 1 ? "s" : ""} confirmed{" "}
-            {confirmedDate}
+            Aggiornato il {confirmedDate}
+            {dataSourcesLabel && <> · Fonti: {dataSourcesLabel}</>}
           </p>
         )}
       </div>
@@ -172,7 +185,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
           onClick={onAddDocuments}
         >
           <Plus className="h-4 w-4" />
-          Add more documents
+          Aggiungi documenti
         </Button>
       </div>
 
@@ -182,7 +195,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* Income */}
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Monthly Income</p>
+              <p className="text-sm text-muted-foreground mb-1">Reddito mensile</p>
               <p className="text-xl font-semibold text-foreground">
                 {formatCurrency(
                   profile.incomeSummary?.amount ?? null,
@@ -191,7 +204,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
               </p>
               {profile.incomeSummary?.source && (
                 <span className="mt-1 inline-block rounded-full border border-primary px-2 py-0.5 text-xs text-muted-foreground">
-                  {SOURCE_LABELS[profile.incomeSummary.source] ??
+                  {DATA_SOURCE_LABELS[profile.incomeSummary.source] ??
                     profile.incomeSummary.source}
                 </span>
               )}
@@ -200,8 +213,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             {/* Expenses */}
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Monthly Expenses{" "}
-                <span className="text-xs">(recurring)</span>
+                Spese mensili{" "}
+                <span className="text-xs">(ricorrenti)</span>
               </p>
               <p className="text-xl font-semibold text-foreground">
                 {formatCurrency(profile.monthlyExpenses)}
@@ -212,8 +225,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             <div>
               <p className="text-sm text-muted-foreground mb-1">
                 {(profile.monthlyMargin ?? 0) >= 0
-                  ? "Available this month"
-                  : "Over budget this month"}
+                  ? "Disponibile questo mese"
+                  : "In rosso questo mese"}
               </p>
               <p
                 className={`text-xl font-semibold ${
@@ -232,7 +245,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {chartData.length > 0 && (
           <section className="rounded-2xl border border-border bg-card p-6">
             <h3 className="mb-4 text-xl font-semibold text-foreground">
-              Where your money goes
+              Dove vanno i tuoi soldi
             </h3>
             <div className="min-h-[220px]">
               <ResponsiveContainer width="100%" height={220}>
@@ -262,7 +275,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       typeof value === "number"
                         ? `€${value.toLocaleString("it-IT")}`
                         : String(value ?? ""),
-                      "Total",
+                      "Totale",
                     ]}
                     contentStyle={{
                       background: "var(--card)",
@@ -302,14 +315,14 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {incomeAvailable && profile.monthlyExpenses !== null && (
           <section className="rounded-2xl border border-border bg-card p-6">
             <h3 className="mb-4 text-xl font-semibold text-foreground">
-              Income vs. Expenses
+              Entrate vs. Uscite
             </h3>
             <div className="min-h-[220px]">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
                   data={[
                     {
-                      name: "This month",
+                      name: "Questo mese",
                       income: Math.round(profile.incomeSummary!.amount),
                       expenses: Math.round(profile.monthlyExpenses!),
                     },
@@ -334,7 +347,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       typeof value === "number"
                         ? `€${value.toLocaleString("it-IT")}`
                         : String(value ?? ""),
-                      name === "income" ? "Income" : "Expenses",
+                      name === "income" ? "Entrate" : "Uscite",
                     ]}
                     contentStyle={{
                       background: "var(--card)",
@@ -354,7 +367,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {/* AI Insight Cards */}
         <section>
           <h3 className="mb-4 text-xl font-semibold text-foreground">
-            What your data shows
+            Cosa dicono i tuoi dati
           </h3>
           {profile.insightCards.length === 0 ? (
             <div className="grid gap-4 lg:grid-cols-3">
@@ -406,18 +419,18 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {/* Confirm / Correct Section */}
         <section className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-4 text-xl font-semibold text-foreground">
-            Does this look right?
+            I dati sono corretti?
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-muted-foreground">
-                Monthly Income
-                {profile.incomeSummary?.source && (
-                  <span className="ml-2 text-xs">
-                    ({SOURCE_LABELS[profile.incomeSummary.source]})
-                  </span>
-                )}
-              </label>
+                <label className="mb-1 block text-sm text-muted-foreground">
+                  Reddito mensile
+                  {profile.incomeSummary?.source && (
+                    <span className="ml-2 text-xs">
+                      ({DATA_SOURCE_LABELS[profile.incomeSummary.source] ?? profile.incomeSummary.source})
+                    </span>
+                  )}
+                </label>
               <div className="flex items-center gap-2">
                 <span className="text-sm">€</span>
                 <input
@@ -431,7 +444,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             </div>
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">
-                Monthly Expenses
+                Spese mensili
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-sm">€</span>
@@ -453,10 +466,10 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
               onClick={() => void handleSaveProfile()}
               className="sm:w-auto w-full"
             >
-              {saving ? "Saving..." : "Save Profile"}
+              {saving ? "Salvataggio..." : "Salva profilo"}
             </Button>
             {saveSuccess && (
-              <span className="text-sm text-green-600">Profile saved ✓</span>
+              <span className="text-sm text-green-600">Profilo salvato ✓</span>
             )}
             {saveError && (
               <span className="text-sm text-destructive">{saveError}</span>

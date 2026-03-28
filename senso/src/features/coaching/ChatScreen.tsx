@@ -203,7 +203,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background">
+    <div className="flex flex-col h-full min-h-[calc(100vh-3.5rem)] bg-background">
       {/* Sub-header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background">
         <div className="flex-1">

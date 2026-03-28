@@ -18,13 +18,18 @@ RUN pip install --no-cache-dir \
     PyJWT==2.12.1 \
     sqlalchemy==2.0.41 \
     psycopg2-binary==2.9.10 \
-    boto3==1.38.18 \
+    python-multipart==0.0.20 \
+    python-dotenv==1.0.1 \
+    minio==7.2.15 \
     pytesseract==0.3.13 \
     openpyxl==3.1.5 \
     pdf2image==1.17.0 \
     Pillow==11.2.1 \
     google-genai==1.68.0 \
-    openai==2.29.0
+    openai==2.29.0 \
+    jsonschema==4.26.0 \
+    pyyaml==6.0.2 \
+    jinja2==3.1.6
 
 COPY app ./app
 

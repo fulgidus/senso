@@ -27,7 +27,7 @@ services:
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "mc", "ready", "local"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -90,6 +90,10 @@ services:
 
 volumes:
   postgres_data:
+    external: false
+    name: senso_postgres_data
   minio_data:
+    external: false
+    name: senso_minio_data
   modules_generated:
   modules_promoted:

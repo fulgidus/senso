@@ -111,6 +111,7 @@ function ProfilePage({ user }: { user: User }) {
       onAddDocuments={() => void navigate("/")}
       onNavigateToChat={() => void navigate("/chat")}
       onSignOut={async () => { /* handled by shell */ }}
+      onNoProfile={() => void navigate("/", { replace: true })}
     />
   )
 }

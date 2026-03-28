@@ -80,9 +80,9 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-background px-4">
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background px-4">
         <button
           aria-label="Apri menu"
           onClick={() => setOpen(true)}
@@ -166,10 +166,10 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </div>
 
-      {/* Page content */}
-      <main className="flex-1">
+      {/* Page content — grows to fill remaining height */}
+      <div className="flex-1 overflow-y-auto">
         {children}
-      </main>
+      </div>
     </div>
   )
 }
