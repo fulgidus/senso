@@ -14,6 +14,7 @@ Stateful session persistence is handled at the API layer (Plan 04-02).
 """
 
 import json
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any, Optional
@@ -27,6 +28,9 @@ from app.ingestion.llm import LLMClient, LLMError
 from app.services.profile_service import ProfileError, ProfileService
 
 logger = logging.getLogger(__name__)
+
+# Module-level cache so it survives across request-scoped CoachingService instances.
+_welcome_cache: dict[str, str] = {}
 
 COACHING_DIR = Path(__file__).parent
 PERSONAS_DIR = COACHING_DIR.parent / "personas"
@@ -80,6 +84,7 @@ class CoachingService:
         self._a2ui_reference = self._jinja_env.get_template(
             "a2ui_reference.j2"
         ).render()
+        # Welcome cache is module-level (_welcome_cache) — survives across request instances.
 
     def generate_conversation_name(self, first_user_message: str) -> str:
         """
@@ -113,9 +118,20 @@ class CoachingService:
         Generate a short, warm, personalised welcome message for the chat screen.
         Uses the LLM directly — no profile required (graceful fallback if unavailable).
 
+        Results are cached in-memory keyed on (user_id, first_name, locale) so repeated
+        mounts / new-conversation calls don't fire a fresh LLM call.
+
         Returns a plain string.
         """
         locale = locale if locale in _SUPPORTED_LOCALES else _DEFAULT_LOCALE
+
+        # ── Cache lookup ──────────────────────────────────────────────────────
+        cache_key = hashlib.md5(
+            f"{user_id}:{first_name or ''}:{locale}".encode()
+        ).hexdigest()
+        if cache_key in _welcome_cache:
+            return _welcome_cache[cache_key]
+
         name_part = f" {first_name}" if first_name else ""
         if locale == "en":
             prompt = (
@@ -144,11 +160,15 @@ class CoachingService:
                 json_mode=False,
                 timeout=20.0,
             )
-            return raw.strip()
+            result = raw.strip()
         except LLMError:
             if locale == "en":
-                return f"Hi{name_part}! I'm your financial coach. Ask me anything about your budget, spending, or financial goals."
-            return f"Ciao{name_part}! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+                result = f"Hi{name_part}! I'm your financial coach. Ask me anything about your budget, spending, or financial goals."
+            else:
+                result = f"Ciao{name_part}! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+
+        _welcome_cache[cache_key] = result
+        return result
 
     def chat(
         self,
