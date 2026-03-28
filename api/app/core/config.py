@@ -29,7 +29,6 @@ class Settings:
     starting_admins: frozenset[str]
     # ElevenLabs TTS settings
     elevenlabs_api_key: str | None
-    elevenlabs_voice_id: str
 
     @property
     def google_enabled(self) -> bool:
@@ -118,5 +117,4 @@ def get_settings() -> Settings:
         ),
         # ElevenLabs TTS settings
         elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
-        elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
     )

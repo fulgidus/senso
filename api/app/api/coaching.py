@@ -21,9 +21,16 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.api.ingestion import get_current_user
+from app.api.ingestion import get_current_user, get_minio_client
 from app.coaching.service import CoachingError, get_coaching_service
-from app.coaching.tts import TTSService, TTSUnavailableError
+from app.coaching.tts import TTSService, TTSUnavailableError, ElevenLabsVoiceSettings
+from app.personas.loader import (
+    get_voice_id,
+    get_tts_config,
+    get_elevenlabs_settings,
+    resolve_effective_gender,
+    get_persona_default_gender,
+)
 from app.core.config import get_settings
 from app.db.models import ChatMessage, ChatSession
 from app.db.session import get_db
@@ -50,6 +57,8 @@ _PERSONAS_DIR = Path(__file__).parent.parent / "personas"
 class TTSRequest(BaseModel):
     text: str
     locale: Literal["it", "en"] = "it"
+    persona_id: str | None = None
+    gender: str | None = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -324,6 +333,8 @@ def get_personas(
             description=p["description"],
             icon=p["icon"],
             available=p.get("available", False),
+            tts=get_tts_config(p["id"]),
+            defaultGender=p.get("defaultGender", "neutral"),
         )
         for p in config.get("personas", [])
         if p.get("available", False)
@@ -335,13 +346,35 @@ def tts_speak(
     req: TTSRequest,
     current_user: UserDTO = Depends(get_current_user),
     settings=Depends(get_settings),
+    minio_client=Depends(get_minio_client),
 ):
-    """Convert coaching response message to MP3 audio bytes via ElevenLabs."""
+    """Convert coaching response message to MP3 audio bytes via ElevenLabs (MinIO-cached)."""
+    # req.gender overrides the user preference; if absent, honour user's stored preference
+    effective_gender = resolve_effective_gender(
+        req.gender or current_user.voice_gender,
+        req.persona_id,
+    )
+    voice_id = get_voice_id(req.persona_id, req.locale, effective_gender)
     svc = TTSService(
-        api_key=settings.elevenlabs_api_key, voice_id=settings.elevenlabs_voice_id
+        api_key=settings.elevenlabs_api_key,
+        minio_client=minio_client,
+        bucket=settings.minio_bucket,
+    )
+    el_settings = get_elevenlabs_settings(req.persona_id)
+    vs = ElevenLabsVoiceSettings(
+        stability=el_settings.get("stability", 0.75),
+        similarity_boost=el_settings.get("similarityBoost", 0.8),
+        style=el_settings.get("style", 0.0),
+        use_speaker_boost=el_settings.get("useSpeakerBoost", True),
     )
     try:
-        audio_bytes = svc.speak(req.text, req.locale)
+        audio_bytes = svc.speak(
+            req.text,
+            voice_id,
+            req.locale,
+            normalization=el_settings.get("normalization", "elevenlabs"),
+            voice_settings=vs,
+        )
     except TTSUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

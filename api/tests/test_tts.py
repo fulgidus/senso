@@ -1,5 +1,5 @@
 """
-Tests for TTSService, _truncate_at_sentence, and POST /coaching/tts endpoint.
+Tests for TTSService, _truncate_at_sentence, get_voice_id loader, and POST /coaching/tts endpoint.
 """
 
 import pytest
@@ -60,9 +60,18 @@ def test_tts_service_raises_when_no_key():
     """TTSService.speak raises TTSUnavailableError when api_key is None."""
     from app.coaching.tts import TTSService, TTSUnavailableError
 
-    svc = TTSService(api_key=None, voice_id="voice123")
+    svc = TTSService(api_key=None)
     with pytest.raises(TTSUnavailableError, match="not configured"):
-        svc.speak("Hello world", "it")
+        svc.speak("Hello world", "voice123", "it")
+
+
+def test_tts_service_raises_when_no_voice_id():
+    """TTSService.speak raises TTSUnavailableError when voice_id is None/empty."""
+    from app.coaching.tts import TTSService, TTSUnavailableError
+
+    svc = TTSService(api_key="test-key")
+    with pytest.raises(TTSUnavailableError, match="No voice ID"):
+        svc.speak("Hello world", None, "it")
 
 
 def test_tts_service_returns_bytes_when_key_set():
@@ -79,8 +88,8 @@ def test_tts_service_returns_bytes_when_key_set():
         mock_elevenlabs_module = sys.modules["elevenlabs"]
         mock_elevenlabs_module.ElevenLabs.return_value = mock_client
 
-        svc = TTSService(api_key="test-key", voice_id="voice123")
-        result = svc.speak("Hello world", "it")
+        svc = TTSService(api_key="test-key")
+        result = svc.speak("Hello world", "voice123", "it")
 
     assert isinstance(result, bytes)
     assert result == b"fake-mp3"
@@ -98,9 +107,9 @@ def test_tts_service_raises_on_elevenlabs_failure():
         mock_client.text_to_speech.convert.side_effect = RuntimeError("API error")
         mock_elevenlabs_module.ElevenLabs.return_value = mock_client
 
-        svc = TTSService(api_key="test-key", voice_id="voice123")
+        svc = TTSService(api_key="test-key")
         with pytest.raises(TTSUnavailableError, match="ElevenLabs call failed"):
-            svc.speak("Hello world", "it")
+            svc.speak("Hello world", "voice123", "it")
 
 
 def test_tts_service_truncates_long_text():
@@ -115,14 +124,85 @@ def test_tts_service_truncates_long_text():
         mock_client.text_to_speech.convert.return_value = b"audio"
         mock_elevenlabs_module.ElevenLabs.return_value = mock_client
 
-        svc = TTSService(api_key="test-key", voice_id="voice123")
+        svc = TTSService(api_key="test-key")
         long_text = "x" * 3000
-        svc.speak(long_text, "it")
+        svc.speak(long_text, "voice123", "it")
 
         # Check that the text passed to ElevenLabs is ≤ 2500 chars
         call_kwargs = mock_client.text_to_speech.convert.call_args.kwargs
         sent_text = call_kwargs.get("text", "")
         assert len(sent_text) <= 2500
+
+
+# ── Unit tests: get_voice_id loader ───────────────────────────────────────────
+
+
+def test_get_voice_id_named_persona_locale_match():
+    """mentore-saggio + it + masculine returns the Italian masculine voice."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("mentore-saggio", "it", "masculine")
+    assert voice_id == "o4b57JYAECRMJyCEXyIE"
+
+
+def test_get_voice_id_named_persona_locale_match_feminine():
+    """mentore-saggio + it + feminine returns the Italian feminine voice."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("mentore-saggio", "it", "feminine")
+    assert voice_id == "8KInRSd4DtD5L5gK7itu"
+
+
+def test_get_voice_id_named_persona_locale_match_neutral():
+    """mentore-saggio + it + neutral returns the Italian neutral voice."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("mentore-saggio", "it", "neutral")
+    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+
+
+def test_get_voice_id_falls_back_to_default_for_unknown_persona():
+    """Unknown persona falls through to defaultPersonaSettings → any → neutral."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("nonexistent-persona", "it", "neutral")
+    # defaultPersonaSettings.voiceIds.any.neutral
+    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+
+
+def test_get_voice_id_falls_back_to_default_for_persona_without_voice_ids():
+    """Persona with no voiceIds (e.g. amico-sarcastico) falls through to default."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("amico-sarcastico", "it", "neutral")
+    # falls through to defaultPersonaSettings.voiceIds.any.neutral
+    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+
+
+def test_get_voice_id_locale_fallback_to_any():
+    """mentore-saggio + en (no en bucket) falls back to defaultPersonaSettings → any."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("mentore-saggio", "en", "neutral")
+    # No "en" bucket in mentore-saggio, no "en" in default → falls to "any" neutral
+    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+
+
+def test_get_voice_id_gender_fallback_to_neutral():
+    """Requesting unknown gender falls back to 'neutral' within the bucket."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id("mentore-saggio", "it", "unknown-gender")
+    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+
+
+def test_get_voice_id_none_persona_uses_default():
+    """persona_id=None uses defaultPersonaSettings directly."""
+    from app.personas.loader import get_voice_id
+
+    voice_id = get_voice_id(None, "it", "masculine")
+    # default has "any" bucket only → masculine
+    assert voice_id == "o4b57JYAECRMJyCEXyIE"
 
 
 # ── Integration tests: POST /coaching/tts endpoint ────────────────────────────
@@ -185,3 +265,24 @@ def test_tts_returns_audio_when_key_set(client):
     assert resp.status_code == 200
     assert resp.headers["content-type"].startswith("audio/mpeg")
     assert resp.content == b"fake-mp3"
+
+
+def test_tts_endpoint_passes_persona_id_and_gender(client):
+    """POST /coaching/tts with persona_id and gender fields are accepted (200 with mock)."""
+    from app.coaching.tts import TTSService
+
+    token = _register_and_login(client, "ttspersona@example.com")
+
+    with patch.object(TTSService, "speak", return_value=b"audio"):
+        resp = client.post(
+            "/coaching/tts",
+            json={
+                "text": "Ciao",
+                "locale": "it",
+                "persona_id": "mentore-saggio",
+                "gender": "neutral",
+            },
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert resp.status_code == 200

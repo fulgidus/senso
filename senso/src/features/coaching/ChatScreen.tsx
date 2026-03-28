@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config"
 import { A2UISurface } from "@/components/A2UISurface"
@@ -12,6 +13,7 @@ import {
   renameSession,
   deleteSession,
   generateConversationName,
+  getPersonas,
   CoachingApiError,
   type CoachingResponse,
   type ReasoningStep,
@@ -22,9 +24,9 @@ import {
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2 } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2 } from "lucide-react"
 import { useVoiceInput } from "./useVoiceInput"
-import { useTTS } from "./useTTS"
+import { useTTS, type TTSConfig } from "./useTTS"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -192,25 +194,49 @@ function SensoAvatar() {
   )
 }
 
-function VoicePlayButton({ text, locale }: { text: string; locale: "it" | "en" }) {
-  const { canPlay, isPlaying, play, stop } = useTTS()
+function VoicePlayButton({
+  text,
+  locale,
+  ttsConfig,
+}: {
+  text: string
+  locale: "it" | "en"
+  ttsConfig: TTSConfig
+}) {
+  const { canPlay, isPlaying, isGenerating, play, stop } = useTTS(ttsConfig)
   if (!canPlay) return null
+  const busy = isGenerating || isPlaying
   return (
     <Button
       type="button"
       variant="ghost"
       size="icon"
       className="h-6 w-6 text-muted-foreground hover:text-foreground"
-      onClick={() => (isPlaying ? stop() : void play(text, locale))}
-      aria-label={isPlaying ? "Ferma audio" : "Ascolta risposta"}
-      title={isPlaying ? "Ferma" : "Ascolta"}
+      onClick={() => (busy ? stop() : void play(text, locale))}
+      disabled={isGenerating && !isPlaying}
+      aria-label={isGenerating ? "Generazione audio..." : isPlaying ? "Ferma audio" : "Ascolta risposta"}
+      title={isGenerating ? "Generazione..." : isPlaying ? "Ferma" : "Ascolta"}
     >
-      {isPlaying ? <Square className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+      {isGenerating ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : isPlaying ? (
+        <Square className="h-3 w-3" />
+      ) : (
+        <Volume2 className="h-3 w-3" />
+      )}
     </Button>
   )
 }
 
-function AssistantBubble({ msg, locale }: { msg: DisplayMessage; locale: "it" | "en" }) {
+function AssistantBubble({
+  msg,
+  locale,
+  ttsConfig,
+}: {
+  msg: DisplayMessage
+  locale: "it" | "en"
+  ttsConfig: TTSConfig
+}) {
   const resp = msg.response
   return (
     <div className="flex items-start gap-2 max-w-[90%]">
@@ -218,7 +244,7 @@ function AssistantBubble({ msg, locale }: { msg: DisplayMessage; locale: "it" | 
       <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0">
         <p className="whitespace-pre-wrap">{msg.content}</p>
         <div className="flex justify-end mt-1">
-          <VoicePlayButton text={msg.content} locale={locale} />
+          <VoicePlayButton text={msg.content} locale={locale} ttsConfig={ttsConfig} />
         </div>
         {resp && (
           <>
@@ -450,12 +476,28 @@ function parseStoredMessage(m: SessionMessage): DisplayMessage {
 
 export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const { user } = useAuthContext()
+  const { t } = useTranslation()
+
+  // Resolve which gender key to use for translated strings:
+  // user preference wins unless "indifferent", then fall back to persona default.
+  const [personaDefaultGender, setPersonaDefaultGender] = useState<"masculine" | "feminine" | "neutral">("masculine")
+  const [personaName, setPersonaName] = useState<string>("Mentore Saggio")
+
+  const effectiveGender: "masculine" | "feminine" | "neutral" = (
+    user.voiceGender && user.voiceGender !== "indifferent"
+      ? user.voiceGender as "masculine" | "feminine" | "neutral"
+      : personaDefaultGender
+  )
 
   // Session state
   const [sessionId, setSessionId] = useState<string | undefined>(undefined)
   const [sessionName, setSessionName] = useState<string>("")
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [showModal, setShowModal] = useState(false)
+
+  // TTS config (from active persona)
+  const DEFAULT_TTS_CONFIG: TTSConfig = { fallback: "browser", browserFallbackEnabled: true }
+  const [ttsConfig, setTtsConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG)
 
   // Message state
   const [messages, setMessages] = useState<DisplayMessage[]>([])
@@ -475,7 +517,12 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       const list = await listSessions()
       setSessions(list)
       return list
-    } catch {
+    } catch (err) {
+      if (err instanceof CoachingApiError) {
+        setError({ code: err.code, message: getErrorMessage(err.code) })
+      } else {
+        setError({ code: "network_error", message: getErrorMessage("network_error") })
+      }
       return []
     }
   }, [])
@@ -496,6 +543,20 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   // On mount: load sessions, restore last or fetch welcome for empty new session
   useEffect(() => {
     void (async () => {
+      // Fetch personas to get TTS config (best-effort; default used on failure)
+      try {
+        const personas = await getPersonas()
+        const active = personas.find((p) => p.id === "mentore-saggio") ?? personas[0]
+        if (active?.tts) {
+          setTtsConfig({
+            fallback: active.tts.fallback,
+            browserFallbackEnabled: active.tts.browser_fallback_enabled,
+          })
+        }
+        if (active?.defaultGender) setPersonaDefaultGender(active.defaultGender)
+        if (active?.name) setPersonaName(active.name)
+      } catch { /* non-fatal — use DEFAULT_TTS_CONFIG */ }
+
       const list = await fetchSessions()
       if (list.length > 0) {
         const last = list[0] // newest = index 0 (sorted by updated_at desc)
@@ -512,8 +573,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         } catch {
           const fallback =
             locale === "en"
-              ? "Hi! I'm your financial coach. Ask me anything about your budget, spending, or goals."
-              : "Ciao! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+              ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+              : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
           setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
         } finally {
           setWelcomeLoading(false)
@@ -542,8 +603,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     } catch {
       const fallback =
         locale === "en"
-          ? "Hi! I'm your financial coach. Ask me anything about your budget, spending, or goals."
-          : "Ciao! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
+          ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+          : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
       setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
     } finally {
       setWelcomeLoading(false)
@@ -677,7 +738,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         <SensoAvatar />
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-sm truncate">
-            {sessionName || "Il Mentore Saggio"}
+            {sessionName || "Nuova conversazione"}
           </h2>
           <p className="text-xs text-muted-foreground">Coach finanziario</p>
         </div>
@@ -708,7 +769,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           <div className="flex items-start gap-2">
             <SensoAvatar />
             <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-muted-foreground">
-              <span className="animate-pulse">Il Mentore sta pensando...</span>
+              <span className="animate-pulse">{t(`coaching.thinking.${effectiveGender}`, { name: personaName })}</span>
             </div>
           </div>
         )}
@@ -726,7 +787,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
                 <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
               </div>
             ) : (
-              <AssistantBubble msg={msg} locale={locale} />
+              <AssistantBubble msg={msg} locale={locale} ttsConfig={ttsConfig} />
             )}
           </div>
         ))}
@@ -735,7 +796,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           <div className="flex items-start gap-2">
             <SensoAvatar />
             <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-muted-foreground">
-              <span className="animate-pulse">Il Mentore sta pensando...</span>
+              <span className="animate-pulse">{t(`coaching.thinking.${effectiveGender}`, { name: personaName })}</span>
             </div>
           </div>
         )}
