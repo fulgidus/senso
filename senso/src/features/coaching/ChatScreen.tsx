@@ -18,11 +18,11 @@ import {
   type ResourceCard,
   type LearnCard,
   type DebugPayload,
-  type LLMCallTrace,
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square } from "lucide-react"
+import { useVoiceInput } from "./useVoiceInput"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -560,8 +560,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
   // ── Send message ───────────────────────────────────────────────────────────
 
-  const handleSend = async () => {
-    const trimmed = inputText.trim()
+  const handleSend = useCallback(async (text?: string) => {
+    const trimmed = (text ?? inputText).trim()
     if (!trimmed || isLoading) return
 
     setError(null)
@@ -615,7 +615,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [inputText, isLoading, sessionId, locale, fetchSessions])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -623,6 +623,22 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       void handleSend()
     }
   }
+
+  // ── Voice input ─────────────────────────────────────────────────────────────
+
+  const { isAvailable: isSttAvailable, isRecording, transcript, error: sttError, startRecording, stopRecording } = useVoiceInput({
+    locale,
+    onFinalTranscript: handleSend,
+  })
+
+  const [sttErrorVisible, setSttErrorVisible] = useState(false)
+  useEffect(() => {
+    if (sttError) {
+      setSttErrorVisible(true)
+      const t = setTimeout(() => setSttErrorVisible(false), 4000)
+      return () => clearTimeout(t)
+    }
+  }, [sttError])
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -717,11 +733,24 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       {/* Input area */}
       <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0">
         <div className="flex gap-2 items-end">
+          {isSttAvailable && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isLoading}
+              aria-label={isRecording ? "Ferma registrazione" : "Inizia registrazione vocale"}
+            >
+              {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+          )}
           <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            value={isRecording ? transcript : inputText}
+            onChange={(e) => { if (!isRecording) setInputText(e.target.value) }}
             onKeyDown={handleKeyDown}
-            disabled={isLoading || loadingHistory}
+            disabled={isLoading || loadingHistory || isRecording}
             placeholder={locale === "en" ? "Ask your coach..." : "Chiedi al coach..."}
             rows={1}
             className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 max-h-32 overflow-y-auto"
@@ -729,13 +758,16 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           />
           <Button
             onClick={() => void handleSend()}
-            disabled={isLoading || loadingHistory || !inputText.trim()}
+            disabled={isLoading || loadingHistory || isRecording || !inputText.trim()}
             size="sm"
             className="shrink-0"
           >
             {isLoading ? "..." : "Invia"}
           </Button>
         </div>
+        {sttErrorVisible && sttError && (
+          <p className="text-xs text-red-500 mt-1 px-1">{sttError}</p>
+        )}
         <p className="text-xs text-muted-foreground mt-1 text-center">
           Invio con Invio · A scopo educativo · Non è consulenza finanziaria
         </p>
