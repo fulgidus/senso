@@ -23,7 +23,7 @@ type AuthState = {
 const initialState: AuthState = {
   initialized: false,
   loading: false,
-  mode: "signup",
+  mode: "login",
   user: null,
   error: null,
   googleFallback: null,

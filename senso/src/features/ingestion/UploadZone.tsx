@@ -2,12 +2,12 @@ import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 
 type Props = {
-  onFile: (file: File) => void
+  onFiles: (files: File[]) => void
   uploading: boolean
   disabled?: boolean
 }
 
-export function UploadZone({ onFile, uploading, disabled }: Props) {
+export function UploadZone({ onFiles, uploading, disabled }: Props) {
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -16,8 +16,8 @@ export function UploadZone({ onFile, uploading, disabled }: Props) {
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) onFile(file)
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) onFiles(files)
   }
 
   return (
@@ -39,14 +39,17 @@ export function UploadZone({ onFile, uploading, disabled }: Props) {
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple
         className="hidden"
         onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) onFile(f)
+          const files = Array.from(e.target.files ?? [])
+          if (files.length > 0) onFiles(files)
+          // Reset so the same file(s) can be re-selected if needed
+          e.target.value = ""
         }}
       />
       <p className="text-sm font-medium text-foreground">
-        {uploading ? "Uploading..." : "Drop a file here or click to select"}
+        {uploading ? "Uploading..." : "Drop files here or click to select"}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
         Supports: CSV, XLSX, PDF, images (max 20 MB)

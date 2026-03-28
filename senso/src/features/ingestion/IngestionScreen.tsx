@@ -61,7 +61,7 @@ export function IngestionScreen({ user, onSignOut, onConfirmAll }: Props) {
       {/* Upload zone */}
       <section className="mb-6 rounded-2xl border border-border bg-card p-6">
         <h2 className="mb-4 text-base font-semibold text-foreground">Upload Document</h2>
-        <UploadZone onFile={(f) => void upload(f)} uploading={uploading} />
+        <UploadZone onFiles={(files) => { files.forEach((f) => void upload(f)) }} uploading={uploading} />
         {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </section>
 
