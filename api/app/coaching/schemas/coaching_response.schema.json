@@ -82,6 +82,10 @@
           "example": { "type": "string" }
         }
       }
+    },
+    "details_a2ui": {
+      "type": ["string", "null"],
+      "description": "A2UI JSONL string with surfaceUpdate/dataModelUpdate/beginRendering messages for rich detail UI rendering. Null or absent if no structured detail is needed."
     }
   }
 }

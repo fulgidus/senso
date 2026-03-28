@@ -45,6 +45,7 @@ _BLOCKED_RESPONSE_TEMPLATE = {
     "action_cards": [],
     "resource_cards": [],
     "learn_cards": [],
+    "details_a2ui": None,
     "_blocked": True,
 }
 
@@ -326,12 +327,22 @@ class CoachingService:
         insight_cards = getattr(profile_dto, "insight_cards", [])
         monthly_expenses = getattr(profile_dto, "monthly_expenses", None)
         monthly_margin = getattr(profile_dto, "monthly_margin", None)
+        # Extract income sources from questionnaire answers if present
+        questionnaire_answers = (
+            getattr(profile_dto, "questionnaire_answers", None) or {}
+        )
+        income_sources = (
+            questionnaire_answers.get("incomeSources")
+            or questionnaire_answers.get("income_sources")
+            or []
+        )
         return tmpl.render(
             income_summary=income_summary,
             monthly_expenses=monthly_expenses,
             monthly_margin=monthly_margin,
             category_totals=category_totals or {},
             insight_cards=insight_cards or [],
+            income_sources=income_sources,
         )
 
     def _render_response_format(self) -> str:

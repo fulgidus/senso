@@ -69,6 +69,7 @@ class CoachingResponseDTO(BaseModel):
     action_cards: list[ActionCard] = Field(default_factory=list)
     resource_cards: list[ResourceCard] = Field(default_factory=list)
     learn_cards: list[LearnCard] = Field(default_factory=list)
+    details_a2ui: Optional[str] = None
     session_id: str  # always returned — new or existing session
     debug: Optional[dict] = None  # only populated when LLM_DEBUG=true
 

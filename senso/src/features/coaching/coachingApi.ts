@@ -63,6 +63,7 @@ export interface CoachingResponse {
   action_cards: ActionCard[]
   resource_cards: ResourceCard[]
   learn_cards: LearnCard[]
+  details_a2ui?: string | null
   debug?: DebugPayload
 }
 
