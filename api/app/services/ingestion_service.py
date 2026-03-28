@@ -141,13 +141,13 @@ class IngestionService:
             raw_result = module_entry.extract_fn(file_path)
             if isinstance(raw_result, ExtractionResult):
                 return raw_result
-            # Module returned a dict — wrap it
+            # Module returned a dict - wrap it
             from app.schemas.ingestion import ExtractedDocument, ExtractionResult as ER
 
             doc = ExtractedDocument(**raw_result)
             return ER(document=doc, confidence=0.85, tier_used="module")
 
-        # No module matched — check if image/PDF → OCR pipeline
+        # No module matched - check if image/PDF → OCR pipeline
         if content_type in IMAGE_MIME_TYPES or content_type == PDF_MIME_TYPE:
             return extract_with_ocr_pipeline(file_path, llm_client)
 

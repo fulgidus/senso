@@ -41,25 +41,25 @@ tech-stack:
 
 key-files:
   created:
-    - api/app/db/repository.py — repository functions for User + RefreshSession CRUD
-    - api/uv.lock — Python dependency lockfile
+    - api/app/db/repository.py - repository functions for User + RefreshSession CRUD
+    - api/uv.lock - Python dependency lockfile
   modified:
-    - api/app/db/models.py — replaced dataclasses with SQLAlchemy ORM models (6 tables)
-    - api/app/db/session.py — replaced InMemoryDB with SessionLocal + get_db + create_tables
-    - api/app/services/auth_service.py — updated to use Session + repository pattern
-    - api/app/api/auth.py — updated get_auth_service to use Depends(get_db)
-    - api/app/core/config.py — added minio_*, gemini_api_key, openai_api_key, database_url fields
-    - api/app/main.py — added lifespan with create_tables() call
-    - api/tests/conftest.py — SQLite test DB with per-test reset fixture
-    - api/pyproject.toml — added hatch build target pointing at app/ directory
-    - docker-compose.yml — added minio + minio-init services + named volumes + MinIO/LLM env vars
-    - api/Dockerfile — added tesseract-ocr + all Phase 2 Python deps
-    - .env.example — added MinIO and LLM provider variables
-    - .gitignore — added api/test.db exclusion
+    - api/app/db/models.py - replaced dataclasses with SQLAlchemy ORM models (6 tables)
+    - api/app/db/session.py - replaced InMemoryDB with SessionLocal + get_db + create_tables
+    - api/app/services/auth_service.py - updated to use Session + repository pattern
+    - api/app/api/auth.py - updated get_auth_service to use Depends(get_db)
+    - api/app/core/config.py - added minio_*, gemini_api_key, openai_api_key, database_url fields
+    - api/app/main.py - added lifespan with create_tables() call
+    - api/tests/conftest.py - SQLite test DB with per-test reset fixture
+    - api/pyproject.toml - added hatch build target pointing at app/ directory
+    - docker-compose.yml - added minio + minio-init services + named volumes + MinIO/LLM env vars
+    - api/Dockerfile - added tesseract-ocr + all Phase 2 Python deps
+    - .env.example - added MinIO and LLM provider variables
+    - .gitignore - added api/test.db exclusion
 
 key-decisions:
   - "SQLite file-based DB for tests (not in-memory) to allow cross-session fixture setup without ENGINE_URL coupling"
-  - "datetime.utcnow() fallback for timezone-naive SQLite datetimes in test env — avoids Postgres-only tz constraint"
+  - "datetime.utcnow() fallback for timezone-naive SQLite datetimes in test env - avoids Postgres-only tz constraint"
   - "Repository functions as thin wrappers over SQLAlchemy queries, not a full repo class pattern"
   - "uv.lock committed for reproducible developer + CI dependency resolution"
 
@@ -79,7 +79,7 @@ completed: 2026-03-24
 
 # Phase 2 Plan 1: DB Migration + MinIO Infrastructure Summary
 
-**SQLAlchemy ORM replacing InMemoryDB with 6-table schema, repository pattern, MinIO in Docker Compose, and extended Settings — all auth tests green**
+**SQLAlchemy ORM replacing InMemoryDB with 6-table schema, repository pattern, MinIO in Docker Compose, and extended Settings - all auth tests green**
 
 ## Performance
 
@@ -102,29 +102,29 @@ completed: 2026-03-24
 
 Each task was committed atomically:
 
-1. **Task 1: Migrate DB layer — SQLAlchemy ORM models + session factory + repository** - `ce8e8d9` (feat)
+1. **Task 1: Migrate DB layer - SQLAlchemy ORM models + session factory + repository** - `ce8e8d9` (feat)
 2. **Task 2: Extend Settings with MinIO + LLM fields; add MinIO to Docker Compose** - `45c8185` (feat)
 3. **Housekeeping: uv.lock + gitignore** - `3b4a9a5` (chore)
 
 ## Files Created/Modified
 
-- `api/app/db/models.py` — SQLAlchemy ORM: User, RefreshSession, Upload, ExtractedDocument, Transaction, ExtractionReport
-- `api/app/db/session.py` — SessionLocal + get_db() + create_tables() (no InMemoryDB)
-- `api/app/db/repository.py` — 6 repository functions for auth CRUD (NEW)
-- `api/app/services/auth_service.py` — Uses Session + repository pattern
-- `api/app/api/auth.py` — get_auth_service() uses Depends(get_db)
-- `api/app/core/config.py` — Extended Settings with MinIO + LLM + database_url fields
-- `api/app/main.py` — lifespan context manager calling create_tables()
-- `api/tests/conftest.py` — SQLite test DB with per-test autouse reset fixture
-- `api/pyproject.toml` — Added hatch build target for wheel packaging
-- `docker-compose.yml` — minio + minio-init services, modules_generated/promoted volumes
-- `api/Dockerfile` — tesseract-ocr apt pkg + all Phase 2 Python deps
-- `.env.example` — MinIO and LLM provider env vars added
+- `api/app/db/models.py` - SQLAlchemy ORM: User, RefreshSession, Upload, ExtractedDocument, Transaction, ExtractionReport
+- `api/app/db/session.py` - SessionLocal + get_db() + create_tables() (no InMemoryDB)
+- `api/app/db/repository.py` - 6 repository functions for auth CRUD (NEW)
+- `api/app/services/auth_service.py` - Uses Session + repository pattern
+- `api/app/api/auth.py` - get_auth_service() uses Depends(get_db)
+- `api/app/core/config.py` - Extended Settings with MinIO + LLM + database_url fields
+- `api/app/main.py` - lifespan context manager calling create_tables()
+- `api/tests/conftest.py` - SQLite test DB with per-test autouse reset fixture
+- `api/pyproject.toml` - Added hatch build target for wheel packaging
+- `docker-compose.yml` - minio + minio-init services, modules_generated/promoted volumes
+- `api/Dockerfile` - tesseract-ocr apt pkg + all Phase 2 Python deps
+- `.env.example` - MinIO and LLM provider env vars added
 
 ## Decisions Made
 
 - **SQLite for tests**: Used `sqlite:///./test.db` (file-based) for test env since SQLAlchemy's in-memory SQLite doesn't persist across `get_db()` generator calls within the same test
-- **Timezone workaround**: SQLite stores datetimes as timezone-naive; added UTC comparison fallback for `expires_at` check in `refresh()` — uses `datetime.utcnow()` when `tzinfo is None`. This only affects test env; Postgres stores timezone-aware datetimes properly
+- **Timezone workaround**: SQLite stores datetimes as timezone-naive; added UTC comparison fallback for `expires_at` check in `refresh()` - uses `datetime.utcnow()` when `tzinfo is None`. This only affects test env; Postgres stores timezone-aware datetimes properly
 - **Repository as functions (not class)**: Plan specified functional style `repository.get_user_by_email(db, ...)` which is simpler and avoids over-engineering for this codebase size
 - **uv.lock committed**: Lock file committed for reproducible builds across developer machines and CI
 
@@ -142,7 +142,7 @@ Each task was committed atomically:
 
 **2. [Rule 3 - Blocking] Fixed pyproject.toml hatch build target**
 - **Found during:** Task 1 setup (`uv run` failed to build the package)
-- **Issue:** `hatchling` couldn't determine which files to ship — `senso_api` directory didn't exist matching the project name
+- **Issue:** `hatchling` couldn't determine which files to ship - `senso_api` directory didn't exist matching the project name
 - **Fix:** Added `[tool.hatch.build.targets.wheel] packages = ["app"]` to pyproject.toml
 - **Files modified:** `api/pyproject.toml`
 - **Verification:** `uv run python3 -c "import sqlalchemy"` succeeds
@@ -155,7 +155,7 @@ Each task was committed atomically:
 
 ## Issues Encountered
 
-None — both deviations were resolved automatically.
+None - both deviations were resolved automatically.
 
 ## User Setup Required
 
@@ -175,12 +175,12 @@ None - no external service configuration required for local development (MinIO a
 
 ## Self-Check: PASSED
 
-- `api/app/db/models.py` — FOUND
-- `api/app/db/session.py` — FOUND
-- `api/app/db/repository.py` — FOUND
-- `api/app/core/config.py` — FOUND
-- `docker-compose.yml` — FOUND
-- `.planning/phases/02-financial-input-ingestion/02-01-SUMMARY.md` — FOUND
-- Commit `ce8e8d9` — FOUND
-- Commit `45c8185` — FOUND
-- All 11 auth tests — PASSED
+- `api/app/db/models.py` - FOUND
+- `api/app/db/session.py` - FOUND
+- `api/app/db/repository.py` - FOUND
+- `api/app/core/config.py` - FOUND
+- `docker-compose.yml` - FOUND
+- `.planning/phases/02-financial-input-ingestion/02-01-SUMMARY.md` - FOUND
+- Commit `ce8e8d9` - FOUND
+- Commit `45c8185` - FOUND
+- All 11 auth tests - PASSED

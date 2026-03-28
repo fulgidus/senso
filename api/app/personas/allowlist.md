@@ -1,4 +1,4 @@
-# Allowlist — Argomenti Liberamente Trattabili
+# Allowlist - Argomenti Liberamente Trattabili
 
 Questo file viene iniettato nel system prompt come istruzione esplicita all'LLM.
 Definisce cosa SENSO può e deve spiegare liberamente, anche quando tocca argomenti che potrebbero sembrare "sensibili" fuori contesto.

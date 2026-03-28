@@ -20,10 +20,10 @@
 # ─── MATCH MODE ──────────────────────────────────────────────────────────────
 #   any                  : scatta su qualsiasi match (default)
 #   exclude_user_profile : scatta SOLO se il match NON corrisponde a un campo
-#                          in session.userProfile — usato per PII di terze parti
+#                          in session.userProfile - usato per PII di terze parti
 #   user_profile_only    : scatta SOLO se il match corrisponde a un campo in
 #                          session.userProfile E non era stato esplicitamente
-#                          richiesto — usato per rilevare leak passivi
+#                          richiesto - usato per rilevare leak passivi
 #
 # I gruppi sono valutati in ordine di gravità decrescente:
 #   hard_ban → temp_ban → block → warn → censor
@@ -58,13 +58,13 @@ groups:
 
   # ─────────────────────────────────────────────
   # CREDENTIAL / SECRET LEAKAGE
-  # Credenziali, token e segreti tecnici nell'output — sempre hard_ban,
+  # Credenziali, token e segreti tecnici nell'output - sempre hard_ban,
   # indipendentemente da chi sono: non devono mai uscire.
   # ─────────────────────────────────────────────
   - name: credential_leakage
     severity: hard_ban
     scope: output
-    description: Credenziali o token tecnici nell'output — bloccato immediatamente
+    description: Credenziali o token tecnici nell'output - bloccato immediatamente
     substituteMessage: "Risposta bloccata per sicurezza. La sessione è stata segnalata."
     patterns:
       # API key / token / bearer
@@ -86,7 +86,7 @@ groups:
     severity: block
     scope: output
     matchMode: exclude_user_profile
-    description: PII di terze parti nell'output — bloccato
+    description: PII di terze parti nell'output - bloccato
     substituteMessage: "Non posso includere dati personali di terze parti nella risposta."
     patterns:
       # IBAN
@@ -113,7 +113,7 @@ groups:
     matchMode: user_profile_only
     requiresContext: unsolicited  # non scatta se il match risponde a una richiesta esplicita
     description: >
-      L'LLM riproduce PII dell'utente senza che fossero stati richiesti —
+      L'LLM riproduce PII dell'utente senza che fossero stati richiesti -
       possibile segnale di injection via documenti uploadati. Solo log + alert, non blocca.
     substituteMessage: null
     # Phase 4: pattern-only mode. Full profile cross-check deferred to Phase 7.

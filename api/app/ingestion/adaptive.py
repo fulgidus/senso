@@ -95,7 +95,7 @@ Extract the financial data AND generate a Python module for this format."""
         tier_used="adaptive",
         warnings=[f"Generated module: {module_name}"]
         if module_name
-        else ["Module generation failed — extraction only"],
+        else ["Module generation failed - extraction only"],
     )
 
 

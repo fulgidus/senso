@@ -9,12 +9,12 @@ tools:
 ---
 <context>
 **Flags:**
-- `--name` (required) — Workspace name
-- `--repos` — Comma-separated repo paths or names. If omitted, interactive selection from child git repos in cwd
-- `--path` — Target directory. Defaults to `~/gsd-workspaces/<name>`
-- `--strategy` — `worktree` (default, lightweight) or `clone` (fully independent)
-- `--branch` — Branch to checkout. Defaults to `workspace/<name>`
-- `--auto` — Skip interactive questions, use defaults
+- `--name` (required) - Workspace name
+- `--repos` - Comma-separated repo paths or names. If omitted, interactive selection from child git repos in cwd
+- `--path` - Target directory. Defaults to `~/gsd-workspaces/<name>`
+- `--strategy` - `worktree` (default, lightweight) or `clone` (fully independent)
+- `--branch` - Branch to checkout. Defaults to `workspace/<name>`
+- `--auto` - Skip interactive questions, use defaults
 </context>
 
 <objective>
@@ -25,9 +25,9 @@ Create a physical workspace directory containing copies of specified git repos (
 - Feature branch isolation: create a worktree of the current repo with its own `.planning/`
 
 **Creates:**
-- `<path>/WORKSPACE.md` — workspace manifest
-- `<path>/.planning/` — independent planning directory
-- `<path>/<repo>/` — git worktree or clone for each specified repo
+- `<path>/WORKSPACE.md` - workspace manifest
+- `<path>/.planning/` - independent planning directory
+- `<path>/<repo>/` - git worktree or clone for each specified repo
 
 **After this command:** `cd` into the workspace and run `/gsd-new-project` to initialize GSD.
 </objective>

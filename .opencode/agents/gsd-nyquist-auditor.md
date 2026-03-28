@@ -32,11 +32,11 @@ For each gap in `<gaps>`:
 2. Identify observable behavior the requirement demands
 3. Classify test type:
 
-| Behavior | Test Type |
-|----------|-----------|
-| Pure function I/O | Unit |
-| API endpoint | Integration |
-| CLI command | Smoke |
+| Behavior                | Test Type   |
+| ----------------------- | ----------- |
+| Pure function I/O       | Unit        |
+| API endpoint            | Integration |
+| CLI command             | Smoke       |
 | DB/filesystem operation | Integration |
 
 4. Map to test file path per project conventions
@@ -50,12 +50,12 @@ Action by gap type:
 <step name="generate_tests">
 Convention discovery: existing tests → framework defaults → fallback.
 
-| Framework | File Pattern | Runner | Assert Style |
-|-----------|-------------|--------|--------------|
-| pytest | `test_{name}.py` | `pytest {file} -v` | `assert result == expected` |
-| jest | `{name}.test.ts` | `npx jest {file}` | `expect(result).toBe(expected)` |
-| vitest | `{name}.test.ts` | `npx vitest run {file}` | `expect(result).toBe(expected)` |
-| go test | `{name}_test.go` | `go test -v -run {Name}` | `if got != want { t.Errorf(...) }` |
+| Framework | File Pattern     | Runner                   | Assert Style                       |
+| --------- | ---------------- | ------------------------ | ---------------------------------- |
+| pytest    | `test_{name}.py` | `pytest {file} -v`       | `assert result == expected`        |
+| jest      | `{name}.test.ts` | `npx jest {file}`        | `expect(result).toBe(expected)`    |
+| vitest    | `{name}.test.ts` | `npx vitest run {file}`  | `expect(result).toBe(expected)`    |
+| go test   | `{name}_test.go` | `go test -v -run {Name}` | `if got != want { t.Errorf(...) }` |
 
 Per gap: Write test file. One focused test per requirement behavior. Arrange/Act/Assert. Behavioral test names (`test_user_can_reset_password`), not structural (`test_reset_function`).
 </step>
@@ -69,12 +69,12 @@ Run every test. Never mark untested tests as passing.
 <step name="debug_loop">
 Max 3 iterations per failing test.
 
-| Failure Type | Action |
-|--------------|--------|
-| Import/syntax/fixture error | Fix test, re-run |
+| Failure Type                                            | Action                        |
+| ------------------------------------------------------- | ----------------------------- |
+| Import/syntax/fixture error                             | Fix test, re-run              |
 | Assertion: actual matches impl but violates requirement | IMPLEMENTATION BUG → ESCALATE |
-| Assertion: test expectation wrong | Fix assertion, re-run |
-| Environment/runtime error | ESCALATE |
+| Assertion: test expectation wrong                       | Fix assertion, re-run         |
+| Environment/runtime error                               | ESCALATE                      |
 
 Track: `{ gap_id, iteration, error_type, action, result }`
 
@@ -97,18 +97,18 @@ Return one of three formats below.
 ```markdown
 ## GAPS FILLED
 
-**Phase:** {N} — {name}
+**Phase:** {N} - {name}
 **Resolved:** {count}/{count}
 
 ### Tests Created
-| # | File | Type | Command |
-|---|------|------|---------|
-| 1 | {path} | {unit/integration/smoke} | `{cmd}` |
+| #   | File   | Type                     | Command |
+| --- | ------ | ------------------------ | ------- |
+| 1   | {path} | {unit/integration/smoke} | `{cmd}` |
 
 ### Verification Map Updates
 | Task ID | Requirement | Command | Status |
-|---------|-------------|---------|--------|
-| {id} | {req} | `{cmd}` | green |
+| ------- | ----------- | ------- | ------ |
+| {id}    | {req}       | `{cmd}` | green  |
 
 ### Files for Commit
 {test file paths}
@@ -119,18 +119,18 @@ Return one of three formats below.
 ```markdown
 ## PARTIAL
 
-**Phase:** {N} — {name}
+**Phase:** {N} - {name}
 **Resolved:** {M}/{total} | **Escalated:** {K}/{total}
 
 ### Resolved
-| Task ID | Requirement | File | Command | Status |
-|---------|-------------|------|---------|--------|
-| {id} | {req} | {file} | `{cmd}` | green |
+| Task ID | Requirement | File   | Command | Status |
+| ------- | ----------- | ------ | ------- | ------ |
+| {id}    | {req}       | {file} | `{cmd}` | green  |
 
 ### Escalated
-| Task ID | Requirement | Reason | Iterations |
-|---------|-------------|--------|------------|
-| {id} | {req} | {reason} | {N}/3 |
+| Task ID | Requirement | Reason   | Iterations |
+| ------- | ----------- | -------- | ---------- |
+| {id}    | {req}       | {reason} | {N}/3      |
 
 ### Files for Commit
 {test file paths for resolved gaps}
@@ -141,13 +141,13 @@ Return one of three formats below.
 ```markdown
 ## ESCALATE
 
-**Phase:** {N} — {name}
+**Phase:** {N} - {name}
 **Resolved:** 0/{total}
 
 ### Details
-| Task ID | Requirement | Reason | Iterations |
-|---------|-------------|--------|------------|
-| {id} | {req} | {reason} | {N}/3 |
+| Task ID | Requirement | Reason   | Iterations |
+| ------- | ----------- | -------- | ---------- |
+| {id}    | {req}       | {reason} | {N}/3      |
 
 ### Recommendations
 - **{req}:** {manual test instructions or implementation fix needed}
@@ -160,7 +160,7 @@ Return one of three formats below.
 - [ ] Each gap analyzed with correct test type
 - [ ] Tests follow project conventions
 - [ ] Tests verify behavior, not structure
-- [ ] Every test executed — none marked passing without running
+- [ ] Every test executed - none marked passing without running
 - [ ] Implementation files never modified
 - [ ] Max 3 debug iterations per gap
 - [ ] Implementation bugs escalated, not fixed

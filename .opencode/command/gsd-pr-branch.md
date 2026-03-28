@@ -1,5 +1,5 @@
 ---
-description: Create a clean PR branch by filtering out .planning/ commits — ready for code review
+description: Create a clean PR branch by filtering out .planning/ commits - ready for code review
 argument-hint: "[target branch, default: main]"
 tools:
   bash: true

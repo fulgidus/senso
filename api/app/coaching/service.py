@@ -84,7 +84,7 @@ class CoachingService:
         self._a2ui_reference = self._jinja_env.get_template(
             "a2ui_reference.j2"
         ).render()
-        # Welcome cache is module-level (_welcome_cache) — survives across request instances.
+        # Welcome cache is module-level (_welcome_cache) - survives across request instances.
 
     def generate_conversation_name(self, first_user_message: str) -> str:
         """
@@ -116,7 +116,7 @@ class CoachingService:
     ) -> str:
         """
         Generate a short, warm, personalised welcome message for the chat screen.
-        Uses the LLM directly — no profile required (graceful fallback if unavailable).
+        Uses the LLM directly - no profile required (graceful fallback if unavailable).
 
         Results are cached in-memory keyed on (user_id, first_name, locale) so repeated
         mounts / new-conversation calls don't fire a fresh LLM call.
@@ -139,7 +139,7 @@ class CoachingService:
                 f"Write a short (2-3 sentences), encouraging welcome message for a user named{name_part or ' a user'} "
                 f"who has just opened the chat. "
                 f"Do not ask questions. Be warm, concise, and motivating. "
-                f"Do not include any JSON — plain text only."
+                f"Do not include any JSON - plain text only."
             )
         else:
             prompt = (
@@ -147,7 +147,7 @@ class CoachingService:
                 f"Scrivi un breve messaggio di benvenuto (2-3 frasi) per{name_part or ' un utente'} "
                 f"che ha appena aperto la chat. "
                 f"Non fare domande. Sii caloroso, conciso e incoraggiante. "
-                f"Solo testo — nessun JSON."
+                f"Solo testo - nessun JSON."
             )
 
         soul_text = self._load_soul(_DEFAULT_PERSONA_ID)
@@ -185,8 +185,8 @@ class CoachingService:
             user_id: The user's ID (used to fetch their financial profile).
             messages: Conversation history as list of {role, content} dicts.
                       The last message should be the new user message.
-            locale: Response language — 'it' (default) or 'en'.
-            persona_id: Persona to use — Phase 4 only accepts 'mentore-saggio'.
+            locale: Response language - 'it' (default) or 'en'.
+            persona_id: Persona to use - Phase 4 only accepts 'mentore-saggio'.
             debug: When True, attach debug payload to returned dict.
 
         Returns:

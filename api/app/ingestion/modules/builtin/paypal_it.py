@@ -1,5 +1,5 @@
 """
-PaypalIT — PayPal Italy transaction history extractor.
+PaypalIT - PayPal Italy transaction history extractor.
 Supported formats: CSV (primary), PDF (best-effort via OCR)
 Export path: PayPal → Attività → Scarica attività → CSV
 Sample FINGERPRINT keywords (from actual Italian CSV): "fuso orario", "codice transazione", "lordo", "netto", "descrizione"
@@ -58,7 +58,7 @@ def _parse_csv(path: Path):
     with open(str(path), newline="", encoding="utf-8-sig", errors="ignore") as f:
         content = f.read()
 
-    # PayPal CSV may use semicolons in some locales — detect delimiter
+    # PayPal CSV may use semicolons in some locales - detect delimiter
     first_line = content.split("\n")[0] if content else ""
     delimiter = ";" if ";" in first_line and "," not in first_line else ","
 
@@ -207,7 +207,7 @@ def extract(file_path: str | Path):  # noqa: ANN201
     if path.suffix.lower() in (".csv", ".txt"):
         return _parse_csv(path)
 
-    # PDF: best-effort skeleton — OCR pipeline handles this better
+    # PDF: best-effort skeleton - OCR pipeline handles this better
     return ExtractionResult(
         document=ExtractedDocument(
             document_type="bank_statement",
@@ -218,6 +218,6 @@ def extract(file_path: str | Path):  # noqa: ANN201
         confidence=0.3,
         tier_used="module",
         warnings=[
-            "PaypalIT: PDF extraction requires OCR pipeline — use CSV export for full accuracy"
+            "PaypalIT: PDF extraction requires OCR pipeline - use CSV export for full accuracy"
         ],
     )

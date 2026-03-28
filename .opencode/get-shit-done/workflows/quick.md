@@ -81,7 +81,7 @@ If `$DISCUSS_MODE` only:
  GSD ► QUICK TASK (DISCUSS)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Discussion phase enabled — surfacing gray areas before planning
+◆ Discussion phase enabled - surfacing gray areas before planning
 ```
 
 If `$RESEARCH_MODE` only:
@@ -90,7 +90,7 @@ If `$RESEARCH_MODE` only:
  GSD ► QUICK TASK (RESEARCH)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Research phase enabled — investigating approaches before planning
+◆ Research phase enabled - investigating approaches before planning
 ```
 
 If `$FULL_MODE` only:
@@ -113,7 +113,7 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 
 Parse JSON for: `planner_model`, `executor_model`, `checker_model`, `verifier_model`, `commit_docs`, `branch_name`, `quick_id`, `slug`, `date`, `timestamp`, `quick_dir`, `task_dir`, `roadmap_exists`, `planning_exists`.
 
-**If `roadmap_exists` is false:** Error — Quick mode requires an active project with ROADMAP.md. Run `/gsd-new-project` first.
+**If `roadmap_exists` is false:** Error - Quick mode requires an active project with ROADMAP.md. Run `/gsd-new-project` first.
 
 Quick tasks can run mid-phase - validation only checks ROADMAP.md exists, not phase status.
 
@@ -175,7 +175,7 @@ Display banner:
 
 **4.5a. Identify gray areas**
 
-Analyze `$DESCRIPTION` to identify 2-4 gray areas — implementation decisions that would change the outcome and that the user should weigh in on.
+Analyze `$DESCRIPTION` to identify 2-4 gray areas - implementation decisions that would change the outcome and that the user should weigh in on.
 
 Use the domain-aware heuristic to generate phase-specific (not generic) gray areas:
 - Something users **SEE** → layout, density, interactions, states
@@ -196,7 +196,7 @@ question(
     { label: "${area_1}", description: "${why_it_matters_1}" },
     { label: "${area_2}", description: "${why_it_matters_2}" },
     { label: "${area_3}", description: "${why_it_matters_3}" },
-    { label: "All clear", description: "Skip discussion — I know what I want" }
+    { label: "All clear", description: "Skip discussion - I know what I want" }
   ],
   multiSelect: true
 )
@@ -227,7 +227,7 @@ Rules:
 - Highlight recommended choice where you have a clear opinion
 - If user selects "Other" with freeform text, switch to plain text follow-up (per questioning.md freeform rule)
 - If user selects "You decide", capture as the agent's Discretion in CONTEXT.md
-- Max 2 questions per area — this is lightweight, not a deep dive
+- Max 2 questions per area - this is lightweight, not a deep dive
 
 Collect all decisions into `$DECISIONS`.
 
@@ -267,7 +267,7 @@ ${areas_where_user_said_you_decide_or_areas_not_discussed}
 
 ${any_specific_references_or_examples_from_discussion}
 
-[If none: "No specific requirements — open to standard approaches"]
+[If none: "No specific requirements - open to standard approaches"]
 
 </specifics>
 
@@ -276,12 +276,12 @@ ${any_specific_references_or_examples_from_discussion}
 
 ${any_specs_adrs_or_docs_referenced_during_discussion}
 
-[If none: "No external specs — requirements fully captured in decisions above"]
+[If none: "No external specs - requirements fully captured in decisions above"]
 
 </canonical_refs>
 ```
 
-Note: Quick task CONTEXT.md omits `<code_context>` and `<deferred>` sections (no codebase scouting, no phase scope to defer to). Keep it lean. The `<canonical_refs>` section is included when external docs were referenced — omit it only if no external docs apply.
+Note: Quick task CONTEXT.md omits `<code_context>` and `<deferred>` sections (no codebase scouting, no phase scope to defer to). Keep it lean. The `<canonical_refs>` section is included when external docs were referenced - omit it only if no external docs apply.
 
 Report: `Context captured: ${QUICK_DIR}/${quick_id}-CONTEXT.md`
 
@@ -300,7 +300,7 @@ Display banner:
 ◆ Investigating approaches for: ${DESCRIPTION}
 ```
 
-Spawn a single focused researcher (not 4 parallel researchers like full phases — quick tasks need targeted research, not broad domain surveys):
+Spawn a single focused researcher (not 4 parallel researchers like full phases - quick tasks need targeted research, not broad domain surveys):
 
 ```
 Task(
@@ -312,10 +312,10 @@ Task(
 **Output:** ${QUICK_DIR}/${quick_id}-RESEARCH.md
 
 <files_to_read>
-- .planning/STATE.md (Project state — what's already built)
+- .planning/STATE.md (Project state - what's already built)
 - .planning/PROJECT.md (Project context)
-- ./AGENTS.md (if exists — project-specific guidelines)
-${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions — research should align with these)' : ''}
+- ./AGENTS.md (if exists - project-specific guidelines)
+${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions - research should align with these)' : ''}
 </files_to_read>
 
 </research_context>
@@ -332,7 +332,7 @@ Do NOT produce a full domain survey. Target 1-2 pages of actionable findings.
 
 <output>
 Write research to: ${QUICK_DIR}/${quick_id}-RESEARCH.md
-Use standard research format but keep it lean — skip sections that don't apply.
+Use standard research format but keep it lean - skip sections that don't apply.
 Return: ## RESEARCH COMPLETE with file path
 </output>
 ",
@@ -346,7 +346,7 @@ After researcher returns:
 1. Verify research exists at `${QUICK_DIR}/${quick_id}-RESEARCH.md`
 2. Report: "Research complete: ${QUICK_DIR}/${quick_id}-RESEARCH.md"
 
-If research file not found, warn but continue: "Research agent did not produce output — proceeding to planning without research."
+If research file not found, warn but continue: "Research agent did not produce output - proceeding to planning without research."
 
 ---
 
@@ -367,19 +367,19 @@ Task(
 
 <files_to_read>
 - .planning/STATE.md (Project State)
-- ./AGENTS.md (if exists — follow project-specific guidelines)
-${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions — locked, do not revisit)' : ''}
-${RESEARCH_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-RESEARCH.md (Research findings — use to inform implementation choices)' : ''}
+- ./AGENTS.md (if exists - follow project-specific guidelines)
+${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions - locked, do not revisit)' : ''}
+${RESEARCH_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-RESEARCH.md (Research findings - use to inform implementation choices)' : ''}
 </files_to_read>
 
-**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) — read SKILL.md files, plans should account for project skill rules
+**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) - read SKILL.md files, plans should account for project skill rules
 
 </planning_context>
 
 <constraints>
 - Create a SINGLE plan with 1-3 focused tasks
 - Quick tasks should be atomic and self-contained
-${RESEARCH_MODE ? '- Research findings are available — use them to inform library/pattern choices' : '- No research phase'}
+${RESEARCH_MODE ? '- Research findings are available - use them to inform library/pattern choices' : '- No research phase'}
 ${FULL_MODE ? '- Target ~40% context usage (structured for verification)' : '- Target ~30% context usage (simple, focused)'}
 ${FULL_MODE ? '- MUST generate `must_haves` in plan frontmatter (truths, artifacts, key_links)' : ''}
 ${FULL_MODE ? '- Each task MUST have `files`, `action`, `verify`, `done` fields' : ''}
@@ -444,8 +444,8 @@ ${DISCUSS_MODE ? '- Context compliance: Does the plan honor locked decisions fro
 </check_dimensions>
 
 <expected_output>
-- ## VERIFICATION PASSED — all checks pass
-- ## ISSUES FOUND — structured issue list
+- ## VERIFICATION PASSED - all checks pass
+- ## ISSUES FOUND - structured issue list
 </expected_output>
 ```
 
@@ -524,7 +524,7 @@ Execute quick task ${quick_id}.
 - ${QUICK_DIR}/${quick_id}-PLAN.md (Plan)
 - .planning/STATE.md (Project state)
 - ./AGENTS.md (Project instructions, if exists)
-- .claude/skills/ or .agents/skills/ (Project skills, if either exists — list skills, read SKILL.md for each, follow relevant rules during implementation)
+- .claude/skills/ or .agents/skills/ (Project skills, if either exists - list skills, read SKILL.md for each, follow relevant rules during implementation)
 </files_to_read>
 
 <constraints>
@@ -546,7 +546,7 @@ After executor returns:
 2. Extract commit hash from executor output
 3. Report completion status
 
-**Known Claude Code bug (classifyHandoffIfNeeded):** If executor reports "failed" with error `classifyHandoffIfNeeded is not defined`, this is a Claude Code runtime bug — not a real failure. Check if summary file exists and git log shows commits. If so, treat as successful.
+**Known Claude Code bug (classifyHandoffIfNeeded):** If executor reports "failed" with error `classifyHandoffIfNeeded is not defined`, this is a Claude Code runtime bug - not a real failure. Check if summary file exists and git log shows commits. If so, treat as successful.
 
 If summary not found, error: "Executor failed to create ${quick_id}-SUMMARY.md"
 
@@ -591,11 +591,11 @@ grep "^status:" "${QUICK_DIR}/${quick_id}-VERIFICATION.md" | cut -d: -f2 | tr -d
 
 Store as `$VERIFICATION_STATUS`.
 
-| Status | Action |
-|--------|--------|
-| `passed` | Store `$VERIFICATION_STATUS = "Verified"`, continue to step 7 |
-| `human_needed` | Display items needing manual check, store `$VERIFICATION_STATUS = "Needs Review"`, continue |
-| `gaps_found` | Display gap summary, offer: 1) Re-run executor to fix gaps, 2) Accept as-is. Store `$VERIFICATION_STATUS = "Gaps"` |
+| Status         | Action                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `passed`       | Store `$VERIFICATION_STATUS = "Verified"`, continue to step 7                                                      |
+| `human_needed` | Display items needing manual check, store `$VERIFICATION_STATUS = "Needs Review"`, continue                        |
+| `gaps_found`   | Display gap summary, offer: 1) Re-run executor to fix gaps, 2) Accept as-is. Store `$VERIFICATION_STATUS = "Gaps"` |
 
 ---
 
@@ -615,16 +615,16 @@ Insert after `### Blockers/Concerns` section:
 ```markdown
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Status | Directory |
-|---|-------------|------|--------|--------|-----------|
+| #   | Description | Date | Commit | Status | Directory |
+| --- | ----------- | ---- | ------ | ------ | --------- |
 ```
 
 **If NOT `$FULL_MODE`:**
 ```markdown
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+| #   | Description | Date | Commit | Directory |
+| --- | ----------- | ---- | ------ | --------- |
 ```
 
 **Note:** If the table already exists, match its existing column format. If adding `--full` to a project that already has quick tasks without a Status column, add the Status column to the header and separator rows, and leave Status empty for the new row's predecessors.

@@ -26,7 +26,7 @@ Teams assume Web Speech recognition is baseline-stable. It is not broadly baseli
 - Recognition only stable on one developer machine.
 
 **Phase to address:**
-**Phase 0 – Demo Reliability Contract** (first phase, before feature expansion).
+**Phase 0 - Demo Reliability Contract** (first phase, before feature expansion).
 
 ---
 
@@ -50,7 +50,7 @@ Teams test on localhost and forget production-like conditions. `getUserMedia` be
 - No telemetry on permission failure causes.
 
 **Phase to address:**
-**Phase 0 – Demo Reliability Contract**.
+**Phase 0 - Demo Reliability Contract**.
 
 ---
 
@@ -78,7 +78,7 @@ Teams optimize one component (e.g., TTS model speed) but ignore end-to-end time-
 - P95 response latency unknown.
 
 **Phase to address:**
-**Phase 1 – End-to-End Performance Budgeting**.
+**Phase 1 - End-to-End Performance Budgeting**.
 
 ---
 
@@ -106,7 +106,7 @@ No strict answer contract requiring cited user facts (income, recurring costs, m
 - No automated test that checks numeric grounding.
 
 **Phase to address:**
-**Phase 2 – Grounding & Reasoning Integrity**.
+**Phase 2 - Grounding & Reasoning Integrity**.
 
 ---
 
@@ -130,7 +130,7 @@ Persona style is prioritized over policy hierarchy. Soft boundaries exist but ar
 - Prompt-injection tests can override boundaries.
 
 **Phase to address:**
-**Phase 2 – Safety & Policy Guardrails**.
+**Phase 2 - Safety & Policy Guardrails**.
 
 ---
 
@@ -154,7 +154,7 @@ Untrusted content from documents is mixed into prompts without delimiting, trust
 - System prompt leakage attempts succeed.
 
 **Phase to address:**
-**Phase 2 – Safety & Policy Guardrails**.
+**Phase 2 - Safety & Policy Guardrails**.
 
 ---
 
@@ -168,7 +168,7 @@ Defaults are left unchanged (e.g., long retention windows), no data minimization
 
 **How to avoid:**
 - Define explicit retention by artifact type for MVP:
-  - Raw uploads: short TTL (e.g., 24–72h)
+  - Raw uploads: short TTL (e.g., 24-72h)
   - Derived profile: retain only required fields
   - Voice transcripts/audio: opt-in and short TTL
 - Add in-product disclosure: what is stored, for how long, and why.
@@ -180,7 +180,7 @@ Defaults are left unchanged (e.g., long retention windows), no data minimization
 - Raw sensitive files remain after session end.
 
 **Phase to address:**
-**Phase 3 – Privacy, Retention, and Trust Narrative**.
+**Phase 3 - Privacy, Retention, and Trust Narrative**.
 
 ---
 
@@ -203,7 +203,7 @@ No ranking policy balancing user benefit vs partner conversion. Educational inte
 - User trust feedback drops after seeing actions.
 
 **Phase to address:**
-**Phase 3 – Recommendation Ethics & Ranking Rules**.
+**Phase 3 - Recommendation Ethics & Ranking Rules**.
 
 ---
 
@@ -226,7 +226,7 @@ LLM extraction output is accepted without validation or confidence thresholds.
 - No extraction confidence surfaced.
 
 **Phase to address:**
-**Phase 1 – Data Ingestion Reliability**.
+**Phase 1 - Data Ingestion Reliability**.
 
 ---
 
@@ -251,79 +251,79 @@ Hackathon teams over-index on “happy-path live” and skip fallback choreograp
 - Team has never timed a full dry run.
 
 **Phase to address:**
-**Phase 4 – Demo Ops & Failure Recovery**.
+**Phase 4 - Demo Ops & Failure Recovery**.
 
 ## Technical Debt Patterns
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding prompts in UI layer | Faster iteration in hackathon | Untraceable policy drift, unsafe edits | Acceptable only for prototype day; move to versioned prompt files in next phase |
-| Storing raw financial docs indefinitely | Easier debugging | Privacy/compliance risk | Never acceptable beyond controlled local test |
-| Single monolithic “do everything” prompt | Quick implementation | Unstable outputs, hard debugging | Acceptable for first spike only; split by tasks immediately |
-| No typed response schema | Faster coding | Silent contract breaks in frontend | Never acceptable for demo-critical path |
+| Shortcut                                 | Immediate Benefit             | Long-term Cost                         | When Acceptable                                                                 |
+| ---------------------------------------- | ----------------------------- | -------------------------------------- | ------------------------------------------------------------------------------- |
+| Hardcoding prompts in UI layer           | Faster iteration in hackathon | Untraceable policy drift, unsafe edits | Acceptable only for prototype day; move to versioned prompt files in next phase |
+| Storing raw financial docs indefinitely  | Easier debugging              | Privacy/compliance risk                | Never acceptable beyond controlled local test                                   |
+| Single monolithic “do everything” prompt | Quick implementation          | Unstable outputs, hard debugging       | Acceptable for first spike only; split by tasks immediately                     |
+| No typed response schema                 | Faster coding                 | Silent contract breaks in frontend     | Never acceptable for demo-critical path                                         |
 
 ## Integration Gotchas
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Browser STT (Web Speech) | Assuming cross-browser support and offline behavior | Lock demo browser + fallback to typed input/API STT |
-| `getUserMedia` | Testing only on localhost without HTTPS/permission states | Validate secure context + explicit denied/blocked UX |
-| ElevenLabs TTS | Optimizing model only, ignoring TTFA and buffering | Measure end-to-end TTFA and stream audio early |
-| LLM + RAG | Injecting raw OCR chunks directly into instruction context | Separate trusted/untrusted context and sanitize outputs |
+| Integration              | Common Mistake                                             | Correct Approach                                        |
+| ------------------------ | ---------------------------------------------------------- | ------------------------------------------------------- |
+| Browser STT (Web Speech) | Assuming cross-browser support and offline behavior        | Lock demo browser + fallback to typed input/API STT     |
+| `getUserMedia`           | Testing only on localhost without HTTPS/permission states  | Validate secure context + explicit denied/blocked UX    |
+| ElevenLabs TTS           | Optimizing model only, ignoring TTFA and buffering         | Measure end-to-end TTFA and stream audio early          |
+| LLM + RAG                | Injecting raw OCR chunks directly into instruction context | Separate trusted/untrusted context and sanitize outputs |
 
 ## Performance Traps
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Recomputing full profile every turn | Slow answers after each question | Precompute snapshot and incremental updates | Breaks demo flow immediately (>2 turns) |
-| Sequential STT→LLM→retrieval→TTS without overlap | Long pauses before speech | Pipeline parallelism + streaming | Noticeable even at <100 users |
-| Large unfiltered retrieval context | High token cost and drift | Retrieval top-k + strict context budget | Breaks quality/cost at moderate usage |
+| Trap                                             | Symptoms                         | Prevention                                  | When It Breaks                          |
+| ------------------------------------------------ | -------------------------------- | ------------------------------------------- | --------------------------------------- |
+| Recomputing full profile every turn              | Slow answers after each question | Precompute snapshot and incremental updates | Breaks demo flow immediately (>2 turns) |
+| Sequential STT→LLM→retrieval→TTS without overlap | Long pauses before speech        | Pipeline parallelism + streaming            | Noticeable even at <100 users           |
+| Large unfiltered retrieval context               | High token cost and drift        | Retrieval top-k + strict context budget     | Breaks quality/cost at moderate usage   |
 
 ## Security Mistakes
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Trusting document text as instructions | Prompt injection, policy bypass | Treat uploaded text as untrusted; delimit and filter |
-| Logging full raw financial payloads | Sensitive data exposure in logs | Structured redaction + minimal logs |
-| Missing output validation before UI/action cards | Unsafe or manipulative guidance shown to user | Output schema + policy validation layer |
+| Mistake                                          | Risk                                          | Prevention                                           |
+| ------------------------------------------------ | --------------------------------------------- | ---------------------------------------------------- |
+| Trusting document text as instructions           | Prompt injection, policy bypass               | Treat uploaded text as untrusted; delimit and filter |
+| Logging full raw financial payloads              | Sensitive data exposure in logs               | Structured redaction + minimal logs                  |
+| Missing output validation before UI/action cards | Unsafe or manipulative guidance shown to user | Output schema + policy validation layer              |
 
 ## UX Pitfalls
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| “Can I buy this?” answered with yes/no only | Feels judgmental and shallow | Always include reason + tradeoff + alternative action |
-| No transparency on which numbers were used | Low trust (“this is generic AI”) | Show cited personal factors in every answer |
-| Harsh persona without empathy guardrails | Shame response, user disengagement | Keep assertive tone but non-judgmental wording policy |
+| Pitfall                                     | User Impact                        | Better Approach                                       |
+| ------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
+| “Can I buy this?” answered with yes/no only | Feels judgmental and shallow       | Always include reason + tradeoff + alternative action |
+| No transparency on which numbers were used  | Low trust (“this is generic AI”)   | Show cited personal factors in every answer           |
+| Harsh persona without empathy guardrails    | Shame response, user disengagement | Keep assertive tone but non-judgmental wording policy |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Voice input:** Works only on one machine/browser — verify on the exact demo hardware.
-- [ ] **Grounded reasoning:** Mentions “your data” but cites no numbers — verify numeric citation in output.
-- [ ] **Privacy:** Privacy claim exists but no retention/deletion behavior — verify TTL + delete flow.
-- [ ] **Safety:** Persona boundaries written but not enforced — verify rule-based output checks.
-- [ ] **Demo readiness:** Happy-path works once — verify 3 consecutive timed dry runs + fallback plan.
+- [ ] **Voice input:** Works only on one machine/browser - verify on the exact demo hardware.
+- [ ] **Grounded reasoning:** Mentions “your data” but cites no numbers - verify numeric citation in output.
+- [ ] **Privacy:** Privacy claim exists but no retention/deletion behavior - verify TTL + delete flow.
+- [ ] **Safety:** Persona boundaries written but not enforced - verify rule-based output checks.
+- [ ] **Demo readiness:** Happy-path works once - verify 3 consecutive timed dry runs + fallback plan.
 
 ## Recovery Strategies
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Voice stack failure live | MEDIUM | Switch to typed mode, keep TTS output, continue scenario |
-| Ungrounded response detected | LOW | Regenerate with strict schema and required numeric fields |
-| Unsafe response emitted | MEDIUM | Block render, show safe fallback message, log violation |
-| Bad parsed profile | HIGH | Re-run extraction with confirmation UI; use known-good demo dataset if needed |
+| Pitfall                      | Recovery Cost | Recovery Steps                                                                |
+| ---------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| Voice stack failure live     | MEDIUM        | Switch to typed mode, keep TTS output, continue scenario                      |
+| Ungrounded response detected | LOW           | Regenerate with strict schema and required numeric fields                     |
+| Unsafe response emitted      | MEDIUM        | Block render, show safe fallback message, log violation                       |
+| Bad parsed profile           | HIGH          | Re-run extraction with confirmation UI; use known-good demo dataset if needed |
 
 ## Pitfall-to-Phase Mapping
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Non-portable STT + mic permission issues | Phase 0 – Demo Reliability Contract | Browser/device matrix pass + mic permission test pass |
-| Latency budget blow-up | Phase 1 – End-to-End Performance Budgeting | P95 response-start <6s in dry run |
-| OCR/CSV extraction corruption | Phase 1 – Data Ingestion Reliability | Validation checks + user confirm step before advice |
-| Ungrounded generic advice | Phase 2 – Grounding & Reasoning Integrity | 100% answers include profile numbers + assumptions |
-| Persona safety drift/prompt injection | Phase 2 – Safety & Policy Guardrails | Red-team prompts fail to bypass policies |
-| Privacy/retention ambiguity | Phase 3 – Privacy, Retention, and Trust Narrative | Documented TTL + delete action works in demo |
-| Manipulative action cards | Phase 3 – Recommendation Ethics & Ranking Rules | Card rationale visible + relevance checks pass |
-| Live demo outage risk | Phase 4 – Demo Ops & Failure Recovery | Rehearsed fallback (<10s switch) in full runbook |
+| Pitfall                                  | Prevention Phase                                  | Verification                                          |
+| ---------------------------------------- | ------------------------------------------------- | ----------------------------------------------------- |
+| Non-portable STT + mic permission issues | Phase 0 - Demo Reliability Contract               | Browser/device matrix pass + mic permission test pass |
+| Latency budget blow-up                   | Phase 1 - End-to-End Performance Budgeting        | P95 response-start <6s in dry run                     |
+| OCR/CSV extraction corruption            | Phase 1 - Data Ingestion Reliability              | Validation checks + user confirm step before advice   |
+| Ungrounded generic advice                | Phase 2 - Grounding & Reasoning Integrity         | 100% answers include profile numbers + assumptions    |
+| Persona safety drift/prompt injection    | Phase 2 - Safety & Policy Guardrails              | Red-team prompts fail to bypass policies              |
+| Privacy/retention ambiguity              | Phase 3 - Privacy, Retention, and Trust Narrative | Documented TTL + delete action works in demo          |
+| Manipulative action cards                | Phase 3 - Recommendation Ethics & Ranking Rules   | Card rationale visible + relevance checks pass        |
+| Live demo outage risk                    | Phase 4 - Demo Ops & Failure Recovery             | Rehearsed fallback (<10s switch) in full runbook      |
 
 ## Sources
 

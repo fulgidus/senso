@@ -4,20 +4,20 @@ Model profiles control which the agent model each GSD agent uses. This allows ba
 
 ## Profile Definitions
 
-| Agent | `quality` | `balanced` | `budget` | `inherit` |
-|-------|-----------|------------|----------|-----------|
-| gsd-planner | opus | opus | sonnet | inherit |
-| gsd-roadmapper | opus | sonnet | sonnet | inherit |
-| gsd-executor | opus | sonnet | sonnet | inherit |
-| gsd-phase-researcher | opus | sonnet | haiku | inherit |
-| gsd-project-researcher | opus | sonnet | haiku | inherit |
-| gsd-research-synthesizer | sonnet | sonnet | haiku | inherit |
-| gsd-debugger | opus | sonnet | sonnet | inherit |
-| gsd-codebase-mapper | sonnet | haiku | haiku | inherit |
-| gsd-verifier | sonnet | sonnet | haiku | inherit |
-| gsd-plan-checker | sonnet | sonnet | haiku | inherit |
-| gsd-integration-checker | sonnet | sonnet | haiku | inherit |
-| gsd-nyquist-auditor | sonnet | sonnet | haiku | inherit |
+| Agent                    | `quality` | `balanced` | `budget` | `inherit` |
+| ------------------------ | --------- | ---------- | -------- | --------- |
+| gsd-planner              | opus      | opus       | sonnet   | inherit   |
+| gsd-roadmapper           | opus      | sonnet     | sonnet   | inherit   |
+| gsd-executor             | opus      | sonnet     | sonnet   | inherit   |
+| gsd-phase-researcher     | opus      | sonnet     | haiku    | inherit   |
+| gsd-project-researcher   | opus      | sonnet     | haiku    | inherit   |
+| gsd-research-synthesizer | sonnet    | sonnet     | haiku    | inherit   |
+| gsd-debugger             | opus      | sonnet     | sonnet   | inherit   |
+| gsd-codebase-mapper      | sonnet    | haiku      | haiku    | inherit   |
+| gsd-verifier             | sonnet    | sonnet     | haiku    | inherit   |
+| gsd-plan-checker         | sonnet    | sonnet     | haiku    | inherit   |
+| gsd-integration-checker  | sonnet    | sonnet     | haiku    | inherit   |
+| gsd-nyquist-auditor      | sonnet    | sonnet     | haiku    | inherit   |
 
 ## Profile Philosophy
 
@@ -40,7 +40,7 @@ Model profiles control which the agent model each GSD agent uses. This allows ba
 **inherit** - Follow the current session model
 - All agents resolve to `inherit`
 - Best when you switch models interactively (for example OpenCode `/model`)
-- **Required when using non-Anthropic providers** (OpenRouter, local models, etc.) — otherwise GSD may call Anthropic models directly, incurring unexpected costs
+- **Required when using non-Anthropic providers** (OpenRouter, local models, etc.) - otherwise GSD may call Anthropic models directly, incurring unexpected costs
 - Use when: you want GSD to follow your currently selected runtime model
 
 ## Using Non-the agent Runtimes (Codex, OpenCode, Gemini CLI)

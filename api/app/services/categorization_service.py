@@ -63,7 +63,7 @@ VALID_CATEGORIES = {
 # Rule engine
 # ────────────────────────────────────────────────────────────────────
 CATEGORY_RULES: list[tuple[str, str, list[str]]] = [
-    # --- Extraordinary income (C) — check before generic income rules ---
+    # --- Extraordinary income (C) - check before generic income rules ---
     (
         r"eredit|eredi|successione|inheritance|donazione ricevuta|gift received|"
         r"regalo ricevuto|lotteria|gratta e vinci|jackpot|vincita|gambling|casin[oò]|"
@@ -307,7 +307,7 @@ class CategorizationService:
                 if date_delta > _TRANSFER_DATE_WINDOW_DAYS:
                     continue
 
-                # Match found — mark both
+                # Match found - mark both
                 for txn in (credit, debit):
                     txn.category = "internal_transfer"
                     txn.type = "transfer"
@@ -412,7 +412,7 @@ class CategorizationService:
             and t.type != "transfer"
         ]
 
-        # Group by (upload_id, description_prefix) — first 30 chars normalised
+        # Group by (upload_id, description_prefix) - first 30 chars normalised
         groups: dict[tuple[str, str], list[Transaction]] = defaultdict(list)
         for t in candidates:
             prefix = re.sub(r"\s+", " ", (t.description or "").lower().strip())[:30]
@@ -492,7 +492,7 @@ class CategorizationService:
             for cat, total in category_totals_raw.items()
         }
 
-        # Extraordinary income total (raw over period, reported separately — not monthly)
+        # Extraordinary income total (raw over period, reported separately - not monthly)
         extraordinary_raw = sum(
             float(t.amount)
             for t in accounting_txns
@@ -540,7 +540,7 @@ class CategorizationService:
             insight_cards=insight_cards,
             data_sources=list(set(data_sources)),
             profile_generated_at=datetime.now(UTC),
-            # Extra fields stored in JSON — frontend ignores unknown keys
+            # Extra fields stored in JSON - frontend ignores unknown keys
             extraordinary_income_total=round(extraordinary_raw, 2),
             months_covered=round(months, 2),
         )
@@ -588,7 +588,7 @@ class CategorizationService:
                     "source": "questionnaire",
                 }
 
-        # Priority 3: infer from transactions — B: only category='income' (not None, not uncategorized)
+        # Priority 3: infer from transactions - B: only category='income' (not None, not uncategorized)
         income_txns = [
             t
             for t in transactions
@@ -666,7 +666,7 @@ class CategorizationService:
             "Based on the spending data below, generate 1-3 insight cards. "
             "Focus on NON-OBVIOUS patterns (subscription creep, income-to-fixed-cost ratios, "
             "irregular large spends, extraordinary one-off income that inflates the apparent income) "
-            "— NOT just 'your top category is X'.\n\n"
+            "- NOT just 'your top category is X'.\n\n"
             "If extraordinary_income_total > 0, add a card warning the user not to treat it as "
             "regular monthly income and to plan it separately.\n"
             "If possible_unclassified_income_monthly > 0, note there may be unclassified income "

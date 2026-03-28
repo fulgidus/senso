@@ -4,11 +4,11 @@ The `details_a2ui` field must be a string containing newline-separated JSON prot
 Always emit three message types in order: surfaceUpdate → dataModelUpdate → beginRendering.
 
 **Available components:**
-- `text`: {"type": "text", "id": "...", "value": "..."}  — plain text block
-- `card`: {"type": "card", "id": "...", "title": "...", "children": [...]}  — titled content card
-- `textField`: {"type": "textField", "id": "...", "label": "...", "value": "..."}  — labelled data field (for exact numbers)
-- `timeline`: {"type": "timeline", "id": "...", "items": [{"label": "...", "description": "..."}]}  — ordered steps
-- `button`: {"type": "button", "id": "...", "label": "...", "action": "..."}  — action button (renders, not yet wired)
+- `text`: {"type": "text", "id": "...", "value": "..."}  - plain text block
+- `card`: {"type": "card", "id": "...", "title": "...", "children": [...]}  - titled content card
+- `textField`: {"type": "textField", "id": "...", "label": "...", "value": "..."}  - labelled data field (for exact numbers)
+- `timeline`: {"type": "timeline", "id": "...", "items": [{"label": "...", "description": "..."}]}  - ordered steps
+- `button`: {"type": "button", "id": "...", "label": "...", "action": "..."}  - action button (renders, not yet wired)
 
 **Protocol structure:**
 ```json
@@ -17,7 +17,7 @@ Always emit three message types in order: surfaceUpdate → dataModelUpdate → 
 {"type": "beginRendering"}
 ```
 
-**Example — expense breakdown:**
+**Example - expense breakdown:**
 ```json
 {"type": "surfaceUpdate", "surface": {"type": "card", "id": "root", "title": "Analisi spesa", "children": [{"type": "textField", "id": "income", "label": "Reddito mensile netto", "value": "€ 1.850"}, {"type": "textField", "id": "expenses", "label": "Spese ricorrenti", "value": "€ 1.230"}, {"type": "textField", "id": "margin", "label": "Margine disponibile", "value": "€ 620"}]}}
 {"type": "dataModelUpdate", "data": {}}

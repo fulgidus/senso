@@ -65,7 +65,7 @@ def get_voice_id(
     Lookup order:
       1. personas[].find(p => p.id == persona_id) → elevenlabs.voiceIds
       2. defaultPersonaSettings → elevenlabs.voiceIds
-      3. None (caller must handle — will 503)
+      3. None (caller must handle - will 503)
     """
     config = _load_config()
 
@@ -77,7 +77,7 @@ def get_voice_id(
                 result = _resolve_from_elevenlabs(el, locale, gender)
                 if result:
                     return result
-                break  # persona found but no voiceIds — fall through to default
+                break  # persona found but no voiceIds - fall through to default
 
     # 2. defaultPersonaSettings
     default_el = config.get("defaultPersonaSettings", {}).get("elevenlabs", {})
@@ -118,8 +118,8 @@ def get_tts_config(persona_id: str | None) -> dict[str, Any]:
     Return TTS configuration for the given persona.
 
     Keys returned:
-        fallback: "browser" | "none"   — what to do when ElevenLabs fails
-        browserFallbackEnabled: bool   — whether browser speechSynthesis is allowed at all
+        fallback: "browser" | "none"   - what to do when ElevenLabs fails
+        browserFallbackEnabled: bool   - whether browser speechSynthesis is allowed at all
     """
     config = _load_config()
     defaults = config.get("defaultPersonaSettings", {}).get(
@@ -145,7 +145,7 @@ def get_elevenlabs_settings(persona_id: str | None) -> dict[str, Any]:
     """
     Return merged ElevenLabs generation settings for the given persona.
 
-    Keys returned (all optional — caller should use .get() with sensible defaults):
+    Keys returned (all optional - caller should use .get() with sensible defaults):
         normalization: "internal" | "elevenlabs"
         stability: float
         similarityBoost: float
@@ -153,7 +153,7 @@ def get_elevenlabs_settings(persona_id: str | None) -> dict[str, Any]:
         useSpeakerBoost: bool
 
     Lookup order: named persona → defaultPersonaSettings → hardcoded fallback.
-    voiceIds is intentionally excluded — use get_voice_id() for that.
+    voiceIds is intentionally excluded - use get_voice_id() for that.
     """
     config = _load_config()
     defaults = {

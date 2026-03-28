@@ -77,7 +77,7 @@ Research modes: ecosystem (default), feasibility, implementation, comparison.
 
 ```markdown
 <research_type>
-Phase Research — investigating HOW to implement a specific phase well.
+Phase Research - investigating HOW to implement a specific phase well.
 </research_type>
 
 <key_insight>

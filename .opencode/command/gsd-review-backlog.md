@@ -45,7 +45,7 @@ milestone sequence or remove stale entries.
 
 6. **Commit changes:**
    ```bash
-   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: review backlog — promoted N, removed M" --files .planning/ROADMAP.md
+   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: review backlog - promoted N, removed M" --files .planning/ROADMAP.md
    ```
 
 7. **Report summary:**

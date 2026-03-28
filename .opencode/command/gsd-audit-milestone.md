@@ -20,7 +20,7 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </execution_context>
 
 <context>
-Version: $ARGUMENTS (optional — defaults to current milestone)
+Version: $ARGUMENTS (optional - defaults to current milestone)
 
 Core planning files are resolved in-workflow (`init milestone-op`) and loaded only as needed.
 

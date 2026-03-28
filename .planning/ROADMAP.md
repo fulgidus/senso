@@ -32,9 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A fresh machine can run the product locally via documented reproducible setup for judging.
 **Plans**: 3 plans
 Plans:
-- [x] 01-01-PLAN.md — Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
-- [x] 01-02-PLAN.md — Build Vite React auth UX with localStorage session persistence and Google fallback.
-- [x] 01-03-PLAN.md — Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
+- [x] 01-01-PLAN.md - Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
+- [x] 01-02-PLAN.md - Build Vite React auth UX with localStorage session persistence and Google fallback.
+- [x] 01-03-PLAN.md - Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
 **UI hint**: yes
 
 ### Phase 2: Financial Input Ingestion
@@ -47,11 +47,11 @@ Plans:
   3. User can review extracted values and confirm/correct them before recommendations are generated.
 **Plans**: 5 plans
 Plans:
-- [x] 02-01-PLAN.md — Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
-- [x] 02-02-PLAN.md — Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
-- [x] 02-03-PLAN.md — API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
-- [x] 02-04-PLAN.md — Implement builtin extraction modules for all sample financial document types.
-- [x] 02-05-PLAN.md — Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
+- [x] 02-01-PLAN.md - Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
+- [x] 02-02-PLAN.md - Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
+- [x] 02-03-PLAN.md - API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
+- [x] 02-04-PLAN.md - Implement builtin extraction modules for all sample financial document types.
+- [x] 02-05-PLAN.md - Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
 **UI hint**: yes
 
 ### Phase 3: Financial Profile Clarity
@@ -64,10 +64,10 @@ Plans:
   3. User can see at least one highlighted high-impact spending pattern derived from their own data.
 **Plans**: 4 plans
 Plans:
-- [x] 03-01-PLAN.md — Backend models, categorization service, profile endpoints, and tests.
-- [x] 03-02-PLAN.md — Confirm-all endpoint wired to categorization trigger.
-- [x] 03-03-PLAN.md — Frontend processing flow: profile API client, useProfileStatus hook, ProcessingScreen, AuthedHome routing.
-- [x] 03-04-PLAN.md — Full profile UI: ProfileScreen, OnboardingChoiceScreen, QuestionnaireScreen, AuthedHome 5-screen routing.
+- [x] 03-01-PLAN.md - Backend models, categorization service, profile endpoints, and tests.
+- [x] 03-02-PLAN.md - Confirm-all endpoint wired to categorization trigger.
+- [x] 03-03-PLAN.md - Frontend processing flow: profile API client, useProfileStatus hook, ProcessingScreen, AuthedHome routing.
+- [x] 03-04-PLAN.md - Full profile UI: ProfileScreen, OnboardingChoiceScreen, QuestionnaireScreen, AuthedHome 5-screen routing.
 **UI hint**: yes
 
 ### Phase 4: Safe Grounded Text Coaching
@@ -81,10 +81,10 @@ Plans:
   4. Unsafe or injection-style inputs are sanitized/rejected, and outputs remain within educational safety boundaries.
 **Plans**: 4 plans
 Plans:
-- [x] 04-01-PLAN.md — Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
-- [x] 04-02-PLAN.md — Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
-- [x] 04-03-PLAN.md — Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
-- [x] 04-04-PLAN.md — Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
+- [x] 04-01-PLAN.md - Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
+- [x] 04-02-PLAN.md - Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
+- [x] 04-03-PLAN.md - Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
+- [x] 04-04-PLAN.md - Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
 **UI hint**: yes
 
 ### Phase 5: Voice Coaching Loop
@@ -97,11 +97,11 @@ Plans:
   3. If speech recognition fails or is unavailable, user can continue seamlessly with typed input.
 **Plans**: 5 plans
 Plans:
-- [x] 05-01-PLAN.md — Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
-- [x] 05-02-PLAN.md — Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
-- [x] 05-03-PLAN.md — A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
-- [x] 05-04-PLAN.md — Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
-- [x] 05-05-PLAN.md — Frontend voice output (TTS): fetchTTSAudio, useTTS hook, VoicePlayButton in AssistantBubble, ElevenLabs + speechSynthesis fallback.
+- [x] 05-01-PLAN.md - Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
+- [x] 05-02-PLAN.md - Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
+- [x] 05-03-PLAN.md - A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
+- [x] 05-04-PLAN.md - Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
+- [x] 05-05-PLAN.md - Frontend voice output (TTS): fetchTTSAudio, useTTS hook, VoicePlayButton in AssistantBubble, ElevenLabs + speechSynthesis fallback.
 **UI hint**: yes
 
 ### Phase 6: Learn+Act Cards & Demo Hardening
@@ -132,12 +132,12 @@ Plans:
 **Execution Order:**
 Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
-| 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
-| 3. Financial Profile Clarity | 4/4 | Complete   | 2026-03-25 |
-| 4. Safe Grounded Text Coaching | 4/4 | Complete   | 2026-03-28 |
-| 5. Voice Coaching Loop | 4/5 | In Progress|  |
-| 6. Learn+Act Cards & Demo Hardening | 0/TBD | Not started | - |
-| 7. Streaming & Nice-to-Have Polish | 0/TBD | Not started | - |
+| Phase                               | Plans Complete | Status      | Completed  |
+| ----------------------------------- | -------------- | ----------- | ---------- |
+| 1. Runtime & Account Foundation     | 3/3            | Complete    | 2026-03-23 |
+| 2. Financial Input Ingestion        | 5/5            | Complete    | 2026-03-24 |
+| 3. Financial Profile Clarity        | 4/4            | Complete    | 2026-03-25 |
+| 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
+| 5. Voice Coaching Loop              | 4/5            | In Progress |            |
+| 6. Learn+Act Cards & Demo Hardening | 0/TBD          | Not started | -          |
+| 7. Streaming & Nice-to-Have Polish  | 0/TBD          | Not started | -          |

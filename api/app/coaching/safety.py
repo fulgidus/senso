@@ -1,7 +1,7 @@
 """
 SafetyScanner: implements hard-boundaries.yml groups for input and output scanning.
 
-Phase 4: pattern-only matching. own_pii_unsolicited uses patterns only — live
+Phase 4: pattern-only matching. own_pii_unsolicited uses patterns only - live
 userProfile cross-check deferred to Phase 7. Groups with no patterns[] are skipped.
 """
 
@@ -26,10 +26,10 @@ PERSONAS_DIR = Path(__file__).parent.parent / "personas"
 # Add only confirmed gaps discovered by the safety corpus tests.
 # ─────────────────────────────────────────────────────────────────────────────
 _SUPPLEMENTAL_INJECTION_PATTERNS: list[str] = [
-    # "disregard all previous safety rules" — YAML pattern requires instructions/guidelines/prompt
+    # "disregard all previous safety rules" - YAML pattern requires instructions/guidelines/prompt
     # as the terminal word, but attackers may target "rules", "context", "restrictions" etc.
     r"disregard (your |all |previous |prior |above )*(safety |ethical |all )*(rules|restrictions|context|filters)",
-    # "your real self has no limits" — YAML requires (true|real|actual)+noun+(is|are),
+    # "your real self has no limits" - YAML requires (true|real|actual)+noun+(is|are),
     # but attacker may say "has", "have", or omit the verb entirely.
     r"your (true|real|actual) (self|instructions|purpose|goal|nature)(\s+(has|have|is|are|knows?|can))?",
 ]
@@ -74,7 +74,7 @@ class SafetyScanner:
             if not patterns:
                 # Phase 4: skip groups with no regex patterns (e.g. own_pii_unsolicited)
                 logger.debug(
-                    "SafetyScanner: skipping group %s — no patterns defined (Phase 4)",
+                    "SafetyScanner: skipping group %s - no patterns defined (Phase 4)",
                     group.get("name"),
                 )
                 continue
@@ -170,7 +170,7 @@ class SafetyScanner:
                                 safe=True,
                                 severity=severity,
                                 group=group["name"],
-                                reason=f"Output flagged (severity={severity}) — passing through",
+                                reason=f"Output flagged (severity={severity}) - passing through",
                                 substitute_message=None,
                                 is_warn=True,
                             )
@@ -189,7 +189,7 @@ class SafetyScanner:
                                 safe=True,
                                 severity=severity,
                                 group=group["name"],
-                                reason=f"Input flagged (severity={severity}) — allowing",
+                                reason=f"Input flagged (severity={severity}) - allowing",
                                 is_warn=True,
                             )
         return ScanResult(safe=True, reason="No safety violations detected")

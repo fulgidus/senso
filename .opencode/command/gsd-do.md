@@ -9,7 +9,7 @@ tools:
 <objective>
 Analyze freeform natural language input and dispatch to the most appropriate GSD command.
 
-Acts as a smart dispatcher — never does the work itself. Matches intent to the best GSD command using routing rules, confirms the match, then hands off.
+Acts as a smart dispatcher - never does the work itself. Matches intent to the best GSD command using routing rules, confirms the match, then hands off.
 
 Use when you know what you want but don't know which `/gsd-*` command to run.
 </objective>

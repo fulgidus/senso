@@ -81,7 +81,7 @@ Each task was committed atomically:
 - `api/tests/test_ingestion_endpoints.py` - Added 3 confirm-all tests
 
 ## Decisions Made
-- **Always trigger categorization**: `confirm-all` calls `trigger_categorization_for_user` regardless of `confirmed_count`. Even if 0 uploads are confirmable, the user may have previously confirmed uploads — triggering categorization unconditionally matches D-10.
+- **Always trigger categorization**: `confirm-all` calls `trigger_categorization_for_user` regardless of `confirmed_count`. Even if 0 uploads are confirmable, the user may have previously confirmed uploads - triggering categorization unconditionally matches D-10.
 - **Lazy import for ProfileService**: Used `_get_profile_service` with a local import inside the function body to avoid circular import at module load time (ingestion.py → profile_service.py → categorization_service.py).
 - **Test status flexibility**: `test_confirm_all_queues_categorization_job` accepts `queued|complete|categorizing|generating_insights` because TestClient runs background tasks synchronously, so the job may already complete by the time the status is polled.
 
@@ -102,12 +102,12 @@ None - no external service configuration required.
 
 ## Self-Check: PASSED
 
-- ✅ `api/app/services/ingestion_service.py` — exists
-- ✅ `api/app/api/ingestion.py` — exists
-- ✅ `api/tests/test_ingestion_endpoints.py` — exists
-- ✅ `03-02-SUMMARY.md` — exists
-- ✅ Commit `d6a3307` — feat(03-02): add confirm_all_uploads to IngestionService
-- ✅ Commit `929edb3` — feat(03-02): add POST /ingestion/confirm-all endpoint + tests
+- ✅ `api/app/services/ingestion_service.py` - exists
+- ✅ `api/app/api/ingestion.py` - exists
+- ✅ `api/tests/test_ingestion_endpoints.py` - exists
+- ✅ `03-02-SUMMARY.md` - exists
+- ✅ Commit `d6a3307` - feat(03-02): add confirm_all_uploads to IngestionService
+- ✅ Commit `929edb3` - feat(03-02): add POST /ingestion/confirm-all endpoint + tests
 - ✅ 45/45 tests pass
 
 ---

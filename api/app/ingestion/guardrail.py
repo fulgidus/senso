@@ -58,7 +58,7 @@ def check_coaching_input(text: str) -> tuple[bool, str]:
     Check coaching user input for safety violations.
     Returns (safe: bool, reason: str).
     Wraps SafetyScanner.scan_input() from the coaching safety module.
-    On scanner failure: logs warning and returns (True, "") — never blocks on scanner error.
+    On scanner failure: logs warning and returns (True, "") - never blocks on scanner error.
     """
     try:
         from app.coaching.safety import SafetyScanner

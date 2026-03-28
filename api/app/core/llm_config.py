@@ -2,7 +2,7 @@
 LLM non-sensitive configuration loader.
 
 Reads api/app/config.json → llm section and exposes typed dataclasses.
-API keys are NOT stored here — they are read from env vars named:
+API keys are NOT stored here - they are read from env vars named:
     LLM_{PROVIDER_NAME_UPPER}_API_KEY
 e.g.  LLM_OPENROUTER_API_KEY, LLM_GEMINI_API_KEY, LLM_OPENAI_API_KEY
 

@@ -22,19 +22,19 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 - Derive roadmap implications from combined research
 - Identify confidence levels and gaps
 - Write SUMMARY.md
-- Commit ALL research files (researchers write but don't commit — you commit everything)
+- Commit ALL research files (researchers write but don't commit - you commit everything)
 </role>
 
 <downstream_consumer>
 Your SUMMARY.md is consumed by the gsd-roadmapper agent which uses it to:
 
-| Section | How Roadmapper Uses It |
-|---------|------------------------|
-| Executive Summary | Quick understanding of domain |
-| Key Findings | Technology and feature decisions |
-| Implications for Roadmap | Phase structure suggestions |
-| Research Flags | Which phases need deeper research |
-| Gaps to Address | What to flag for validation |
+| Section                  | How Roadmapper Uses It            |
+| ------------------------ | --------------------------------- |
+| Executive Summary        | Quick understanding of domain     |
+| Key Findings             | Technology and feature decisions  |
+| Implications for Roadmap | Phase structure suggestions       |
+| Research Flags           | Which phases need deeper research |
+| Gaps to Address          | What to flag for validation       |
 
 **Be opinionated.** The roadmapper needs clear recommendations, not wishy-washy summaries.
 </downstream_consumer>
@@ -110,18 +110,18 @@ This is the most important section. Based on combined research:
 
 ## Step 5: Assess Confidence
 
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | [level] | [based on source quality from STACK.md] |
-| Features | [level] | [based on source quality from FEATURES.md] |
-| Architecture | [level] | [based on source quality from ARCHITECTURE.md] |
-| Pitfalls | [level] | [based on source quality from PITFALLS.md] |
+| Area         | Confidence | Notes                                          |
+| ------------ | ---------- | ---------------------------------------------- |
+| Stack        | [level]    | [based on source quality from STACK.md]        |
+| Features     | [level]    | [based on source quality from FEATURES.md]     |
+| Architecture | [level]    | [based on source quality from ARCHITECTURE.md] |
+| Pitfalls     | [level]    | [based on source quality from PITFALLS.md]     |
 
 Identify gaps that couldn't be resolved and need attention during planning.
 
 ## Step 6: Write SUMMARY.md
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 Use template: /home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/research-project/SUMMARY.md
 
@@ -179,9 +179,9 @@ When SUMMARY.md is written and committed:
 
 Suggested phases: [N]
 
-1. **[Phase name]** — [one-liner rationale]
-2. **[Phase name]** — [one-liner rationale]
-3. **[Phase name]** — [one-liner rationale]
+1. **[Phase name]** - [one-liner rationale]
+2. **[Phase name]** - [one-liner rationale]
+3. **[Phase name]** - [one-liner rationale]
 
 ### Research Flags
 

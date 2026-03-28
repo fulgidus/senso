@@ -35,7 +35,7 @@ If the flag is absent, keep the current behavior of continuing phase numbering f
 - Present what shipped in last milestone
 - Ask inline (freeform, NOT question): "What do you want to build next?"
 - Wait for their response, then use question to probe specifics
-- If user selects "Other" at any point to provide freeform input, ask follow-up as plain text — not another question
+- If user selects "Other" at any point to provide freeform input, ask follow-up as plain text - not another question
 
 ## 3. Determine Milestone Version
 
@@ -68,8 +68,8 @@ question:
 - header: "Confirm?"
 - question: "Does this capture what you want to build in this milestone?"
 - options:
-  - "Looks good" — Proceed to write PROJECT.md
-  - "Adjust" — Let me correct or add details
+  - "Looks good" - Proceed to write PROJECT.md
+  - "Adjust" - Let me correct or add details
 
 **If "Adjust":** Ask what needs changing (plain text, NOT question). Incorporate changes, re-present the summary. Loop until "Looks good" is selected.
 
@@ -108,8 +108,8 @@ This document evolves at phase transitions and milestone boundaries.
 
 **After each milestone** (via `/gsd-complete-milestone`):
 1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
+2. Core Value check - still the right priority?
+3. Audit Out of Scope - reasons still valid?
 4. Update Context with current state
 ```
 
@@ -119,9 +119,9 @@ This document evolves at phase transitions and milestone boundaries.
 ## Current Position
 
 Phase: Not started (defining requirements)
-Plan: —
+Plan: -
 Status: Defining requirements
-Last activity: [today] — Milestone v[X.Y] started
+Last activity: [today] - Milestone v[X.Y] started
 ```
 
 Keep Accumulated Context section from previous milestone.
@@ -170,14 +170,14 @@ Check `research_enabled` from init JSON (loaded from config).
 **If `research_enabled` is `true`:**
 
 question: "Research the domain ecosystem for new features before defining requirements?"
-- "Research first (Recommended)" — Discover patterns, features, architecture for NEW capabilities
-- "Skip research for this milestone" — Go straight to requirements (does not change your default)
+- "Research first (Recommended)" - Discover patterns, features, architecture for NEW capabilities
+- "Skip research for this milestone" - Go straight to requirements (does not change your default)
 
 **If `research_enabled` is `false`:**
 
 question: "Research the domain ecosystem for new features before defining requirements?"
-- "Skip research (current default)" — Go straight to requirements
-- "Research first" — Discover patterns, features, architecture for NEW capabilities
+- "Skip research (current default)" - Go straight to requirements
+- "Research first" - Discover patterns, features, architecture for NEW capabilities
 
 **IMPORTANT:** Do NOT persist this choice to config.json. The `workflow.research` setting is a persistent user preference that controls plan-phase behavior across the project. Changing it here would silently alter future `/gsd-plan-phase` behavior. To change the default, use `/gsd-settings`.
 
@@ -201,10 +201,10 @@ Spawn 4 parallel gsd-project-researcher agents. Each uses this template with dim
 **Common structure for all 4 researchers:**
 ```
 Task(prompt="
-<research_type>Project Research — {DIMENSION} for [new features].</research_type>
+<research_type>Project Research - {DIMENSION} for [new features].</research_type>
 
 <milestone_context>
-SUBSEQUENT MILESTONE — Adding [target features] to existing app.
+SUBSEQUENT MILESTONE - Adding [target features] to existing app.
 {EXISTING_CONTEXT}
 Focus ONLY on what's needed for the NEW features.
 </milestone_context>
@@ -228,13 +228,13 @@ Use template: /home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/r
 
 **Dimension-specific fields:**
 
-| Field | Stack | Features | Architecture | Pitfalls |
-|-------|-------|----------|-------------|----------|
-| EXISTING_CONTEXT | Existing validated capabilities (DO NOT re-research): [from PROJECT.md] | Existing features (already built): [from PROJECT.md] | Existing architecture: [from PROJECT.md or codebase map] | Focus on common mistakes when ADDING these features to existing system |
-| QUESTION | What stack additions/changes are needed for [new features]? | How do [target features] typically work? Expected behavior? | How do [target features] integrate with existing architecture? | Common mistakes when adding [target features] to [domain]? |
-| CONSUMER | Specific libraries with versions for NEW capabilities, integration points, what NOT to add | Table stakes vs differentiators vs anti-features, complexity noted, dependencies on existing | Integration points, new components, data flow changes, suggested build order | Warning signs, prevention strategy, which phase should address it |
-| GATES | Versions current (verify with Context7), rationale explains WHY, integration considered | Categories clear, complexity noted, dependencies identified | Integration points identified, new vs modified explicit, build order considers deps | Pitfalls specific to adding these features, integration pitfalls covered, prevention actionable |
-| FILE | STACK.md | FEATURES.md | ARCHITECTURE.md | PITFALLS.md |
+| Field            | Stack                                                                                      | Features                                                                                     | Architecture                                                                        | Pitfalls                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| EXISTING_CONTEXT | Existing validated capabilities (DO NOT re-research): [from PROJECT.md]                    | Existing features (already built): [from PROJECT.md]                                         | Existing architecture: [from PROJECT.md or codebase map]                            | Focus on common mistakes when ADDING these features to existing system                          |
+| QUESTION         | What stack additions/changes are needed for [new features]?                                | How do [target features] typically work? Expected behavior?                                  | How do [target features] integrate with existing architecture?                      | Common mistakes when adding [target features] to [domain]?                                      |
+| CONSUMER         | Specific libraries with versions for NEW capabilities, integration points, what NOT to add | Table stakes vs differentiators vs anti-features, complexity noted, dependencies on existing | Integration points, new components, data flow changes, suggested build order        | Warning signs, prevention strategy, which phase should address it                               |
+| GATES            | Versions current (verify with Context7), rationale explains WHY, integration considered    | Categories clear, complexity noted, dependencies identified                                  | Integration points identified, new vs modified explicit, build order considers deps | Pitfalls specific to adding these features, integration pitfalls covered, prevention actionable |
+| FILE             | STACK.md                                                                                   | FEATURES.md                                                                                  | ARCHITECTURE.md                                                                     | PITFALLS.md                                                                                     |
 
 After all 4 complete, spawn synthesizer:
 
@@ -291,15 +291,15 @@ Present features by category:
 **If no research:** Gather requirements through conversation. Ask: "What are the main things users need to do with [new features]?" Clarify, probe for related capabilities, group into categories.
 
 **Scope each category** via question (multiSelect: true, header max 12 chars):
-- "[Feature 1]" — [brief description]
-- "[Feature 2]" — [brief description]
-- "None for this milestone" — Defer entire category
+- "[Feature 1]" - [brief description]
+- "[Feature 2]" - [brief description]
+- "None for this milestone" - Defer entire category
 
 Track: Selected → this milestone. Unselected table stakes → future. Unselected differentiators → out of scope.
 
 **Identify gaps** via question:
-- "No, research covered it" — Proceed
-- "Yes, let me add some" — Capture additions
+- "No, research covered it" - Proceed
+- "Yes, let me add some" - Capture additions
 
 **Generate REQUIREMENTS.md:**
 - v1 Requirements grouped by category (checkboxes, REQ-IDs)
@@ -393,9 +393,9 @@ Write files first, then return.
 
 **[N] phases** | **[X] requirements mapped** | All covered ✓
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| [N] | [Name] | [Goal] | [REQ-IDs] | [count] |
+| #   | Phase  | Goal   | Requirements | Success Criteria |
+| --- | ------ | ------ | ------------ | ---------------- |
+| [N] | [Name] | [Goal] | [REQ-IDs]    | [count]          |
 
 ### Phase Details
 
@@ -408,9 +408,9 @@ Success criteria:
 ```
 
 **Ask for approval** via question:
-- "Approve" — Commit and continue
-- "Adjust phases" — Tell me what to change
-- "Review full file" — Show raw ROADMAP.md
+- "Approve" - Commit and continue
+- "Adjust phases" - Tell me what to change
+- "Review full file" - Show raw ROADMAP.md
 
 **If "Adjust":** Get notes, re-spawn roadmapper with revision context, loop until approved.
 **If "Review":** Display raw ROADMAP.md, re-ask.
@@ -429,24 +429,24 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 
 **Milestone v[X.Y]: [Name]**
 
-| Artifact       | Location                    |
-|----------------|-----------------------------|
-| Project        | `.planning/PROJECT.md`      |
-| Research       | `.planning/research/`       |
-| Requirements   | `.planning/REQUIREMENTS.md` |
-| Roadmap        | `.planning/ROADMAP.md`      |
+| Artifact     | Location                    |
+| ------------ | --------------------------- |
+| Project      | `.planning/PROJECT.md`      |
+| Research     | `.planning/research/`       |
+| Requirements | `.planning/REQUIREMENTS.md` |
+| Roadmap      | `.planning/ROADMAP.md`      |
 
 **[N] phases** | **[X] requirements** | Ready to build ✓
 
 ## ▶ Next Up
 
-**Phase [N]: [Phase Name]** — [Goal]
+**Phase [N]: [Phase Name]** - [Goal]
 
-`/gsd-discuss-phase [N] ${GSD_WS}` — gather context and clarify approach
+`/gsd-discuss-phase [N] ${GSD_WS}` - gather context and clarify approach
 
 <sub>`/clear` first → fresh context window</sub>
 
-Also: `/gsd-plan-phase [N] ${GSD_WS}` — skip discussion, plan directly
+Also: `/gsd-plan-phase [N] ${GSD_WS}` - skip discussion, plan directly
 ```
 
 </process>
@@ -455,7 +455,7 @@ Also: `/gsd-plan-phase [N] ${GSD_WS}` — skip discussion, plan directly
 - [ ] PROJECT.md updated with Current Milestone section
 - [ ] STATE.md reset for new milestone
 - [ ] MILESTONE-CONTEXT.md consumed and deleted (if existed)
-- [ ] Research completed (if selected) — 4 parallel agents, milestone-aware
+- [ ] Research completed (if selected) - 4 parallel agents, milestone-aware
 - [ ] Requirements gathered and scoped per category
 - [ ] REQUIREMENTS.md created with REQ-IDs
 - [ ] gsd-roadmapper spawned with phase numbering context

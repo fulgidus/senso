@@ -30,7 +30,7 @@ key_files:
 decisions:
   - "D-02: JSONSchema files at api/app/coaching/schemas/ as standalone files, loaded at init time"
   - "D-03: Jinja2 templates in api/app/coaching/prompts/, no hardcoded prompt strings"
-  - "D-06: own_pii_unsolicited group has no patterns[] in hard-boundaries.yml — SafetyScanner skips pattern-less groups in Phase 4"
+  - "D-06: own_pii_unsolicited group has no patterns[] in hard-boundaries.yml - SafetyScanner skips pattern-less groups in Phase 4"
   - "D-07: 3-layer safety: check_coaching_input (input guard) + system prompt persona boundaries + SafetyScanner output scan"
   - "D-09: ChatSession/ChatMessage DB models added to models.py; session persistence wired at API layer (Plan 04-02)"
   - "D-10: jsonschema.validate() on every LLM response before returning; _repair_response() fallback for partial violations"
@@ -47,25 +47,25 @@ metrics:
 
 # Phase 04 Plan 01: Coaching Service Backend Core Summary
 
-**One-liner:** Composable Jinja2 prompt system + JSONSchema LLM output validation + 3-layer SafetyScanner + ChatSession/ChatMessage DB models — full coaching backend core.
+**One-liner:** Composable Jinja2 prompt system + JSONSchema LLM output validation + 3-layer SafetyScanner + ChatSession/ChatMessage DB models - full coaching backend core.
 
 ## What Was Built
 
 This plan creates every reusable building block for the S.E.N.S.O. text coaching pipeline:
 
-1. **3 JSONSchema files** in `api/app/coaching/schemas/` define the LLM output contracts — `coaching_response.schema.json` (colloquial mode), `coaching_simple_response.schema.json` (machine mode), `capabilities.schema.json` (capability shapes for LLM reference).
+1. **3 JSONSchema files** in `api/app/coaching/schemas/` define the LLM output contracts - `coaching_response.schema.json` (colloquial mode), `coaching_simple_response.schema.json` (machine mode), `capabilities.schema.json` (capability shapes for LLM reference).
 
-2. **3 Jinja2 templates** in `api/app/coaching/prompts/` — `system_base.j2` injects ethos+soul+boundaries+allowlist+locale, `context_block.j2` structures user financial numbers, `response_format.j2` injects the output schema instruction. All templates render correctly for both `it` and `en` locales.
+2. **3 Jinja2 templates** in `api/app/coaching/prompts/` - `system_base.j2` injects ethos+soul+boundaries+allowlist+locale, `context_block.j2` structures user financial numbers, `response_format.j2` injects the output schema instruction. All templates render correctly for both `it` and `en` locales.
 
-3. **`SafetyScanner`** in `api/app/coaching/safety.py` — loads `hard-boundaries.yml` at init, compiles patterns in severity order (hard_ban first), implements `scan_input`/`scan_output` with proper severity semantics. `own_pii_unsolicited` group (no patterns in Phase 4) is gracefully skipped.
+3. **`SafetyScanner`** in `api/app/coaching/safety.py` - loads `hard-boundaries.yml` at init, compiles patterns in severity order (hard_ban first), implements `scan_input`/`scan_output` with proper severity semantics. `own_pii_unsolicited` group (no patterns in Phase 4) is gracefully skipped.
 
-4. **`check_coaching_input()`** in `api/app/ingestion/guardrail.py` — thin wrapper around `SafetyScanner.scan_input()`, follows `check_hint_safety()` tuple return pattern, never blocks on scanner error.
+4. **`check_coaching_input()`** in `api/app/ingestion/guardrail.py` - thin wrapper around `SafetyScanner.scan_input()`, follows `check_hint_safety()` tuple return pattern, never blocks on scanner error.
 
 5. **`ChatSession` and `ChatMessage` SQLAlchemy models** appended to `api/app/db/models.py` with proper FK relationships and cascade deletes. `User.chat_sessions` relationship added.
 
-6. **`CoachingService`** in `api/app/coaching/service.py` — `chat(user_id, messages, locale, persona_id)` method that renders templates, calls LLM, validates schema, scans output. `CoachingError` exception class for structured error handling.
+6. **`CoachingService`** in `api/app/coaching/service.py` - `chat(user_id, messages, locale, persona_id)` method that renders templates, calls LLM, validates schema, scans output. `CoachingError` exception class for structured error handling.
 
-7. **25 unit tests** in `api/tests/test_coaching_service.py` — all passing.
+7. **25 unit tests** in `api/tests/test_coaching_service.py` - all passing.
 
 ## Deviations from Plan
 
@@ -73,7 +73,7 @@ This plan creates every reusable building block for the S.E.N.S.O. text coaching
 
 **1. [Rule 3 - Blocking] Missing Python dependencies**
 - **Found during:** Task 2 verification
-- **Issue:** `jinja2`, `jsonschema`, `pyyaml` not in `pyproject.toml` — `ModuleNotFoundError` blocked all verification
+- **Issue:** `jinja2`, `jsonschema`, `pyyaml` not in `pyproject.toml` - `ModuleNotFoundError` blocked all verification
 - **Fix:** Added via `uv add jinja2 jsonschema pyyaml`
 - **Files modified:** `api/pyproject.toml`, `api/uv.lock`
 - **Commit:** b0df535
@@ -81,7 +81,7 @@ This plan creates every reusable building block for the S.E.N.S.O. text coaching
 **2. [Rule 1 - Bug] Fixed `hard-boundaries.yml` pattern quantifier bug**
 - **Found during:** Task 3 verification
 - **Issue:** Patterns `ignore (all |previous |...)?` used `?` (zero or one) for optional modifiers, causing `ignore all previous instructions` (two modifiers) to not match
-- **Fix:** Changed `?` → `*` on `ignore` and `disregard` patterns (line 45-46) — allows zero or more modifiers
+- **Fix:** Changed `?` → `*` on `ignore` and `disregard` patterns (line 45-46) - allows zero or more modifiers
 - **Files modified:** `api/app/personas/hard-boundaries.yml`
 - **Commit:** b414c8d
 
@@ -92,7 +92,7 @@ This plan creates every reusable building block for the S.E.N.S.O. text coaching
 
 ## Known Stubs
 
-None — all functionality implemented as specified. No placeholder data flows to UI rendering in this plan (backend-only).
+None - all functionality implemented as specified. No placeholder data flows to UI rendering in this plan (backend-only).
 
 ## Self-Check
 

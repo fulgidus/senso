@@ -55,22 +55,22 @@ these conditions:
 
 ## Scope Estimate
 
-**Large** — This is a full milestone of significant effort, likely 3–5 phases:
-- **Phase A**: Encryption at rest — Fernet/AES column-level encryption for sensitive DB fields
+**Large** - This is a full milestone of significant effort, likely 3-5 phases:
+- **Phase A**: Encryption at rest - Fernet/AES column-level encryption for sensitive DB fields
   (questionnaire_answers, income_sources, extracted payload_json); MinIO SSE-S3 or SSE-C enabled
   in Docker Compose and cloud config; migration strategy for existing plaintext data.
-- **Phase B**: ZDR policy enforcement — `enforce_zero_data_retention: bool` in
+- **Phase B**: ZDR policy enforcement - `enforce_zero_data_retention: bool` in
   `api/app/core/llm_config.py` (`LLMConfig`/`ProviderConfig`); ZDR capability registry per
   provider+model; `LLMCallCanceledError` raised before any non-ZDR call when policy is active;
   unit tests covering all combinations (ZDR required + ZDR model ✓, ZDR required + non-ZDR model
   → error, ZDR not required → pass through).
-- **Phase C**: Pre-flight check service — `api/app/services/preflight.py`; checks: API key
+- **Phase C**: Pre-flight check service - `api/app/services/preflight.py`; checks: API key
   presence + validity (live smoke call), LLM model reachability, Jinja2 template render, ingestion
   module registry load, soul/persona config coherence, MinIO + Postgres connectivity, ZDR contract
   satisfaction; structured `PreflightReport` with per-check results (name, status, duration_ms,
   input_summary, output_summary, error); non-zero exit on any FAIL; invokable via
   `python -m app.preflight` or as a FastAPI startup hook.
-- **Phase D**: Admin backoffice page — `GET /admin/preflight-report` endpoint returning the latest
+- **Phase D**: Admin backoffice page - `GET /admin/preflight-report` endpoint returning the latest
   `PreflightReport`; frontend admin-only page showing check list with status badges, timing,
   in/out, and error details; only visible to `is_admin=True` users.
 
@@ -78,25 +78,25 @@ these conditions:
 
 Related code and decisions in the current codebase:
 
-- `api/app/core/config.py` — `Settings` dataclass (all env vars, secrets); natural home for
+- `api/app/core/config.py` - `Settings` dataclass (all env vars, secrets); natural home for
   `enforce_zero_data_retention: bool` and `encryption_key: str | None`
-- `api/app/core/llm_config.py` — `LLMConfig`, `ProviderConfig`, `ModelRoute`; ZDR capability flag
+- `api/app/core/llm_config.py` - `LLMConfig`, `ProviderConfig`, `ModelRoute`; ZDR capability flag
   belongs on `ProviderConfig`; pre-flight smoke call lives in `LLMClient.probe()`
-- `api/app/ingestion/llm.py` — `LLMClient` and `get_llm_client()`; wraps Google + OpenAI calls;
+- `api/app/ingestion/llm.py` - `LLMClient` and `get_llm_client()`; wraps Google + OpenAI calls;
   ZDR enforcement check must run here before any provider call
-- `api/app/ingestion/adaptive.py` — ingestion module registry load; pre-flight checks all modules
+- `api/app/ingestion/adaptive.py` - ingestion module registry load; pre-flight checks all modules
   import cleanly here
-- `api/app/coaching/prompts/` — Jinja2 templates (`system_base.j2`, `context_block.j2`,
+- `api/app/coaching/prompts/` - Jinja2 templates (`system_base.j2`, `context_block.j2`,
   `response_format.j2`); pre-flight renders all templates with fixture data
-- `api/app/api/admin.py` — `require_admin` Depends(); pre-flight report endpoint goes here with
+- `api/app/api/admin.py` - `require_admin` Depends(); pre-flight report endpoint goes here with
   same guard
-- `api/app/db/models.py` — `UserProfile.questionnaire_answers`, `ExtractedDocument.payload_json`
+- `api/app/db/models.py` - `UserProfile.questionnaire_answers`, `ExtractedDocument.payload_json`
   (both JSON columns); encryption wrapper targets these columns
-- `api/app/db/session.py` — `create_tables()` startup hook; pre-flight can be wired here as a
+- `api/app/db/session.py` - `create_tables()` startup hook; pre-flight can be wired here as a
   startup check
-- `api/app/main.py` — FastAPI app startup; pre-flight invocation on `lifespan` startup event
-- `docker-compose.yml` — MinIO service config; SSE settings added here for at-rest encryption
-- `.planning/seeds/SEED-001-llm-crowdsourced-category-corrections.md` — sibling seed for context
+- `api/app/main.py` - FastAPI app startup; pre-flight invocation on `lifespan` startup event
+- `docker-compose.yml` - MinIO service config; SSE settings added here for at-rest encryption
+- `.planning/seeds/SEED-001-llm-crowdsourced-category-corrections.md` - sibling seed for context
 
 ## Notes
 
@@ -108,7 +108,7 @@ Related code and decisions in the current codebase:
 - For the hackathon demo, ZDR enforcement should default to `false` (no-op) to avoid breaking the
   current setup. The flag is additive and non-breaking.
 - Fernet (symmetric, key rotation friendly) is preferred over raw AES for DB-level encryption in
-  Python — the `cryptography` package is already likely available via FastAPI deps.
+  Python - the `cryptography` package is already likely available via FastAPI deps.
 - OpenAI ZDR is available through the Zero Data Retention API agreement (enterprise); standard API
   keys do NOT guarantee ZDR even if OpenAI's privacy policy implies it. The capability flag must
   default to `false` for all providers unless explicitly documented.

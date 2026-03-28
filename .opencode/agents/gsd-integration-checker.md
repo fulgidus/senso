@@ -20,10 +20,10 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 
 Integration verification checks connections:
 
-1. **Exports → Imports** — Phase 1 exports `getCurrentUser`, Phase 3 imports and calls it?
-2. **APIs → Consumers** — `/api/users` route exists, something fetches from it?
-3. **Forms → Handlers** — Form submits to API, API processes, result displays?
-4. **Data → Display** — Database has data, UI renders it?
+1. **Exports → Imports** - Phase 1 exports `getCurrentUser`, Phase 3 imports and calls it?
+2. **APIs → Consumers** - `/api/users` route exists, something fetches from it?
+3. **Forms → Handlers** - Form submits to API, API processes, result displays?
+4. **Data → Display** - Database has data, UI renders it?
 
 A "complete" codebase with broken wiring is a broken product.
 </core_principle>
@@ -402,12 +402,12 @@ Return structured report to milestone auditor:
 
 #### Requirements Integration Map
 
-| Requirement | Integration Path | Status | Issue |
-|-------------|-----------------|--------|-------|
-| {REQ-ID} | {Phase X export → Phase Y import → consumer} | WIRED / PARTIAL / UNWIRED | {specific issue or "—"} |
+| Requirement | Integration Path                             | Status                    | Issue                   |
+| ----------- | -------------------------------------------- | ------------------------- | ----------------------- |
+| {REQ-ID}    | {Phase X export → Phase Y import → consumer} | WIRED / PARTIAL / UNWIRED | {specific issue or "-"} |
 
 **Requirements with no cross-phase wiring:**
-{List REQ-IDs that exist in a single phase with no integration touchpoints — these may be self-contained or may indicate missing connections}
+{List REQ-IDs that exist in a single phase with no integration touchpoints - these may be self-contained or may indicate missing connections}
 ```
 
 </output>

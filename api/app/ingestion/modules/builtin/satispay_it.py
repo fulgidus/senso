@@ -1,5 +1,5 @@
 """
-SatispayIT — Satispay Italy payment history extractor.
+SatispayIT - Satispay Italy payment history extractor.
 Supported formats: XLSX (primary), PDF (best-effort)
 Export path in Satispay app: Profilo → Storico → Esporta
 Sample FINGERPRINT keywords (from actual XLSX): "satispay", "date", "name", "balance after transaction", "meal vouchers"
@@ -8,7 +8,7 @@ XLSX column order (from real sample, row 0 is the header):
   Date | Name | Description | Amount | Type | Status | Balance | Meal Vouchers | Balance after transaction | ID
 
 Amount sign: negative = payment out, positive = top-up/incoming.
-Status values: "✅ Approved", "❌ Canceled" — only Approved transactions are included.
+Status values: "✅ Approved", "❌ Canceled" - only Approved transactions are included.
 """
 
 from __future__ import annotations
@@ -197,7 +197,7 @@ def extract(file_path: str | Path):  # noqa: ANN201
     if path.suffix.lower() in (".xlsx", ".xls"):
         return _parse_xlsx(path)
 
-    # PDF: return low-confidence skeleton — OCR pipeline handles this better
+    # PDF: return low-confidence skeleton - OCR pipeline handles this better
     return ExtractionResult(
         document=ExtractedDocument(
             document_type="bank_statement",
@@ -208,6 +208,6 @@ def extract(file_path: str | Path):  # noqa: ANN201
         confidence=0.3,
         tier_used="module",
         warnings=[
-            "SatispayIT: PDF extraction requires OCR pipeline — use XLSX export for full accuracy"
+            "SatispayIT: PDF extraction requires OCR pipeline - use XLSX export for full accuracy"
         ],
     )

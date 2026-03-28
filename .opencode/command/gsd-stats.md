@@ -1,5 +1,5 @@
 ---
-description: Display project statistics — phases, plans, requirements, git metrics, and timeline
+description: Display project statistics - phases, plans, requirements, git metrics, and timeline
 tools:
   read: true
   bash: true

@@ -91,7 +91,7 @@ Each task was committed atomically:
 ## Decisions Made
 - `details_a2ui` placed after `learn_cards` in the DTO (before `session_id`) to keep backwards-compatible field ordering for existing clients
 - `a2ui_reference.j2` rendered once at `CoachingService.__init__()` (not per-request) to avoid repeated file I/O
-- Template injection uses `{{ a2ui_reference }}` variable in `response_format.j2` — the Jinja2 include approach was considered but variable injection is cleaner since `a2ui_reference.j2` is a static reference (no looping/conditionals)
+- Template injection uses `{{ a2ui_reference }}` variable in `response_format.j2` - the Jinja2 include approach was considered but variable injection is cleaner since `a2ui_reference.j2` is a static reference (no looping/conditionals)
 - Voice-optimised rules explicitly enumerate forbidden patterns ("NO exact decimal numbers", "NO acronyms", "NO bullet lists") to maximize LLM compliance
 
 ## Deviations from Plan
@@ -105,7 +105,7 @@ None - plan executed exactly as written.
 None - no external service configuration required.
 
 ## Next Phase Readiness
-- Dual-channel data contract is fully established — `details_a2ui` flows through backend as opaque string
+- Dual-channel data contract is fully established - `details_a2ui` flows through backend as opaque string
 - Frontend `CoachingResponse` interface is ready for A2UI renderer (05-03)
 - Backend TTS endpoint (05-01) can read `message` field knowing it's voice-optimised
 - Ready for 05-03 (A2UI renderer) and 05-05 (frontend TTS wiring)

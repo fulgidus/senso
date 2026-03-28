@@ -1,5 +1,5 @@
 ---
-description: Start a new milestone cycle — update PROJECT.md and route to requirements
+description: Start a new milestone cycle - update PROJECT.md and route to requirements
 argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
 tools:
   read: true
@@ -14,11 +14,11 @@ Start a new milestone: questioning → research (optional) → requirements → 
 Brownfield equivalent of new-project. Project exists, PROJECT.md has history. Gathers "what's next", updates PROJECT.md, then runs requirements → roadmap cycle.
 
 **Creates/Updates:**
-- `.planning/PROJECT.md` — updated with new milestone goals
-- `.planning/research/` — domain research (optional, NEW features only)
-- `.planning/REQUIREMENTS.md` — scoped requirements for this milestone
-- `.planning/ROADMAP.md` — phase structure (continues numbering)
-- `.planning/STATE.md` — reset for new milestone
+- `.planning/PROJECT.md` - updated with new milestone goals
+- `.planning/research/` - domain research (optional, NEW features only)
+- `.planning/REQUIREMENTS.md` - scoped requirements for this milestone
+- `.planning/ROADMAP.md` - phase structure (continues numbering)
+- `.planning/STATE.md` - reset for new milestone
 
 **After:** `/gsd-plan-phase [N]` to start execution.
 </objective>

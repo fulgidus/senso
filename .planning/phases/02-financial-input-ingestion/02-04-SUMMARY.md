@@ -30,7 +30,7 @@ tech-stack:
     - "FINGERPRINT keywords verified against actual sample file content before writing (D-26)"
     - "Lazy imports inside extract() for optional deps (pytesseract, pdf2image) to avoid import-time failures"
     - "Italian decimal format parser (_parse_italian_decimal) for PayPal CSV"
-    - "PDF modules return low-confidence skeleton when OCR unavailable — OCR tier handles these better"
+    - "PDF modules return low-confidence skeleton when OCR unavailable - OCR tier handles these better"
     - "GenericCSV score floored at 0.1 in registry (D-27)"
 
 key-files:
@@ -50,8 +50,8 @@ key-files:
 key-decisions:
   - "FINGERPRINT keywords for all modules derived from actual sample file inspection before writing any code (D-26)"
   - "Revolut/Satispay/PayPal: skip REVERTED/CANCELLED transactions to avoid double-counting"
-  - "PDF modules (Edison, GenericInvoice) return low-confidence graceful fallback when pytesseract/pdf2image unavailable — OCR tier handles full extraction better"
-  - "PayPal Italian CSV uses comma decimal separator — dedicated _parse_italian_decimal() helper"
+  - "PDF modules (Edison, GenericInvoice) return low-confidence graceful fallback when pytesseract/pdf2image unavailable - OCR tier handles full extraction better"
+  - "PayPal Italian CSV uses comma decimal separator - dedicated _parse_italian_decimal() helper"
   - "SatispayIT FINGERPRINT uses emoji-containing text strings ('to a store', 'from bank') from actual sample content"
   - "openpyxl added to pyproject.toml as project dependency (D-41)"
 
@@ -97,21 +97,21 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `api/app/ingestion/modules/__init__.py` — Empty package init
-- `api/app/ingestion/modules/builtin/__init__.py` — Empty package init
-- `api/app/ingestion/modules/builtin/fineco_it.py` — FinecoBank XLSX extractor; reads Data_Operazione/Entrate/Uscite/Descrizione_Completa; extracts account_holder and statement period
-- `api/app/ingestion/modules/builtin/revolut_it.py` — Revolut CSV extractor; maps Type/Started Date/Amount/Balance; skips REVERTED/DECLINED
-- `api/app/ingestion/modules/builtin/satispay_it.py` — Satispay XLSX extractor; maps Date/Name/Amount/Status columns; skips cancelled
-- `api/app/ingestion/modules/builtin/generic_csv.py` — Last-resort CSV fallback (D-27); score floor 0.1; Italian+English column variants
-- `api/app/ingestion/modules/builtin/paypal_it.py` — PayPal Italy CSV extractor; Italian decimal format handling; skips zero-net rows
-- `api/app/ingestion/modules/builtin/edison_energia_it.py` — Edison Energia PDF extractor; pytesseract OCR; extracts service type, total_due, billing period
-- `api/app/ingestion/modules/builtin/generic_invoice_it.py` — Generic Italian invoice PDF extractor; OCR-based regex extraction
-- `api/pyproject.toml` — Added openpyxl>=3.1.0 dependency
+- `api/app/ingestion/modules/__init__.py` - Empty package init
+- `api/app/ingestion/modules/builtin/__init__.py` - Empty package init
+- `api/app/ingestion/modules/builtin/fineco_it.py` - FinecoBank XLSX extractor; reads Data_Operazione/Entrate/Uscite/Descrizione_Completa; extracts account_holder and statement period
+- `api/app/ingestion/modules/builtin/revolut_it.py` - Revolut CSV extractor; maps Type/Started Date/Amount/Balance; skips REVERTED/DECLINED
+- `api/app/ingestion/modules/builtin/satispay_it.py` - Satispay XLSX extractor; maps Date/Name/Amount/Status columns; skips cancelled
+- `api/app/ingestion/modules/builtin/generic_csv.py` - Last-resort CSV fallback (D-27); score floor 0.1; Italian+English column variants
+- `api/app/ingestion/modules/builtin/paypal_it.py` - PayPal Italy CSV extractor; Italian decimal format handling; skips zero-net rows
+- `api/app/ingestion/modules/builtin/edison_energia_it.py` - Edison Energia PDF extractor; pytesseract OCR; extracts service type, total_due, billing period
+- `api/app/ingestion/modules/builtin/generic_invoice_it.py` - Generic Italian invoice PDF extractor; OCR-based regex extraction
+- `api/pyproject.toml` - Added openpyxl>=3.1.0 dependency
 
 ## Decisions Made
 
 - FINGERPRINT keywords for all modules derived from actual sample file inspection before writing any code (D-26 compliance)
-- PDF modules return graceful low-confidence skeleton when pytesseract/pdf2image not installed — OCR tier handles full PDF extraction better; avoids import-time failures
+- PDF modules return graceful low-confidence skeleton when pytesseract/pdf2image not installed - OCR tier handles full PDF extraction better; avoids import-time failures
 - PayPal Italian CSV requires dedicated decimal parser (comma as decimal separator)
 - Revolut, Satispay, PayPal modules skip cancelled/reverted/declined transactions
 - openpyxl added as project dependency per D-41
@@ -135,8 +135,8 @@ Each task was committed atomically:
 
 ## Issues Encountered
 
-- `openpyxl` not available in project venv at execution start — installed via `uv pip install openpyxl` into `.venv`, then added to `pyproject.toml`. Normal setup step for first run.
-- PDF modules (Edison, GenericInvoice) could not be fully tested for OCR output since `pytesseract`/`pdf2image` are not installed in the executor environment. Both modules gracefully return low-confidence ExtractionResult without crashing — the OCR tier will handle full PDF extraction in the running Docker container where tesseract-ocr is installed (D-41).
+- `openpyxl` not available in project venv at execution start - installed via `uv pip install openpyxl` into `.venv`, then added to `pyproject.toml`. Normal setup step for first run.
+- PDF modules (Edison, GenericInvoice) could not be fully tested for OCR output since `pytesseract`/`pdf2image` are not installed in the executor environment. Both modules gracefully return low-confidence ExtractionResult without crashing - the OCR tier will handle full PDF extraction in the running Docker container where tesseract-ocr is installed (D-41).
 
 ## User Setup Required
 
@@ -145,8 +145,8 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - All 7 builtin modules ready for use by ingestion_service.py (plan 02-05)
-- Registry loads all modules at startup — verified
-- FINGERPRINT patterns verified against real sample files — registry matching will work correctly
+- Registry loads all modules at startup - verified
+- FINGERPRINT patterns verified against real sample files - registry matching will work correctly
 - PDF modules will benefit from pytesseract being available in Docker container (D-41 already specifies `apt-get install tesseract-ocr` in Dockerfile)
 
 ## Self-Check: PASSED

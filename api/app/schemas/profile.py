@@ -18,7 +18,7 @@ IncomeSourceType = Literal[
 
 
 class IncomeSource(BaseModel):
-    """Rich income source object — replaces the old list[str] income_sources."""
+    """Rich income source object - replaces the old list[str] income_sources."""
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     label: str
@@ -105,7 +105,7 @@ class UserProfileDTO(BaseModel):
     confirmed: bool = False
     profile_generated_at: str | None = Field(alias="profileGeneratedAt", default=None)
     updated_at: str = Field(alias="updatedAt")
-    # New fields (C + A) — optional so existing clients don't break
+    # New fields (C + A) - optional so existing clients don't break
     extraordinary_income_total: float | None = Field(
         alias="extraordinaryIncomeTotal", default=None
     )
@@ -139,7 +139,7 @@ class QuestionnaireAnswers(BaseModel):
     job_other: str | None = Field(alias="jobOther", default=None)
     monthly_net_income: float = Field(alias="monthlyNetIncome")
     currency: str = "EUR"
-    # Income sources — rich objects (replaces old list[str])
+    # Income sources - rich objects (replaces old list[str])
     income_sources: list[IncomeSource] = Field(
         alias="incomeSources", default_factory=list
     )

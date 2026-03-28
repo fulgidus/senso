@@ -29,7 +29,7 @@ Before executing, discover project context:
 
 This ensures project-specific patterns, conventions, and best practices are applied during execution.
 
-**AGENTS.md enforcement:** If `./AGENTS.md` exists, treat its directives as hard constraints during execution. Before committing each task, verify that code changes do not violate AGENTS.md rules (forbidden patterns, required conventions, mandated tools). If a task action would contradict a AGENTS.md directive, apply the AGENTS.md rule — it takes precedence over plan instructions. Document any AGENTS.md-driven adjustments as deviations (Rule 2: auto-add missing critical functionality).
+**AGENTS.md enforcement:** If `./AGENTS.md` exists, treat its directives as hard constraints during execution. Before committing each task, verify that code changes do not violate AGENTS.md rules (forbidden patterns, required conventions, mandated tools). If a task action would contradict a AGENTS.md directive, apply the AGENTS.md rule - it takes precedence over plan instructions. Document any AGENTS.md-driven adjustments as deviations (Rule 2: auto-add missing critical functionality).
 </project_context>
 
 <execution_flow>
@@ -50,7 +50,7 @@ cat .planning/STATE.md 2>/dev/null
 ```
 
 If STATE.md missing but .planning/ exists: offer to reconstruct or continue without.
-If .planning/ missing: Error — project not initialized.
+If .planning/ missing: Error - project not initialized.
 </step>
 
 <step name="load_plan">
@@ -73,11 +73,11 @@ PLAN_START_EPOCH=$(date +%s)
 grep -n "type=\"checkpoint" [plan-path]
 ```
 
-**Pattern A: Fully autonomous (no checkpoints)** — Execute all tasks, create SUMMARY, commit.
+**Pattern A: Fully autonomous (no checkpoints)** - Execute all tasks, create SUMMARY, commit.
 
-**Pattern B: Has checkpoints** — Execute until checkpoint, STOP, return structured message. You will NOT be resumed.
+**Pattern B: Has checkpoints** - Execute until checkpoint, STOP, return structured message. You will NOT be resumed.
 
-**Pattern C: Continuation** — Check `<completed_tasks>` in prompt, verify commits exist, resume from specified task.
+**Pattern C: Continuation** - Check `<completed_tasks>` in prompt, verify commits exist, resume from specified task.
 </step>
 
 <step name="execute_tasks">
@@ -92,7 +92,7 @@ For each task:
    - Track completion + commit hash for Summary
 
 2. **If `type="checkpoint:*"`:**
-   - STOP immediately — return structured checkpoint message
+   - STOP immediately - return structured checkpoint message
    - A fresh agent will be spawned to continue
 
 3. After all tasks: run overall verification, confirm success criteria, document deviations
@@ -123,7 +123,7 @@ No user permission needed for Rules 1-3.
 
 **Examples:** Missing error handling, no input validation, missing null checks, no auth on protected routes, missing authorization, no CSRF/CORS, no rate limiting, missing DB indexes, no error logging
 
-**Critical = required for correct/secure/performant operation.** These aren't "features" — they're correctness requirements.
+**Critical = required for correct/secure/performant operation.** These aren't "features" - they're correctness requirements.
 
 ---
 
@@ -168,7 +168,7 @@ Only auto-fix issues DIRECTLY caused by the current task's changes. Pre-existing
 
 **FIX ATTEMPT LIMIT:**
 Track auto-fix attempts per task. After 3 auto-fix attempts on a single task:
-- STOP fixing — document remaining issues in SUMMARY.md under "Deferred Issues"
+- STOP fixing - document remaining issues in SUMMARY.md under "Deferred Issues"
 - Continue to the next task (or return checkpoint if blocked)
 - Do NOT restart the build to find more issues
 </deviation_rules>
@@ -226,19 +226,19 @@ For full automation-first patterns, server lifecycle, CLI handling:
 
 - **checkpoint:human-verify** → Auto-approve. Log `⚡ Auto-approved: [what-built]`. Continue to next task.
 - **checkpoint:decision** → Auto-select first option (planners front-load the recommended choice). Log `⚡ Auto-selected: [option name]`. Continue to next task.
-- **checkpoint:human-action** → STOP normally. Auth gates cannot be automated — return structured checkpoint message using checkpoint_return_format.
+- **checkpoint:human-action** → STOP normally. Auth gates cannot be automated - return structured checkpoint message using checkpoint_return_format.
 
 **Standard checkpoint behavior** (when `AUTO_CFG` is not `"true"`):
 
 When encountering `type="checkpoint:*"`: **STOP immediately.** Return structured checkpoint message using checkpoint_return_format.
 
-**checkpoint:human-verify (90%)** — Visual/functional verification after automation.
+**checkpoint:human-verify (90%)** - Visual/functional verification after automation.
 Provide: what was built, exact verification steps (URLs, commands, expected behavior).
 
-**checkpoint:decision (9%)** — Implementation choice needed.
+**checkpoint:decision (9%)** - Implementation choice needed.
 Provide: decision context, options table (pros/cons), selection prompt.
 
-**checkpoint:human-action (1% - rare)** — Truly unavoidable manual step (email link, 2FA code).
+**checkpoint:human-action (1% - rare)** - Truly unavoidable manual step (email link, 2FA code).
 Provide: what automation was attempted, single manual step needed, verification command.
 
 </checkpoint_protocol>
@@ -314,13 +314,13 @@ git add src/types/user.ts
 
 **3. Commit type:**
 
-| Type       | When                                            |
-| ---------- | ----------------------------------------------- |
-| `feat`     | New feature, endpoint, component                |
-| `fix`      | Bug fix, error correction                       |
-| `test`     | Test-only changes (TDD RED)                     |
-| `refactor` | Code cleanup, no behavior change                |
-| `chore`    | Config, tooling, dependencies                   |
+| Type       | When                             |
+| ---------- | -------------------------------- |
+| `feat`     | New feature, endpoint, component |
+| `fix`      | Bug fix, error correction        |
+| `test`     | Test-only changes (TDD RED)      |
+| `refactor` | Code cleanup, no behavior change |
+| `chore`    | Config, tooling, dependencies    |
 
 **4. Commit:**
 
@@ -340,7 +340,7 @@ git commit -m "{type}({phase}-{plan}): {concise task description}
 ```
 
 **5. Record hash:**
-- **Single-repo:** `TASK_COMMIT=$(git rev-parse --short HEAD)` — track for SUMMARY.
+- **Single-repo:** `TASK_COMMIT=$(git rev-parse --short HEAD)` - track for SUMMARY.
 - **Multi-repo (sub_repos):** Extract hashes from `commit-to-subrepo` JSON output (`repos.{name}.hash`). Record all hashes for SUMMARY (e.g., `backend@abc1234, frontend@def5678`).
 
 **6. Check for untracked files:** After running scripts or tools, check `git status --short | grep '^??'`. For any new untracked files: commit if intentional, add to `.gitignore` if generated/runtime output. Never leave generated files untracked.
@@ -349,7 +349,7 @@ git commit -m "{type}({phase}-{plan}): {concise task description}
 <summary_creation>
 After all tasks complete, create `{phase}-{plan}-SUMMARY.md` at `.planning/phases/XX-name/`.
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 **Use template:** @/home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/summary.md
 
@@ -385,7 +385,7 @@ Or: "None - plan executed exactly as written."
 - Placeholder text: "not available", "coming soon", "placeholder", "TODO", "FIXME"
 - Components with no data source wired (props always receiving empty/mock data)
 
-If any stubs exist, add a `## Known Stubs` section to the SUMMARY listing each stub with its file, line, and reason. These are tracked for the verifier to catch. Do NOT mark a plan as complete if stubs exist that prevent the plan's goal from being achieved — either wire the data or document in the plan why the stub is intentional and which future plan will resolve it.
+If any stubs exist, add a `## Known Stubs` section to the SUMMARY listing each stub with its file, line, and reason. These are tracked for the verifier to catch. Do NOT mark a plan as complete if stubs exist that prevent the plan's goal from being achieved - either wire the data or document in the plan why the stub is intentional and which future plan will resolve it.
 </summary_creation>
 
 <self_check>
@@ -465,7 +465,7 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs({phase}-{plan}): complete [plan-name] plan" --files .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md .planning/REQUIREMENTS.md
 ```
 
-Separate from per-task commits — captures execution results only.
+Separate from per-task commits - captures execution results only.
 </final_commit>
 
 <completion_format>

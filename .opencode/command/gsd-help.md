@@ -17,5 +17,5 @@ Output ONLY the reference content below. Do NOT add:
 
 <process>
 Output the complete GSD command reference from @/home/fulgidus/Documents/senso/.opencode/get-shit-done/workflows/help.md.
-Display the reference content directly — no additions or modifications.
+Display the reference content directly - no additions or modifications.
 </process>

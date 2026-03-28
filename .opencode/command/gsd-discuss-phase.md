@@ -14,17 +14,17 @@ tools:
 ---
 
 <objective>
-Extract implementation decisions that downstream agents need — researcher and planner will use CONTEXT.md to know what to investigate and what choices are locked.
+Extract implementation decisions that downstream agents need - researcher and planner will use CONTEXT.md to know what to investigate and what choices are locked.
 
 **How it works:**
 1. Load prior context (PROJECT.md, REQUIREMENTS.md, STATE.md, prior CONTEXT.md files)
 2. Scout codebase for reusable assets and patterns
-3. Analyze phase — skip gray areas already decided in prior phases
-4. Present remaining gray areas — user selects which to discuss
+3. Analyze phase - skip gray areas already decided in prior phases
+4. Present remaining gray areas - user selects which to discuss
 5. Deep-dive each selected area until satisfied
 6. Create CONTEXT.md with decisions that guide research and planning
 
-**Output:** `{phase_num}-CONTEXT.md` — decisions clear enough that downstream agents can act without asking the user again
+**Output:** `{phase_num}-CONTEXT.md` - decisions clear enough that downstream agents can act without asking the user again
 </objective>
 
 <execution_context>
@@ -49,7 +49,7 @@ If `DISCUSS_MODE` is `"assumptions"`: Read and execute @/home/fulgidus/Documents
 
 If `DISCUSS_MODE` is `"discuss"` (or unset, or any other value): Read and execute @/home/fulgidus/Documents/senso/.opencode/get-shit-done/workflows/discuss-phase.md end-to-end.
 
-**MANDATORY:** The execution_context files listed above ARE the instructions. Read the workflow file BEFORE taking any action. The objective and success_criteria sections in this command file are summaries — the workflow file contains the complete step-by-step process with all required behaviors, config checks, and interaction patterns. Do not improvise from the summary.
+**MANDATORY:** The execution_context files listed above ARE the instructions. Read the workflow file BEFORE taking any action. The objective and success_criteria sections in this command file are summaries - the workflow file contains the complete step-by-step process with all required behaviors, config checks, and interaction patterns. Do not improvise from the summary.
 </process>
 
 <success_criteria>

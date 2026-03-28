@@ -107,7 +107,7 @@ Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tag
    - Ask about pushing tag
 
 8. **Offer next steps:**
-   - `/gsd-new-milestone` — start next milestone (questioning → research → requirements → roadmap)
+   - `/gsd-new-milestone` - start next milestone (questioning → research → requirements → roadmap)
 
 </process>
 

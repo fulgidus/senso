@@ -1,7 +1,7 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**S.E.N.S.O. — Sistema Educativo per Numeri, Spese e Obiettivi**
+**S.E.N.S.O. - Sistema Educativo per Numeri, Spese e Obiettivi**
 
 S.E.N.S.O. is a voice-first AI financial education assistant for young adults (18-30) that turns real spending decisions into personalized learning moments. Users upload real financial documents, then ask "Can I buy this?" and receive grounded answers based on their own numbers, with clear reasoning, educational resources, and actionable next steps. It is designed as a working, demo-ready product for a one-day hackathon where AI must be central and non-decorative.
 
@@ -9,11 +9,11 @@ S.E.N.S.O. is a voice-first AI financial education assistant for young adults (1
 
 ### Constraints
 
-- **Timeline**: One-day hackathon build finish and same-day demo — we are working beforehand to prepare for the hackathon.
-- **Product**: Must be concretely demoable, not conceptual — every core interaction must run end-to-end during demo.
+- **Timeline**: One-day hackathon build finish and same-day demo - we are working beforehand to prepare for the hackathon.
+- **Product**: Must be concretely demoable, not conceptual - every core interaction must run end-to-end during demo.
 - **AI Centrality**: AI must drive the core experience (ingestion reasoning + conversational guidance), not decorative add-ons.
-- **Audience**: Young adults 18-30 with low financial literacy — language and UX must be simple, direct, and jargon-light.
-- **Voice**: Voice interaction is a primary differentiator in this challenge context — spoken I/O quality must be reliable.
+- **Audience**: Young adults 18-30 with low financial literacy - language and UX must be simple, direct, and jargon-light.
+- **Voice**: Voice interaction is a primary differentiator in this challenge context - spoken I/O quality must be reliable.
 - **Data/Safety**: Financial guidance must avoid unsafe advice patterns and enforce persona boundaries consistently.
 <!-- GSD:project-end -->
 

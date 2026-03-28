@@ -9,7 +9,7 @@ tools:
 ---
 <objective>
 Detect the current project state and automatically invoke the next logical GSD workflow step.
-No arguments needed — reads STATE.md, ROADMAP.md, and phase directories to determine what comes next.
+No arguments needed - reads STATE.md, ROADMAP.md, and phase directories to determine what comes next.
 
 Designed for rapid multi-project workflows where remembering which phase/step you're on is overhead.
 </objective>

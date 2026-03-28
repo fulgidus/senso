@@ -33,8 +33,8 @@ INIT=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tool
 
 Parse JSON for: `milestone_version`, `milestone_name`, `phase_count`, `completed_phases`, `roadmap_exists`, `state_exists`, `commit_docs`.
 
-**If `roadmap_exists` is false:** Error — "No ROADMAP.md found. Run `/gsd-new-milestone` first."
-**If `state_exists` is false:** Error — "No STATE.md found. Run `/gsd-new-milestone` first."
+**If `roadmap_exists` is false:** Error - "No ROADMAP.md found. Run `/gsd-new-milestone` first."
+**If `state_exists` is false:** Error - "No STATE.md found. Run `/gsd-new-milestone` first."
 
 Display startup banner:
 
@@ -43,7 +43,7 @@ Display startup banner:
  GSD ► AUTONOMOUS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
- Milestone: {milestone_version} — {milestone_name}
+ Milestone: {milestone_version} - {milestone_name}
  Phases: {phase_count} total, {completed_phases} complete
 ```
 
@@ -65,7 +65,7 @@ Parse the JSON `phases` array.
 
 **Filter to incomplete phases:** Keep only phases where `disk_status !== "complete"` OR `roadmap_complete === false`.
 
-**Apply `--from N` filter:** If `FROM_PHASE` was provided, additionally filter out phases where `number < FROM_PHASE` (use numeric comparison — handles decimal phases like "5.1").
+**Apply `--from N` filter:** If `FROM_PHASE` was provided, additionally filter out phases where `number < FROM_PHASE` (use numeric comparison - handles decimal phases like "5.1").
 
 **Sort by `number`** in numeric ascending order.
 
@@ -86,12 +86,12 @@ Exit cleanly.
 ```
 ## Phase Plan
 
-| # | Phase | Status |
-|---|-------|--------|
-| 5 | Skill Scaffolding & Phase Discovery | In Progress |
-| 6 | Smart Discuss | Not Started |
-| 7 | Auto-Chain Refinements | Not Started |
-| 8 | Lifecycle Orchestration | Not Started |
+| #   | Phase                               | Status      |
+| --- | ----------------------------------- | ----------- |
+| 5   | Skill Scaffolding & Phase Discovery | In Progress |
+| 6   | Smart Discuss                       | Not Started |
+| 7   | Auto-Chain Refinements              | Not Started |
+| 8   | Lifecycle Orchestration             | Not Started |
 ```
 
 **Fetch details for each phase:**
@@ -128,10 +128,10 @@ PHASE_STATE=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/g
 
 Parse `has_context` from JSON.
 
-**If has_context is true:** Skip discuss — context already gathered. Display:
+**If has_context is true:** Skip discuss - context already gathered. Display:
 
 ```
-Phase ${PHASE_NUM}: Context exists — skipping discuss.
+Phase ${PHASE_NUM}: Context exists - skipping discuss.
 ```
 
 Proceed to 3b.
@@ -142,10 +142,10 @@ Proceed to 3b.
 SKIP_DISCUSS=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" config-get workflow.skip_discuss 2>/dev/null || echo "false")
 ```
 
-**If SKIP_DISCUSS is `true`:** Skip discuss entirely — the ROADMAP phase description is the spec. Display:
+**If SKIP_DISCUSS is `true`:** Skip discuss entirely - the ROADMAP phase description is the spec. Display:
 
 ```
-Phase ${PHASE_NUM}: Discuss skipped (workflow.skip_discuss=true) — using ROADMAP phase goal as spec.
+Phase ${PHASE_NUM}: Discuss skipped (workflow.skip_discuss=true) - using ROADMAP phase goal as spec.
 ```
 
 Write a minimal CONTEXT.md so downstream plan-phase has valid input. Get phase details:
@@ -174,7 +174,7 @@ Extract `goal` and `requirements` from JSON. Write `${phase_dir}/${padded_phase}
 ## Implementation Decisions
 
 ### the agent's Discretion
-All implementation choices are at the agent's discretion — discuss phase was skipped per user setting. Use ROADMAP phase goal, success criteria, and codebase conventions to guide decisions.
+All implementation choices are at the agent's discretion - discuss phase was skipped per user setting. Use ROADMAP phase goal, success criteria, and codebase conventions to guide decisions.
 
 </decisions>
 
@@ -188,14 +188,14 @@ Codebase context will be gathered during plan-phase research.
 <specifics>
 ## Specific Ideas
 
-No specific requirements — discuss phase skipped. Refer to ROADMAP phase description and success criteria.
+No specific requirements - discuss phase skipped. Refer to ROADMAP phase description and success criteria.
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-None — discuss phase skipped.
+None - discuss phase skipped.
 
 </deferred>
 ```
@@ -224,7 +224,7 @@ Check `has_context`. If false → go to handle_blocker: "Smart discuss for phase
 Skill(skill="gsd:plan-phase", args="${PHASE_NUM}")
 ```
 
-Verify plan produced output — re-run `init phase-op` and check `has_plans`. If false → go to handle_blocker: "Plan phase ${PHASE_NUM} did not produce any plans."
+Verify plan produced output - re-run `init phase-op` and check `has_plans`. If false → go to handle_blocker: "Plan phase ${PHASE_NUM} did not produce any plans."
 
 **3c. Execute**
 
@@ -256,7 +256,7 @@ Go to handle_blocker: "Execute phase ${PHASE_NUM} did not produce verification r
 
 Display:
 ```
-Phase ${PHASE_NUM} ✅ ${PHASE_NAME} — Verification passed
+Phase ${PHASE_NUM} ✅ ${PHASE_NAME} - Verification passed
 ```
 
 Proceed to iterate step.
@@ -271,9 +271,9 @@ Display the items, then ask user via question:
 
 On **"Validate now"**: Present the specific items from VERIFICATION.md's human_verification section. After user reviews, ask:
 - **question:** "Validation result?"
-- **options:** "All good — continue" / "Found issues"
+- **options:** "All good - continue" / "Found issues"
 
-On "All good — continue": Display `Phase ${PHASE_NUM} ✅ Human validation passed` and proceed to iterate step.
+On "All good - continue": Display `Phase ${PHASE_NUM} ✅ Human validation passed` and proceed to iterate step.
 
 On "Found issues": Go to handle_blocker with the user's reported issues as the description.
 
@@ -283,7 +283,7 @@ On **"Continue without validation"**: Display `Phase ${PHASE_NUM} ⏭ Human vali
 
 Read gap summary from VERIFICATION.md (score and missing items). Display:
 ```
-⚠ Phase ${PHASE_NUM}: ${PHASE_NAME} — Gaps Found
+⚠ Phase ${PHASE_NUM}: ${PHASE_NAME} - Gaps Found
 Score: {N}/{M} must-haves verified
 ```
 
@@ -297,7 +297,7 @@ On **"Run gap closure"**: Execute gap closure cycle (limit: 1 attempt):
 Skill(skill="gsd:plan-phase", args="${PHASE_NUM} --gaps")
 ```
 
-Verify gap plans were created — re-run `init phase-op ${PHASE_NUM}` and check `has_plans`. If no new gap plans → go to handle_blocker: "Gap closure planning for phase ${PHASE_NUM} did not produce plans."
+Verify gap plans were created - re-run `init phase-op ${PHASE_NUM}` and check `has_plans`. If no new gap plans → go to handle_blocker: "Gap closure planning for phase ${PHASE_NUM} did not produce plans."
 
 Re-execute:
 ```
@@ -322,7 +322,7 @@ This limits gap closure to 1 automatic retry to prevent infinite loops.
 
 On **"Continue without fixing"**: Display `Phase ${PHASE_NUM} ⏭ Gaps deferred` and proceed to iterate step.
 
-On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps remain in phase ${PHASE_NUM}".
+On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped - gaps remain in phase ${PHASE_NUM}".
 
 </step>
 
@@ -330,7 +330,7 @@ On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps 
 
 ## Smart Discuss
 
-Run smart discuss for the current phase. Proposes grey area answers in batch tables — the user accepts or overrides per area. Produces identical CONTEXT.md output to regular discuss-phase.
+Run smart discuss for the current phase. Proposes grey area answers in batch tables - the user accepts or overrides per area. Produces identical CONTEXT.md output to regular discuss-phase.
 
 > **Note:** Smart discuss is an autonomous-optimized variant of the `gsd:discuss-phase` skill. It produces identical CONTEXT.md output but uses batch table proposals instead of sequential questioning. The original `discuss-phase` skill remains unchanged (per CTRL-03). Future milestones may extract this to a separate skill file.
 
@@ -357,9 +357,9 @@ cat .planning/STATE.md 2>/dev/null
 ```
 
 Extract from these:
-- **PROJECT.md** — Vision, principles, non-negotiables, user preferences
-- **REQUIREMENTS.md** — Acceptance criteria, constraints, must-haves vs nice-to-haves
-- **STATE.md** — Current progress, decisions logged so far
+- **PROJECT.md** - Vision, principles, non-negotiables, user preferences
+- **REQUIREMENTS.md** - Acceptance criteria, constraints, must-haves vs nice-to-haves
+- **STATE.md** - Current progress, decisions logged so far
 
 **Read all prior CONTEXT.md files:**
 
@@ -368,8 +368,8 @@ find .planning/phases -name "*-CONTEXT.md" 2>/dev/null | sort
 ```
 
 For each CONTEXT.md where phase number < current phase:
-- Read the `<decisions>` section — these are locked preferences
-- Read `<specifics>` — particular references or "I want it like X" moments
+- Read the `<decisions>` section - these are locked preferences
+- Read `<specifics>` - particular references or "I want it like X" moments
 - Note patterns (e.g., "user consistently prefers minimal UI", "user rejected verbose output")
 
 **Build internal prior_decisions context** (do not write to file):
@@ -387,7 +387,7 @@ For each CONTEXT.md where phase number < current phase:
 </prior_decisions>
 ```
 
-If no prior context exists, continue without — expected for early phases.
+If no prior context exists, continue without - expected for early phases.
 
 ---
 
@@ -415,9 +415,9 @@ ls src/components/ src/hooks/ src/lib/ src/utils/ 2>/dev/null
 Read the 3-5 most relevant files to understand existing patterns.
 
 **Build internal codebase_context** (do not write to file):
-- **Reusable assets** — existing components, hooks, utilities usable in this phase
-- **Established patterns** — how the codebase does state management, styling, data fetching
-- **Integration points** — where new code connects (routes, nav, providers)
+- **Reusable assets** - existing components, hooks, utilities usable in this phase
+- **Established patterns** - how the codebase does state management, styling, data fetching
+- **Integration points** - where new code connects (routes, nav, providers)
 
 ---
 
@@ -431,7 +431,7 @@ DETAIL=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-to
 
 Extract `goal`, `requirements`, `success_criteria` from the JSON response.
 
-**Infrastructure detection — check FIRST before generating grey areas:**
+**Infrastructure detection - check FIRST before generating grey areas:**
 
 A phase is pure infrastructure when ALL of these are true:
 1. Goal keywords match: "scaffolding", "plumbing", "setup", "configuration", "migration", "refactor", "rename", "restructure", "upgrade", "infrastructure"
@@ -441,17 +441,17 @@ A phase is pure infrastructure when ALL of these are true:
 **If infrastructure-only:** Skip Sub-step 4. Jump directly to Sub-step 5 with minimal CONTEXT.md. Display:
 
 ```
-Phase ${PHASE_NUM}: Infrastructure phase — skipping discuss, writing minimal context.
+Phase ${PHASE_NUM}: Infrastructure phase - skipping discuss, writing minimal context.
 ```
 
 Use these defaults for the CONTEXT.md:
 - `<domain>`: Phase boundary from ROADMAP goal
-- `<decisions>`: Single "### the agent's Discretion" subsection — "All implementation choices are at the agent's discretion — pure infrastructure phase"
+- `<decisions>`: Single "### the agent's Discretion" subsection - "All implementation choices are at the agent's discretion - pure infrastructure phase"
 - `<code_context>`: Whatever the codebase scout found
-- `<specifics>`: "No specific requirements — infrastructure phase"
+- `<specifics>`: "No specific requirements - infrastructure phase"
 - `<deferred>`: "None"
 
-**If NOT infrastructure — generate grey area proposals:**
+**If NOT infrastructure - generate grey area proposals:**
 
 Determine domain type from the phase goal:
 - Something users **SEE** → visual: layout, interactions, states, density
@@ -460,7 +460,7 @@ Determine domain type from the phase goal:
 - Something users **READ** → content: structure, tone, depth, flow
 - Something being **ORGANIZED** → organization: criteria, grouping, exceptions, naming
 
-Check prior_decisions — skip grey areas already decided in prior phases.
+Check prior_decisions - skip grey areas already decided in prior phases.
 
 Generate **3-4 grey areas** with **~4 questions each**. For each question:
 - **Pre-select a recommended answer** based on: prior decisions (consistency), codebase patterns (reuse), domain conventions (standard approaches), ROADMAP success criteria
@@ -478,18 +478,18 @@ Display a table:
 ```
 ### Grey Area {M}/{N}: {Area Name}
 
-| # | Question | ✅ Recommended | Alternative(s) |
-|---|----------|---------------|-----------------|
-| 1 | {question} | {answer} — {rationale} | {alt1}; {alt2} |
-| 2 | {question} | {answer} — {rationale} | {alt1} |
-| 3 | {question} | {answer} — {rationale} | {alt1}; {alt2} |
-| 4 | {question} | {answer} — {rationale} | {alt1} |
+| #   | Question   | ✅ Recommended          | Alternative(s) |
+| --- | ---------- | ---------------------- | -------------- |
+| 1   | {question} | {answer} - {rationale} | {alt1}; {alt2} |
+| 2   | {question} | {answer} - {rationale} | {alt1}         |
+| 3   | {question} | {answer} - {rationale} | {alt1}; {alt2} |
+| 4   | {question} | {answer} - {rationale} | {alt1}         |
 ```
 
 Then prompt the user via **question**:
 - **header:** "Area {M}/{N}"
 - **question:** "Accept these answers for {Area Name}?"
-- **options:** Build dynamically — always "Accept all" first, then "Change Q1" through "Change QN" for each question (up to 4), then "Discuss deeper" last. Cap at 6 explicit options max (question adds "Other" automatically).
+- **options:** Build dynamically - always "Accept all" first, then "Change Q1" through "Change QN" for each question (up to 4), then "Discuss deeper" last. Cap at 6 explicit options max (question adds "Other" automatically).
 
 **On "Accept all":** Record all recommended answers for this area. Move to next area.
 
@@ -500,7 +500,7 @@ Then prompt the user via **question**:
 
 Record the user's choice. Re-display the updated table with the change reflected. Re-present the full acceptance prompt so the user can make additional changes or accept.
 
-**On "Discuss deeper":** Switch to interactive mode for this area only — ask questions one at a time using question with 2-3 concrete options per question plus "You decide". After 4 questions, prompt:
+**On "Discuss deeper":** Switch to interactive mode for this area only - ask questions one at a time using question with 2-3 concrete options per question plus "You decide". After 4 questions, prompt:
 - **header:** "{Area Name}"
 - **question:** "More questions about {area name}, or move to next?"
 - **options:** "More questions" / "Next area"
@@ -512,7 +512,7 @@ If "More questions", ask 4 more. If "Next area", display final summary table of 
 **Scope creep handling:** If user mentions something outside the phase domain:
 
 ```
-"{Feature} sounds like a new capability — that belongs in its own phase.
+"{Feature} sounds like a new capability - that belongs in its own phase.
 I'll note it as a deferred idea.
 
 Back to {current area}: {return to current question}"
@@ -539,7 +539,7 @@ Use **exactly** this structure (identical to discuss-phase output):
 <domain>
 ## Phase Boundary
 
-{Domain boundary statement from analysis — what this phase delivers}
+{Domain boundary statement from analysis - what this phase delivers}
 
 </domain>
 
@@ -558,7 +558,7 @@ Use **exactly** this structure (identical to discuss-phase output):
 ...
 
 ### the agent's Discretion
-{Any "You decide" answers collected — note the agent has flexibility here}
+{Any "You decide" answers collected - note the agent has flexibility here}
 
 </decisions>
 
@@ -566,13 +566,13 @@ Use **exactly** this structure (identical to discuss-phase output):
 ## Existing Code Insights
 
 ### Reusable Assets
-- {From codebase scout — components, hooks, utilities}
+- {From codebase scout - components, hooks, utilities}
 
 ### Established Patterns
-- {From codebase scout — state management, styling, data fetching}
+- {From codebase scout - state management, styling, data fetching}
 
 ### Integration Points
-- {From codebase scout — where new code connects}
+- {From codebase scout - where new code connects}
 
 </code_context>
 
@@ -580,7 +580,7 @@ Use **exactly** this structure (identical to discuss-phase output):
 ## Specific Ideas
 
 {Any specific references or "I want it like X" from discussion}
-{If none: "No specific requirements — open to standard approaches"}
+{If none: "No specific requirements - open to standard approaches"}
 
 </specifics>
 
@@ -588,7 +588,7 @@ Use **exactly** this structure (identical to discuss-phase output):
 ## Deferred Ideas
 
 {Ideas captured but out of scope for this phase}
-{If none: "None — discussion stayed within phase scope"}
+{If none: "None - discussion stayed within phase scope"}
 
 </deferred>
 ```
@@ -653,7 +653,7 @@ Display lifecycle transition banner:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
  All phases complete → Starting lifecycle: audit → complete → cleanup
- Milestone: {milestone_version} — {milestone_name}
+ Milestone: {milestone_version} - {milestone_name}
 ```
 
 **5a. Audit**
@@ -671,16 +671,16 @@ AUDIT_STATUS=$(grep "^status:" "${AUDIT_FILE}" 2>/dev/null | head -1 | cut -d: -
 
 **If AUDIT_STATUS is empty** (no audit file or no status field):
 
-Go to handle_blocker: "Audit did not produce results — audit file missing or malformed."
+Go to handle_blocker: "Audit did not produce results - audit file missing or malformed."
 
 **If `passed`:**
 
 Display:
 ```
-Audit ✅ passed — proceeding to complete milestone
+Audit ✅ passed - proceeding to complete milestone
 ```
 
-Proceed to 5b (no user pause — per CTRL-01).
+Proceed to 5b (no user pause - per CTRL-01).
 
 **If `gaps_found`:**
 
@@ -691,11 +691,11 @@ Read the gaps summary from the audit file. Display:
 
 Ask user via question:
 - **question:** "Milestone audit found gaps. How to proceed?"
-- **options:** "Continue anyway — accept gaps" / "Stop — fix gaps manually"
+- **options:** "Continue anyway - accept gaps" / "Stop - fix gaps manually"
 
-On **"Continue anyway"**: Display `Audit ⏭ Gaps accepted — proceeding to complete milestone` and proceed to 5b.
+On **"Continue anyway"**: Display `Audit ⏭ Gaps accepted - proceeding to complete milestone` and proceed to 5b.
 
-On **"Stop"**: Go to handle_blocker with "User stopped — audit gaps remain. Run /gsd-audit-milestone to review, then /gsd-complete-milestone when ready."
+On **"Stop"**: Go to handle_blocker with "User stopped - audit gaps remain. Run /gsd-audit-milestone to review, then /gsd-complete-milestone when ready."
 
 **If `tech_debt`:**
 
@@ -706,11 +706,11 @@ Read the tech debt summary from the audit file. Display:
 
 Show the summary, then ask user via question:
 - **question:** "Milestone audit found tech debt. How to proceed?"
-- **options:** "Continue with tech debt" / "Stop — address debt first"
+- **options:** "Continue with tech debt" / "Stop - address debt first"
 
-On **"Continue with tech debt"**: Display `Audit ⏭ Tech debt acknowledged — proceeding to complete milestone` and proceed to 5b.
+On **"Continue with tech debt"**: Display `Audit ⏭ Tech debt acknowledged - proceeding to complete milestone` and proceed to 5b.
 
-On **"Stop"**: Go to handle_blocker with "User stopped — tech debt to address. Run /gsd-audit-milestone to review details."
+On **"Stop"**: Go to handle_blocker with "User stopped - tech debt to address. Run /gsd-audit-milestone to review details."
 
 **5b. Complete Milestone**
 
@@ -732,7 +732,7 @@ If the archive file does not exist, go to handle_blocker: "Complete milestone di
 Skill(skill="gsd:cleanup")
 ```
 
-Cleanup shows its own dry-run and asks user for approval internally — this is an acceptable pause per CTRL-01 since it's an explicit decision about file deletion.
+Cleanup shows its own dry-run and asks user for approval internally - this is an acceptable pause per CTRL-01 since it's an explicit decision about file deletion.
 
 **5d. Final Completion**
 
@@ -743,7 +743,7 @@ Display final completion banner:
  GSD ► AUTONOMOUS ▸ COMPLETE 🎉
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
- Milestone: {milestone_version} — {milestone_name}
+ Milestone: {milestone_version} - {milestone_name}
  Status: Complete ✅
  Lifecycle: audit ✅ → complete ✅ → cleanup ✅
 
@@ -761,13 +761,13 @@ When any phase operation fails or a blocker is detected, present 3 options via q
 **Prompt:** "Phase {N} ({Name}) encountered an issue: {description}"
 
 **Options:**
-1. **"Fix and retry"** — Re-run the failed step (discuss, plan, or execute) for this phase
-2. **"Skip this phase"** — Mark phase as skipped, continue to the next incomplete phase
-3. **"Stop autonomous mode"** — Display summary of progress so far and exit cleanly
+1. **"Fix and retry"** - Re-run the failed step (discuss, plan, or execute) for this phase
+2. **"Skip this phase"** - Mark phase as skipped, continue to the next incomplete phase
+3. **"Stop autonomous mode"** - Display summary of progress so far and exit cleanly
 
 **On "Fix and retry":** Loop back to the failed step within execute_phase. If the same step fails again after retry, re-present these options.
 
-**On "Skip this phase":** Log `Phase {N} ⏭ {Name} — Skipped by user` and proceed to iterate.
+**On "Skip this phase":** Log `Phase {N} ⏭ {Name} - Skipped by user` and proceed to iterate.
 
 **On "Stop autonomous mode":** Display progress summary:
 
@@ -808,7 +808,7 @@ When any phase operation fails or a blocker is detected, present 3 options via q
 - [ ] Audit result routing: passed → auto-continue, gaps_found → user decides, tech_debt → user decides
 - [ ] Audit technical failure (no file/no status) routes to handle_blocker
 - [ ] Complete-milestone invoked via Skill() with ${milestone_version} arg
-- [ ] Cleanup invoked via Skill() — internal confirmation is acceptable (CTRL-01)
+- [ ] Cleanup invoked via Skill() - internal confirmation is acceptable (CTRL-01)
 - [ ] Final completion banner displayed after lifecycle
 - [ ] Progress bar uses phase number / total milestone phases (not position among incomplete)
 - [ ] Smart discuss documents relationship to discuss-phase with CTRL-03 note

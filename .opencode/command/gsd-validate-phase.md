@@ -13,9 +13,9 @@ tools:
 ---
 <objective>
 Audit Nyquist validation coverage for a completed phase. Three states:
-- (A) VALIDATION.md exists — audit and fill gaps
-- (B) No VALIDATION.md, SUMMARY.md exists — reconstruct from artifacts
-- (C) Phase not executed — exit with guidance
+- (A) VALIDATION.md exists - audit and fill gaps
+- (B) No VALIDATION.md, SUMMARY.md exists - reconstruct from artifacts
+- (C) Phase not executed - exit with guidance
 
 Output: updated VALIDATION.md + generated test files.
 </objective>
@@ -25,7 +25,7 @@ Output: updated VALIDATION.md + generated test files.
 </execution_context>
 
 <context>
-Phase: $ARGUMENTS — optional, defaults to last completed phase.
+Phase: $ARGUMENTS - optional, defaults to last completed phase.
 </context>
 
 <process>

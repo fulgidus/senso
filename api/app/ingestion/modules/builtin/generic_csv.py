@@ -1,12 +1,12 @@
 """
-GenericCSV — fallback extractor for any CSV with date/amount/description columns.
+GenericCSV - fallback extractor for any CSV with date/amount/description columns.
 Supported formats: CSV
-Export path: N/A — generic fallback for unrecognized CSV files.
+Export path: N/A - generic fallback for unrecognized CSV files.
 Sample FINGERPRINT keywords: "date", "amount", "description" (very generic; low score by design per D-27)
 
 This module is the LOWEST priority match (score floor = 0.1 per D-27).
 It attempts best-effort column mapping for Italian and English column name variants.
-No institution-specific logic — returns extracted transactions with reduced confidence.
+No institution-specific logic - returns extracted transactions with reduced confidence.
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ def _find_col(headers: list[str], candidates: list[str]) -> int | None:
 
 
 def extract(file_path: str | Path):  # noqa: ANN201
-    """Best-effort CSV extraction — last-resort fallback."""
+    """Best-effort CSV extraction - last-resort fallback."""
     from app.schemas.ingestion import ExtractionResult, ExtractedDocument, Transaction  # noqa: PLC0415
 
     path = Path(file_path)
@@ -104,7 +104,7 @@ def extract(file_path: str | Path):  # noqa: ANN201
             warnings=["Empty CSV file"],
         )
 
-    # Find header row — search first 5 rows for one that has recognisable column names
+    # Find header row - search first 5 rows for one that has recognisable column names
     header_row_idx = 0
     for i, row in enumerate(rows[:5]):
         row_lower = [c.lower().strip() for c in row if c]
@@ -221,7 +221,7 @@ def extract(file_path: str | Path):  # noqa: ANN201
             statement_period_start=statement_start,
             statement_period_end=statement_end,
         ),
-        # Capped at 0.5 even if transactions found — this is a best-effort fallback
+        # Capped at 0.5 even if transactions found - this is a best-effort fallback
         confidence=0.5 if transactions else 0.1,
         tier_used="module",
         warnings=[] if transactions else ["GenericCSV: no transactions extracted"],

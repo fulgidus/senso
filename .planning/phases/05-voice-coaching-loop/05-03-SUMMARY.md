@@ -24,7 +24,7 @@ tech-stack:
   added:
     - "lit 3.3.2 (dependency)"
   patterns:
-    - "Lit LitElement without decorators — manual property getter/setter + customElements.define() for erasableSyntaxOnly tsconfig compatibility"
+    - "Lit LitElement without decorators - manual property getter/setter + customElements.define() for erasableSyntaxOnly tsconfig compatibility"
     - "React wrapper with useRef + useEffect property assignment for Lit custom element reactivity"
     - "global declare namespace React.JSX.IntrinsicElements augmentation in .d.ts file for hyphenated custom element JSX typing"
 
@@ -39,9 +39,9 @@ key-files:
     - senso/pnpm-lock.yaml
 
 key-decisions:
-  - "Used Lit without decorators (@property, @customElement) — erasableSyntaxOnly tsconfig forbids legacy decorators; used manual getter/setter and customElements.define() instead"
-  - "JSX type augmentation via declare global { namespace React.JSX } in .d.ts — module augmentation approach breaks React types with verbatimModuleSyntax; global namespace augmentation is correct pattern"
-  - "Custom element registered only if not already defined (customElements.get guard) — prevents duplicate registration errors during HMR"
+  - "Used Lit without decorators (@property, @customElement) - erasableSyntaxOnly tsconfig forbids legacy decorators; used manual getter/setter and customElements.define() instead"
+  - "JSX type augmentation via declare global { namespace React.JSX } in .d.ts - module augmentation approach breaks React types with verbatimModuleSyntax; global namespace augmentation is correct pattern"
+  - "Custom element registered only if not already defined (customElements.get guard) - prevents duplicate registration errors during HMR"
 
 requirements-completed: [COCH-02]
 
@@ -66,27 +66,27 @@ completed: 2026-03-28
 - `a2ui-element.ts`: Lit `LitElement` subclass with manual reactive property (no decorators) rendering card/textField/text/timeline/button component types from JSONL `surfaceUpdate` protocol messages
 - `A2UISurface.tsx`: React wrapper that imports and registers `<a2ui-surface>`, uses `useRef` + `useEffect` to set `.jsonl` property directly on the DOM element (Lit-compatible), returns `null` when `jsonl` is null/undefined
 - `custom-elements.d.ts`: Global `React.JSX.IntrinsicElements` augmentation so TypeScript accepts `<a2ui-surface>` in `.tsx` files
-- `ChatScreen.tsx`: AssistantBubble now renders `<A2UISurface jsonl={resp.details_a2ui} />` when `details_a2ui` is non-null — zero render when null
+- `ChatScreen.tsx`: AssistantBubble now renders `<A2UISurface jsonl={resp.details_a2ui} />` when `details_a2ui` is non-null - zero render when null
 - `lit` 3.3.2 added as production dependency
 
 ## Task Commits
 
-1. **Task 1: Lit element + React wrapper** — `282641f` (feat)
-2. **Task 2: Wire into AssistantBubble** — `2a9c0d9` (feat)
+1. **Task 1: Lit element + React wrapper** - `282641f` (feat)
+2. **Task 2: Wire into AssistantBubble** - `2a9c0d9` (feat)
 
 ## Files Created/Modified
 
-- `senso/src/components/a2ui-element.ts` — Lit custom element definition
-- `senso/src/components/A2UISurface.tsx` — React wrapper for the element
-- `senso/src/custom-elements.d.ts` — JSX type declarations for `<a2ui-surface>`
-- `senso/src/features/coaching/ChatScreen.tsx` — A2UISurface import + AssistantBubble render
-- `senso/package.json` — lit 3.3.2 added
+- `senso/src/components/a2ui-element.ts` - Lit custom element definition
+- `senso/src/components/A2UISurface.tsx` - React wrapper for the element
+- `senso/src/custom-elements.d.ts` - JSX type declarations for `<a2ui-surface>`
+- `senso/src/features/coaching/ChatScreen.tsx` - A2UISurface import + AssistantBubble render
+- `senso/package.json` - lit 3.3.2 added
 
 ## Decisions Made
 
-- **No Lit decorators** — `erasableSyntaxOnly: true` in tsconfig forbids them. Used manual `get jsonl()`/`set jsonl()` with `requestUpdate()` and explicit `customElements.define()`.
-- **JSX type via `declare global { namespace React.JSX }`** — Tried `declare module "react"` which breaks the React module entirely under `verbatimModuleSyntax`. Global namespace augmentation is correct for co-existing with React's built-in types.
-- **Property assignment (not attribute)** — Lit reactive properties work via DOM property setter, not HTML attribute; `ref.current.jsonl = value` is the correct Lit integration pattern from React.
+- **No Lit decorators** - `erasableSyntaxOnly: true` in tsconfig forbids them. Used manual `get jsonl()`/`set jsonl()` with `requestUpdate()` and explicit `customElements.define()`.
+- **JSX type via `declare global { namespace React.JSX }`** - Tried `declare module "react"` which breaks the React module entirely under `verbatimModuleSyntax`. Global namespace augmentation is correct for co-existing with React's built-in types.
+- **Property assignment (not attribute)** - Lit reactive properties work via DOM property setter, not HTML attribute; `ref.current.jsonl = value` is the correct Lit integration pattern from React.
 
 ## Deviations from Plan
 
@@ -94,7 +94,7 @@ completed: 2026-03-28
 
 **1. [Rule 1 - Bug] Avoided Lit decorators incompatible with erasableSyntaxOnly**
 - **Found during:** Task 1 (pnpm build TypeScript compile)
-- **Issue:** `@customElement` and `@property` decorators from Lit are not erasable syntax — TS1240 decorator resolution errors
+- **Issue:** `@customElement` and `@property` decorators from Lit are not erasable syntax - TS1240 decorator resolution errors
 - **Fix:** Manual `customElements.define()` registration + `get`/`set` property accessors with `requestUpdate()` call
 - **Files modified:** senso/src/components/a2ui-element.ts
 
@@ -111,8 +111,8 @@ completed: 2026-03-28
 
 ## Pre-existing Issues (Out of Scope)
 
-- `AppShell.tsx(92)`: `navigate` declared but never read — TS6133 pre-existing
-- `profile-api.ts(197)`: `extraMonths` declared but never read — TS6133 pre-existing
+- `AppShell.tsx(92)`: `navigate` declared but never read - TS6133 pre-existing
+- `profile-api.ts(197)`: `extraMonths` declared but never read - TS6133 pre-existing
 - Both cause `pnpm build` to fail TS check but are unrelated to this plan's work
 
 ## Next Phase Readiness

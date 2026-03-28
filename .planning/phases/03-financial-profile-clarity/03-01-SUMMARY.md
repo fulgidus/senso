@@ -15,8 +15,8 @@ provides:
   - FastAPI /profile router with 5 authenticated endpoints
   - 22-rule CATEGORY_RULES taxonomy derived from real Italian transaction samples
 affects:
-  - 03-02 (frontend profile screens — depends on /profile API)
-  - 03-03 (coaching — depends on UserProfile data)
+  - 03-02 (frontend profile screens - depends on /profile API)
+  - 03-03 (coaching - depends on UserProfile data)
 
 # Tech tracking
 tech-stack:
@@ -44,7 +44,7 @@ key-decisions:
   - "Tags column on Transaction uses JSON type (not ARRAY) for SQLite test compatibility"
   - "Income priority chain: payslip net_income > questionnaire answers > estimated from income-type transactions (D-19)"
   - "LLM partial failure on classification → uncategorized, not job failure (D-10)"
-  - "CategorizationJob has unique=True on user_id — one job per user at a time, upsert on re-trigger"
+  - "CategorizationJob has unique=True on user_id - one job per user at a time, upsert on re-trigger"
 
 patterns-established:
   - "Profile error handling: ProfileError(code, message, status_code) mirrors AuthError pattern"
@@ -61,7 +61,7 @@ duration: 3min
 completed: 2026-03-25
 ---
 
-# Phase 03 Plan 01: Financial Profile Clarity — Backend Summary
+# Phase 03 Plan 01: Financial Profile Clarity - Backend Summary
 
 **Rules-first/LLM-fallback categorization pipeline, UserProfile DB model, and 5-endpoint /profile API with full auth guards and 45-test suite passing**
 
@@ -92,20 +92,20 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `api/app/db/models.py` — Added `Transaction.tags`, `UserProfile`, `CategorizationJob`, `TagVocabulary` models
-- `api/app/db/repository.py` — Added 8 profile/categorization repository functions
-- `api/app/schemas/profile.py` — `UserProfileDTO`, `CategorizationStatusDTO`, `QuestionnaireAnswers`, `ProfileConfirmRequest`, `QuestionnaireSubmitRequest`, `InsightCard`, `IncomeSummary`
-- `api/app/services/categorization_service.py` — `CategorizationService` with 22-rule engine, LLM batch fallback, insight generation
-- `api/app/services/profile_service.py` — `ProfileService` with all required methods
-- `api/app/api/profile.py` — FastAPI router with prefix="/profile", 5 endpoints
-- `api/app/main.py` — Added `include_router(profile_router)`
-- `api/tests/test_profile_endpoints.py` — 6 tests: 401, 404, 201, 202 responses
+- `api/app/db/models.py` - Added `Transaction.tags`, `UserProfile`, `CategorizationJob`, `TagVocabulary` models
+- `api/app/db/repository.py` - Added 8 profile/categorization repository functions
+- `api/app/schemas/profile.py` - `UserProfileDTO`, `CategorizationStatusDTO`, `QuestionnaireAnswers`, `ProfileConfirmRequest`, `QuestionnaireSubmitRequest`, `InsightCard`, `IncomeSummary`
+- `api/app/services/categorization_service.py` - `CategorizationService` with 22-rule engine, LLM batch fallback, insight generation
+- `api/app/services/profile_service.py` - `ProfileService` with all required methods
+- `api/app/api/profile.py` - FastAPI router with prefix="/profile", 5 endpoints
+- `api/app/main.py` - Added `include_router(profile_router)`
+- `api/tests/test_profile_endpoints.py` - 6 tests: 401, 404, 201, 202 responses
 
 ## Decisions Made
 
 - CATEGORY_RULES taxonomy (22 rules) derived directly from real Italian Revolut/PayPal transaction descriptions observed in `api/app/ingestion/samples/` (honors D-07 mandatory prereading)
 - Tags column on Transaction uses JSON type (not PostgreSQL ARRAY) to maintain SQLite compatibility for testing
-- CategorizationJob has `unique=True` on `user_id` — one job record per user, upserted on re-trigger
+- CategorizationJob has `unique=True` on `user_id` - one job record per user, upserted on re-trigger
 - LLM batch classification failures result in `category="uncategorized"` (D-10 partial failure policy)
 - Income priority chain: payslip net_income → questionnaire monthlyNetIncome → sum of income-type transactions (D-19)
 
@@ -115,7 +115,7 @@ None - plan executed exactly as written. All files were already present (created
 
 ## Issues Encountered
 
-None — all verification checks passed on first run.
+None - all verification checks passed on first run.
 
 ## User Setup Required
 
@@ -123,7 +123,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- Backend /profile API complete and tested — ready for 03-02 (frontend profile screens)
+- Backend /profile API complete and tested - ready for 03-02 (frontend profile screens)
 - All auth guards working (401 without token)
 - CategorizationService pipeline functional, ready for integration with ingestion confirm-all flow
 - No blockers

@@ -22,7 +22,7 @@ If the prompt contains a `<files_to_read>` block, you MUST use the `Read` tool t
 - Scope exceeds context budget (quality will degrade)
 - **Plans contradict user decisions from CONTEXT.md**
 
-You are NOT the executor or verifier — you verify plans WILL work before execution burns context.
+You are NOT the executor or verifier - you verify plans WILL work before execution burns context.
 </role>
 
 <project_context>
@@ -41,13 +41,13 @@ This ensures verification checks that plans follow project-specific conventions.
 </project_context>
 
 <upstream_input>
-**CONTEXT.md** (if exists) — User decisions from `/gsd-discuss-phase`
+**CONTEXT.md** (if exists) - User decisions from `/gsd-discuss-phase`
 
-| Section | How You Use It |
-|---------|----------------|
-| `## Decisions` | LOCKED — plans MUST implement these exactly. Flag if contradicted. |
-| `## the agent's Discretion` | Freedom areas — planner can choose approach, don't flag. |
-| `## Deferred Ideas` | Out of scope — plans must NOT include these. Flag if present. |
+| Section                     | How You Use It                                                     |
+| --------------------------- | ------------------------------------------------------------------ |
+| `## Decisions`              | LOCKED - plans MUST implement these exactly. Flag if contradicted. |
+| `## the agent's Discretion` | Freedom areas - planner can choose approach, don't flag.           |
+| `## Deferred Ideas`         | Out of scope - plans must NOT include these. Flag if present.      |
 
 If CONTEXT.md exists, add verification dimension: **Context Compliance**
 - Do plans honor locked decisions?
@@ -117,17 +117,17 @@ issue:
 3. Flag incomplete tasks
 
 **Required by task type:**
-| Type | Files | Action | Verify | Done |
-|------|-------|--------|--------|------|
-| `auto` | Required | Required | Required | Required |
-| `checkpoint:*` | N/A | N/A | N/A | N/A |
-| `tdd` | Required | Behavior + Implementation | Test commands | Expected outcomes |
+| Type           | Files    | Action                    | Verify        | Done              |
+| -------------- | -------- | ------------------------- | ------------- | ----------------- |
+| `auto`         | Required | Required                  | Required      | Required          |
+| `checkpoint:*` | N/A      | N/A                       | N/A           | N/A               |
+| `tdd`          | Required | Behavior + Implementation | Test commands | Expected outcomes |
 
 **Red flags:**
-- Missing `<verify>` — can't confirm completion
-- Missing `<done>` — no acceptance criteria
-- Vague `<action>` — "implement auth" instead of specific steps
-- Empty `<files>` — what gets created?
+- Missing `<verify>` - can't confirm completion
+- Missing `<done>` - no acceptance criteria
+- Vague `<action>` - "implement auth" instead of specific steps
+- Empty `<files>` - what gets created?
 
 **Example issue:**
 ```yaml
@@ -214,11 +214,11 @@ issue:
 3. Check against thresholds
 
 **Thresholds:**
-| Metric | Target | Warning | Blocker |
-|--------|--------|---------|---------|
-| Tasks/plan | 2-3 | 4 | 5+ |
-| Files/plan | 5-8 | 10 | 15+ |
-| Total context | ~50% | ~70% | 80%+ |
+| Metric        | Target | Warning | Blocker |
+| ------------- | ------ | ------- | ------- |
+| Tasks/plan    | 2-3    | 4       | 5+      |
+| Files/plan    | 5-8    | 10      | 15+     |
+| Total context | ~50%   | ~70%    | 80%+    |
 
 **Red flags:**
 - Plan with 5+ tasks (quality degrades)
@@ -277,7 +277,7 @@ issue:
 **Process:**
 1. Parse CONTEXT.md sections: Decisions, the agent's Discretion, Deferred Ideas
 2. Extract all numbered decisions (D-01, D-02, etc.) from the `<decisions>` section
-3. For each locked Decision, find implementing task(s) — check task actions for D-XX references
+3. For each locked Decision, find implementing task(s) - check task actions for D-XX references
 4. Verify 100% decision coverage: every D-XX must appear in at least one task's action or rationale
 5. Verify no tasks implement Deferred Ideas (scope creep)
 6. Verify Discretion areas are handled (planner's choice is valid)
@@ -288,7 +288,7 @@ issue:
 - Task implements something from Deferred Ideas
 - Plan ignores user's stated preference
 
-**Example — contradiction:**
+**Example - contradiction:**
 ```yaml
 issue:
   dimension: context_compliance
@@ -301,7 +301,7 @@ issue:
   fix_hint: "Change Task 2 to implement card-based layout per user decision"
 ```
 
-**Example — scope creep:**
+**Example - scope creep:**
 ```yaml
 issue:
   dimension: context_compliance
@@ -317,7 +317,7 @@ issue:
 
 Skip if: `workflow.nyquist_validation` is explicitly set to `false` in config.json (absent key = enabled), phase has no RESEARCH.md, or RESEARCH.md has no "Validation Architecture" section. Output: "Dimension 8: SKIPPED (nyquist_validation disabled or not applicable)"
 
-### Check 8e — VALIDATION.md Existence (Gate)
+### Check 8e - VALIDATION.md Existence (Gate)
 
 Before running checks 8a-8d, verify VALIDATION.md exists:
 
@@ -325,30 +325,30 @@ Before running checks 8a-8d, verify VALIDATION.md exists:
 ls "${PHASE_DIR}"/*-VALIDATION.md 2>/dev/null
 ```
 
-**If missing:** **BLOCKING FAIL** — "VALIDATION.md not found for phase {N}. Re-run `/gsd-plan-phase {N} --research` to regenerate."
+**If missing:** **BLOCKING FAIL** - "VALIDATION.md not found for phase {N}. Re-run `/gsd-plan-phase {N} --research` to regenerate."
 Skip checks 8a-8d entirely. Report Dimension 8 as FAIL with this single issue.
 
 **If exists:** Proceed to checks 8a-8d.
 
-### Check 8a — Automated Verify Presence
+### Check 8a - Automated Verify Presence
 
 For each `<task>` in each plan:
 - `<verify>` must contain `<automated>` command, OR a Wave 0 dependency that creates the test first
 - If `<automated>` is absent with no Wave 0 dependency → **BLOCKING FAIL**
 - If `<automated>` says "MISSING", a Wave 0 task must reference the same test file path → **BLOCKING FAIL** if link broken
 
-### Check 8b — Feedback Latency Assessment
+### Check 8b - Feedback Latency Assessment
 
 For each `<automated>` command:
-- Full E2E suite (playwright, cypress, selenium) → **WARNING** — suggest faster unit/smoke test
+- Full E2E suite (playwright, cypress, selenium) → **WARNING** - suggest faster unit/smoke test
 - Watch mode flags (`--watchAll`) → **BLOCKING FAIL**
 - Delays > 30 seconds → **WARNING**
 
-### Check 8c — Sampling Continuity
+### Check 8c - Sampling Continuity
 
 Map tasks to waves. Per wave, any consecutive window of 3 implementation tasks must have ≥2 with `<automated>` verify. 3 consecutive without → **BLOCKING FAIL**.
 
-### Check 8d — Wave 0 Completeness
+### Check 8d - Wave 0 Completeness
 
 For each `<automated>MISSING</automated>` reference:
 - Wave 0 task must exist with matching `<files>` path
@@ -360,9 +360,9 @@ For each `<automated>MISSING</automated>` reference:
 ```
 ## Dimension 8: Nyquist Compliance
 
-| Task | Plan | Wave | Automated Command | Status |
-|------|------|------|-------------------|--------|
-| {task} | {plan} | {wave} | `{command}` | ✅ / ❌ |
+| Task   | Plan   | Wave   | Automated Command | Status |
+| ------ | ------ | ------ | ----------------- | ------ |
+| {task} | {plan} | {wave} | `{command}`       | ✅ / ❌  |
 
 Sampling: Wave {N}: {X}/{Y} verified → ✅ / ❌
 Wave 0: {test file} → ✅ present / ❌ MISSING
@@ -410,7 +410,7 @@ If FAIL: return to planner with specific fixes. Same revision loop as other dime
 
 **Skip condition:** If no `./AGENTS.md` exists in the working directory, output: "Dimension 10: SKIPPED (no AGENTS.md found)" and move on.
 
-**Example — forbidden pattern:**
+**Example - forbidden pattern:**
 ```yaml
 issue:
   dimension: claude_md_compliance
@@ -423,7 +423,7 @@ issue:
   fix_hint: "Replace Jest with Vitest per project AGENTS.md"
 ```
 
-**Example — skipped required step:**
+**Example - skipped required step:**
 ```yaml
 issue:
   dimension: claude_md_compliance
@@ -514,16 +514,16 @@ Aggregate across plans for full picture of what phase delivers.
 Map requirements to tasks:
 
 ```
-Requirement          | Plans | Tasks | Status
----------------------|-------|-------|--------
-User can log in      | 01    | 1,2   | COVERED
-User can log out     | -     | -     | MISSING
-Session persists     | 01    | 3     | COVERED
+| Requirement      | Plans | Tasks | Status  |
+| ---------------- | ----- | ----- | ------- |
+| User can log in  | 01    | 1,2   | COVERED |
+| User can log out | -     | -     | MISSING |
+| Session persists | 01    | 3     | COVERED |
 ```
 
 For each requirement: find covering task(s), verify action is specific, flag gaps.
 
-**Exhaustive cross-check:** Also read PROJECT.md requirements (not just phase goal). Verify no PROJECT.md requirement relevant to this phase is silently dropped. A requirement is "relevant" if the ROADMAP.md explicitly maps it to this phase or if the phase goal directly implies it — do NOT flag requirements that belong to other phases or future work. Any unmapped relevant requirement is an automatic blocker — list it explicitly in issues.
+**Exhaustive cross-check:** Also read PROJECT.md requirements (not just phase goal). Verify no PROJECT.md requirement relevant to this phase is silently dropped. A requirement is "relevant" if the ROADMAP.md explicitly maps it to this phase or if the phase goal directly implies it - do NOT flag requirements that belong to other phases or future work. Any unmapped relevant requirement is an automatic blocker - list it explicitly in issues.
 
 ## Step 5: Validate Task Structure
 
@@ -534,10 +534,10 @@ PLAN_STRUCTURE=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bi
 ```
 
 The `tasks` array in the result shows each task's completeness:
-- `hasFiles` — files element present
-- `hasAction` — action element present
-- `hasVerify` — verify element present
-- `hasDone` — done element present
+- `hasFiles` - files element present
+- `hasAction` - action element present
+- `hasVerify` - verify element present
+- `hasDone` - done element present
 
 **Check:** valid task type (auto, checkpoint:*, tdd), auto tasks have files/action/verify/done, action is specific, verify is runnable, done is measurable.
 
@@ -680,15 +680,15 @@ Return all issues as a structured `issues:` YAML list (see dimension examples fo
 
 ### Coverage Summary
 
-| Requirement | Plans | Status |
-|-------------|-------|--------|
+| Requirement | Plans | Status  |
+| ----------- | ----- | ------- |
 | {req-1}     | 01    | Covered |
 | {req-2}     | 01,02 | Covered |
 
 ### Plan Summary
 
 | Plan | Tasks | Files | Wave | Status |
-|------|-------|-------|------|--------|
+| ---- | ----- | ----- | ---- | ------ |
 | 01   | 3     | 5     | 1    | Valid  |
 | 02   | 2     | 4     | 2    | Valid  |
 
@@ -730,7 +730,7 @@ Plans verified. Run `/gsd-execute-phase {phase}` to proceed.
 
 <anti_patterns>
 
-**DO NOT** check code existence — that's gsd-verifier's job. You verify plans, not codebase.
+**DO NOT** check code existence - that's gsd-verifier's job. You verify plans, not codebase.
 
 **DO NOT** run the application. Static plan analysis only.
 

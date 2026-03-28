@@ -46,17 +46,17 @@
 
 ### Component Responsibilities
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| Next.js App | UX, upload/chat screens, action cards, auth flows | App Router + client components for voice/chat |
-| Voice Input Adapter | Capture microphone audio and produce text transcript | Web Speech API with graceful text-input fallback |
-| Voice Output Adapter | Convert response text to speech and stream playback | ElevenLabs TTS API client + browser audio player |
-| Conversation Orchestrator | Build grounded prompt context, call LLM, format answer + citations + cards | FastAPI service module with typed request/response contracts |
-| Ingestion Pipeline | Parse uploaded docs, extract entities, create chunks/embeddings, update profile | FastAPI endpoints + background jobs (task table + worker loop) |
-| Retrieval Service | Hybrid retrieval from user docs + educational KB | Qdrant query API (prefetch/fusion where useful) |
-| Financial Profile Service | Canonical user financial state and derived signals | Postgres schema + deterministic calculators |
-| Action-Card Matcher | Map current context to partner/bank actions | Rules-first matcher over Postgres catalog |
-| Persona/Safety Engine | Apply ethos, tone, hard boundaries, response filtering | Prompt assembly + post-generation policy checks |
+| Component                 | Responsibility                                                                  | Typical Implementation                                         |
+| ------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Next.js App               | UX, upload/chat screens, action cards, auth flows                               | App Router + client components for voice/chat                  |
+| Voice Input Adapter       | Capture microphone audio and produce text transcript                            | Web Speech API with graceful text-input fallback               |
+| Voice Output Adapter      | Convert response text to speech and stream playback                             | ElevenLabs TTS API client + browser audio player               |
+| Conversation Orchestrator | Build grounded prompt context, call LLM, format answer + citations + cards      | FastAPI service module with typed request/response contracts   |
+| Ingestion Pipeline        | Parse uploaded docs, extract entities, create chunks/embeddings, update profile | FastAPI endpoints + background jobs (task table + worker loop) |
+| Retrieval Service         | Hybrid retrieval from user docs + educational KB                                | Qdrant query API (prefetch/fusion where useful)                |
+| Financial Profile Service | Canonical user financial state and derived signals                              | Postgres schema + deterministic calculators                    |
+| Action-Card Matcher       | Map current context to partner/bank actions                                     | Rules-first matcher over Postgres catalog                      |
+| Persona/Safety Engine     | Apply ethos, tone, hard boundaries, response filtering                          | Prompt assembly + post-generation policy checks                |
 
 ## Recommended Project Structure
 
@@ -223,11 +223,11 @@ await ingestion_jobs.complete(job.id)
 
 ## Scaling Considerations
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0–1k users | Keep modular monolith; DB-backed job queue; single Qdrant node; aggressive caching of profile snapshots |
-| 1k–100k users | External queue (Redis/RabbitMQ), separate ingestion worker deployment, read replicas for Postgres, dedicated vector cluster |
-| 100k+ users | Split into services: conversation, ingestion, profile, retrieval; event bus for profile updates; strict SLOs and autoscaling policies |
+| Scale         | Architecture Adjustments                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 0-1k users    | Keep modular monolith; DB-backed job queue; single Qdrant node; aggressive caching of profile snapshots                               |
+| 1k-100k users | External queue (Redis/RabbitMQ), separate ingestion worker deployment, read replicas for Postgres, dedicated vector cluster           |
+| 100k+ users   | Split into services: conversation, ingestion, profile, retrieval; event bus for profile updates; strict SLOs and autoscaling policies |
 
 ### Scaling Priorities
 
@@ -258,23 +258,23 @@ await ingestion_jobs.complete(job.id)
 
 ### External Services
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| LLM Provider (Gemini/GPT/etc.) | Adapter interface (`generate_answer`, `extract_profile`) | Keep provider-swappable; enforce timeout + fallback model |
-| ElevenLabs TTS | Streaming audio generation from finalized response text | Preconfigure persona voice IDs; handle quota/rate limit gracefully |
-| Browser Web Speech API (STT) | Client-side transcript capture | Browser support varies; include typed input fallback |
-| Google OAuth | OIDC through auth module | Keep auth state in HttpOnly cookies/session store |
-| Partner/Bank Services | Outbound HTTP via action-card links and optional callback webhooks | Start with link-out cards for MVP, defer deep transactional APIs |
+| Service                        | Integration Pattern                                                | Notes                                                              |
+| ------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| LLM Provider (Gemini/GPT/etc.) | Adapter interface (`generate_answer`, `extract_profile`)           | Keep provider-swappable; enforce timeout + fallback model          |
+| ElevenLabs TTS                 | Streaming audio generation from finalized response text            | Preconfigure persona voice IDs; handle quota/rate limit gracefully |
+| Browser Web Speech API (STT)   | Client-side transcript capture                                     | Browser support varies; include typed input fallback               |
+| Google OAuth                   | OIDC through auth module                                           | Keep auth state in HttpOnly cookies/session store                  |
+| Partner/Bank Services          | Outbound HTTP via action-card links and optional callback webhooks | Start with link-out cards for MVP, defer deep transactional APIs   |
 
 ### Internal Boundaries
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Web UI ↔ API | REST JSON over HTTPS | Single typed API client in web app |
-| Conversation ↔ Retrieval | In-process service call | Return top-k snippets + scores + source refs |
-| Conversation ↔ Safety | In-process policy gate | Enforce `personas/boundaries` + hard-boundary checks before response |
-| Ingestion ↔ Profile | In-process service + DB transaction | Profile merge must be idempotent |
-| Action Matcher ↔ Partner Catalog | Repository query | Rules-first matching for deterministic demo behavior |
+| Boundary                         | Communication                       | Notes                                                                |
+| -------------------------------- | ----------------------------------- | -------------------------------------------------------------------- |
+| Web UI ↔ API                     | REST JSON over HTTPS                | Single typed API client in web app                                   |
+| Conversation ↔ Retrieval         | In-process service call             | Return top-k snippets + scores + source refs                         |
+| Conversation ↔ Safety            | In-process policy gate              | Enforce `personas/boundaries` + hard-boundary checks before response |
+| Ingestion ↔ Profile              | In-process service + DB transaction | Profile merge must be idempotent                                     |
+| Action Matcher ↔ Partner Catalog | Repository query                    | Rules-first matching for deterministic demo behavior                 |
 
 ## Sources
 

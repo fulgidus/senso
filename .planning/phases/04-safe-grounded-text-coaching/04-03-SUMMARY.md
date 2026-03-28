@@ -23,8 +23,8 @@ affects:
 tech-stack:
   added: []
   patterns:
-    - "CoachingApiError: typed error class with code/statusCode (erasableSyntaxOnly compatible — no constructor parameter properties)"
-    - "apiRequest(API_BASE, path, options) — 3-arg signature pattern matches existing api-client.ts"
+    - "CoachingApiError: typed error class with code/statusCode (erasableSyntaxOnly compatible - no constructor parameter properties)"
+    - "apiRequest(API_BASE, path, options) - 3-arg signature pattern matches existing api-client.ts"
     - "Chat state: stateless client sends full message history on each POST; session_id managed by backend (D-09)"
     - "AssistantBubble with sub-components: ReasoningCard (collapsible), ActionCardStub, ResourceCardStub, LearnCardStub"
 
@@ -79,13 +79,13 @@ completed: 2026-03-28
 4. **Task 4: Navigation wiring** - `bc3d14d` (feat)
 
 ## Files Created/Modified
-- `senso/src/features/coaching/coachingApi.ts` — API client: sendMessage(), getPersonas(), CoachingApiError, all types
-- `senso/src/features/coaching/ChatScreen.tsx` — Chat UI with structured response rendering and error states
-- `senso/src/features/auth/AuthedHome.tsx` — Added "chat" to Screen type, ChatScreen import and render branch
-- `senso/src/features/profile/ProfileScreen.tsx` — Added onNavigateToChat prop and "Chiedi al coach" CTA
+- `senso/src/features/coaching/coachingApi.ts` - API client: sendMessage(), getPersonas(), CoachingApiError, all types
+- `senso/src/features/coaching/ChatScreen.tsx` - Chat UI with structured response rendering and error states
+- `senso/src/features/auth/AuthedHome.tsx` - Added "chat" to Screen type, ChatScreen import and render branch
+- `senso/src/features/profile/ProfileScreen.tsx` - Added onNavigateToChat prop and "Chiedi al coach" CTA
 
 ## Decisions Made
-- Used `apiRequest(API_BASE, path, options)` 3-arg signature to match existing `api-client.ts` — plan's template showed 2-arg which would have been a type error
+- Used `apiRequest(API_BASE, path, options)` 3-arg signature to match existing `api-client.ts` - plan's template showed 2-arg which would have been a type error
 - `CoachingApiError` uses explicit property assignment instead of constructor parameter properties to comply with `erasableSyntaxOnly: true` in tsconfig (auto-fixed before first build attempt)
 - Locale hardcoded to `"it"` in AuthedHome → ChatScreen per D-05 and Italian-first UI requirement
 
@@ -115,13 +115,13 @@ completed: 2026-03-28
 **Impact on plan:** Both fixes necessary for correctness. No scope creep.
 
 ## Issues Encountered
-- `tsc --noEmit` (used in plan's verify steps) doesn't invoke `tsc -b` composite project mode — `pnpm build` was used instead to catch all errors including `erasableSyntaxOnly` violations
+- `tsc --noEmit` (used in plan's verify steps) doesn't invoke `tsc -b` composite project mode - `pnpm build` was used instead to catch all errors including `erasableSyntaxOnly` violations
 
 ## Known Stubs
 - `ActionCardStub`, `ResourceCardStub`, `LearnCardStub` in ChatScreen.tsx are intentional stubs (title + description only, no deep interaction). These will be fully wired in Phase 6 (persona picker + card rendering).
 
 ## User Setup Required
-None — no external service configuration required.
+None - no external service configuration required.
 
 ## Next Phase Readiness
 - Frontend chat experience fully wired end-to-end: user can navigate ProfileScreen → ChatScreen → type a question → receive structured AI coaching response → tap back to ProfileScreen

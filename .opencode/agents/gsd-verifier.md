@@ -33,7 +33,7 @@ This ensures project-specific patterns, conventions, and best practices are appl
 <core_principle>
 **Task completion ≠ Goal achievement**
 
-A task "create chat component" can be marked complete when the component is a placeholder. The task was done — a file was created — but the goal "working chat interface" was not achieved.
+A task "create chat component" can be marked complete when the component is a placeholder. The task was done - a file was created - but the goal "working chat interface" was not achieved.
 
 Goal-backward verification starts from the outcome and works backwards:
 
@@ -75,7 +75,7 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 grep -E "^| $PHASE_NUM" .planning/REQUIREMENTS.md 2>/dev/null
 ```
 
-Extract phase goal from ROADMAP.md — this is the outcome to verify, not the tasks.
+Extract phase goal from ROADMAP.md - this is the outcome to verify, not the tasks.
 
 ## Step 2: Establish Must-Haves (Initial Mode Only)
 
@@ -113,20 +113,20 @@ PHASE_DATA=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gs
 
 Parse the `success_criteria` array from the JSON output. If non-empty:
 1. **Use each Success Criterion directly as a truth** (they are already observable, testable behaviors)
-2. **Derive artifacts:** For each truth, "What must EXIST?" — map to concrete file paths
-3. **Derive key links:** For each artifact, "What must be CONNECTED?" — this is where stubs hide
+2. **Derive artifacts:** For each truth, "What must EXIST?" - map to concrete file paths
+3. **Derive key links:** For each artifact, "What must be CONNECTED?" - this is where stubs hide
 4. **Document must-haves** before proceeding
 
-Success Criteria from ROADMAP.md are the contract — they take priority over Goal-derived truths.
+Success Criteria from ROADMAP.md are the contract - they take priority over Goal-derived truths.
 
 **Option C: Derive from phase goal (fallback)**
 
 If no must_haves in frontmatter AND no Success Criteria in ROADMAP:
 
 1. **State the goal** from ROADMAP.md
-2. **Derive truths:** "What must be TRUE?" — list 3-7 observable, testable behaviors
-3. **Derive artifacts:** For each truth, "What must EXIST?" — map to concrete file paths
-4. **Derive key links:** For each artifact, "What must be CONNECTED?" — this is where stubs hide
+2. **Derive truths:** "What must be TRUE?" - list 3-7 observable, testable behaviors
+3. **Derive artifacts:** For each truth, "What must EXIST?" - map to concrete file paths
+4. **Derive key links:** For each artifact, "What must be CONNECTED?" - this is where stubs hide
 5. **Document derived must-haves** before proceeding
 
 ## Step 3: Verify Observable Truths
@@ -163,11 +163,11 @@ For each artifact in result:
 
 **Artifact status mapping:**
 
-| exists | issues empty | Status      |
-| ------ | ------------ | ----------- |
-| true   | true         | ✓ VERIFIED  |
-| true   | false        | ✗ STUB      |
-| false  | -            | ✗ MISSING   |
+| exists | issues empty | Status     |
+| ------ | ------------ | ---------- |
+| true   | true         | ✓ VERIFIED |
+| true   | false        | ✗ STUB     |
+| false  | -            | ✗ MISSING  |
 
 **For wiring verification (Level 3)**, check imports/usage manually for artifacts that pass Levels 1-2:
 
@@ -186,36 +186,36 @@ grep -r "$artifact_name" "${search_path:-src/}" --include="*.ts" --include="*.ts
 
 ### Final Artifact Status
 
-| Exists | Substantive | Wired | Status      |
-| ------ | ----------- | ----- | ----------- |
-| ✓      | ✓           | ✓     | ✓ VERIFIED  |
+| Exists | Substantive | Wired | Status     |
+| ------ | ----------- | ----- | ---------- |
+| ✓      | ✓           | ✓     | ✓ VERIFIED |
 | ✓      | ✓           | ✗     | ⚠️ ORPHANED |
-| ✓      | ✗           | -     | ✗ STUB      |
-| ✗      | -           | -     | ✗ MISSING   |
+| ✓      | ✗           | -     | ✗ STUB     |
+| ✗      | -           | -     | ✗ MISSING  |
 
 ## Step 4b: Data-Flow Trace (Level 4)
 
 Artifacts that pass Levels 1-3 (exist, substantive, wired) can still be hollow if their data source produces empty or hardcoded values. Level 4 traces upstream from the artifact to verify real data flows through the wiring.
 
-**When to run:** For each artifact that passes Level 3 (WIRED) and renders dynamic data (components, pages, dashboards — not utilities or configs).
+**When to run:** For each artifact that passes Level 3 (WIRED) and renders dynamic data (components, pages, dashboards - not utilities or configs).
 
 **How:**
 
-1. **Identify the data variable** — what state/prop does the artifact render?
+1. **Identify the data variable** - what state/prop does the artifact render?
 
 ```bash
 # Find state variables that are rendered in JSX/TSX
 grep -n -E "useState|useQuery|useSWR|useStore|props\." "$artifact" 2>/dev/null
 ```
 
-2. **Trace the data source** — where does that variable get populated?
+2. **Trace the data source** - where does that variable get populated?
 
 ```bash
 # Find the fetch/query that populates the state
 grep -n -A 5 "set${STATE_VAR}\|${STATE_VAR}\s*=" "$artifact" 2>/dev/null | grep -E "fetch|axios|query|store|dispatch|props\."
 ```
 
-3. **Verify the source produces real data** — does the API/store return actual data or static/empty values?
+3. **Verify the source produces real data** - does the API/store return actual data or static/empty values?
 
 ```bash
 # Check the API route or data source for real DB queries vs static returns
@@ -224,7 +224,7 @@ grep -n -E "prisma\.|db\.|query\(|findMany|findOne|select|FROM" "$source_file" 2
 grep -n -E "return.*json\(\s*\[\]|return.*json\(\s*\{\}" "$source_file" 2>/dev/null
 ```
 
-4. **Check for disconnected props** — props passed to child components that are hardcoded empty at the call site
+4. **Check for disconnected props** - props passed to child components that are hardcoded empty at the call site
 
 ```bash
 # Find where the component is used and check prop values
@@ -233,22 +233,22 @@ grep -r -A 3 "<${COMPONENT_NAME}" "${search_path:-src/}" --include="*.tsx" 2>/de
 
 **Data-flow status:**
 
-| Data Source | Produces Real Data | Status |
-| ---------- | ------------------ | ------ |
-| DB query found | Yes | ✓ FLOWING |
-| Fetch exists, static fallback only | No | ⚠️ STATIC |
-| No data source found | N/A | ✗ DISCONNECTED |
-| Props hardcoded empty at call site | No | ✗ HOLLOW_PROP |
+| Data Source                        | Produces Real Data | Status         |
+| ---------------------------------- | ------------------ | -------------- |
+| DB query found                     | Yes                | ✓ FLOWING      |
+| Fetch exists, static fallback only | No                 | ⚠️ STATIC       |
+| No data source found               | N/A                | ✗ DISCONNECTED |
+| Props hardcoded empty at call site | No                 | ✗ HOLLOW_PROP  |
 
 **Final Artifact Status (updated with Level 4):**
 
-| Exists | Substantive | Wired | Data Flows | Status |
-| ------ | ----------- | ----- | ---------- | ------ |
-| ✓ | ✓ | ✓ | ✓ | ✓ VERIFIED |
-| ✓ | ✓ | ✓ | ✗ | ⚠️ HOLLOW — wired but data disconnected |
-| ✓ | ✓ | ✗ | - | ⚠️ ORPHANED |
-| ✓ | ✗ | - | - | ✗ STUB |
-| ✗ | - | - | - | ✗ MISSING |
+| Exists | Substantive | Wired | Data Flows | Status                                 |
+| ------ | ----------- | ----- | ---------- | -------------------------------------- |
+| ✓      | ✓           | ✓     | ✓          | ✓ VERIFIED                             |
+| ✓      | ✓           | ✓     | ✗          | ⚠️ HOLLOW - wired but data disconnected |
+| ✓      | ✓           | ✗     | -          | ⚠️ ORPHANED                             |
+| ✓      | ✗           | -     | -          | ✗ STUB                                 |
+| ✗      | -           | -     | -          | ✗ MISSING                              |
 
 ## Step 5: Verify Key Links (Wiring)
 
@@ -331,7 +331,7 @@ For each requirement ID from plans:
 grep -E "Phase $PHASE_NUM" .planning/REQUIREMENTS.md 2>/dev/null
 ```
 
-If REQUIREMENTS.md maps additional IDs to this phase that don't appear in ANY plan's `requirements` field, flag as **ORPHANED** — these requirements were expected but no plan claimed them. ORPHANED requirements MUST appear in the verification report.
+If REQUIREMENTS.md maps additional IDs to this phase that don't appear in ANY plan's `requirements` field, flag as **ORPHANED** - these requirements were expected but no plan claimed them. ORPHANED requirements MUST appear in the verification report.
 
 ## Step 7: Scan for Anti-Patterns
 
@@ -373,7 +373,7 @@ Categorize: 🛑 Blocker (prevents goal) | ⚠️ Warning (incomplete) | ℹ️ 
 
 ## Step 7b: Behavioral Spot-Checks
 
-Anti-pattern scanning (Step 7) checks for code smells. Behavioral spot-checks go further — they verify that key behaviors actually produce expected output when invoked.
+Anti-pattern scanning (Step 7) checks for code smells. Behavioral spot-checks go further - they verify that key behaviors actually produce expected output when invoked.
 
 **When to run:** For phases that produce runnable code (APIs, CLI tools, build scripts, data pipelines). Skip for documentation-only or config-only phases.
 
@@ -402,18 +402,18 @@ npm test -- --grep "$PHASE_TEST_PATTERN" 2>&1 | grep -q "passing"
 
 **Spot-check status:**
 
-| Behavior | Command | Result | Status |
-| -------- | ------- | ------ | ------ |
-| {truth} | {command} | {output} | ✓ PASS / ✗ FAIL / ? SKIP |
+| Behavior | Command   | Result   | Status                   |
+| -------- | --------- | -------- | ------------------------ |
+| {truth}  | {command} | {output} | ✓ PASS / ✗ FAIL / ? SKIP |
 
 3. **Classification:**
    - ✓ PASS: Command succeeded and output matches expected
-   - ✗ FAIL: Command failed or output is empty/wrong — flag as gap
-   - ? SKIP: Can't test without running server/external service — route to human verification (Step 8)
+   - ✗ FAIL: Command failed or output is empty/wrong - flag as gap
+   - ? SKIP: Can't test without running server/external service - route to human verification (Step 8)
 
 **Spot-check constraints:**
 - Each check must complete in under 10 seconds
-- Do not start servers or services — only test what's already runnable
+- Do not start servers or services - only test what's already runnable
 - Do not modify state (no writes, no mutations, no side effects)
 - If the project has no runnable entry points yet, skip with: "Step 7b: SKIPPED (no runnable entry points)"
 
@@ -435,11 +435,11 @@ npm test -- --grep "$PHASE_TEST_PATTERN" 2>&1 | grep -q "passing"
 
 ## Step 9: Determine Overall Status
 
-**Status: passed** — All truths VERIFIED, all artifacts pass levels 1-3, all key links WIRED, no blocker anti-patterns.
+**Status: passed** - All truths VERIFIED, all artifacts pass levels 1-3, all key links WIRED, no blocker anti-patterns.
 
-**Status: gaps_found** — One or more truths FAILED, artifacts MISSING/STUB, key links NOT_WIRED, or blocker anti-patterns found.
+**Status: gaps_found** - One or more truths FAILED, artifacts MISSING/STUB, key links NOT_WIRED, or blocker anti-patterns found.
 
-**Status: human_needed** — All automated checks pass but items flagged for human verification.
+**Status: human_needed** - All automated checks pass but items flagged for human verification.
 
 **Score:** `verified_truths / total_truths`
 
@@ -465,7 +465,7 @@ gaps:
 - `artifacts`: Files with issues
 - `missing`: Specific things to add/fix
 
-**Group related gaps by concern** — if multiple truths fail from the same root cause, note this to help the planner create focused plans.
+**Group related gaps by concern** - if multiple truths fail from the same root cause, note this to help the planner create focused plans.
 
 </verification_process>
 
@@ -473,7 +473,7 @@ gaps:
 
 ## Create VERIFICATION.md
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 Create `.planning/phases/{phase_dir}/{phase_num}-VERIFICATION.md`:
 
@@ -510,7 +510,7 @@ human_verification: # Only if status: human_needed
 **Phase Goal:** {goal from ROADMAP.md}
 **Verified:** {timestamp}
 **Status:** {status}
-**Re-verification:** {Yes — after gap closure | No — initial verification}
+**Re-verification:** {Yes - after gap closure | No - initial verification}
 
 ## Goal Achievement
 
@@ -547,7 +547,7 @@ human_verification: # Only if status: human_needed
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
-| ----------- | ---------- | ----------- | ------ | -------- |
+| ----------- | ----------- | ----------- | ------ | -------- |
 
 ### Anti-Patterns Found
 
@@ -556,7 +556,7 @@ human_verification: # Only if status: human_needed
 
 ### Human Verification Required
 
-{Items needing human testing — detailed format for user}
+{Items needing human testing - detailed format for user}
 
 ### Gaps Summary
 
@@ -587,7 +587,7 @@ All must-haves verified. Phase goal achieved. Ready to proceed.
 {If gaps_found:}
 ### Gaps Found
 {N} gaps blocking goal achievement:
-1. **{Truth 1}** — {reason}
+1. **{Truth 1}** - {reason}
    - Missing: {what needs to be added}
 
 Structured gaps in VERIFICATION.md frontmatter for `/gsd-plan-phase --gaps`.
@@ -595,7 +595,7 @@ Structured gaps in VERIFICATION.md frontmatter for `/gsd-plan-phase --gaps`.
 {If human_needed:}
 ### Human Verification Required
 {N} items need human testing:
-1. **{Test name}** — {what to do}
+1. **{Test name}** - {what to do}
    - Expected: {what should happen}
 
 Automated checks passed. Awaiting human verification.
@@ -609,7 +609,7 @@ Automated checks passed. Awaiting human verification.
 
 **DO NOT assume existence = implementation.** Need level 2 (substantive), level 3 (wired), and level 4 (data flowing) for artifacts that render dynamic data.
 
-**DO NOT skip key link verification.** 80% of stubs hide here — pieces exist but aren't connected.
+**DO NOT skip key link verification.** 80% of stubs hide here - pieces exist but aren't connected.
 
 **Structure gaps in YAML frontmatter** for `/gsd-plan-phase --gaps`.
 

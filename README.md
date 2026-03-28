@@ -16,7 +16,7 @@ SENSO è un assistente vocale di educazione finanziaria che ti parla con i tuoi 
 
 ​Una giornata per progettare e consegnare una soluzione AI funzionante. Poi festeggiamo insieme.
 
-​📍 OGR Torino — 📅 Sabato 11 aprile 2026 — ⏰10:30 AM
+​📍 OGR Torino - 📅 Sabato 11 aprile 2026 - ⏰10:30 AM
 
 ### ​La Challenge
 
@@ -26,7 +26,7 @@ SENSO è un assistente vocale di educazione finanziaria che ti parla con i tuoi 
 
 ​Può essere un prodotto, un tool, una piattaforma, un'esperienza digitale o un format tech-enabled. Deve funzionare. Deve essere dimostrabile. Deve usare AI in modo non decorativo.
 
-​Puoi integrare tecnologie AI come voice, LLM o automazioni — l’importante è che siano parte centrale dell’esperienza.
+​Puoi integrare tecnologie AI come voice, LLM o automazioni - l’importante è che siano parte centrale dell’esperienza.
 
 ### ​Chi può partecipare
 
@@ -35,7 +35,7 @@ SENSO è un assistente vocale di educazione finanziaria che ti parla con i tuoi 
 #### ​Modalità:
 
     - ​Individuale o in team (massimo 2 persone)
-    - ​I team devono presentarsi già formati — nessun matchmaking in loco
+    - ​I team devono presentarsi già formati - nessun matchmaking in loco
 
 #### 📌 Puoi arrivare con:
 
@@ -57,25 +57,25 @@ SENSO è un assistente vocale di educazione finanziaria che ti parla con i tuoi 
 🥈 500€
 🥉 250€
 
-​🏆 Best Project built with ElevenLabs — 3 mesi di Scale Tier per ogni membro del team
+​🏆 Best Project built with ElevenLabs - 3 mesi di Scale Tier per ogni membro del team
 
 ​Tutti i partecipanti avranno accesso gratuito per 1 mese alla Creator Tier di ElevenLabs a partire dall'11 aprile.
 
 ### ​Agenda
 
-​10:30 – 11:00 Accredito partecipanti
+​10:30 - 11:00 Accredito partecipanti
 11:00 Inizio hackathon
 13:00 Pranzo presso OGR Torino
-18:00 – 19:00 Fine build sprint + demo
+18:00 - 19:00 Fine build sprint + demo
 19:00 Aperitivo + proclamazione vincitori
 
 ### ​Chi siamo
 
-    [​Devpunks](https://www.devpunks.com) Siamo una community di developer freelance e AI engineer selezionati tecnicamente e sempre aggiornati. Grazie a loro aiutiamo le aziende a scalare rapidamente i team IT e di prodotto con un modello Talent-as-a-Service — developer integrati velocemente, supportati da un fractional tech lead Devpunks che garantisce qualità e scelte tecnologiche strategiche.
+    [​Devpunks](https://www.devpunks.com) Siamo una community di developer freelance e AI engineer selezionati tecnicamente e sempre aggiornati. Grazie a loro aiutiamo le aziende a scalare rapidamente i team IT e di prodotto con un modello Talent-as-a-Service - developer integrati velocemente, supportati da un fractional tech lead Devpunks che garantisce qualità e scelte tecnologiche strategiche.
 
-    [​ElevenLabs](https://www.elevenlabs.io) è una piattaforma AI specializzata nella generazione e manipolazione della voce, utilizzata da developer e team di prodotto per integrare voice synthesis, dubbing e audio AI in applicazioni reali. Le loro API permettono di costruire esperienze vocali naturali e scalabili — dal text-to-speech a use case più avanzati come agenti conversazionali e contenuti audio dinamici.
+    [​ElevenLabs](https://www.elevenlabs.io) è una piattaforma AI specializzata nella generazione e manipolazione della voce, utilizzata da developer e team di prodotto per integrare voice synthesis, dubbing e audio AI in applicazioni reali. Le loro API permettono di costruire esperienze vocali naturali e scalabili - dal text-to-speech a use case più avanzati come agenti conversazionali e contenuti audio dinamici.
 
-    [​Banca Territori del Monviso](https://www.bancabtm.it) – Credito Cooperativo di Casalgrasso e Sant'Albano Stura è attiva da oltre 70 anni nelle provincie di Cuneo e Torino. Opera attraverso 21 filiali e un moderno Centro Direzionale a servizio dei suoi 10.500 soci e 30.000 clienti, per conto dei quali amministra masse che superano i 2,3 miliardi di euro. Con un CET1 ratio al 31.12.2025 del 30.60% è tra gli istituti più solidi del sistema bancario nazionale. Da ottobre ha inaugurato NEXT, la BTM Young Community per i giovani dai 18 ai 30 anni. Uno spazio di confronto e coinvolgimento dei giovani come parte attiva nelle scelte della banca.
+    [​Banca Territori del Monviso](https://www.bancabtm.it) - Credito Cooperativo di Casalgrasso e Sant'Albano Stura è attiva da oltre 70 anni nelle provincie di Cuneo e Torino. Opera attraverso 21 filiali e un moderno Centro Direzionale a servizio dei suoi 10.500 soci e 30.000 clienti, per conto dei quali amministra masse che superano i 2,3 miliardi di euro. Con un CET1 ratio al 31.12.2025 del 30.60% è tra gli istituti più solidi del sistema bancario nazionale. Da ottobre ha inaugurato NEXT, la BTM Young Community per i giovani dai 18 ai 30 anni. Uno spazio di confronto e coinvolgimento dei giovani come parte attiva nelle scelte della banca.
 
 ### ​Location
 

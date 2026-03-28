@@ -38,7 +38,7 @@ any human curation effort.
 **Why LLM-assisted matters for UX:**
 Asking users to manually assign categories per transaction is friction that kills
 engagement. Instead, LLM proposes a corrected category ("We think this might be
-Groceries — does that sound right?"), user confirms with one tap, and the correction
+Groceries - does that sound right?"), user confirms with one tap, and the correction
 is written to both the user's profile and the shared crowd table. This keeps the
 interaction lightweight while capturing high-quality signal.
 
@@ -60,7 +60,7 @@ scope matches any of these conditions:
 
 ## Scope Estimate
 
-**Large** — This is a full milestone or a major phase cluster:
+**Large** - This is a full milestone or a major phase cluster:
 
 - Backend: new `MerchantCategory` table (description_fragment, category, tag_list,
   confidence, vote_count, source: "user"|"llm"|"rule"); API endpoints for submitting
@@ -80,27 +80,27 @@ scope matches any of these conditions:
 Related code found in the codebase at time of planting:
 
 **Category taxonomy (hardcoded, not user-editable):**
-- `api/app/services/categorization_service.py:37` — `VALID_CATEGORIES` set
-- `api/app/services/categorization_service.py:65` — `CATEGORY_RULES` regex list
+- `api/app/services/categorization_service.py:37` - `VALID_CATEGORIES` set
+- `api/app/services/categorization_service.py:65` - `CATEGORY_RULES` regex list
 
 **Tag vocabulary (DB table exists but only seeded, never updated from user input):**
-- `api/app/db/models.py:198` — `TagVocabulary` model
-- `api/app/db/repository.py:139` — `seed_default_tags` (one-way seed, no user writes)
+- `api/app/db/models.py:198` - `TagVocabulary` model
+- `api/app/db/repository.py:139` - `seed_default_tags` (one-way seed, no user writes)
 
 **Profile confirm/correct (total-level only, not category/transaction level):**
-- `api/app/services/profile_service.py:55` — `confirm_profile` accepts only
+- `api/app/services/profile_service.py:55` - `confirm_profile` accepts only
   `income_override` and `expenses_override` (totals, not per-category)
-- `api/app/schemas/profile.py:82` — `ProfileConfirmRequest` schema
-- `senso/src/lib/profile-api.ts:80` — `confirmProfile` frontend call
+- `api/app/schemas/profile.py:82` - `ProfileConfirmRequest` schema
+- `senso/src/lib/profile-api.ts:80` - `confirmProfile` frontend call
 
 **Category totals (computed, stored as JSON, not editable):**
-- `api/app/db/models.py:158` — `category_totals: JSON` column on `UserProfile`
-- `api/app/schemas/profile.py:30` — `categoryTotals` in DTO
-- `senso/src/lib/profile-api.ts:38` — `categoryTotals: Record<string, number>` in TS type
+- `api/app/db/models.py:158` - `category_totals: JSON` column on `UserProfile`
+- `api/app/schemas/profile.py:30` - `categoryTotals` in DTO
+- `senso/src/lib/profile-api.ts:38` - `categoryTotals: Record<string, number>` in TS type
 
 **Transaction model (has category field, but no user-correction audit trail):**
-- `api/app/db/models.py:119` — `category: str | None` on `Transaction`
-- `api/app/db/models.py:120` — `tags: JSON` on `Transaction`
+- `api/app/db/models.py:119` - `category: str | None` on `Transaction`
+- `api/app/db/models.py:120` - `tags: JSON` on `Transaction`
 
 ## Notes
 

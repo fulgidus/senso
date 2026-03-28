@@ -5,7 +5,7 @@ status: complete
 completed_at: 2026-03-25
 ---
 
-# Plan 03-04 Summary — Full Profile UI
+# Plan 03-04 Summary - Full Profile UI
 
 ## What was built
 
@@ -40,7 +40,7 @@ Full profile screen:
 - "Add more documents" ghost button → `onAddDocuments()`
 - Loading skeleton state and error state
 
-### senso/src/features/auth/AuthedHome.tsx (rewritten — final)
+### senso/src/features/auth/AuthedHome.tsx (rewritten - final)
 Full 5-screen routing:
 - `"ingestion"` → `IngestionScreen` with `onConfirmAll` callback
 - `"processing"` → `ProcessingScreen` with `onBack` / `onComplete`
@@ -52,8 +52,8 @@ Full 5-screen routing:
 
 ## Verification
 - TypeScript: no errors (`npx tsc --noEmit`)
-- Build: passes (`npm run build`) — 2505 modules, ✓ built in 2.66s
-- Chunk size warning (>500kB) is expected — Recharts bundle; not an error
+- Build: passes (`npm run build`) - 2505 modules, ✓ built in 2.66s
+- Chunk size warning (>500kB) is expected - Recharts bundle; not an error
 
 ## Discoveries
-- Recharts `Tooltip.formatter` types require `ValueType | undefined` (not `number`) — fixed by narrowing with `typeof value === "number"`
+- Recharts `Tooltip.formatter` types require `ValueType | undefined` (not `number`) - fixed by narrowing with `typeof value === "number"`

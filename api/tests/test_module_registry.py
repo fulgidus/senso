@@ -39,7 +39,7 @@ def extract(file_path):
 
 
 def _write_module_missing_fingerprint(dir_path: Path, name: str = "bad_module") -> Path:
-    """Write a module that is missing FINGERPRINT — should be skipped."""
+    """Write a module that is missing FINGERPRINT - should be skipped."""
     py_file = dir_path / f"{name}.py"
     py_file.write_text(
         """
@@ -53,7 +53,7 @@ def extract(file_path):
 
 
 def _write_module_missing_version(dir_path: Path, name: str = "no_ver") -> Path:
-    """Write a module missing MODULE_VERSION — should be skipped."""
+    """Write a module missing MODULE_VERSION - should be skipped."""
     py_file = dir_path / f"{name}.py"
     py_file.write_text(
         """
@@ -84,7 +84,7 @@ def test_empty_modules_dir_loads_zero_modules(tmp_path):
 
 
 def test_module_missing_fingerprint_is_skipped(tmp_path):
-    """Module without FINGERPRINT attribute is skipped — no crash."""
+    """Module without FINGERPRINT attribute is skipped - no crash."""
     builtin_dir = tmp_path / "builtin"
     builtin_dir.mkdir(parents=True)
     _write_module_missing_fingerprint(builtin_dir)
@@ -96,7 +96,7 @@ def test_module_missing_fingerprint_is_skipped(tmp_path):
 
 
 def test_module_missing_version_is_skipped(tmp_path):
-    """Module without MODULE_VERSION attribute is skipped — no crash."""
+    """Module without MODULE_VERSION attribute is skipped - no crash."""
     builtin_dir = tmp_path / "builtin"
     builtin_dir.mkdir(parents=True)
     _write_module_missing_version(builtin_dir)

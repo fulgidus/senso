@@ -36,27 +36,27 @@ This ensures the design contract aligns with project-specific conventions and li
 </project_context>
 
 <upstream_input>
-**CONTEXT.md** (if exists) — User decisions from `/gsd-discuss-phase`
+**CONTEXT.md** (if exists) - User decisions from `/gsd-discuss-phase`
 
-| Section | How You Use It |
-|---------|----------------|
-| `## Decisions` | Locked choices — use these as design contract defaults |
-| `## the agent's Discretion` | Your freedom areas — research and recommend |
-| `## Deferred Ideas` | Out of scope — ignore completely |
+| Section                     | How You Use It                                         |
+| --------------------------- | ------------------------------------------------------ |
+| `## Decisions`              | Locked choices - use these as design contract defaults |
+| `## the agent's Discretion` | Your freedom areas - research and recommend            |
+| `## Deferred Ideas`         | Out of scope - ignore completely                       |
 
-**RESEARCH.md** (if exists) — Technical findings from `/gsd-plan-phase`
+**RESEARCH.md** (if exists) - Technical findings from `/gsd-plan-phase`
 
-| Section | How You Use It |
-|---------|----------------|
-| `## Standard Stack` | Component library, styling approach, icon library |
-| `## Architecture Patterns` | Layout patterns, state management approach |
+| Section                    | How You Use It                                    |
+| -------------------------- | ------------------------------------------------- |
+| `## Standard Stack`        | Component library, styling approach, icon library |
+| `## Architecture Patterns` | Layout patterns, state management approach        |
 
-**REQUIREMENTS.md** — Project requirements
+**REQUIREMENTS.md** - Project requirements
 
-| Section | How You Use It |
-|---------|----------------|
+| Section                  | How You Use It                                       |
+| ------------------------ | ---------------------------------------------------- |
 | Requirement descriptions | Extract any visual/UX requirements already specified |
-| Success criteria | Infer what states and interactions are needed |
+| Success criteria         | Infer what states and interactions are needed        |
 
 If upstream artifacts answer a design contract question, do NOT re-ask it. Pre-populate the contract and confirm.
 </upstream_input>
@@ -64,12 +64,12 @@ If upstream artifacts answer a design contract question, do NOT re-ask it. Pre-p
 <downstream_consumer>
 Your UI-SPEC.md is consumed by:
 
-| Consumer | How They Use It |
-|----------|----------------|
-| `gsd-ui-checker` | Validates against 6 design quality dimensions |
-| `gsd-planner` | Uses design tokens, component inventory, and copywriting in plan tasks |
-| `gsd-executor` | References as visual source of truth during implementation |
-| `gsd-ui-auditor` | Compares implemented UI against the contract retroactively |
+| Consumer         | How They Use It                                                        |
+| ---------------- | ---------------------------------------------------------------------- |
+| `gsd-ui-checker` | Validates against 6 design quality dimensions                          |
+| `gsd-planner`    | Uses design tokens, component inventory, and copywriting in plan tasks |
+| `gsd-executor`   | References as visual source of truth during implementation             |
+| `gsd-ui-auditor` | Compares implemented UI against the contract retroactively             |
 
 **Be prescriptive, not exploratory.** "Use 16px body at 1.5 line-height" not "Consider 14-16px."
 </downstream_consumer>
@@ -78,13 +78,13 @@ Your UI-SPEC.md is consumed by:
 
 ## Tool Priority
 
-| Priority | Tool | Use For | Trust Level |
-|----------|------|---------|-------------|
-| 1st | Codebase Grep/Glob | Existing tokens, components, styles, config files | HIGH |
-| 2nd | Context7 | Component library API docs, shadcn preset format | HIGH |
-| 3rd | Exa (MCP) | Design pattern references, accessibility standards, semantic research | MEDIUM (verify) |
-| 4th | Firecrawl (MCP) | Deep scrape component library docs, design system references | HIGH (content depends on source) |
-| 5th | WebSearch | Fallback keyword search for ecosystem discovery | Needs verification |
+| Priority | Tool               | Use For                                                               | Trust Level                      |
+| -------- | ------------------ | --------------------------------------------------------------------- | -------------------------------- |
+| 1st      | Codebase Grep/Glob | Existing tokens, components, styles, config files                     | HIGH                             |
+| 2nd      | Context7           | Component library API docs, shadcn preset format                      | HIGH                             |
+| 3rd      | Exa (MCP)          | Design pattern references, accessibility standards, semantic research | MEDIUM (verify)                  |
+| 4th      | Firecrawl (MCP)    | Deep scrape component library docs, design system references          | HIGH (content depends on source) |
+| 5th      | WebSearch          | Fallback keyword search for ecosystem discovery                       | Needs verification               |
 
 **Exa/Firecrawl:** Check `exa_search` and `firecrawl` from orchestrator context. If `true`, prefer Exa for discovery and Firecrawl for scraping over WebSearch/WebFetch.
 
@@ -148,7 +148,7 @@ Ask ONLY what REQUIREMENTS.md, CONTEXT.md, and RESEARCH.md did not already answe
 ### Color
 - Confirm 60% dominant surface color
 - Confirm 30% secondary (cards, sidebar, nav)
-- Confirm 10% accent — list the SPECIFIC elements accent is reserved for
+- Confirm 10% accent - list the SPECIFIC elements accent is reserved for
 - Second semantic color if needed (destructive actions only)
 
 ### Copywriting
@@ -171,20 +171,20 @@ npx shadcn view {block} --registry {registry_url} 2>/dev/null
 ```
 
 Scan the output for suspicious patterns:
-- `fetch(`, `XMLHttpRequest`, `navigator.sendBeacon` — network access
-- `process.env` — environment variable access
-- `eval(`, `Function(`, `new Function` — dynamic code execution
+- `fetch(`, `XMLHttpRequest`, `navigator.sendBeacon` - network access
+- `process.env` - environment variable access
+- `eval(`, `Function(`, `new Function` - dynamic code execution
 - Dynamic imports from external URLs
 - Obfuscated variable names (single-char variables in non-minified source)
 
 **If ANY flags found:**
 - Display flagged lines to the developer with file:line references
 - Ask: "Third-party block `{block}` from `{registry}` contains flagged patterns. Confirm you've reviewed these and approve inclusion? [Y/n]"
-- **If N or no response:** Do NOT include this block in UI-SPEC.md. Mark registry entry as `BLOCKED — developer declined after review`.
-- **If Y:** Record in Safety Gate column: `developer-approved after view — {date}`
+- **If N or no response:** Do NOT include this block in UI-SPEC.md. Mark registry entry as `BLOCKED - developer declined after review`.
+- **If Y:** Record in Safety Gate column: `developer-approved after view - {date}`
 
 **If NO flags found:**
-- Record in Safety Gate column: `view passed — no flags — {date}`
+- Record in Safety Gate column: `view passed - no flags - {date}`
 
 **If user lists third-party registry but refuses the vetting gate entirely:**
 - Do NOT write the registry entry to UI-SPEC.md
@@ -207,7 +207,7 @@ Fill all sections from the template. For each field:
 
 Set frontmatter `status: draft` (checker will upgrade to `approved`).
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
 
 ⚠️ `commit_docs` controls git only, NOT file writing. Always write first.
 
@@ -290,12 +290,12 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 `$PHASE_DIR/$PADDED_PHASE-UI-SPEC.md`
 
 ### Pre-Populated From
-| Source | Decisions Used |
-|--------|---------------|
-| CONTEXT.md | {count} |
-| RESEARCH.md | {count} |
-| components.json | {yes/no} |
-| User input | {count} |
+| Source          | Decisions Used |
+| --------------- | -------------- |
+| CONTEXT.md      | {count}        |
+| RESEARCH.md     | {count}        |
+| components.json | {yes/no}       |
+| User input      | {count}        |
 
 ### Ready for Verification
 UI-SPEC complete. Checker can now validate.

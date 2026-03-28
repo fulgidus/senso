@@ -2,7 +2,7 @@
 
 ## Nome
 
-**S.E.N.S.O.** — *Sistema Educativo per Numeri, Spese e Obiettivi*
+**S.E.N.S.O.** - *Sistema Educativo per Numeri, Spese e Obiettivi*
 
 Nome proprio + acronimo. Il doppio senso è intenzionale: SENSO come "buon senso", la cosa che manca quando compri d'impulso.
 
@@ -24,14 +24,14 @@ Non è un'app di budgeting. Non ti dà grafici. Ti **parla**, ti **guida**, ti *
 
 ## Pitch Angle (per la giuria)
 
-> *"I giovani non imparano la finanza leggendo libri. Imparano facendo scelte — e sbagliando. Noi interveniamo esattamente lì: ogni decisione diventa un momento di apprendimento concreto."*
+> *"I giovani non imparano la finanza leggendo libri. Imparano facendo scelte - e sbagliando. Noi interveniamo esattamente lì: ogni decisione diventa un momento di apprendimento concreto."*
 
-| Criterio brief | Come SENSO lo soddisfa |
-|---|---|
-| Concreta | Agisce su decisioni reali, non su teoria astratta |
-| Accessibile | Voice-first, linguaggio semplice, zero jargon bancario |
-| Desiderabile | Utile sul momento — non "educativo" nel senso noioso |
-| AI centrale | LLM + profilo utente + voice + personas — non decorativa |
+| Criterio brief | Come SENSO lo soddisfa                                   |
+| -------------- | -------------------------------------------------------- |
+| Concreta       | Agisce su decisioni reali, non su teoria astratta        |
+| Accessibile    | Voice-first, linguaggio semplice, zero jargon bancario   |
+| Desiderabile   | Utile sul momento - non "educativo" nel senso noioso     |
+| AI centrale    | LLM + profilo utente + voice + personas - non decorativa |
 
 **Claim finale per il pitch:** *"Non insegniamo finanza. Aiutiamo le persone a prendere decisioni migliori. E così imparano davvero."*
 
@@ -66,20 +66,20 @@ Non è un'app di budgeting. Non ti dà grafici. Ti **parla**, ti **guida**, ti *
 
 La "coscienza" di SENSO è definita da una gerarchia di file in `personas/`:
 
-- **`personas/ethos.md`** — i principi finanziari fondanti su cui si basa ogni risposta, indipendentemente dalla persona attiva
-- **`personas/boundaries.md`** — comportamenti, temi e risposte vietati (linee guida soft)
-- **`personas/hard-boundaries.yml`** — regex di sicurezza in uscita: censura, ban temporaneo, rilevamento prompt-injection
-- **`personas/config.json`** — elenco delle personas disponibili (id, nome, descrizione, icona, file)
-- **`personas/soul/{persona}.md`** — file comportamentale di ogni persona: tono, stile, esempi
+- **`personas/ethos.md`** - i principi finanziari fondanti su cui si basa ogni risposta, indipendentemente dalla persona attiva
+- **`personas/boundaries.md`** - comportamenti, temi e risposte vietati (linee guida soft)
+- **`personas/hard-boundaries.yml`** - regex di sicurezza in uscita: censura, ban temporaneo, rilevamento prompt-injection
+- **`personas/config.json`** - elenco delle personas disponibili (id, nome, descrizione, icona, file)
+- **`personas/soul/{persona}.md`** - file comportamentale di ogni persona: tono, stile, esempi
 
 Le personas selezionabili sono:
 
-| ID | Nome | Vibe |
-|---|---|---|
-| `mentore-saggio` | Il Mentore Saggio | Calmo, diretto, ti dà la strada |
-| `amico-sarcastico` | L'Amico Sarcastico | Ironico, ti prende in giro con affetto |
-| `hartman` | Il Sergente Hartman | Duro, senza pietà, ma ti fa crescere |
-| `cheerleader` | La Cheerleader | Entusiasta, celebra ogni progresso |
+| ID                 | Nome                | Vibe                                   |
+| ------------------ | ------------------- | -------------------------------------- |
+| `mentore-saggio`   | Il Mentore Saggio   | Calmo, diretto, ti dà la strada        |
+| `amico-sarcastico` | L'Amico Sarcastico  | Ironico, ti prende in giro con affetto |
+| `hartman`          | Il Sergente Hartman | Duro, senza pietà, ma ti fa crescere   |
+| `cheerleader`      | La Cheerleader      | Entusiasta, celebra ogni progresso     |
 
 ## Knowledge Base
 
@@ -114,7 +114,7 @@ Il modello è: **l'AI educa → l'utente capisce → l'utente agisce tramite ser
 - **Voice**: ElevenLabs (TTS con voice config per persona) + Web Speech API (STT dal browser)
 - **Storage**: Postgres (profilo utente, sessioni, catalogo servizi) + Qdrant (vettori KB + documenti)
 - **Deploy locale / demo**: Docker Compose (fe + be + postgres + qdrant)
-- **Config globale**: `config.json` (root) — API endpoints, lingue, feature flags, puntatori a personas/
+- **Config globale**: `config.json` (root) - API endpoints, lingue, feature flags, puntatori a personas/
 
 ## MVP scope
 

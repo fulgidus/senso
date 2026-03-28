@@ -1,4 +1,4 @@
-# Phase 4: Safe Grounded Text Coaching — Context
+# Phase 4: Safe Grounded Text Coaching - Context
 
 **Gathered:** 2026-03-28
 **Status:** Ready for planning
@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Users can ask purchase and financial decision questions by text and receive personalized, transparent coaching grounded in their own financial data. Each response shows the user's actual numbers, the reasoning used to reach the answer, and optional learn/act resources (stub cards for now — fully wired in Phase 6).
+Users can ask purchase and financial decision questions by text and receive personalized, transparent coaching grounded in their own financial data. Each response shows the user's actual numbers, the reasoning used to reach the answer, and optional learn/act resources (stub cards for now - fully wired in Phase 6).
 
 Phase 4 introduces the full coaching backend: a composable prompt system, structured JSON output from the LLM, and a 3-layer safety pipeline. The frontend adds a `ChatScreen` accessible from `ProfileScreen`.
 
@@ -22,22 +22,22 @@ Phase 4 ends when a user with a confirmed profile can type a question, receive a
 ### D-01: Persona selector
 Default persona only (`mentore-saggio`) for Phase 4. The persona picker UI is deferred to Phase 6 where full card rendering and demo hardening happen. The backend must accept `persona_id` in the request body to be forward-compatible, but Phase 4 hardcodes validation to accept only `mentore-saggio` or default to it.
 
-### D-02: LLM output format — JSONSchema structured output
+### D-02: LLM output format - JSONSchema structured output
 The LLM output is always a complex structured shape (not free-form text). Two schemas exist:
 
-- **`coaching_response.schema.json`** — colloquial mode: contains `message` (main text reply), `reasoning_used` (array of reasoning steps), `action_cards` (array), `resource_cards` (array), `learn_cards` (array).
-- **`coaching_simple_response.schema.json`** — non-colloquial mode: structured data fields only (for machine/API consumers).
+- **`coaching_response.schema.json`** - colloquial mode: contains `message` (main text reply), `reasoning_used` (array of reasoning steps), `action_cards` (array), `resource_cards` (array), `learn_cards` (array).
+- **`coaching_simple_response.schema.json`** - non-colloquial mode: structured data fields only (for machine/API consumers).
 
 The LLM also receives "tool-like" capability schemas describing what it can reference when constructing its response (memory, db-queries, RAG hints, funnels, tutorials, articles, related-services). These are injected into the system prompt as JSONSchema descriptions so the LLM knows what capabilities it has.
 
-All JSONSchema files are stored at `api/app/coaching/schemas/` as standalone `.json` files — not inline strings in Python code. They are loaded at startup and injected into prompt templates.
+All JSONSchema files are stored at `api/app/coaching/schemas/` as standalone `.json` files - not inline strings in Python code. They are loaded at startup and injected into prompt templates.
 
 ### D-03: Composable prompt templates
 Prompts are Jinja2 templates stored in `api/app/coaching/prompts/`. No prompt strings are hardcoded in endpoint handlers or service methods. Template files:
 
-- `system_base.j2` — injects ethos + boundaries + allowlist text + soul file content + locale instruction
-- `context_block.j2` — structures user profile numbers (income, margin, category_totals, insight_cards) into a readable block for the LLM
-- `response_format.j2` — injects the JSONSchema shape the LLM must produce, including capability schemas
+- `system_base.j2` - injects ethos + boundaries + allowlist text + soul file content + locale instruction
+- `context_block.j2` - structures user profile numbers (income, margin, category_totals, insight_cards) into a readable block for the LLM
+- `response_format.j2` - injects the JSONSchema shape the LLM must produce, including capability schemas
 
 The `CoachingService.chat()` method assembles the final prompt by rendering templates in order, then passes the result to `LLMClient.complete()`.
 
@@ -47,7 +47,7 @@ Responses are returned as complete JSON objects. Streaming (EventSource/SSE) is 
 ### D-05: User-controlled locale
 The `/coaching/chat` endpoint accepts a `locale` field. Supported values: `it` (default), `en`. The `system_base.j2` template receives the locale and instructs the LLM to respond in that language. The frontend reads locale from user profile preferences and passes it on every request.
 
-### D-06: Safety — `own_pii_unsolicited` match mode
+### D-06: Safety - `own_pii_unsolicited` match mode
 Phase 4 uses pattern-only matching for `own_pii_unsolicited` (no cross-check against live session userProfile fields). Full profile cross-check is deferred to Phase 7. The regex patterns in `hard-boundaries.yml` are used directly.
 
 ### D-07: 3-Layer safety pipeline
@@ -60,7 +60,7 @@ Safety is enforced at three distinct layers:
 ### D-08: Profile requirement gate
 `POST /coaching/chat` returns HTTP 422 with code `profile_required` if the user has no confirmed profile. The frontend must redirect to the profile flow if this error is received.
 
-### D-09: Stateful chat — DB-persisted conversation history
+### D-09: Stateful chat - DB-persisted conversation history
 Conversation history IS persisted to Postgres in Phase 4. The project already ships a full Postgres container, so there is no justification to defer this.
 
 Two new tables: `chat_sessions` and `chat_messages`.
@@ -75,7 +75,7 @@ API contract change: `POST /coaching/chat` accepts an optional `session_id` fiel
 `GET /coaching/sessions` returns the user's session list (id, created_at, message_count, last_message_preview).
 `GET /coaching/sessions/{session_id}/messages` returns the full message history for a session.
 
-The client no longer needs to manage message history client-side — the backend owns the canonical history.
+The client no longer needs to manage message history client-side - the backend owns the canonical history.
 
 ### D-10: JSONSchema output validation
 Before returning a coaching response to the client, the service validates the LLM output against `coaching_response.schema.json` using `jsonschema`. If validation fails, a fallback error response is returned rather than an invalid payload.
@@ -124,33 +124,33 @@ POST /coaching/chat
 <existing_assets>
 ## Existing Assets to Reuse
 
-| Asset | Location | How Used |
-|-------|----------|----------|
-| `LLMClient` | `api/app/ingestion/llm.py` | `complete()` with `json_mode=True` for all coaching LLM calls |
-| `check_hint_safety()` | `api/app/ingestion/guardrail.py` | Extended/wrapped into `check_coaching_input()` |
-| `hard-boundaries.yml` | `api/app/personas/hard-boundaries.yml` | Loaded by `SafetyScanner` for all 4 groups |
-| `ethos.md` | `api/app/personas/ethos.md` | Injected into `system_base.j2` |
-| `boundaries.md` | `api/app/personas/boundaries.md` | Injected into `system_base.j2` |
-| `allowlist.md` | `api/app/personas/allowlist.md` | Injected into `system_base.j2` |
-| `soul/mentore-saggio.md` | `api/app/personas/soul/` | Soul file injected into `system_base.j2` |
-| `config.json` | `api/app/personas/config.json` | Persona registry loaded by `CoachingService` |
-| `ProfileService.get_profile()` | `api/app/services/profile_service.py` | Fetch user profile for context block |
-| `UserProfile` model | `api/app/db/models.py` | DB model read for coaching context |
-| `get_current_user` | `api/app/api/ingestion.py` | Auth dependency reused in coaching router |
-| `apiRequest<T>()` | `senso/src/lib/api-client.ts` | Used by `coachingApi.ts` |
-| `readAccessToken()` | `senso/src/features/auth/storage.ts` | Auth token for coaching API calls |
+| Asset                          | Location                               | How Used                                                      |
+| ------------------------------ | -------------------------------------- | ------------------------------------------------------------- |
+| `LLMClient`                    | `api/app/ingestion/llm.py`             | `complete()` with `json_mode=True` for all coaching LLM calls |
+| `check_hint_safety()`          | `api/app/ingestion/guardrail.py`       | Extended/wrapped into `check_coaching_input()`                |
+| `hard-boundaries.yml`          | `api/app/personas/hard-boundaries.yml` | Loaded by `SafetyScanner` for all 4 groups                    |
+| `ethos.md`                     | `api/app/personas/ethos.md`            | Injected into `system_base.j2`                                |
+| `boundaries.md`                | `api/app/personas/boundaries.md`       | Injected into `system_base.j2`                                |
+| `allowlist.md`                 | `api/app/personas/allowlist.md`        | Injected into `system_base.j2`                                |
+| `soul/mentore-saggio.md`       | `api/app/personas/soul/`               | Soul file injected into `system_base.j2`                      |
+| `config.json`                  | `api/app/personas/config.json`         | Persona registry loaded by `CoachingService`                  |
+| `ProfileService.get_profile()` | `api/app/services/profile_service.py`  | Fetch user profile for context block                          |
+| `UserProfile` model            | `api/app/db/models.py`                 | DB model read for coaching context                            |
+| `get_current_user`             | `api/app/api/ingestion.py`             | Auth dependency reused in coaching router                     |
+| `apiRequest<T>()`              | `senso/src/lib/api-client.ts`          | Used by `coachingApi.ts`                                      |
+| `readAccessToken()`            | `senso/src/features/auth/storage.ts`   | Auth token for coaching API calls                             |
 
 </existing_assets>
 
 <plan_breakdown>
 ## Plan Breakdown
 
-| Plan | Title | Wave | Depends On |
-|------|-------|------|------------|
-| 04-01 | Coaching service backend core | 1 | 03-01 (profile service) |
-| 04-02 | Coaching API endpoints | 2 | 04-01 |
-| 04-03 | Frontend coaching screen | 3 | 04-02 |
-| 04-04 | Safety hardening + boundary tests | 2 | 04-01 |
+| Plan  | Title                             | Wave | Depends On              |
+| ----- | --------------------------------- | ---- | ----------------------- |
+| 04-01 | Coaching service backend core     | 1    | 03-01 (profile service) |
+| 04-02 | Coaching API endpoints            | 2    | 04-01                   |
+| 04-03 | Frontend coaching screen          | 3    | 04-02                   |
+| 04-04 | Safety hardening + boundary tests | 2    | 04-01                   |
 
 **04-01: Coaching service backend core**
 JSONSchema files for all output shapes, Jinja2 composable prompt templates, `CoachingService` with `chat()` method, `SafetyScanner` implementing hard-boundaries.yml, extension of guardrail for coaching input. Unit tests for all components.
@@ -169,13 +169,13 @@ Full hard-boundaries.yml regression corpus (10+ injection patterns), output boun
 <deferred>
 ## Deferred to Later Phases
 
-- **Persona picker UI** — Phase 6
-- **Voice input/output** — Phase 5
-- **Streaming responses (SSE/EventSource)** — Phase 7
-- **DB-persisted conversation history** — ~~Phase 7~~ **shipped in Phase 4** (Postgres already running)
-- **Full `own_pii_unsolicited` profile cross-check** (matching live session fields) — Phase 7
-- **Learn+Act cards fully wired** (action/resource cards rendered with real data) — Phase 6
-- **ElevenLabs TTS per coaching response** — Phase 5
+- **Persona picker UI** - Phase 6
+- **Voice input/output** - Phase 5
+- **Streaming responses (SSE/EventSource)** - Phase 7
+- **DB-persisted conversation history** - ~~Phase 7~~ **shipped in Phase 4** (Postgres already running)
+- **Full `own_pii_unsolicited` profile cross-check** (matching live session fields) - Phase 7
+- **Learn+Act cards fully wired** (action/resource cards rendered with real data) - Phase 6
+- **ElevenLabs TTS per coaching response** - Phase 5
 
 </deferred>
 

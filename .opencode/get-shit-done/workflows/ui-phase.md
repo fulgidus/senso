@@ -40,7 +40,7 @@ UI phase is disabled in config. Enable via /gsd-settings.
 ```
 Exit workflow.
 
-**If `planning_exists` is false:** Error — run `/gsd-new-project` first.
+**If `planning_exists` is false:** Error - run `/gsd-new-project` first.
 
 ## 2. Parse and Validate Phase
 
@@ -58,7 +58,7 @@ PHASE_INFO=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gs
 ```
 No CONTEXT.md found for Phase {N}.
 Recommended: run /gsd-discuss-phase {N} first to capture design preferences.
-Continuing without user decisions — UI researcher will ask all questions.
+Continuing without user decisions - UI researcher will ask all questions.
 ```
 Continue (non-blocking).
 
@@ -79,9 +79,9 @@ UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
 - header: "Existing UI-SPEC"
 - question: "UI-SPEC.md already exists for Phase {N}. What would you like to do?"
 - options:
-  - "Update — re-run researcher with existing as baseline"
-  - "View — display current UI-SPEC and exit"
-  - "Skip — keep current UI-SPEC, proceed to verification"
+  - "Update - re-run researcher with existing as baseline"
+  - "View - display current UI-SPEC and exit"
+  - "Skip - keep current UI-SPEC, proceed to verification"
 
 If "View": display file contents, exit.
 If "Skip": proceed to step 7 (checker).
@@ -92,7 +92,7 @@ If "Update": continue to step 5.
 Display:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► UI DESIGN CONTRACT — PHASE {N}
+ GSD ► UI DESIGN CONTRACT - PHASE {N}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ◆ Spawning UI researcher...
@@ -113,7 +113,7 @@ Answer: "What visual and interaction contracts does this phase need?"
 - {roadmap_path} (Roadmap)
 - {requirements_path} (Requirements)
 - {context_path} (USER DECISIONS from /gsd-discuss-phase)
-- {research_path} (Technical Research — stack decisions)
+- {research_path} (Technical Research - stack decisions)
 </files_to_read>
 
 <output>
@@ -169,9 +169,9 @@ Check all 6 dimensions. Return APPROVED or BLOCKED.
 </objective>
 
 <files_to_read>
-- {phase_dir}/{padded_phase}-UI-SPEC.md (UI Design Contract — PRIMARY INPUT)
-- {context_path} (USER DECISIONS — check compliance)
-- {research_path} (Technical Research — check stack alignment)
+- {phase_dir}/{padded_phase}-UI-SPEC.md (UI Design Contract - PRIMARY INPUT)
+- {context_path} (USER DECISIONS - check compliance)
+- {research_path} (Technical Research - check stack alignment)
 </files_to_read>
 
 <config>
@@ -225,9 +225,9 @@ Max revision iterations reached. Remaining issues:
 {list remaining issues}
 
 Options:
-1. Force approve — proceed with current UI-SPEC (FLAGs become accepted)
-2. Edit manually — open UI-SPEC.md in editor, re-run /gsd-ui-phase
-3. Abandon — exit without approving
+1. Force approve - proceed with current UI-SPEC (FLAGs become accepted)
+2. Edit manually - open UI-SPEC.md in editor, re-run /gsd-ui-phase
+3. Abandon - exit without approving
 ```
 
 Use question for the choice.
@@ -240,7 +240,7 @@ Display:
  GSD ► UI-SPEC READY ✓
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Phase {N}: {Name}** — UI design contract approved
+**Phase {N}: {Name}** - UI design contract approved
 
 Dimensions: 6/6 passed
 {If any FLAGs: "Recommendations: {N} (non-blocking)"}
@@ -249,7 +249,7 @@ Dimensions: 6/6 passed
 
 ## ▶ Next Up
 
-**Plan Phase {N}** — planner will use UI-SPEC.md as design context
+**Plan Phase {N}** - planner will use UI-SPEC.md as design context
 
 `/gsd-plan-phase {N}`
 
@@ -277,7 +277,7 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 <success_criteria>
 - [ ] Config checked (exit if ui_phase disabled)
 - [ ] Phase validated against roadmap
-- [ ] Prerequisites checked (CONTEXT.md, RESEARCH.md — non-blocking warnings)
+- [ ] Prerequisites checked (CONTEXT.md, RESEARCH.md - non-blocking warnings)
 - [ ] Existing UI-SPEC handled (update/view/skip)
 - [ ] gsd-ui-researcher spawned with correct context and file paths
 - [ ] UI-SPEC.md created in correct location

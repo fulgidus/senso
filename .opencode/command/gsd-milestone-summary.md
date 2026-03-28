@@ -32,7 +32,7 @@ Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, opt
 - `.planning/phases/*-*/` (SUMMARY.md, VERIFICATION.md, CONTEXT.md, RESEARCH.md)
 
 **User input:**
-- Version: $ARGUMENTS (optional — defaults to current/latest milestone)
+- Version: $ARGUMENTS (optional - defaults to current/latest milestone)
 </context>
 
 <process>

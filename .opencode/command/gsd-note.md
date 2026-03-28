@@ -8,14 +8,14 @@ tools:
   grep: true
 ---
 <objective>
-Zero-friction idea capture — one Write call, one confirmation line.
+Zero-friction idea capture - one Write call, one confirmation line.
 
 Three subcommands:
 - **append** (default): Save a timestamped note file. No questions, no formatting.
 - **list**: Show all notes from project and global scopes.
 - **promote**: Convert a note into a structured todo.
 
-Runs inline — no Task, no question, no Bash.
+Runs inline - no Task, no question, no Bash.
 </objective>
 
 <execution_context>
@@ -29,5 +29,5 @@ $ARGUMENTS
 
 <process>
 Execute the note workflow from @/home/fulgidus/Documents/senso/.opencode/get-shit-done/workflows/note.md end-to-end.
-Capture the note, list notes, or promote to todo — depending on arguments.
+Capture the note, list notes, or promote to todo - depending on arguments.
 </process>

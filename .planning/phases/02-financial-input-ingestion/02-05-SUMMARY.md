@@ -42,7 +42,7 @@ key-files:
     - senso/src/features/auth/AuthedHome.tsx
 
 key-decisions:
-  - "ExtractedDocument TypeScript interface uses snake_case not camelCase — API returns payload_json via model_dump(mode='json') which preserves Python snake_case"
+  - "ExtractedDocument TypeScript interface uses snake_case not camelCase - API returns payload_json via model_dump(mode='json') which preserves Python snake_case"
   - "IngestionScreen reads accessToken via readAccessToken() from storage module rather than getStoredTokens() (which doesn't exist)"
   - "UploadZone's Choose file button has pointer-events-none to avoid double-click (whole div is clickable)"
   - "FileList Confirm all button only renders when at least one successful extraction exists"
@@ -61,9 +61,9 @@ duration: 5min
 completed: 2026-03-24
 ---
 
-# Phase 2 Plan 05: Ingestion UI — Frontend Review Screen Summary
+# Phase 2 Plan 05: Ingestion UI - Frontend Review Screen Summary
 
-**Complete ingestion UI with drag-drop upload zone, 4-column file list table ({NEW} badge, Confirm all, Inspect/Retry/Report/Remove actions), type-aware Inspect modal (transactions vs key-value), and RetryDialog with hint — all wired to FastAPI ingestion API via polling hook.**
+**Complete ingestion UI with drag-drop upload zone, 4-column file list table ({NEW} badge, Confirm all, Inspect/Retry/Report/Remove actions), type-aware Inspect modal (transactions vs key-value), and RetryDialog with hint - all wired to FastAPI ingestion API via polling hook.**
 
 ## Performance
 
@@ -86,7 +86,7 @@ completed: 2026-03-24
   - Confirm all / All confirmed state
 - InspectModal with type-aware rendering (transactions table for bank_statement, key-value cards for payslip/utility_bill/receipt)
 - RetryDialog with hint textarea and guardrail note
-- AuthedHome replaced — now renders IngestionScreen
+- AuthedHome replaced - now renders IngestionScreen
 
 ## Task Commits
 
@@ -109,8 +109,8 @@ Each task was committed atomically:
 
 ## Decisions Made
 - **snake_case for ExtractedDocument**: The API's `get_extracted` endpoint returns `extracted.payload_json` which is `doc.model_dump(mode="json")`. Python model_dump uses snake_case field names. TypeScript interface updated accordingly (vs the plan's camelCase suggestion).
-- **readAccessToken()**: Used `readAccessToken()` from `@/features/auth/storage` instead of `getStoredTokens()` — the actual storage module exports `readAccessToken()` not `getStoredTokens()`.
-- **Confirm all visibility**: Only renders when `hasAnySuccess` — better UX than always showing.
+- **readAccessToken()**: Used `readAccessToken()` from `@/features/auth/storage` instead of `getStoredTokens()` - the actual storage module exports `readAccessToken()` not `getStoredTokens()`.
+- **Confirm all visibility**: Only renders when `hasAnySuccess` - better UX than always showing.
 
 ## Deviations from Plan
 
@@ -146,7 +146,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 - Complete ingestion UI wired to API ✅
 - All 3 tasks complete ✅
-- Phase 02 complete — all 5 plans done ✅
+- Phase 02 complete - all 5 plans done ✅
 - Ready to begin Phase 03: Financial Profile Clarity
 
 ---

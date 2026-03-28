@@ -1,5 +1,5 @@
 """
-EdisonEnergiaIT — Edison Energia Italy utility bill extractor.
+EdisonEnergiaIT - Edison Energia Italy utility bill extractor.
 Supported formats: PDF
 Export path: Edison web portal (clienti.edison.it) → Fatture → Scarica PDF
 Sample FINGERPRINT keywords: "edison", "energia", "fornitura di energia", "kwh", "codice cliente"
@@ -129,6 +129,6 @@ def extract(file_path: str | Path):  # noqa: ANN201
         warnings=[]
         if raw_text
         else [
-            "EdisonEnergiaIT: OCR unavailable — install pytesseract for better extraction"
+            "EdisonEnergiaIT: OCR unavailable - install pytesseract for better extraction"
         ],
     )

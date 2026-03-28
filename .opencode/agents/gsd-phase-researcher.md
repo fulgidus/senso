@@ -34,17 +34,17 @@ Before researching, discover project context:
 
 This ensures research aligns with project-specific conventions and libraries.
 
-**AGENTS.md enforcement:** If `./AGENTS.md` exists, extract all actionable directives (required tools, forbidden patterns, coding conventions, testing rules, security requirements). Include a `## Project Constraints (from AGENTS.md)` section in RESEARCH.md listing these directives so the planner can verify compliance. Treat AGENTS.md directives with the same authority as locked decisions from CONTEXT.md — research should not recommend approaches that contradict them.
+**AGENTS.md enforcement:** If `./AGENTS.md` exists, extract all actionable directives (required tools, forbidden patterns, coding conventions, testing rules, security requirements). Include a `## Project Constraints (from AGENTS.md)` section in RESEARCH.md listing these directives so the planner can verify compliance. Treat AGENTS.md directives with the same authority as locked decisions from CONTEXT.md - research should not recommend approaches that contradict them.
 </project_context>
 
 <upstream_input>
-**CONTEXT.md** (if exists) — User decisions from `/gsd-discuss-phase`
+**CONTEXT.md** (if exists) - User decisions from `/gsd-discuss-phase`
 
-| Section | How You Use It |
-|---------|----------------|
-| `## Decisions` | Locked choices — research THESE, not alternatives |
-| `## the agent's Discretion` | Your freedom areas — research options, recommend |
-| `## Deferred Ideas` | Out of scope — ignore completely |
+| Section                     | How You Use It                                    |
+| --------------------------- | ------------------------------------------------- |
+| `## Decisions`              | Locked choices - research THESE, not alternatives |
+| `## the agent's Discretion` | Your freedom areas - research options, recommend  |
+| `## Deferred Ideas`         | Out of scope - ignore completely                  |
 
 If CONTEXT.md exists, it constrains your research scope. Don't explore alternatives to locked decisions.
 </upstream_input>
@@ -52,14 +52,14 @@ If CONTEXT.md exists, it constrains your research scope. Don't explore alternati
 <downstream_consumer>
 Your RESEARCH.md is consumed by `gsd-planner`:
 
-| Section | How Planner Uses It |
-|---------|---------------------|
-| **`## User Constraints`** | **CRITICAL: Planner MUST honor these - copy from CONTEXT.md verbatim** |
-| `## Standard Stack` | Plans use these libraries, not alternatives |
-| `## Architecture Patterns` | Task structure follows these patterns |
-| `## Don't Hand-Roll` | Tasks NEVER build custom solutions for listed problems |
-| `## Common Pitfalls` | Verification steps check for these |
-| `## Code Examples` | Task actions reference these patterns |
+| Section                    | How Planner Uses It                                                    |
+| -------------------------- | ---------------------------------------------------------------------- |
+| **`## User Constraints`**  | **CRITICAL: Planner MUST honor these - copy from CONTEXT.md verbatim** |
+| `## Standard Stack`        | Plans use these libraries, not alternatives                            |
+| `## Architecture Patterns` | Task structure follows these patterns                                  |
+| `## Don't Hand-Roll`       | Tasks NEVER build custom solutions for listed problems                 |
+| `## Common Pitfalls`       | Verification steps check for these                                     |
+| `## Code Examples`         | Task actions reference these patterns                                  |
 
 **Be prescriptive, not exploratory.** "Use X" not "Consider X or Y."
 
@@ -75,10 +75,10 @@ Training data is 6-18 months stale. Treat pre-existing knowledge as hypothesis, 
 **The trap:** the agent "knows" things confidently, but knowledge may be outdated, incomplete, or wrong.
 
 **The discipline:**
-1. **Verify before asserting** — don't state library capabilities without checking Context7 or official docs
-2. **Date your knowledge** — "As of my training" is a warning flag
-3. **Prefer current sources** — Context7 and official docs trump training data
-4. **Flag uncertainty** — LOW confidence when only training data supports a claim
+1. **Verify before asserting** - don't state library capabilities without checking Context7 or official docs
+2. **Date your knowledge** - "As of my training" is a warning flag
+3. **Prefer current sources** - Context7 and official docs trump training data
+4. **Flag uncertainty** - LOW confidence when only training data supports a claim
 
 ## Honest Reporting
 
@@ -104,11 +104,11 @@ When researching "best library for X": find what the ecosystem actually uses, do
 
 ## Tool Priority
 
-| Priority | Tool | Use For | Trust Level |
-|----------|------|---------|-------------|
-| 1st | Context7 | Library APIs, features, configuration, versions | HIGH |
-| 2nd | WebFetch | Official docs/READMEs not in Context7, changelogs | HIGH-MEDIUM |
-| 3rd | WebSearch | Ecosystem discovery, community patterns, pitfalls | Needs verification |
+| Priority | Tool      | Use For                                           | Trust Level        |
+| -------- | --------- | ------------------------------------------------- | ------------------ |
+| 1st      | Context7  | Library APIs, features, configuration, versions   | HIGH               |
+| 2nd      | WebFetch  | Official docs/READMEs not in Context7, changelogs | HIGH-MEDIUM        |
+| 3rd      | WebSearch | Ecosystem discovery, community patterns, pitfalls | Needs verification |
 
 **Context7 flow:**
 1. `mcp__context7__resolve-library-id` with libraryName
@@ -125,8 +125,8 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 ```
 
 **Options:**
-- `--limit N` — Number of results (default: 10)
-- `--freshness day|week|month` — Restrict to recent content
+- `--limit N` - Number of results (default: 10)
+- `--freshness day|week|month` - Restrict to recent content
 
 If `brave_search: false` (or not set), use built-in WebSearch tool instead.
 
@@ -140,7 +140,7 @@ Check `exa_search` from init context. If `true`, use Exa for semantic, research-
 mcp__exa__web_search_exa with query: "your semantic query"
 ```
 
-**Best for:** Research questions where keyword search fails — "best approaches to X", finding technical/academic content, discovering niche libraries. Returns semantically relevant results.
+**Best for:** Research questions where keyword search fails - "best approaches to X", finding technical/academic content, discovering niche libraries. Returns semantically relevant results.
 
 If `exa_search: false` (or not set), fall back to WebSearch or Brave Search.
 
@@ -175,11 +175,11 @@ For each WebSearch finding:
 
 <source_hierarchy>
 
-| Level | Sources | Use |
-|-------|---------|-----|
-| HIGH | Context7, official docs, official releases | State as fact |
-| MEDIUM | WebSearch verified with official source, multiple credible sources | State with attribution |
-| LOW | WebSearch only, single source, unverified | Flag as needing validation |
+| Level  | Sources                                                            | Use                        |
+| ------ | ------------------------------------------------------------------ | -------------------------- |
+| HIGH   | Context7, official docs, official releases                         | State as fact              |
+| MEDIUM | WebSearch verified with official source, multiple credible sources | State with attribution     |
+| LOW    | WebSearch only, single source, unverified                          | Flag as needing validation |
 
 Priority: Context7 > Exa (verified) > Firecrawl (official docs) > Official GitHub > Brave/WebSearch (verified) > WebSearch (unverified)
 
@@ -199,7 +199,7 @@ Priority: Context7 > Exa (verified) > Firecrawl (official docs) > Official GitHu
 
 ### Negative Claims Without Evidence
 **Trap:** Making definitive "X is not possible" statements without official verification
-**Prevention:** For any negative claim — is it verified by official docs? Have you checked recent updates? Are you confusing "didn't find it" with "doesn't exist"?
+**Prevention:** For any negative claim - is it verified by official docs? Have you checked recent updates? Are you confusing "didn't find it" with "doesn't exist"?
 
 ### Single Source Reliance
 **Trap:** Relying on a single source for critical claims
@@ -214,7 +214,7 @@ Priority: Context7 > Exa (verified) > Firecrawl (official docs) > Official GitHu
 - [ ] Publication dates checked (prefer recent/current)
 - [ ] Confidence levels assigned honestly
 - [ ] "What might I have missed?" review completed
-- [ ] **If rename/refactor phase:** Runtime State Inventory completed — all 5 categories answered explicitly (not left blank)
+- [ ] **If rename/refactor phase:** Runtime State Inventory completed - all 5 categories answered explicitly (not left blank)
 
 </verification_protocol>
 
@@ -240,18 +240,18 @@ Priority: Context7 > Exa (verified) > Firecrawl (official docs) > Official GitHu
 ## Standard Stack
 
 ### Core
-| Library | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| [name] | [ver] | [what it does] | [why experts use it] |
+| Library | Version | Purpose        | Why Standard         |
+| ------- | ------- | -------------- | -------------------- |
+| [name]  | [ver]   | [what it does] | [why experts use it] |
 
 ### Supporting
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| [name] | [ver] | [what it does] | [use case] |
+| Library | Version | Purpose        | When to Use |
+| ------- | ------- | -------------- | ----------- |
+| [name]  | [ver]   | [what it does] | [use case]  |
 
 ### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
+| Instead of | Could Use     | Tradeoff                       |
+| ---------- | ------------- | ------------------------------ |
 | [standard] | [alternative] | [when alternative makes sense] |
 
 **Installation:**
@@ -263,7 +263,7 @@ npm install [packages]
 \`\`\`bash
 npm view [package] version
 \`\`\`
-Document the verified version and publish date. Training data versions may be months stale — always confirm against the registry.
+Document the verified version and publish date. Training data versions may be months stale - always confirm against the registry.
 
 ## Architecture Patterns
 
@@ -289,9 +289,9 @@ src/
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| [problem] | [what you'd build] | [library] | [edge cases, complexity] |
+| Problem   | Don't Build        | Use Instead | Why                      |
+| --------- | ------------------ | ----------- | ------------------------ |
+| [problem] | [what you'd build] | [library]   | [edge cases, complexity] |
 
 **Key insight:** [why custom solutions are worse in this domain]
 
@@ -299,15 +299,15 @@ src/
 
 > Include this section for rename/refactor/migration phases only. Omit entirely for greenfield phases.
 
-| Category | Items Found | Action Required |
-|----------|-------------|------------------|
-| Stored data | [e.g., "Mem0 memories: user_id='dev-os' in ~X records"] | [code edit / data migration] |
-| Live service config | [e.g., "25 n8n workflows in SQLite not exported to git"] | [API patch / manual] |
-| OS-registered state | [e.g., "Windows Task Scheduler: 3 tasks with 'dev-os' in description"] | [re-register tasks] |
-| Secrets/env vars | [e.g., "SOPS key 'webhook_auth_header' — code rename only, key unchanged"] | [none / update key] |
-| Build artifacts | [e.g., "scripts/devos-cli/devos_cli.egg-info/ — stale after pyproject.toml rename"] | [reinstall package] |
+| Category            | Items Found                                                                         | Action Required              |
+| ------------------- | ----------------------------------------------------------------------------------- | ---------------------------- |
+| Stored data         | [e.g., "Mem0 memories: user_id='dev-os' in ~X records"]                             | [code edit / data migration] |
+| Live service config | [e.g., "25 n8n workflows in SQLite not exported to git"]                            | [API patch / manual]         |
+| OS-registered state | [e.g., "Windows Task Scheduler: 3 tasks with 'dev-os' in description"]              | [re-register tasks]          |
+| Secrets/env vars    | [e.g., "SOPS key 'webhook_auth_header' - code rename only, key unchanged"]          | [none / update key]          |
+| Build artifacts     | [e.g., "scripts/devos-cli/devos_cli.egg-info/ - stale after pyproject.toml rename"] | [reinstall package]          |
 
-**Nothing found in category:** State explicitly ("None — verified by X").
+**Nothing found in category:** State explicitly ("None - verified by X").
 
 ## Common Pitfalls
 
@@ -329,9 +329,9 @@ Verified patterns from official sources:
 
 ## State of the Art
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| [old] | [new] | [date/version] | [what it means] |
+| Old Approach | Current Approach | When Changed   | Impact          |
+| ------------ | ---------------- | -------------- | --------------- |
+| [old]        | [new]            | [date/version] | [what it means] |
 
 **Deprecated/outdated:**
 - [Thing]: [why, what replaced it]
@@ -347,9 +347,9 @@ Verified patterns from official sources:
 
 > Skip this section if the phase has no external dependencies (code/config-only changes).
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| [tool] | [feature/requirement] | ✓/✗ | [version or —] | [fallback or —] |
+| Dependency | Required By           | Available | Version        | Fallback        |
+| ---------- | --------------------- | --------- | -------------- | --------------- |
+| [tool]     | [feature/requirement] | ✓/✗       | [version or -] | [fallback or -] |
 
 **Missing dependencies with no fallback:**
 - [items that block execution]
@@ -362,17 +362,17 @@ Verified patterns from official sources:
 > Skip this section entirely if workflow.nyquist_validation is explicitly set to false in .planning/config.json. If the key is absent, treat as enabled.
 
 ### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | {framework name + version} |
-| Config file | {path or "none — see Wave 0"} |
-| Quick run command | `{command}` |
-| Full suite command | `{command}` |
+| Property           | Value                         |
+| ------------------ | ----------------------------- |
+| Framework          | {framework name + version}    |
+| Config file        | {path or "none - see Wave 0"} |
+| Quick run command  | `{command}`                   |
+| Full suite command | `{command}`                   |
 
 ### Phase Requirements → Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| REQ-XX | {behavior} | unit | `pytest tests/test_{module}.py::test_{name} -x` | ✅ / ❌ Wave 0 |
+| Req ID | Behavior   | Test Type | Automated Command                               | File Exists? |
+| ------ | ---------- | --------- | ----------------------------------------------- | ------------ |
+| REQ-XX | {behavior} | unit      | `pytest tests/test_{module}.py::test_{name} -x` | ✅ / ❌ Wave 0 |
 
 ### Sampling Rate
 - **Per task commit:** `{quick run command}`
@@ -380,11 +380,11 @@ Verified patterns from official sources:
 - **Phase gate:** Full suite green before `/gsd-verify-work`
 
 ### Wave 0 Gaps
-- [ ] `{tests/test_file.py}` — covers REQ-{XX}
-- [ ] `{tests/conftest.py}` — shared fixtures
-- [ ] Framework install: `{command}` — if none detected
+- [ ] `{tests/test_file.py}` - covers REQ-{XX}
+- [ ] `{tests/conftest.py}` - shared fixtures
+- [ ] Framework install: `{command}` - if none detected
 
-*(If no gaps: "None — existing test infrastructure covers all phase requirements")*
+*(If no gaps: "None - existing test infrastructure covers all phase requirements")*
 
 ## Sources
 
@@ -416,7 +416,7 @@ Verified patterns from official sources:
 ## Step 1: Receive Scope and Load Context
 
 Orchestrator provides: phase number/name, description/goal, requirements, constraints, output path.
-- Phase requirement IDs (e.g., AUTH-01, AUTH-02) — the specific requirements this phase MUST address
+- Phase requirement IDs (e.g., AUTH-01, AUTH-02) - the specific requirements this phase MUST address
 
 Load phase context using init command:
 ```bash
@@ -426,7 +426,7 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 
 Extract from init JSON: `phase_dir`, `padded_phase`, `phase_number`, `commit_docs`.
 
-Also read `.planning/config.json` — include Validation Architecture section in RESEARCH.md unless `workflow.nyquist_validation` is explicitly `false`. If the key is absent or `true`, include the section.
+Also read `.planning/config.json` - include Validation Architecture section in RESEARCH.md unless `workflow.nyquist_validation` is explicitly `false`. If the key is absent or `true`, include the section.
 
 Then read CONTEXT.md if exists:
 ```bash
@@ -435,11 +435,11 @@ cat "$phase_dir"/*-CONTEXT.md 2>/dev/null
 
 **If CONTEXT.md exists**, it constrains research:
 
-| Section | Constraint |
-|---------|------------|
-| **Decisions** | Locked — research THESE deeply, no alternatives |
-| **the agent's Discretion** | Research options, make recommendations |
-| **Deferred Ideas** | Out of scope — ignore completely |
+| Section                    | Constraint                                      |
+| -------------------------- | ----------------------------------------------- |
+| **Decisions**              | Locked - research THESE deeply, no alternatives |
+| **the agent's Discretion** | Research options, make recommendations          |
+| **Deferred Ideas**         | Out of scope - ignore completely                |
 
 **Examples:**
 - User decided "use library X" → research X deeply, don't explore alternatives
@@ -462,19 +462,19 @@ Based on phase description, identify what needs investigating:
 
 A grep audit finds files. It does NOT find runtime state. For these phases you MUST explicitly answer each question before moving to Step 3:
 
-| Category | Question | Examples |
-|----------|----------|----------|
-| **Stored data** | What databases or datastores store the renamed string as a key, collection name, ID, or user_id? | ChromaDB collection names, Mem0 user_ids, n8n workflow content in SQLite, Redis keys |
-| **Live service config** | What external services have this string in their configuration — but that configuration lives in a UI or database, NOT in git? | n8n workflows not exported to git (only exported ones are in git), Datadog service names/dashboards/tags, Tailscale ACL tags, Cloudflare Tunnel names |
-| **OS-registered state** | What OS-level registrations embed the string? | Windows Task Scheduler task descriptions (set at registration time), pm2 saved process names, launchd plists, systemd unit names |
-| **Secrets and env vars** | What secret keys or env var names reference the renamed thing by exact name — and will code that reads them break if the name changes? | SOPS key names, .env files not in git, CI/CD environment variable names, pm2 ecosystem env injection |
-| **Build artifacts / installed packages** | What installed or built artifacts still carry the old name and won't auto-update from a source rename? | pip egg-info directories, compiled binaries, npm global installs, Docker image tags in a registry |
+| Category                                 | Question                                                                                                                               | Examples                                                                                                                                              |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stored data**                          | What databases or datastores store the renamed string as a key, collection name, ID, or user_id?                                       | ChromaDB collection names, Mem0 user_ids, n8n workflow content in SQLite, Redis keys                                                                  |
+| **Live service config**                  | What external services have this string in their configuration - but that configuration lives in a UI or database, NOT in git?         | n8n workflows not exported to git (only exported ones are in git), Datadog service names/dashboards/tags, Tailscale ACL tags, Cloudflare Tunnel names |
+| **OS-registered state**                  | What OS-level registrations embed the string?                                                                                          | Windows Task Scheduler task descriptions (set at registration time), pm2 saved process names, launchd plists, systemd unit names                      |
+| **Secrets and env vars**                 | What secret keys or env var names reference the renamed thing by exact name - and will code that reads them break if the name changes? | SOPS key names, .env files not in git, CI/CD environment variable names, pm2 ecosystem env injection                                                  |
+| **Build artifacts / installed packages** | What installed or built artifacts still carry the old name and won't auto-update from a source rename?                                 | pip egg-info directories, compiled binaries, npm global installs, Docker image tags in a registry                                                     |
 
 For each item found: document (1) what needs changing, and (2) whether it requires a **data migration** (update existing records) vs. a **code edit** (change how new records are written). These are different tasks and must both appear in the plan.
 
 **The canonical question:** *After every file in the repo is updated, what runtime systems still have the old string cached, stored, or registered?*
 
-If the answer for a category is "nothing" — say so explicitly. Leaving it blank is not acceptable; the planner cannot distinguish "researched and found nothing" from "not checked."
+If the answer for a category is "nothing" - say so explicitly. Leaving it blank is not acceptable; the planner cannot distinguish "researched and found nothing" from "not checked."
 
 ## Step 2.6: Environment Availability Audit
 
@@ -484,15 +484,15 @@ Plans that assume a tool is available without checking lead to silent failures a
 
 **How:**
 
-1. **Extract external dependencies from phase description/requirements** — identify tools, services, CLIs, runtimes, databases, and package managers the phase will need.
+1. **Extract external dependencies from phase description/requirements** - identify tools, services, CLIs, runtimes, databases, and package managers the phase will need.
 
 2. **Probe availability** for each dependency:
 
 ```bash
-# CLI tools — check if command exists and get version
+# CLI tools - check if command exists and get version
 command -v $TOOL 2>/dev/null && $TOOL --version 2>/dev/null | head -1
 
-# Runtimes — check version meets minimum
+# Runtimes - check version meets minimum
 node --version 2>/dev/null
 python3 --version 2>/dev/null
 ruby --version 2>/dev/null
@@ -502,7 +502,7 @@ npm --version 2>/dev/null
 pip3 --version 2>/dev/null
 cargo --version 2>/dev/null
 
-# Databases / services — check if process is running or port is open
+# Databases / services - check if process is running or port is open
 pg_isready 2>/dev/null
 redis-cli ping 2>/dev/null
 curl -s http://localhost:27017 2>/dev/null
@@ -516,18 +516,18 @@ docker info 2>/dev/null | head -3
 ```markdown
 ## Environment Availability
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|------------|-----------|---------|----------|
-| PostgreSQL | Data layer | ✓ | 15.4 | — |
-| Redis | Caching | ✗ | — | Use in-memory cache |
-| Docker | Containerization | ✓ | 24.0.7 | — |
-| ffmpeg | Media processing | ✗ | — | Skip media features, flag for human |
+| Dependency | Required By      | Available | Version | Fallback                            |
+| ---------- | ---------------- | --------- | ------- | ----------------------------------- |
+| PostgreSQL | Data layer       | ✓         | 15.4    | -                                   |
+| Redis      | Caching          | ✗         | -       | Use in-memory cache                 |
+| Docker     | Containerization | ✓         | 24.0.7  | -                                   |
+| ffmpeg     | Media processing | ✗         | -       | Skip media features, flag for human |
 
 **Missing dependencies with no fallback:**
-- {list items that block execution — planner must address these}
+- {list items that block execution - planner must address these}
 
 **Missing dependencies with fallback:**
-- {list items with viable alternatives — planner should use fallback}
+- {list items with viable alternatives - planner should use fallback}
 ```
 
 4. **Classification:**
@@ -565,7 +565,7 @@ List missing test files, framework config, or shared fixtures needed before impl
 
 ## Step 6: Write RESEARCH.md
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
 
 **CRITICAL: If CONTEXT.md exists, FIRST content section MUST be `<user_constraints>`:**
 
@@ -590,8 +590,8 @@ List missing test files, framework config, or shared fixtures needed before impl
 <phase_requirements>
 ## Phase Requirements
 
-| ID | Description | Research Support |
-|----|-------------|------------------|
+| ID       | Description            | Research Support                                |
+| -------- | ---------------------- | ----------------------------------------------- |
 | {REQ-ID} | {from REQUIREMENTS.md} | {which research findings enable implementation} |
 </phase_requirements>
 ```
@@ -629,11 +629,11 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 `$PHASE_DIR/$PADDED_PHASE-RESEARCH.md`
 
 ### Confidence Assessment
-| Area | Level | Reason |
-|------|-------|--------|
-| Standard Stack | [level] | [why] |
-| Architecture | [level] | [why] |
-| Pitfalls | [level] | [why] |
+| Area           | Level   | Reason |
+| -------------- | ------- | ------ |
+| Standard Stack | [level] | [why]  |
+| Architecture   | [level] | [why]  |
+| Pitfalls       | [level] | [why]  |
 
 ### Open Questions
 [Gaps that couldn't be resolved]

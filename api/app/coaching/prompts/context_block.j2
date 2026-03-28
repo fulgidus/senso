@@ -14,7 +14,7 @@
 {% for src in income_sources %}
 {% if not src.get("hideFromAssistant", src.get("hide_from_assistant", false)) %}
 - **{{ src.get("label") or src.get("type", "fonte") }}** ({{ src.get("type", "?") }})
-  - Netto mensile: €{{ "%.0f"|format(src.get("valueMin") or src.get("value_min") or 0) }}{% if (src.get("valueMax") or src.get("value_max") or 0) != (src.get("valueMin") or src.get("value_min") or 0) %} – €{{ "%.0f"|format(src.get("valueMax") or src.get("value_max") or 0) }}{% endif %}
+  - Netto mensile: €{{ "%.0f"|format(src.get("valueMin") or src.get("value_min") or 0) }}{% if (src.get("valueMax") or src.get("value_max") or 0) != (src.get("valueMin") or src.get("value_min") or 0) %} - €{{ "%.0f"|format(src.get("valueMax") or src.get("value_max") or 0) }}{% endif %}
   {% if src.get("ral") %}- RAL: €{{ "%.0f"|format(src.get("ral")) }}{% endif %}
   {% if src.get("ccnlId") or src.get("ccnl_id") %}- CCNL: {{ src.get("ccnlId") or src.get("ccnl_id") }}{% endif %}
   {% if src.get("extraMonths") or src.get("extra_months") %}- {{ src.get("extraMonths") or src.get("extra_months") }}ª mensilità{% endif %}

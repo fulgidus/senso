@@ -25,10 +25,10 @@ planning via /gsd-plan-phase --reviews.
 Phase number: extracted from $ARGUMENTS (required)
 
 **Flags:**
-- `--gemini` — Include Gemini CLI review
-- `--claude` — Include the agent CLI review (uses separate session)
-- `--codex` — Include Codex CLI review
-- `--all` — Include all available CLIs
+- `--gemini` - Include Gemini CLI review
+- `--claude` - Include the agent CLI review (uses separate session)
+- `--codex` - Include Codex CLI review
+- `--all` - Include all available CLIs
 </context>
 
 <process>

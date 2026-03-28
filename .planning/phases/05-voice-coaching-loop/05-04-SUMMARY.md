@@ -88,9 +88,9 @@ Each task was committed atomically:
 - `senso/src/features/coaching/ChatScreen.tsx` - Added mic button, STT error toast, live transcript display
 
 ## Decisions Made
-- Used custom Web Speech API interface declarations (`ISpeechRecognition`, `ISpeechRecognitionConstructor`) instead of relying on TS DOM lib types — more explicit, TypeScript 5.x compatible.
-- `handleSend` refactored from plain `async` function to `useCallback` with optional `text` param — required for `onFinalTranscript` callback pattern.
-- Mic button uses conditional render `{isSttAvailable && <Button>}` not `disabled` — VOIC-02 compliance, no confusing broken UI.
+- Used custom Web Speech API interface declarations (`ISpeechRecognition`, `ISpeechRecognitionConstructor`) instead of relying on TS DOM lib types - more explicit, TypeScript 5.x compatible.
+- `handleSend` refactored from plain `async` function to `useCallback` with optional `text` param - required for `onFinalTranscript` callback pattern.
+- Mic button uses conditional render `{isSttAvailable && <Button>}` not `disabled` - VOIC-02 compliance, no confusing broken UI.
 
 ## Deviations from Plan
 
@@ -106,7 +106,7 @@ Each task was committed atomically:
 
 **2. [Rule 1 - Bug] Custom Web Speech API type declarations**
 - **Found during:** Task 1 (pnpm build TypeScript compile)
-- **Issue:** TypeScript tsconfig.app.json `lib: ["ES2022", "DOM", "DOM.Iterable"]` doesn't include `SpeechRecognition`, `SpeechRecognitionEvent`, `SpeechRecognitionErrorEvent` globals — TS errors TS2304/TS2552
+- **Issue:** TypeScript tsconfig.app.json `lib: ["ES2022", "DOM", "DOM.Iterable"]` doesn't include `SpeechRecognition`, `SpeechRecognitionEvent`, `SpeechRecognitionErrorEvent` globals - TS errors TS2304/TS2552
 - **Fix:** Added explicit interface declarations (`ISpeechRecognition`, `SpeechRecognitionEvent`, `SpeechRecognitionErrorEvent`, etc.) directly in `useVoiceInput.ts`
 - **Files modified:** senso/src/features/coaching/useVoiceInput.ts
 - **Verification:** `tsc --noEmit` on coaching files shows zero errors
@@ -114,7 +114,7 @@ Each task was committed atomically:
 
 **3. [Rule 1 - Bug] Removed pre-existing unused `LLMCallTrace` import in ChatScreen**
 - **Found during:** Task 2 (modifying ChatScreen.tsx)
-- **Issue:** `type LLMCallTrace` was imported but never used — pre-existing TS6133 error
+- **Issue:** `type LLMCallTrace` was imported but never used - pre-existing TS6133 error
 - **Fix:** Removed the unused import during Task 2 edit
 - **Files modified:** senso/src/features/coaching/ChatScreen.tsx
 - **Committed in:** `dad0a6c`
@@ -125,7 +125,7 @@ Each task was committed atomically:
 **Impact on plan:** All necessary for compilation and correctness. No scope creep.
 
 ## Issues Encountered
-- `vi.fn()` is not a valid constructor for mocking Web Speech API — needed to use a real `function` constructor pattern with `function MockSpeechRecognition(this: ...)` to satisfy `new SR()` call in hook.
+- `vi.fn()` is not a valid constructor for mocking Web Speech API - needed to use a real `function` constructor pattern with `function MockSpeechRecognition(this: ...)` to satisfy `new SR()` call in hook.
 - `SpeechRecognitionResultList` mock had to be array-like (`Object.assign([result], {length: 1})`) for the `for` loop `event.results[i]` access pattern to work.
 
 ## User Setup Required
@@ -134,7 +134,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 - Voice input complete: user can click mic, speak, and have the transcript submitted as a coaching message
 - ChatScreen ready for 05-05 TTS integration (play button in AssistantBubble)
-- Pre-existing TypeScript errors in AppShell.tsx and profile-api.ts (unused variables) not addressed — out of scope per plan deviation rules
+- Pre-existing TypeScript errors in AppShell.tsx and profile-api.ts (unused variables) not addressed - out of scope per plan deviation rules
 
 ---
 *Phase: 05-voice-coaching-loop*

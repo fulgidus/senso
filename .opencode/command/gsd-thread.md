@@ -29,11 +29,11 @@ For each thread, read the first few lines to show title and status:
 ```
 ## Active Threads
 
-| Thread | Status | Last Updated |
-|--------|--------|-------------|
-| fix-deploy-key-auth | OPEN | 2026-03-15 |
-| pasta-tcp-timeout | RESOLVED | 2026-03-12 |
-| perf-investigation | IN PROGRESS | 2026-03-17 |
+| Thread              | Status      | Last Updated |
+| ------------------- | ----------- | ------------ |
+| fix-deploy-key-auth | OPEN        | 2026-03-15   |
+| pasta-tcp-timeout   | RESOLVED    | 2026-03-12   |
+| perf-investigation  | IN PROGRESS | 2026-03-17   |
 ```
 
 If no threads exist, show:
@@ -45,7 +45,7 @@ No threads found. Create one with: /gsd-thread <description>
 <mode_resume>
 **If $ARGUMENTS matches an existing thread name (file exists):**
 
-Resume the thread — load its context into the current session:
+Resume the thread - load its context into the current session:
 ```bash
 cat ".planning/threads/${THREAD_NAME}.md"
 ```
@@ -100,7 +100,7 @@ Create a new thread:
 
 5. Commit:
    ```bash
-   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: create thread — ${ARGUMENTS}" --files ".planning/threads/${SLUG}.md"
+   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: create thread - ${ARGUMENTS}" --files ".planning/threads/${SLUG}.md"
    ```
 
 6. Report:
@@ -117,10 +117,10 @@ Create a new thread:
 </process>
 
 <notes>
-- Threads are NOT phase-scoped — they exist independently of the roadmap
-- Lighter weight than /gsd-pause-work — no phase state, no plan context
-- The value is in Context and Next Steps — a cold-start session can pick up immediately
+- Threads are NOT phase-scoped - they exist independently of the roadmap
+- Lighter weight than /gsd-pause-work - no phase state, no plan context
+- The value is in Context and Next Steps - a cold-start session can pick up immediately
 - Threads can be promoted to phases or backlog items when they mature:
   /gsd-add-phase or /gsd-add-backlog with context from the thread
-- Thread files live in .planning/threads/ — no collision with phases or other GSD structures
+- Thread files live in .planning/threads/ - no collision with phases or other GSD structures
 </notes>

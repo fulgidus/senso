@@ -1,13 +1,13 @@
 """
 Coaching API: stateful chat with DB-persisted conversation history.
-POST /coaching/chat           — send a message, get a response, session created/continued
-GET  /coaching/sessions       — list user's sessions (newest first)
-GET  /coaching/sessions/{id}/messages — full message history
-PATCH /coaching/sessions/{id} — rename a session
-DELETE /coaching/sessions/{id} — delete a session and its messages
-POST /coaching/name-conversation — generate a short name for a new conversation
-GET  /coaching/welcome        — LLM-generated personalised welcome message
-GET  /coaching/personas       — list available personas
+POST /coaching/chat           - send a message, get a response, session created/continued
+GET  /coaching/sessions       - list user's sessions (newest first)
+GET  /coaching/sessions/{id}/messages - full message history
+PATCH /coaching/sessions/{id} - rename a session
+DELETE /coaching/sessions/{id} - delete a session and its messages
+POST /coaching/name-conversation - generate a short name for a new conversation
+GET  /coaching/welcome        - LLM-generated personalised welcome message
+GET  /coaching/personas       - list available personas
 """
 
 import json

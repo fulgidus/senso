@@ -24,7 +24,7 @@ Flow: Validate → Research UI → Verify UI-SPEC → Done
 </execution_context>
 
 <context>
-Phase number: $ARGUMENTS — optional, auto-detects next unplanned phase if omitted.
+Phase number: $ARGUMENTS - optional, auto-detects next unplanned phase if omitted.
 </context>
 
 <process>

@@ -2,9 +2,9 @@
 TTSService: ElevenLabs text-to-speech with MinIO caching.
 
 Normalization modes (controlled per-persona via config.json elevenlabs.normalization):
-  "elevenlabs" (default) — send text verbatim; let ElevenLabs normalize numbers,
+  "elevenlabs" (default) - send text verbatim; let ElevenLabs normalize numbers,
                            punctuation, and prosody server-side.
-  "internal"             — apply _truncate_at_sentence() before sending (legacy fallback).
+  "internal"             - apply _truncate_at_sentence() before sending (legacy fallback).
 
 Lazy SDK import so tests can run without elevenlabs installed.
 """
@@ -76,8 +76,8 @@ class TTSService:
             text:          The text to synthesize (displayed bubble content).
             voice_id:      ElevenLabs voice ID resolved from persona config.
             locale:        Language hint (unused by ElevenLabs directly, kept for logging).
-            normalization: "elevenlabs" — send verbatim (recommended);
-                           "internal" — truncate at sentence boundary first.
+            normalization: "elevenlabs" - send verbatim (recommended);
+                           "internal" - truncate at sentence boundary first.
             voice_settings: ElevenLabs VoiceSettings parameters. Defaults used if None.
 
         Raises TTSUnavailableError on configuration or API failure.

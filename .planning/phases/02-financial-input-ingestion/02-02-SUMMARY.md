@@ -42,14 +42,14 @@ key-files:
 key-decisions:
   - "LLMClient uses lazy imports (google.genai, openai) inside methods so the module loads without SDK installed"
   - "Guardrail uses threading.Thread with join(timeout) to enforce 2s wall-clock limit regardless of LLM call latency"
-  - "Registry singleton (get_registry()) initialized at first call — avoids import-time side effects in tests"
+  - "Registry singleton (get_registry()) initialized at first call - avoids import-time side effects in tests"
   - "ModuleEntry stores file_path.stem for GenericCSV score-floor check per D-27"
-  - "Adaptive pipeline raises LLMError on invalid JSON or schema validation failure — caller sets extraction_status=adaptive_failed"
+  - "Adaptive pipeline raises LLMError on invalid JSON or schema validation failure - caller sets extraction_status=adaptive_failed"
 
 patterns-established:
   - "Ingestion module interface: FINGERPRINT: list[str], MODULE_VERSION: str, extract(file_path) -> ExtractionResult"
-  - "All LLM calls route through LLMClient.complete() / .vision() — never call providers directly from business logic"
-  - "GuardrailResult TypedDict: {safe: bool, reason: str} — standard shape for all safety preflight results"
+  - "All LLM calls route through LLMClient.complete() / .vision() - never call providers directly from business logic"
+  - "GuardrailResult TypedDict: {safe: bool, reason: str} - standard shape for all safety preflight results"
 
 requirements-completed:
   - INGT-01
@@ -60,7 +60,7 @@ duration: 2min
 completed: 2026-03-24
 ---
 
-# Phase 02 Plan 02: Ingestion Engine — Schemas, LLM Wrapper, Guardrail, OCR, Registry, Adaptive Pipeline
+# Phase 02 Plan 02: Ingestion Engine - Schemas, LLM Wrapper, Guardrail, OCR, Registry, Adaptive Pipeline
 
 **Pydantic ingestion schemas (ExtractionResult/ExtractedDocument/Transaction) plus LLMClient (Gemini→OpenAI), three-tier OCR pipeline, fault-tolerant module registry, guardrail preflight, and adaptive LLM extraction with sandboxed module generation**
 
@@ -88,24 +88,24 @@ Each task was committed atomically:
 1. **Task 1: Pydantic ingestion schemas** - `9376ebe` (feat)
 2. **Task 2: LLM provider wrapper, guardrail, OCR pipeline, module registry, adaptive pipeline** - `cc2cbcf` (feat)
 
-**Plan metadata:** (docs commit — see below)
+**Plan metadata:** (docs commit - see below)
 
 ## Files Created/Modified
 
-- `api/app/schemas/ingestion.py` — ExtractionResult, ExtractedDocument, Transaction, LineItem, UploadStatusDTO, RetryRequest, ReportRequest, ModuleInfo
-- `api/app/ingestion/__init__.py` — package marker
-- `api/app/ingestion/llm.py` — LLMClient with complete()/vision(), Gemini primary → OpenAI fallback, get_llm_client() FastAPI dependency
-- `api/app/ingestion/guardrail.py` — check_hint_safety() with threading timeout, GuardrailResult TypedDict
-- `api/app/ingestion/ocr.py` — extract_with_ocr_pipeline() three-tier implementation, extract_text_with_tesseract() helper
-- `api/app/ingestion/registry.py` — ModuleRegistry class, ModuleEntry dataclass, get_registry() singleton
-- `api/app/ingestion/adaptive.py` — run_adaptive_pipeline(), _save_and_validate_module() sandbox helper
+- `api/app/schemas/ingestion.py` - ExtractionResult, ExtractedDocument, Transaction, LineItem, UploadStatusDTO, RetryRequest, ReportRequest, ModuleInfo
+- `api/app/ingestion/__init__.py` - package marker
+- `api/app/ingestion/llm.py` - LLMClient with complete()/vision(), Gemini primary → OpenAI fallback, get_llm_client() FastAPI dependency
+- `api/app/ingestion/guardrail.py` - check_hint_safety() with threading timeout, GuardrailResult TypedDict
+- `api/app/ingestion/ocr.py` - extract_with_ocr_pipeline() three-tier implementation, extract_text_with_tesseract() helper
+- `api/app/ingestion/registry.py` - ModuleRegistry class, ModuleEntry dataclass, get_registry() singleton
+- `api/app/ingestion/adaptive.py` - run_adaptive_pipeline(), _save_and_validate_module() sandbox helper
 
 ## Decisions Made
 
 - Used lazy imports inside LLM provider methods so the llm.py module itself loads without google-genai or openai installed (avoids import-time failure in test environments)
-- Used threading.Thread.join(timeout) instead of signal-based alarm for guardrail timeout — works cross-platform and doesn't require SIGALRM (unavailable in some environments)
+- Used threading.Thread.join(timeout) instead of signal-based alarm for guardrail timeout - works cross-platform and doesn't require SIGALRM (unavailable in some environments)
 - Registry singleton initialized lazily on first get_registry() call to avoid import-time file system access during module loading
-- Adaptive pipeline raises LLMError (not returns error result) on invalid JSON or schema validation failure — upstream caller is responsible for setting extraction_status="adaptive_failed"
+- Adaptive pipeline raises LLMError (not returns error result) on invalid JSON or schema validation failure - upstream caller is responsible for setting extraction_status="adaptive_failed"
 - ModuleEntry preserves file_path for stem-based special-casing (GenericCSV score floor per D-27)
 
 ## Deviations from Plan

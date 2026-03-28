@@ -107,9 +107,9 @@ def get_settings() -> Settings:
         database_url=os.getenv(
             "DATABASE_URL", "postgresql://senso:senso@postgres:5432/senso"
         ),
-        # Seed users — format: "email:password,email2:pass:with:colons"
+        # Seed users - format: "email:password,email2:pass:with:colons"
         default_users=_parse_default_users(os.getenv("DEFAULT_USERS", "")),
-        # Starting admins — comma-separated emails granted is_admin on registration
+        # Starting admins - comma-separated emails granted is_admin on registration
         starting_admins=frozenset(
             e.strip().lower()
             for e in os.getenv("STARTING_ADMINS", "").split(",")

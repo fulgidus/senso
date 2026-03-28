@@ -9,7 +9,7 @@ tools:
 
 <objective>
 Add a backlog item to the roadmap using 999.x numbering. Backlog items are
-unsequenced ideas that aren't ready for active planning — they live outside
+unsequenced ideas that aren't ready for active planning - they live outside
 the normal phase sequence and accumulate context over time.
 </objective>
 
@@ -50,7 +50,7 @@ the normal phase sequence and accumulate context over time.
 
 5. **Commit:**
    ```bash
-   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: add backlog item ${NEXT} — ${ARGUMENTS}" --files .planning/ROADMAP.md ".planning/phases/${NEXT}-${SLUG}/.gitkeep"
+   node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" commit "docs: add backlog item ${NEXT} - ${ARGUMENTS}" --files .planning/ROADMAP.md ".planning/phases/${NEXT}-${SLUG}/.gitkeep"
    ```
 
 6. **Report:**
@@ -70,6 +70,6 @@ the normal phase sequence and accumulate context over time.
 <notes>
 - 999.x numbering keeps backlog items out of the active phase sequence
 - Phase directories are created immediately, so /gsd-discuss-phase and /gsd-plan-phase work on them
-- No `Depends on:` field — backlog items are unsequenced by definition
-- Sparse numbering is fine (999.1, 999.3) — always uses next-decimal
+- No `Depends on:` field - backlog items are unsequenced by definition
+- Sparse numbering is fine (999.1, 999.3) - always uses next-decimal
 </notes>

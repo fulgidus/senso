@@ -1,5 +1,5 @@
 """
-RevolutIT — Revolut Italy bank statement extractor.
+RevolutIT - Revolut Italy bank statement extractor.
 Supported formats: CSV (primary), PDF (best-effort)
 Export path in Revolut app: Account → Statements → Download → CSV
 Sample FINGERPRINT keywords (from actual CSV): "type", "product", "started date", "completed date", "state", "balance"
@@ -197,7 +197,7 @@ def extract(file_path: str | Path):  # noqa: ANN201
     if path.suffix.lower() in (".csv", ".txt"):
         return _parse_csv(path)
 
-    # PDF: best-effort — return low-confidence skeleton (OCR pipeline handles this better)
+    # PDF: best-effort - return low-confidence skeleton (OCR pipeline handles this better)
     return ExtractionResult(
         document=ExtractedDocument(
             document_type="bank_statement",
@@ -208,6 +208,6 @@ def extract(file_path: str | Path):  # noqa: ANN201
         confidence=0.3,
         tier_used="module",
         warnings=[
-            "RevolutIT: PDF extraction requires OCR pipeline — use CSV export for full accuracy"
+            "RevolutIT: PDF extraction requires OCR pipeline - use CSV export for full accuracy"
         ],
     )

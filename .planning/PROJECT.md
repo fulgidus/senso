@@ -1,4 +1,4 @@
-# S.E.N.S.O. — Sistema Educativo per Numeri, Spese e Obiettivi
+# S.E.N.S.O. - Sistema Educativo per Numeri, Spese e Obiettivi
 
 ## What This Is
 
@@ -27,10 +27,10 @@ Help users make better financial decisions in the moment by combining their real
 
 ### Out of Scope
 
-- Full native mobile app in MVP — web-first experience is faster for hackathon delivery and demo reliability.
-- Deep open-banking account connectors in MVP — mocked/partial ingestion via uploaded documents is sufficient for first validation.
-- Advanced portfolio/investing suite — not core to immediate spending-decision coaching value.
-- Generic analytics dashboards and heavy charting — product positioning prioritizes conversation and decision support over passive tracking.
+- Full native mobile app in MVP - web-first experience is faster for hackathon delivery and demo reliability.
+- Deep open-banking account connectors in MVP - mocked/partial ingestion via uploaded documents is sufficient for first validation.
+- Advanced portfolio/investing suite - not core to immediate spending-decision coaching value.
+- Generic analytics dashboards and heavy charting - product positioning prioritizes conversation and decision support over passive tracking.
 
 ## Context
 
@@ -42,22 +42,22 @@ Help users make better financial decisions in the moment by combining their real
 
 ## Constraints
 
-- **Timeline**: One-day hackathon build and same-day demo — requires strict MVP slicing and rapid integration choices.
-- **Product**: Must be concretely demoable, not conceptual — every core interaction must run end-to-end during demo.
+- **Timeline**: One-day hackathon build and same-day demo - requires strict MVP slicing and rapid integration choices.
+- **Product**: Must be concretely demoable, not conceptual - every core interaction must run end-to-end during demo.
 - **AI Centrality**: AI must drive the core experience (ingestion reasoning + conversational guidance), not decorative add-ons.
-- **Audience**: Young adults 18-30 with low financial literacy — language and UX must be simple, direct, and jargon-light.
-- **Voice**: Voice interaction is a primary differentiator in this challenge context — spoken I/O quality must be reliable.
+- **Audience**: Young adults 18-30 with low financial literacy - language and UX must be simple, direct, and jargon-light.
+- **Voice**: Voice interaction is a primary differentiator in this challenge context - spoken I/O quality must be reliable.
 - **Data/Safety**: Financial guidance must avoid unsafe advice patterns and enforce persona boundaries consistently.
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Build voice-first coaching instead of dashboard-first budgeting | Better aligns with target users and challenge requirement for desirable, concrete behavior change | — Pending |
-| Ground all answers in uploaded user data + RAG context | Creates trust and personalization; avoids generic financial tips | — Pending |
-| Include educational + action cards on every recommendation | Converts insight into learning and immediate next action | — Pending |
-| Use configurable mentor personas with shared ethos and safety boundaries | Enables tone differentiation without compromising guidance quality/safety | — Pending |
-| Prioritize demo reliability over feature breadth | Hackathon judging rewards working end-to-end experience under time constraints | — Pending |
+| Decision                                                                 | Rationale                                                                                         | Outcome   |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | --------- |
+| Build voice-first coaching instead of dashboard-first budgeting          | Better aligns with target users and challenge requirement for desirable, concrete behavior change | - Pending |
+| Ground all answers in uploaded user data + RAG context                   | Creates trust and personalization; avoids generic financial tips                                  | - Pending |
+| Include educational + action cards on every recommendation               | Converts insight into learning and immediate next action                                          | - Pending |
+| Use configurable mentor personas with shared ethos and safety boundaries | Enables tone differentiation without compromising guidance quality/safety                         | - Pending |
+| Prioritize demo reliability over feature breadth                         | Hackathon judging rewards working end-to-end experience under time constraints                    | - Pending |
 
 ## Evolution
 
@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after Phase 3 completion — financial profile clarity backend + UI shipped*
+*Last updated: 2026-03-25 after Phase 3 completion - financial profile clarity backend + UI shipped*

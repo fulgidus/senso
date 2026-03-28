@@ -13,7 +13,7 @@ After a GSD update wipes and reinstalls files, this command merges user's previo
 Check for local patches directory:
 
 ```bash
-# Global install — detect runtime config directory
+# Global install - detect runtime config directory
 if [ -d "$HOME/.config/opencode/gsd-local-patches" ]; then
   PATCHES_DIR="$HOME/.config/opencode/gsd-local-patches"
 elif [ -d "$HOME/.opencode/gsd-local-patches" ]; then
@@ -23,7 +23,7 @@ elif [ -d "$HOME/.gemini/gsd-local-patches" ]; then
 else
   PATCHES_DIR="/home/fulgidus/Documents/senso/.opencode/gsd-local-patches"
 fi
-# Local install fallback — check all runtime directories
+# Local install fallback - check all runtime directories
 if [ ! -d "$PATCHES_DIR" ]; then
   for dir in .config/opencode .opencode .gemini .claude; do
     if [ -d "./$dir/gsd-local-patches" ]; then
@@ -54,10 +54,10 @@ Exit.
 **Current version:** {read VERSION file}
 **Files modified:** {count}
 
-| # | File | Status |
-|---|------|--------|
-| 1 | {file_path} | Pending |
-| 2 | {file_path} | Pending |
+| #   | File        | Status  |
+| --- | ----------- | ------- |
+| 1   | {file_path} | Pending |
+| 2   | {file_path} | Pending |
 ```
 
 ## Step 3: Merge each file
@@ -79,9 +79,9 @@ For each file in `backup-meta.json`:
 
 4. **Write merged result** to the installed location
 5. **Report status:**
-   - `Merged` — user modifications applied cleanly
-   - `Skipped` — modification already in upstream
-   - `Conflict` — user chose resolution
+   - `Merged` - user modifications applied cleanly
+   - `Skipped` - modification already in upstream
+   - `Conflict` - user chose resolution
 
 ## Step 4: Update manifest
 
@@ -103,11 +103,11 @@ Ask user:
 ```
 ## Patches Reapplied
 
-| # | File | Status |
-|---|------|--------|
-| 1 | {file_path} | ✓ Merged |
-| 2 | {file_path} | ○ Skipped (already upstream) |
-| 3 | {file_path} | ⚠ Conflict resolved |
+| #   | File        | Status                       |
+| --- | ----------- | ---------------------------- |
+| 1   | {file_path} | ✓ Merged                     |
+| 2   | {file_path} | ○ Skipped (already upstream) |
+| 3   | {file_path} | ⚠ Conflict resolved          |
 
 {count} file(s) updated. Your local modifications are active again.
 ```

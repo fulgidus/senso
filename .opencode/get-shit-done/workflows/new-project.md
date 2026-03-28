@@ -1,5 +1,5 @@
 <purpose>
-Initialize a new project through unified flow: questioning, research (optional), requirements, roadmap. This is the most leveraged moment in any project — deep questioning here means better plans, better execution, better outcomes. One workflow takes you from idea to ready-for-planning.
+Initialize a new project through unified flow: questioning, research (optional), requirements, roadmap. This is the most leveraged moment in any project - deep questioning here means better plans, better execution, better outcomes. One workflow takes you from idea to ready-for-planning.
 </purpose>
 
 <required_reading>
@@ -24,7 +24,7 @@ Check if `--auto` flag is present in $ARGUMENTS.
   - Roadmap approval: Auto-approve
 
 **Document requirement:**
-Auto mode requires an idea document — either:
+Auto mode requires an idea document - either:
 
 - File reference: `/gsd-new-project --auto @prd.md`
 - Pasted/written text in the prompt
@@ -47,7 +47,7 @@ The document should describe what you want to build.
 
 ## 1. Setup
 
-**MANDATORY FIRST STEP — Execute these checks before ANY user interaction:**
+**MANDATORY FIRST STEP - Execute these checks before ANY user interaction:**
 
 ```bash
 INIT=$(node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" init new-project)
@@ -56,7 +56,7 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 
 Parse JSON for: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `project_exists`, `has_codebase_map`, `planning_exists`, `has_existing_code`, `has_package_file`, `is_brownfield`, `needs_codebase_map`, `has_git`, `project_path`.
 
-**If `project_exists` is true:** Error — project already initialized. Use `/gsd-progress`.
+**If `project_exists` is true:** Error - project already initialized. Use `/gsd-progress`.
 
 **If `has_git` is false:** Initialize git:
 
@@ -68,15 +68,15 @@ git init
 
 **If auto mode:** Skip to Step 4 (assume greenfield, synthesize PROJECT.md from provided document).
 
-**If `needs_codebase_map` is true** (from init — existing code detected but no codebase map):
+**If `needs_codebase_map` is true** (from init - existing code detected but no codebase map):
 
 Use question:
 
 - header: "Codebase"
 - question: "I detected existing code in this directory. Would you like to map the codebase first?"
 - options:
-  - "Map codebase first" — Run /gsd-map-codebase to understand existing architecture (Recommended)
-  - "Skip mapping" — Proceed with project initialization
+  - "Map codebase first" - Run /gsd-map-codebase to understand existing architecture (Recommended)
+  - "Skip mapping" - Proceed with project initialization
 
 **If "Map codebase first":**
 
@@ -94,7 +94,7 @@ Exit command.
 
 YOLO mode is implicit (auto = YOLO). Ask remaining config questions:
 
-**Round 1 — Core settings (3 questions, no Mode question):**
+**Round 1 - Core settings (3 questions, no Mode question):**
 
 ```
 question([
@@ -129,7 +129,7 @@ question([
 ])
 ```
 
-**Round 2 — Workflow agents (same as Step 5):**
+**Round 2 - Workflow agents (same as Step 5):**
 
 ```
 question([
@@ -165,9 +165,9 @@ question([
     question: "Which AI models for planning agents?",
     multiSelect: false,
     options: [
-      { label: "Balanced (Recommended)", description: "Sonnet for most agents — good quality/cost ratio" },
-      { label: "Quality", description: "Opus for research/roadmap — higher cost, deeper analysis" },
-      { label: "Budget", description: "Haiku where possible — fastest, lowest cost" },
+      { label: "Balanced (Recommended)", description: "Sonnet for most agents - good quality/cost ratio" },
+      { label: "Quality", description: "Opus for research/roadmap - higher cost, deeper analysis" },
+      { label: "Budget", description: "Haiku where possible - fastest, lowest cost" },
       { label: "Inherit", description: "Use the current session model for all agents (OpenCode /model)" }
     ]
   }
@@ -221,14 +221,14 @@ Wait for their response. This gives you the context needed to ask intelligent fo
 **Research-before-questions mode:** Check if `workflow.research_before_questions` is enabled in `.planning/config.json` (or the config from init context). When enabled, before asking follow-up questions about a topic area:
 
 1. Do a brief web search for best practices related to what the user described
-2. Mention key findings naturally as you ask questions (e.g., "Most projects like this use X — is that what you're thinking, or something different?")
+2. Mention key findings naturally as you ask questions (e.g., "Most projects like this use X - is that what you're thinking, or something different?")
 3. This makes questions more informed without changing the conversational flow
 
 When disabled (default), ask questions directly as before.
 
 **Follow the thread:**
 
-Based on what they said, ask follow-up questions that dig into their response. Use question with options that probe what they mentioned — interpretations, clarifications, concrete examples.
+Based on what they said, ask follow-up questions that dig into their response. Use question with options that probe what they mentioned - interpretations, clarifications, concrete examples.
 
 Keep following threads. Each answer opens new threads to explore. Ask about:
 
@@ -257,16 +257,16 @@ When you could write a clear PROJECT.md, use question:
 - header: "Ready?"
 - question: "I think I understand what you're after. Ready to create PROJECT.md?"
 - options:
-  - "Create PROJECT.md" — Let's move forward
-  - "Keep exploring" — I want to share more / ask me more
+  - "Create PROJECT.md" - Let's move forward
+  - "Keep exploring" - I want to share more / ask me more
 
-If "Keep exploring" — ask what they want to add, or identify gaps and probe naturally.
+If "Keep exploring" - ask what they want to add, or identify gaps and probe naturally.
 
 Loop until "Create PROJECT.md" selected.
 
 ## 4. Write PROJECT.md
 
-**If auto mode:** Synthesize from provided document. No "Ready?" gate was shown — proceed directly to commit.
+**If auto mode:** Synthesize from provided document. No "Ready?" gate was shown - proceed directly to commit.
 
 Synthesize all context into `.planning/PROJECT.md` using the template from `templates/project.md`.
 
@@ -279,7 +279,7 @@ Initialize requirements as hypotheses:
 
 ### Validated
 
-(None yet — ship to validate)
+(None yet - ship to validate)
 
 ### Active
 
@@ -289,8 +289,8 @@ Initialize requirements as hypotheses:
 
 ### Out of Scope
 
-- [Exclusion 1] — [why]
-- [Exclusion 2] — [why]
+- [Exclusion 1] - [why]
+- [Exclusion 2] - [why]
 ```
 
 All Active requirements are hypotheses until shipped and validated.
@@ -308,9 +308,9 @@ Infer Validated requirements from existing code:
 
 ### Validated
 
-- ✓ [Existing capability 1] — existing
-- ✓ [Existing capability 2] — existing
-- ✓ [Existing capability 3] — existing
+- ✓ [Existing capability 1] - existing
+- ✓ [Existing capability 2] - existing
+- ✓ [Existing capability 3] - existing
 
 ### Active
 
@@ -319,7 +319,7 @@ Infer Validated requirements from existing code:
 
 ### Out of Scope
 
-- [Exclusion 1] — [why]
+- [Exclusion 1] - [why]
 ```
 
 **Key Decisions:**
@@ -329,9 +329,9 @@ Initialize with any decisions made during questioning:
 ```markdown
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| [Choice from questioning] | [Why] | — Pending |
+| Decision                  | Rationale | Outcome   |
+| ------------------------- | --------- | --------- |
+| [Choice from questioning] | [Why]     | - Pending |
 ```
 
 **Last updated footer:**
@@ -357,8 +357,8 @@ This document evolves at phase transitions and milestone boundaries.
 
 **After each milestone** (via `/gsd-complete-milestone`):
 1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
+2. Core Value check - still the right priority?
+3. Audit Out of Scope - reasons still valid?
 4. Update Context with current state
 ```
 
@@ -373,7 +373,7 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 
 ## 5. Workflow Preferences
 
-**If auto mode:** Skip — config was collected in Step 2a. Proceed to Step 5.5.
+**If auto mode:** Skip - config was collected in Step 2a. Proceed to Step 5.5.
 
 **Check for global defaults** at `~/.gsd/defaults.json`. If the file exists, offer to use saved defaults:
 
@@ -395,7 +395,7 @@ If "Yes": read `~/.gsd/defaults.json`, use those values for config.json, and ski
 
 If "No" or `~/.gsd/defaults.json` doesn't exist: proceed with the questions below.
 
-**Round 1 — Core workflow settings (4 questions):**
+**Round 1 - Core workflow settings (4 questions):**
 
 ```
 questions: [
@@ -439,15 +439,15 @@ questions: [
 ]
 ```
 
-**Round 2 — Workflow agents:**
+**Round 2 - Workflow agents:**
 
 These spawn additional agents during planning/execution. They add tokens and time but improve quality.
 
-| Agent | When it runs | What it does |
-|-------|--------------|--------------|
-| **Researcher** | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
-| **Plan Checker** | After plan is created | Verifies plan actually achieves the phase goal |
-| **Verifier** | After phase execution | Confirms must-haves were delivered |
+| Agent            | When it runs               | What it does                                          |
+| ---------------- | -------------------------- | ----------------------------------------------------- |
+| **Researcher**   | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
+| **Plan Checker** | After plan is created      | Verifies plan actually achieves the phase goal        |
+| **Verifier**     | After phase execution      | Confirms must-haves were delivered                    |
 
 All recommended for important projects. Skip for quick experiments.
 
@@ -485,9 +485,9 @@ questions: [
     question: "Which AI models for planning agents?",
     multiSelect: false,
     options: [
-      { label: "Balanced (Recommended)", description: "Sonnet for most agents — good quality/cost ratio" },
-      { label: "Quality", description: "Opus for research/roadmap — higher cost, deeper analysis" },
-      { label: "Budget", description: "Haiku where possible — fastest, lowest cost" },
+      { label: "Balanced (Recommended)", description: "Sonnet for most agents - good quality/cost ratio" },
+      { label: "Quality", description: "Opus for research/roadmap - higher cost, deeper analysis" },
+      { label: "Budget", description: "Haiku where possible - fastest, lowest cost" },
       { label: "Inherit", description: "Use the current session model for all agents (OpenCode /model)" }
     ]
   }
@@ -538,7 +538,7 @@ Use question:
 - question: "I detected separate git repos in this workspace. Which directories contain code that GSD should commit to?"
 - multiSelect: true
 - options: one option per detected directory
-  - "[directory name]" — Separate git repo
+  - "[directory name]" - Separate git repo
 
 **If user selects one or more directories:**
 
@@ -546,7 +546,7 @@ Use question:
 - Auto-set `planning.commit_docs` to `false` (planning docs stay local in multi-repo workspaces)
 - Add `.planning/` to `.gitignore` if not already present
 
-Config changes are saved locally — no commit needed since `commit_docs` is `false` in multi-repo mode.
+Config changes are saved locally - no commit needed since `commit_docs` is `false` in multi-repo mode.
 
 **If no sub-repos found or user selects none:** Continue with no changes to config.
 
@@ -563,8 +563,8 @@ Use question:
 - header: "Research"
 - question: "Research the domain ecosystem before defining requirements?"
 - options:
-  - "Research first (Recommended)" — Discover standard stacks, expected features, architecture patterns
-  - "Skip research" — I know this domain well, go straight to requirements
+  - "Research first (Recommended)" - Discover standard stacks, expected features, architecture patterns
+  - "Skip research" - I know this domain well, go straight to requirements
 
 **If "Research first":**
 
@@ -605,7 +605,7 @@ Spawn 4 parallel gsd-project-researcher agents with path references:
 
 ```
 Task(prompt="<research_type>
-Project Research — Stack dimension for [domain].
+Project Research - Stack dimension for [domain].
 </research_type>
 
 <milestone_context>
@@ -643,7 +643,7 @@ Use template: /home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/r
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
 
 Task(prompt="<research_type>
-Project Research — Features dimension for [domain].
+Project Research - Features dimension for [domain].
 </research_type>
 
 <milestone_context>
@@ -681,7 +681,7 @@ Use template: /home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/r
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
 
 Task(prompt="<research_type>
-Project Research — Architecture dimension for [domain].
+Project Research - Architecture dimension for [domain].
 </research_type>
 
 <milestone_context>
@@ -719,7 +719,7 @@ Use template: /home/fulgidus/Documents/senso/.opencode/get-shit-done/templates/r
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
 
 Task(prompt="<research_type>
-Project Research — Pitfalls dimension for [domain].
+Project Research - Pitfalls dimension for [domain].
 </research_type>
 
 <milestone_context>
@@ -871,10 +871,10 @@ For each category, use question:
 - question: "Which [category] features are in v1?"
 - multiSelect: true
 - options:
-  - "[Feature 1]" — [brief description]
-  - "[Feature 2]" — [brief description]
-  - "[Feature 3]" — [brief description]
-  - "None for v1" — Defer entire category
+  - "[Feature 1]" - [brief description]
+  - "[Feature 2]" - [brief description]
+  - "[Feature 3]" - [brief description]
+  - "None for v1" - Defer entire category
 
 Track responses:
 
@@ -889,8 +889,8 @@ Use question:
 - header: "Additions"
 - question: "Any requirements research missed? (Features specific to your vision)"
 - options:
-  - "No, research covered it" — Proceed
-  - "Yes, let me add some" — Capture additions
+  - "No, research covered it" - Proceed
+  - "Yes, let me add some" - Capture additions
 
 **Validate core value:**
 
@@ -1012,11 +1012,11 @@ Read the created ROADMAP.md and present it nicely inline:
 
 **[N] phases** | **[X] requirements mapped** | All v1 requirements covered ✓
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| 1 | [Name] | [Goal] | [REQ-IDs] | [count] |
-| 2 | [Name] | [Goal] | [REQ-IDs] | [count] |
-| 3 | [Name] | [Goal] | [REQ-IDs] | [count] |
+| #   | Phase  | Goal   | Requirements | Success Criteria |
+| --- | ------ | ------ | ------------ | ---------------- |
+| 1   | [Name] | [Goal] | [REQ-IDs]    | [count]          |
+| 2   | [Name] | [Goal] | [REQ-IDs]    | [count]          |
+| 3   | [Name] | [Goal] | [REQ-IDs]    | [count]          |
 ...
 
 ### Phase Details
@@ -1041,7 +1041,7 @@ Success criteria:
 ---
 ```
 
-**If auto mode:** Skip approval gate — auto-approve and commit directly.
+**If auto mode:** Skip approval gate - auto-approve and commit directly.
 
 **CRITICAL: Ask for approval before committing (interactive mode only):**
 
@@ -1050,9 +1050,9 @@ Use question:
 - header: "Roadmap"
 - question: "Does this roadmap structure work for you?"
 - options:
-  - "Approve" — Commit and continue
-  - "Adjust phases" — Tell me what to change
-  - "Review full file" — Show raw ROADMAP.md
+  - "Approve" - Commit and continue
+  - "Adjust phases" - Tell me what to change
+  - "Review full file" - Show raw ROADMAP.md
 
 **If "Approve":** Continue to commit.
 
@@ -1107,14 +1107,14 @@ Present completion summary:
 
 **[Project Name]**
 
-| Artifact       | Location                    |
-|----------------|-----------------------------|
-| Project        | `.planning/PROJECT.md`      |
-| Config         | `.planning/config.json`     |
-| Research       | `.planning/research/`       |
-| Requirements   | `.planning/REQUIREMENTS.md` |
-| Roadmap        | `.planning/ROADMAP.md`      |
-| Project guide  | `AGENTS.md`                 |
+| Artifact      | Location                    |
+| ------------- | --------------------------- |
+| Project       | `.planning/PROJECT.md`      |
+| Config        | `.planning/config.json`     |
+| Research      | `.planning/research/`       |
+| Requirements  | `.planning/REQUIREMENTS.md` |
+| Roadmap       | `.planning/ROADMAP.md`      |
+| Project guide | `AGENTS.md`                 |
 
 **[N] phases** | **[X] requirements** | Ready to build ✓
 ```
@@ -1145,17 +1145,17 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 ## ▶ Next Up
 
-**Phase 1: [Phase Name]** — [Goal from ROADMAP.md]
+**Phase 1: [Phase Name]** - [Goal from ROADMAP.md]
 
-/gsd-discuss-phase 1 — gather context and clarify approach
+/gsd-discuss-phase 1 - gather context and clarify approach
 
 <sub>/clear first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- /gsd-ui-phase 1 — generate UI design contract (recommended for frontend phases)
-- /gsd-plan-phase 1 — skip discussion, plan directly
+- /gsd-ui-phase 1 - generate UI design contract (recommended for frontend phases)
+- /gsd-plan-phase 1 - skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -1167,16 +1167,16 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 ## ▶ Next Up
 
-**Phase 1: [Phase Name]** — [Goal from ROADMAP.md]
+**Phase 1: [Phase Name]** - [Goal from ROADMAP.md]
 
-/gsd-discuss-phase 1 — gather context and clarify approach
+/gsd-discuss-phase 1 - gather context and clarify approach
 
 <sub>/clear first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- /gsd-plan-phase 1 — skip discussion, plan directly
+- /gsd-plan-phase 1 - skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -1208,7 +1208,7 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 - [ ] Deep questioning completed (threads followed, not rushed)
 - [ ] PROJECT.md captures full context → **committed**
 - [ ] config.json has workflow mode, granularity, parallelization → **committed**
-- [ ] Research completed (if selected) — 4 parallel agents spawned → **committed**
+- [ ] Research completed (if selected) - 4 parallel agents spawned → **committed**
 - [ ] Requirements gathered (from research or conversation)
 - [ ] User scoped each category (v1/v2/out of scope)
 - [ ] REQUIREMENTS.md created with REQ-IDs → **committed**

@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "personas/config.schema.json",
     "title": "PersonasConfig",
-    "description": "Schema for api/app/personas/config.json — persona definitions and shared defaults.",
+    "description": "Schema for api/app/personas/config.json - persona definitions and shared defaults.",
     "type": "object",
     "required": [
         "defaultPersonaSettings",
@@ -24,7 +24,7 @@
     },
     "$defs": {
         "VoiceLocale": {
-            "description": "Supported locale codes. Add new locales here — VoiceIds picks them up automatically.",
+            "description": "Supported locale codes. Add new locales here - VoiceIds picks them up automatically.",
             "enum": [
                 "any",
                 "it",
@@ -75,13 +75,13 @@
                         "elevenlabs"
                     ],
                     "default": "elevenlabs",
-                    "description": "'elevenlabs' — let ElevenLabs normalize text (recommended); 'internal' — apply our own _truncate_at_sentence preprocessing instead."
+                    "description": "'elevenlabs' - let ElevenLabs normalize text (recommended); 'internal' - apply our own _truncate_at_sentence preprocessing instead."
                 },
                 "stability": {
                     "type": "number",
                     "minimum": 0.0,
                     "maximum": 1.0,
-                    "description": "Voice stability (0=more variable, 1=more consistent). Recommended 0.5–0.85."
+                    "description": "Voice stability (0=more variable, 1=more consistent). Recommended 0.5-0.85."
                 },
                 "similarityBoost": {
                     "type": "number",
@@ -113,7 +113,7 @@
                         "none"
                     ],
                     "default": "browser",
-                    "description": "'browser' — fall back to window.speechSynthesis if ElevenLabs fails; 'none' — hard fail silently."
+                    "description": "'browser' - fall back to window.speechSynthesis if ElevenLabs fails; 'none' - hard fail silently."
                 },
                 "browserFallbackEnabled": {
                     "type": "boolean",

@@ -1,8 +1,8 @@
 """
 Three-tier OCR pipeline for image/PDF files:
-  Tier 1 — pytesseract OCR (fast, cheap)
-  Tier 2 — LLM text extraction (if ≥50 chars from OCR)
-  Tier 3 — LLM vision extraction (if <50 chars from OCR)
+  Tier 1 - pytesseract OCR (fast, cheap)
+  Tier 2 - LLM text extraction (if ≥50 chars from OCR)
+  Tier 3 - LLM vision extraction (if <50 chars from OCR)
 """
 
 import json

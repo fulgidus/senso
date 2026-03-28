@@ -8,7 +8,7 @@ tools:
 ---
 <context>
 **Arguments:**
-- `<workspace-name>` (required) — Name of the workspace to remove
+- `<workspace-name>` (required) - Name of the workspace to remove
 </context>
 
 <objective>

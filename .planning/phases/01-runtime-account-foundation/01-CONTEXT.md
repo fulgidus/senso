@@ -44,16 +44,16 @@ Deliver reliable app access with persistent sessions and a reproducible local ru
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Phase Scope and Acceptance
-- `.planning/ROADMAP.md` — Phase 1 boundary, requirements list, and success criteria.
-- `.planning/REQUIREMENTS.md` — `AUTH-01`, `AUTH-02`, `AUTH-03`, `DEMO-03` acceptance targets.
-- `.planning/PROJECT.md` — non-negotiables (one-day demo reliability, AI-central product constraints).
+- `.planning/ROADMAP.md` - Phase 1 boundary, requirements list, and success criteria.
+- `.planning/REQUIREMENTS.md` - `AUTH-01`, `AUTH-02`, `AUTH-03`, `DEMO-03` acceptance targets.
+- `.planning/PROJECT.md` - non-negotiables (one-day demo reliability, AI-central product constraints).
 
 ### Existing Project Configuration
-- `config.json` — current app/backend endpoints, feature flags, and provider defaults used as implementation baseline.
+- `config.json` - current app/backend endpoints, feature flags, and provider defaults used as implementation baseline.
 
 ### Prior Research Inputs
-- `.planning/research/STACK.md` — stack recommendation context; frontend choice is overridden here by D-01.
-- `.planning/research/ARCHITECTURE.md` — modular architecture guidance and integration boundaries for auth/runtime foundation.
+- `.planning/research/STACK.md` - stack recommendation context; frontend choice is overridden here by D-01.
+- `.planning/research/ARCHITECTURE.md` - modular architecture guidance and integration boundaries for auth/runtime foundation.
 
 </canonical_refs>
 
@@ -86,8 +86,8 @@ Deliver reliable app access with persistent sessions and a reproducible local ru
 <deferred>
 ## Deferred Ideas
 
-- VPS deployment automation scripts/pipeline — move to later phase once Phase 1 local reliability is complete.
-- Email verification and magic link auth variants — not part of Phase 1 runtime/account foundation scope.
+- VPS deployment automation scripts/pipeline - move to later phase once Phase 1 local reliability is complete.
+- Email verification and magic link auth variants - not part of Phase 1 runtime/account foundation scope.
 
 </deferred>
 

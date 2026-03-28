@@ -33,7 +33,7 @@ def create_tables() -> None:
 def _add_missing_columns() -> None:
     """
     Idempotent column additions for Postgres (ALTER TABLE ... ADD COLUMN IF NOT EXISTS).
-    SQLite is used only in tests — skip silently for SQLite.
+    SQLite is used only in tests - skip silently for SQLite.
     """
     if DATABASE_URL.startswith("sqlite"):
         return
@@ -50,9 +50,9 @@ def _add_missing_columns() -> None:
             try:
                 conn.execute(__import__("sqlalchemy").text(stmt))
             except Exception as exc:
-                # Column may already exist or DB may be read-only — log and continue
+                # Column may already exist or DB may be read-only - log and continue
                 logging.getLogger(__name__).warning(
-                    "Migration skipped: %s — %s", stmt, exc
+                    "Migration skipped: %s - %s", stmt, exc
                 )
         conn.commit()
 
@@ -62,7 +62,7 @@ def _seed_default_users() -> None:
 
     Derives first_name from the email username (part before '@'), capitalised.
     Honours STARTING_ADMINS: if the email is listed there, sets is_admin=True.
-    Idempotent — silently skips users that are already present.
+    Idempotent - silently skips users that are already present.
     """
     from uuid import uuid4  # noqa: PLC0415
 

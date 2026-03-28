@@ -123,7 +123,7 @@ def test_post_chat_injection_returns_400(client):
 def test_post_chat_no_profile_returns_422_profile_required(client):
     """User with no profile → 422 profile_required."""
     token = _register_and_login(client, "noprofile@example.com")
-    # Do NOT create a profile — service will raise ProfileError
+    # Do NOT create a profile - service will raise ProfileError
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
         from app.services.profile_service import ProfileError
 
@@ -214,7 +214,7 @@ def test_post_chat_continues_existing_session(client):
         "learn_cards": [],
     }
 
-    # First message — creates session
+    # First message - creates session
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
         mock_service = MagicMock()
         mock_service.chat.return_value = mock_response
@@ -230,7 +230,7 @@ def test_post_chat_continues_existing_session(client):
     session_id = resp1.json()["session_id"]
     assert session_id is not None
 
-    # Second message — continues session with same session_id
+    # Second message - continues session with same session_id
     mock_response2 = {
         "message": "Considera anche le spese fisse mensili.",
         "reasoning_used": [

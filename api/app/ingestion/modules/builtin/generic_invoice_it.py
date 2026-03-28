@@ -1,7 +1,7 @@
 """
-GenericInvoiceIT — Generic Italian invoice/receipt extractor.
+GenericInvoiceIT - Generic Italian invoice/receipt extractor.
 Supported formats: PDF
-Export path: N/A — generic fallback for Italian PDFs with invoice characteristics.
+Export path: N/A - generic fallback for Italian PDFs with invoice characteristics.
 Sample FINGERPRINT keywords: "fattura", "partita iva", "importo totale", "codice fiscale"
 
 Extracts key invoice fields from PDF text via pytesseract OCR.
@@ -138,6 +138,6 @@ def extract(file_path: str | Path):  # noqa: ANN201
         warnings=[]
         if raw_text
         else [
-            "GenericInvoiceIT: OCR unavailable — install pytesseract for better extraction"
+            "GenericInvoiceIT: OCR unavailable - install pytesseract for better extraction"
         ],
     )

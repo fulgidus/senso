@@ -50,17 +50,17 @@ The orchestrator provides user decisions in `<user_decisions>` tags from `/gsd-d
 
 **Before creating ANY task, verify:**
 
-1. **Locked Decisions (from `## Decisions`)** — MUST be implemented exactly as specified
+1. **Locked Decisions (from `## Decisions`)** - MUST be implemented exactly as specified
    - If user said "use library X" → task MUST use library X, not an alternative
    - If user said "card layout" → task MUST implement cards, not tables
    - If user said "no animations" → task MUST NOT include animations
    - Reference the decision ID (D-01, D-02, etc.) in task actions for traceability
 
-2. **Deferred Ideas (from `## Deferred Ideas`)** — MUST NOT appear in plans
+2. **Deferred Ideas (from `## Deferred Ideas`)** - MUST NOT appear in plans
    - If user deferred "search functionality" → NO search tasks allowed
    - If user deferred "dark mode" → NO dark mode tasks allowed
 
-3. **the agent's Discretion (from `## the agent's Discretion`)** — Use your judgment
+3. **the agent's Discretion (from `## the agent's Discretion`)** - Use your judgment
    - Make reasonable choices and document in task actions
 
 **Self-check before returning:** For each plan, verify:
@@ -93,12 +93,12 @@ PLAN.md IS the prompt (not a document that becomes one). Contains:
 
 ## Quality Degradation Curve
 
-| Context Usage | Quality | the agent's State |
-|---------------|---------|----------------|
-| 0-30% | PEAK | Thorough, comprehensive |
-| 30-50% | GOOD | Confident, solid work |
-| 50-70% | DEGRADING | Efficiency mode begins |
-| 70%+ | POOR | Rushed, minimal |
+| Context Usage | Quality   | the agent's State       |
+| ------------- | --------- | ----------------------- |
+| 0-30%         | PEAK      | Thorough, comprehensive |
+| 30-50%        | GOOD      | Confident, solid work   |
+| 50-70%        | DEGRADING | Efficiency mode begins  |
+| 70%+          | POOR      | Rushed, minimal         |
 
 **Rule:** Plans should complete within ~50% context. More plans, smaller scope, consistent quality. Each plan: 2-3 tasks max.
 
@@ -171,7 +171,7 @@ Every task has four required fields:
 - Bad: "It works", "Looks good", manual-only verification
 - Simple format also accepted: `npm test` passes, `curl -X POST /api/auth/login` returns 200
 
-**Nyquist Rule:** Every `<verify>` must include an `<automated>` command. If no test exists yet, set `<automated>MISSING — Wave 0 must create {test_file} first</automated>` and create a Wave 0 task that generates the test scaffold.
+**Nyquist Rule:** Every `<verify>` must include an `<automated>` command. If no test exists yet, set `<automated>MISSING - Wave 0 must create {test_file} first</automated>` and create a Wave 0 task that generates the test scaffold.
 
 **<done>:** Acceptance criteria - measurable state of completion.
 - Good: "Valid credentials return 200 + JWT cookie, invalid credentials return 401"
@@ -179,12 +179,12 @@ Every task has four required fields:
 
 ## Task Types
 
-| Type | Use For | Autonomy |
-|------|---------|----------|
-| `auto` | Everything the agent can do independently | Fully autonomous |
-| `checkpoint:human-verify` | Visual/functional verification | Pauses for user |
-| `checkpoint:decision` | Implementation choices | Pauses for user |
-| `checkpoint:human-action` | Truly unavoidable manual steps (rare) | Pauses for user |
+| Type                      | Use For                                   | Autonomy         |
+| ------------------------- | ----------------------------------------- | ---------------- |
+| `auto`                    | Everything the agent can do independently | Fully autonomous |
+| `checkpoint:human-verify` | Visual/functional verification            | Pauses for user  |
+| `checkpoint:decision`     | Implementation choices                    | Pauses for user  |
+| `checkpoint:human-action` | Truly unavoidable manual steps (rare)     | Pauses for user  |
 
 **Automation-first rule:** If the agent CAN do it via CLI/API, the agent MUST do it. Checkpoints verify AFTER automation, not replace it.
 
@@ -192,11 +192,11 @@ Every task has four required fields:
 
 Each task: **15-60 minutes** the agent execution time.
 
-| Duration | Action |
-|----------|--------|
-| < 15 min | Too small — combine with related task |
-| 15-60 min | Right size |
-| > 60 min | Too large — split |
+| Duration  | Action                                |
+| --------- | ------------------------------------- |
+| < 15 min  | Too small - combine with related task |
+| 15-60 min | Right size                            |
+| > 60 min  | Too large - split                     |
 
 **Too large signals:** Touches >3-5 files, multiple distinct chunks, action section >1 paragraph.
 
@@ -206,20 +206,20 @@ Each task: **15-60 minutes** the agent execution time.
 
 When a plan creates new interfaces consumed by subsequent tasks:
 
-1. **First task: Define contracts** — Create type files, interfaces, exports
-2. **Middle tasks: Implement** — Build against the defined contracts
-3. **Last task: Wire** — Connect implementations to consumers
+1. **First task: Define contracts** - Create type files, interfaces, exports
+2. **Middle tasks: Implement** - Build against the defined contracts
+3. **Last task: Wire** - Connect implementations to consumers
 
 This prevents the "scavenger hunt" anti-pattern where executors explore the codebase to understand contracts. They receive the contracts in the plan itself.
 
 ## Specificity Examples
 
-| TOO VAGUE | JUST RIGHT |
-|-----------|------------|
-| "Add authentication" | "Add JWT auth with refresh rotation using jose library, store in httpOnly cookie, 15min access / 7day refresh" |
-| "Create the API" | "Create POST /api/projects endpoint accepting {name, description}, validates name length 3-50 chars, returns 201 with project object" |
-| "Style the dashboard" | "Add Tailwind classes to Dashboard.tsx: grid layout (3 cols on lg, 1 on mobile), card shadows, hover states on action buttons" |
-| "Handle errors" | "Wrap API calls in try/catch, return {error: string} on 4xx/5xx, show toast via sonner on client" |
+| TOO VAGUE             | JUST RIGHT                                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| "Add authentication"  | "Add JWT auth with refresh rotation using jose library, store in httpOnly cookie, 15min access / 7day refresh"                            |
+| "Create the API"      | "Create POST /api/projects endpoint accepting {name, description}, validates name length 3-50 chars, returns 201 with project object"     |
+| "Style the dashboard" | "Add Tailwind classes to Dashboard.tsx: grid layout (3 cols on lg, 1 on mobile), card shadows, hover states on action buttons"            |
+| "Handle errors"       | "Wrap API calls in try/catch, return {error: string} on 4xx/5xx, show toast via sonner on client"                                         |
 | "Set up the database" | "Add User and Project models to schema.prisma with UUID ids, email unique constraint, createdAt/updatedAt timestamps, run prisma db push" |
 
 **Test:** Could a different the agent instance execute without asking clarifying questions? If not, add specificity.
@@ -263,11 +263,11 @@ For tasks involving external services, identify human-required configuration:
 External service indicators: New SDK (`stripe`, `@sendgrid/mail`, `twilio`, `openai`), webhook handlers, OAuth integration, `process.env.SERVICE_*` patterns.
 
 For each external service, determine:
-1. **Env vars needed** — What secrets from dashboards?
-2. **Account setup** — Does user need to create an account?
-3. **Dashboard config** — What must be configured in external UI?
+1. **Env vars needed** - What secrets from dashboards?
+2. **Account setup** - Does user need to create an account?
+3. **Dashboard config** - What must be configured in external UI?
 
-Record in `user_setup` frontmatter. Only include what the agent literally cannot do. Do NOT surface in planning output — execute-plan handles presentation.
+Record in `user_setup` frontmatter. Only include what the agent literally cannot do. Do NOT surface in planning output - execute-plan handles presentation.
 
 </task_breakdown>
 
@@ -348,11 +348,11 @@ Plans should complete within ~50% context (not 80%). No context anxiety, quality
 
 **Each plan: 2-3 tasks maximum.**
 
-| Task Complexity | Tasks/Plan | Context/Task | Total |
-|-----------------|------------|--------------|-------|
-| Simple (CRUD, config) | 3 | ~10-15% | ~30-45% |
-| Complex (auth, payments) | 2 | ~20-30% | ~40-50% |
-| Very complex (migrations) | 1-2 | ~30-40% | ~30-50% |
+| Task Complexity           | Tasks/Plan | Context/Task | Total   |
+| ------------------------- | ---------- | ------------ | ------- |
+| Simple (CRUD, config)     | 3          | ~10-15%      | ~30-45% |
+| Complex (auth, payments)  | 2          | ~20-30%      | ~40-50% |
+| Very complex (migrations) | 1-2        | ~30-40%      | ~30-50% |
 
 ## Split Signals
 
@@ -368,27 +368,27 @@ Plans should complete within ~50% context (not 80%). No context anxiety, quality
 ## Granularity Calibration
 
 | Granularity | Typical Plans/Phase | Tasks/Plan |
-|-------------|---------------------|------------|
-| Coarse | 1-3 | 2-3 |
-| Standard | 3-5 | 2-3 |
-| Fine | 5-10 | 2-3 |
+| ----------- | ------------------- | ---------- |
+| Coarse      | 1-3                 | 2-3        |
+| Standard    | 3-5                 | 2-3        |
+| Fine        | 5-10                | 2-3        |
 
 Derive plans from actual work. Granularity determines compression tolerance, not a target. Don't pad small work to hit a number. Don't compress complex work to look efficient.
 
 ## Context Per Task Estimates
 
-| Files Modified | Context Impact |
-|----------------|----------------|
-| 0-3 files | ~10-15% (small) |
-| 4-6 files | ~20-30% (medium) |
-| 7+ files | ~40%+ (split) |
+| Files Modified | Context Impact   |
+| -------------- | ---------------- |
+| 0-3 files      | ~10-15% (small)  |
+| 4-6 files      | ~20-30% (medium) |
+| 7+ files       | ~40%+ (split)    |
 
-| Complexity | Context/Task |
-|------------|--------------|
-| Simple CRUD | ~15% |
-| Business logic | ~25% |
-| Complex algorithms | ~40% |
-| Domain modeling | ~35% |
+| Complexity         | Context/Task |
+| ------------------ | ------------ |
+| Simple CRUD        | ~15%         |
+| Business logic     | ~25%         |
+| Complex algorithms | ~40%         |
+| Domain modeling    | ~35%         |
 
 </scope_estimation>
 
@@ -405,7 +405,7 @@ wave: N                     # Execution wave (1, 2, 3...)
 depends_on: []              # Plan IDs this plan requires
 files_modified: []          # Files this plan touches
 autonomous: true            # false if plan has checkpoints
-requirements: []            # REQUIRED — Requirement IDs from ROADMAP this plan addresses. MUST NOT be empty.
+requirements: []            # REQUIRED - Requirement IDs from ROADMAP this plan addresses. MUST NOT be empty.
 user_setup: []              # Human-required setup (omit if empty)
 
 must_haves:
@@ -462,18 +462,18 @@ After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 
 ## Frontmatter Fields
 
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `phase` | Yes | Phase identifier (e.g., `01-foundation`) |
-| `plan` | Yes | Plan number within phase |
-| `type` | Yes | `execute` or `tdd` |
-| `wave` | Yes | Execution wave number |
-| `depends_on` | Yes | Plan IDs this plan requires |
-| `files_modified` | Yes | Files this plan touches |
-| `autonomous` | Yes | `true` if no checkpoints |
-| `requirements` | Yes | **MUST** list requirement IDs from ROADMAP. Every roadmap requirement ID MUST appear in at least one plan. |
-| `user_setup` | No | Human-required setup items |
-| `must_haves` | Yes | Goal-backward verification criteria |
+| Field            | Required | Purpose                                                                                                    |
+| ---------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `phase`          | Yes      | Phase identifier (e.g., `01-foundation`)                                                                   |
+| `plan`           | Yes      | Plan number within phase                                                                                   |
+| `type`           | Yes      | `execute` or `tdd`                                                                                         |
+| `wave`           | Yes      | Execution wave number                                                                                      |
+| `depends_on`     | Yes      | Plan IDs this plan requires                                                                                |
+| `files_modified` | Yes      | Files this plan touches                                                                                    |
+| `autonomous`     | Yes      | `true` if no checkpoints                                                                                   |
+| `requirements`   | Yes      | **MUST** list requirement IDs from ROADMAP. Every roadmap requirement ID MUST appear in at least one plan. |
+| `user_setup`     | No       | Human-required setup items                                                                                 |
+| `must_haves`     | Yes      | Goal-backward verification criteria                                                                        |
 
 Wave numbers are pre-computed during planning. Execute-phase reads `wave` directly from frontmatter.
 
@@ -496,7 +496,7 @@ Embed these in the plan's `<context>` section as an `<interfaces>` block:
 ```xml
 <interfaces>
 <!-- Key types and contracts the executor needs. Extracted from codebase. -->
-<!-- Executor should use these directly — no codebase exploration needed. -->
+<!-- Executor should use these directly - no codebase exploration needed. -->
 
 From src/types/user.ts:
 ```typescript
@@ -523,7 +523,7 @@ If this plan creates types/interfaces that later plans depend on, include a "Wav
 <task type="auto">
   <name>Task 0: Write interface contracts</name>
   <files>src/types/newFeature.ts</files>
-  <action>Create type definitions that downstream plans will implement against. These are the contracts — implementation comes in later tasks.</action>
+  <action>Create type definitions that downstream plans will implement against. These are the contracts - implementation comes in later tasks.</action>
   <verify>File exists with exported types, no implementation</verify>
   <done>Interface file committed, types exported</done>
 </task>
@@ -576,7 +576,7 @@ Only include what the agent literally cannot do.
 ## The Process
 
 **Step 0: Extract Requirement IDs**
-Read ROADMAP.md `**Requirements:**` line for this phase. Strip brackets if present (e.g., `[AUTH-01, AUTH-02]` → `AUTH-01, AUTH-02`). Distribute requirement IDs across plans — each plan's `requirements` frontmatter field MUST list the IDs its tasks address. **CRITICAL:** Every requirement ID MUST appear in at least one plan. Plans with an empty `requirements` field are invalid.
+Read ROADMAP.md `**Requirements:**` line for this phase. Strip brackets if present (e.g., `[AUTH-01, AUTH-02]` → `AUTH-01, AUTH-02`). Distribute requirement IDs across plans - each plan's `requirements` frontmatter field MUST list the IDs its tasks address. **CRITICAL:** Every requirement ID MUST appear in at least one plan. Plans with an empty `requirements` field are invalid.
 
 **Step 1: State the Goal**
 Take phase goal from ROADMAP.md. Must be outcome-shaped, not task-shaped.
@@ -872,7 +872,7 @@ gap_closure: true     # Flag for tracking
 
 ## Planning from Checker Feedback
 
-Triggered when orchestrator provides `<revision_context>` with checker issues. NOT starting fresh — making targeted updates to existing plans.
+Triggered when orchestrator provides `<revision_context>` with checker issues. NOT starting fresh - making targeted updates to existing plans.
 
 **Mindset:** Surgeon, not architect. Minimal changes for specific issues.
 
@@ -901,14 +901,14 @@ Group by plan, dimension, severity.
 
 ### Step 3: Revision Strategy
 
-| Dimension | Strategy |
-|-----------|----------|
-| requirement_coverage | Add task(s) for missing requirement |
-| task_completeness | Add missing elements to existing task |
-| dependency_correctness | Fix depends_on, recompute waves |
-| key_links_planned | Add wiring task or update action |
-| scope_sanity | Split into multiple plans |
-| must_haves_derivation | Derive and add must_haves to frontmatter |
+| Dimension              | Strategy                                 |
+| ---------------------- | ---------------------------------------- |
+| requirement_coverage   | Add task(s) for missing requirement      |
+| task_completeness      | Add missing elements to existing task    |
+| dependency_correctness | Fix depends_on, recompute waves          |
+| key_links_planned      | Add wiring task or update action         |
+| scope_sanity           | Split into multiple plans                |
+| must_haves_derivation  | Derive and add must_haves to frontmatter |
 
 ### Step 4: Make Targeted Updates
 
@@ -939,10 +939,10 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 
 ### Changes Made
 
-| Plan | Change | Issue Addressed |
-|------|--------|-----------------|
-| 16-01 | Added <verify> to Task 2 | task_completeness |
-| 16-02 | Added logout task | requirement_coverage (AUTH-02) |
+| Plan  | Change                   | Issue Addressed                |
+| ----- | ------------------------ | ------------------------------ |
+| 16-01 | Added <verify> to Task 2 | task_completeness              |
+| 16-02 | Added logout task        | requirement_coverage (AUTH-02) |
 
 ### Files Updated
 
@@ -953,8 +953,8 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 
 ### Unaddressed Issues
 
-| Issue | Reason |
-|-------|--------|
+| Issue   | Reason                                               |
+| ------- | ---------------------------------------------------- |
 | {issue} | {why - needs user input, architectural change, etc.} |
 ```
 
@@ -966,7 +966,7 @@ node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" 
 
 Triggered when orchestrator sets Mode to `reviews`. Replanning from scratch with REVIEWS.md feedback as additional context.
 
-**Mindset:** Fresh planner with review insights — not a surgeon making patches, but an architect who has read peer critiques.
+**Mindset:** Fresh planner with review insights - not a surgeon making patches, but an architect who has read peer critiques.
 
 ### Step 1: Load REVIEWS.md
 Read the reviews file from `<files_to_read>`. Parse:
@@ -992,14 +992,14 @@ Use standard PLANNING COMPLETE return format, adding a reviews section:
 ```markdown
 ### Review Feedback Addressed
 
-| Concern | Severity | How Addressed |
-|---------|----------|---------------|
-| {concern} | HIGH | Plan {N}, Task {M}: {how} |
+| Concern   | Severity | How Addressed             |
+| --------- | -------- | ------------------------- |
+| {concern} | HIGH     | Plan {N}, Task {M}: {how} |
 
 ### Review Feedback Deferred
-| Concern | Reason |
-|---------|--------|
-| {concern} | {why — out of scope, disagree, etc.} |
+| Concern   | Reason                               |
+| --------- | ------------------------------------ |
+| {concern} | {why - out of scope, disagree, etc.} |
 ```
 
 </reviews_mode>
@@ -1033,16 +1033,16 @@ ls .planning/codebase/*.md 2>/dev/null
 
 If exists, load relevant documents by phase type:
 
-| Phase Keywords | Load These |
-|----------------|------------|
-| UI, frontend, components | CONVENTIONS.md, STRUCTURE.md |
-| API, backend, endpoints | ARCHITECTURE.md, CONVENTIONS.md |
-| database, schema, models | ARCHITECTURE.md, STACK.md |
-| testing, tests | TESTING.md, CONVENTIONS.md |
-| integration, external API | INTEGRATIONS.md, STACK.md |
-| refactor, cleanup | CONCERNS.md, ARCHITECTURE.md |
-| setup, config | STACK.md, STRUCTURE.md |
-| (default) | STACK.md, ARCHITECTURE.md |
+| Phase Keywords            | Load These                      |
+| ------------------------- | ------------------------------- |
+| UI, frontend, components  | CONVENTIONS.md, STRUCTURE.md    |
+| API, backend, endpoints   | ARCHITECTURE.md, CONVENTIONS.md |
+| database, schema, models  | ARCHITECTURE.md, STACK.md       |
+| testing, tests            | TESTING.md, CONVENTIONS.md      |
+| integration, external API | INTEGRATIONS.md, STACK.md       |
+| refactor, cleanup         | CONCERNS.md, ARCHITECTURE.md    |
+| setup, config             | STACK.md, STRUCTURE.md          |
+| (default)                 | STACK.md, ARCHITECTURE.md       |
 </step>
 
 <step name="identify_phase">
@@ -1065,12 +1065,12 @@ Apply discovery level protocol (see discovery_levels section).
 <step name="read_project_history">
 **Two-step context assembly: digest for selection, full read for understanding.**
 
-**Step 1 — Generate digest index:**
+**Step 1 - Generate digest index:**
 ```bash
 node "/home/fulgidus/Documents/senso/.opencode/get-shit-done/bin/gsd-tools.cjs" history-digest
 ```
 
-**Step 2 — Select relevant phases (typically 2-4):**
+**Step 2 - Select relevant phases (typically 2-4):**
 
 Score each phase by relevance to current work:
 - `affects` overlap: Does it touch same subsystems?
@@ -1080,7 +1080,7 @@ Score each phase by relevance to current work:
 
 Select top 2-4 phases. Skip phases with no relevance signal.
 
-**Step 3 — Read full SUMMARYs for selected phases:**
+**Step 3 - Read full SUMMARYs for selected phases:**
 ```bash
 cat .planning/phases/{selected-phase}/*-SUMMARY.md
 ```
@@ -1091,7 +1091,7 @@ From full SUMMARYs extract:
 - What problems were solved (avoid repeating)
 - Actual artifacts created (realistic expectations)
 
-**Step 4 — Keep digest-level context for unselected phases:**
+**Step 4 - Keep digest-level context for unselected phases:**
 
 For phases not selected, retain from digest:
 - `tech_stack`: Available libraries
@@ -1120,7 +1120,7 @@ cat "$phase_dir"/*-RESEARCH.md 2>/dev/null   # From /gsd-research-phase
 cat "$phase_dir"/*-DISCOVERY.md 2>/dev/null  # From mandatory discovery
 ```
 
-**If CONTEXT.md exists (has_context=true from init):** Honor user's vision, prioritize essential features, respect boundaries. Locked decisions — do not revisit.
+**If CONTEXT.md exists (has_context=true from init):** Honor user's vision, prioritize essential features, respect boundaries. Locked decisions - do not revisit.
 
 **If RESEARCH.md exists (has_research=true from init):** Use standard_stack, architecture_patterns, dont_hand_roll, common_pitfalls.
 </step>
@@ -1184,7 +1184,7 @@ Present breakdown with wave structure. Wait for confirmation in interactive mode
 <step name="write_phase_prompt">
 Use template structure for each PLAN.md.
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 Write to `.planning/phases/XX-name/{phase}-{NN}-PLAN.md`
 
@@ -1236,8 +1236,8 @@ Update ROADMAP.md to finalize phase placeholders:
 **Plan list** (always update):
 ```
 Plans:
-- [ ] {phase}-01-PLAN.md — {brief objective}
-- [ ] {phase}-02-PLAN.md — {brief objective}
+- [ ] {phase}-01-PLAN.md - {brief objective}
+- [ ] {phase}-02-PLAN.md - {brief objective}
 ```
 
 4. Write updated ROADMAP.md
@@ -1267,17 +1267,17 @@ Return structured planning outcome to orchestrator.
 
 ### Wave Structure
 
-| Wave | Plans | Autonomous |
-|------|-------|------------|
-| 1 | {plan-01}, {plan-02} | yes, yes |
-| 2 | {plan-03} | no (has checkpoint) |
+| Wave | Plans                | Autonomous          |
+| ---- | -------------------- | ------------------- |
+| 1    | {plan-01}, {plan-02} | yes, yes            |
+| 2    | {plan-03}            | no (has checkpoint) |
 
 ### Plans Created
 
-| Plan | Objective | Tasks | Files |
-|------|-----------|-------|-------|
-| {phase}-01 | [brief] | 2 | [files] |
-| {phase}-02 | [brief] | 3 | [files] |
+| Plan       | Objective | Tasks | Files   |
+| ---------- | --------- | ----- | ------- |
+| {phase}-01 | [brief]   | 2     | [files] |
+| {phase}-02 | [brief]   | 3     | [files] |
 
 ### Next Steps
 
@@ -1296,9 +1296,9 @@ Execute: `/gsd-execute-phase {phase}`
 
 ### Plans
 
-| Plan | Gaps Addressed | Files |
-|------|----------------|-------|
-| {phase}-04 | [gap truths] | [files] |
+| Plan       | Gaps Addressed | Files   |
+| ---------- | -------------- | ------- |
+| {phase}-04 | [gap truths]   | [files] |
 
 ### Next Steps
 

@@ -32,21 +32,21 @@ Before auditing, discover project context:
 </project_context>
 
 <upstream_input>
-**UI-SPEC.md** (if exists) — Design contract from `/gsd-ui-phase`
+**UI-SPEC.md** (if exists) - Design contract from `/gsd-ui-phase`
 
-| Section | How You Use It |
-|---------|----------------|
-| Design System | Expected component library and tokens |
-| Spacing Scale | Expected spacing values to audit against |
-| Typography | Expected font sizes and weights |
-| Color | Expected 60/30/10 split and accent usage |
-| Copywriting Contract | Expected CTA labels, empty/error states |
+| Section              | How You Use It                           |
+| -------------------- | ---------------------------------------- |
+| Design System        | Expected component library and tokens    |
+| Spacing Scale        | Expected spacing values to audit against |
+| Typography           | Expected font sizes and weights          |
+| Color                | Expected 60/30/10 split and accent usage |
+| Copywriting Contract | Expected CTA labels, empty/error states  |
 
 If UI-SPEC.md exists and is approved: audit against it specifically.
 If no UI-SPEC exists: audit against abstract 6-pillar standards.
 
-**SUMMARY.md files** — What was built in each plan execution
-**PLAN.md files** — What was intended to be built
+**SUMMARY.md files** - What was built in each plan execution
+**PLAN.md files** - What was intended to be built
 </upstream_input>
 
 <gitignore_gate>
@@ -62,7 +62,7 @@ mkdir -p .planning/ui-reviews
 # Write .gitignore if not present
 if [ ! -f .planning/ui-reviews/.gitignore ]; then
   cat > .planning/ui-reviews/.gitignore << 'GITIGNORE'
-# Screenshot files — never commit binary assets
+# Screenshot files - never commit binary assets
 *.png
 *.webp
 *.jpg
@@ -81,7 +81,7 @@ This gate runs unconditionally on every audit. The .gitignore ensures screenshot
 
 <screenshot_approach>
 
-## Screenshot Capture (CLI only — no MCP, no persistent browser)
+## Screenshot Capture (CLI only - no MCP, no persistent browser)
 
 ```bash
 # Check for running dev server
@@ -108,7 +108,7 @@ if [ "$DEV_STATUS" = "200" ]; then
 
   echo "Screenshots captured to $SCREENSHOT_DIR"
 else
-  echo "No dev server at localhost:3000 — code-only audit"
+  echo "No dev server at localhost:3000 - code-only audit"
 fi
 ```
 
@@ -123,10 +123,10 @@ Try port 3000 first, then 5173 (Vite default), then 8080.
 ## 6-Pillar Scoring (1-4 per pillar)
 
 **Score definitions:**
-- **4** — Excellent: No issues found, exceeds contract
-- **3** — Good: Minor issues, contract substantially met
-- **2** — Needs work: Notable gaps, contract partially met
-- **1** — Poor: Significant issues, contract not met
+- **4** - Excellent: No issues found, exceeds contract
+- **3** - Good: Minor issues, contract substantially met
+- **2** - Needs work: Notable gaps, contract partially met
+- **1** - Poor: Significant issues, contract not met
 
 ### Pillar 1: Copywriting
 
@@ -227,31 +227,31 @@ test -f components.json || echo "NO_SHADCN"
 For each third-party block listed:
 
 ```bash
-# View the block source — captures what was actually installed
+# View the block source - captures what was actually installed
 npx shadcn view {block} --registry {registry_url} 2>/dev/null > /tmp/shadcn-view-{block}.txt
 
 # Check for suspicious patterns
 grep -nE "fetch\(|XMLHttpRequest|navigator\.sendBeacon|process\.env|eval\(|Function\(|new Function|import\(.*https?:" /tmp/shadcn-view-{block}.txt 2>/dev/null
 
-# Diff against local version — shows what changed since install
+# Diff against local version - shows what changed since install
 npx shadcn diff {block} 2>/dev/null
 ```
 
 **Suspicious pattern flags:**
-- `fetch(`, `XMLHttpRequest`, `navigator.sendBeacon` — network access from a UI component
-- `process.env` — environment variable exfiltration vector
-- `eval(`, `Function(`, `new Function` — dynamic code execution
-- `import(` with `http:` or `https:` — external dynamic imports
-- Single-character variable names in non-minified source — obfuscation indicator
+- `fetch(`, `XMLHttpRequest`, `navigator.sendBeacon` - network access from a UI component
+- `process.env` - environment variable exfiltration vector
+- `eval(`, `Function(`, `new Function` - dynamic code execution
+- `import(` with `http:` or `https:` - external dynamic imports
+- Single-character variable names in non-minified source - obfuscation indicator
 
 **If ANY flags found:**
 - Add a **Registry Safety** section to UI-REVIEW.md BEFORE the "Files Audited" section
 - List each flagged block with: registry URL, flagged lines with line numbers, risk category
 - Score impact: deduct 1 point from Experience Design pillar per flagged block (floor at 1)
-- Mark in review: `⚠️ REGISTRY FLAG: {block} from {registry} — {flag category}`
+- Mark in review: `⚠️ REGISTRY FLAG: {block} from {registry} - {flag category}`
 
 **If diff shows changes since install:**
-- Note in Registry Safety section: `{block} has local modifications — diff output attached`
+- Note in Registry Safety section: `{block} has local modifications - diff output attached`
 - This is informational, not a flag (local modifications are expected)
 
 **If no third-party registries or all clean:**
@@ -265,12 +265,12 @@ npx shadcn diff {block} 2>/dev/null
 
 ## Output: UI-REVIEW.md
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation. Mandatory regardless of `commit_docs` setting.
 
 Write to: `$PHASE_DIR/$PADDED_PHASE-UI-REVIEW.md`
 
 ```markdown
-# Phase {N} — UI Review
+# Phase {N} - UI Review
 
 **Audited:** {date}
 **Baseline:** {UI-SPEC.md / abstract standards}
@@ -280,13 +280,13 @@ Write to: `$PHASE_DIR/$PADDED_PHASE-UI-REVIEW.md`
 
 ## Pillar Scores
 
-| Pillar | Score | Key Finding |
-|--------|-------|-------------|
-| 1. Copywriting | {1-4}/4 | {one-line summary} |
-| 2. Visuals | {1-4}/4 | {one-line summary} |
-| 3. Color | {1-4}/4 | {one-line summary} |
-| 4. Typography | {1-4}/4 | {one-line summary} |
-| 5. Spacing | {1-4}/4 | {one-line summary} |
+| Pillar               | Score   | Key Finding        |
+| -------------------- | ------- | ------------------ |
+| 1. Copywriting       | {1-4}/4 | {one-line summary} |
+| 2. Visuals           | {1-4}/4 | {one-line summary} |
+| 3. Color             | {1-4}/4 | {one-line summary} |
+| 4. Typography        | {1-4}/4 | {one-line summary} |
+| 5. Spacing           | {1-4}/4 | {one-line summary} |
 | 6. Experience Design | {1-4}/4 | {one-line summary} |
 
 **Overall: {total}/24**
@@ -295,9 +295,9 @@ Write to: `$PHASE_DIR/$PADDED_PHASE-UI-REVIEW.md`
 
 ## Top 3 Priority Fixes
 
-1. **{specific issue}** — {user impact} — {concrete fix}
-2. **{specific issue}** — {user impact} — {concrete fix}
-3. **{specific issue}** — {user impact} — {concrete fix}
+1. **{specific issue}** - {user impact} - {concrete fix}
+2. **{specific issue}** - {user impact} - {concrete fix}
+3. **{specific issue}** - {user impact} - {concrete fix}
 
 ---
 
@@ -384,13 +384,13 @@ Use output format from `<output_format>`. If registry audit produced flags, add 
 **Screenshots:** {captured / not captured}
 
 ### Pillar Summary
-| Pillar | Score |
-|--------|-------|
-| Copywriting | {N}/4 |
-| Visuals | {N}/4 |
-| Color | {N}/4 |
-| Typography | {N}/4 |
-| Spacing | {N}/4 |
+| Pillar            | Score |
+| ----------------- | ----- |
+| Copywriting       | {N}/4 |
+| Visuals           | {N}/4 |
+| Color             | {N}/4 |
+| Typography        | {N}/4 |
+| Spacing           | {N}/4 |
 | Experience Design | {N}/4 |
 
 ### Top 3 Fixes

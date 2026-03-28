@@ -68,12 +68,12 @@ When debugging, return to foundational truths:
 
 ## Cognitive Biases to Avoid
 
-| Bias | Trap | Antidote |
-|------|------|----------|
-| **Confirmation** | Only look for evidence supporting your hypothesis | Actively seek disconfirming evidence. "What would prove me wrong?" |
-| **Anchoring** | First explanation becomes your anchor | Generate 3+ independent hypotheses before investigating any |
-| **Availability** | Recent bugs → assume similar cause | Treat each bug as novel until evidence suggests otherwise |
-| **Sunk Cost** | Spent 2 hours on one path, keep going despite evidence | Every 30 min: "If I started fresh, is this still the path I'd take?" |
+| Bias             | Trap                                                   | Antidote                                                             |
+| ---------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| **Confirmation** | Only look for evidence supporting your hypothesis      | Actively seek disconfirming evidence. "What would prove me wrong?"   |
+| **Anchoring**    | First explanation becomes your anchor                  | Generate 3+ independent hypotheses before investigating any          |
+| **Availability** | Recent bugs → assume similar cause                     | Treat each bug as novel until evidence suggests otherwise            |
+| **Sunk Cost**    | Spent 2 hours on one path, keep going despite evidence | Every 30 min: "If I started fresh, is this still the path I'd take?" |
 
 ## Systematic Investigation Disciplines
 
@@ -209,13 +209,13 @@ try {
 
 ## Hypothesis Testing Pitfalls
 
-| Pitfall | Problem | Solution |
-|---------|---------|----------|
-| Testing multiple hypotheses at once | You change three things and it works - which one fixed it? | Test one hypothesis at a time |
-| Confirmation bias | Only looking for evidence that confirms your hypothesis | Actively seek disconfirming evidence |
-| Acting on weak evidence | "It seems like maybe this could be..." | Wait for strong, unambiguous evidence |
-| Not documenting results | Forget what you tested, repeat experiments | Write down each hypothesis and result |
-| Abandoning rigor under pressure | "Let me just try this..." | Double down on method when pressure increases |
+| Pitfall                             | Problem                                                    | Solution                                      |
+| ----------------------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| Testing multiple hypotheses at once | You change three things and it works - which one fixed it? | Test one hypothesis at a time                 |
+| Confirmation bias                   | Only looking for evidence that confirms your hypothesis    | Actively seek disconfirming evidence          |
+| Acting on weak evidence             | "It seems like maybe this could be..."                     | Wait for strong, unambiguous evidence         |
+| Not documenting results             | Forget what you tested, repeat experiments                 | Write down each hypothesis and result         |
+| Abandoning rigor under pressure     | "Let me just try this..."                                  | Double down on method when pressure increases |
 
 </hypothesis_testing>
 
@@ -404,15 +404,15 @@ git bisect bad              # or good, based on testing
 
 ## Follow the Indirection
 
-**When:** Code constructs paths, URLs, keys, or references from variables — and the constructed value might not point where you expect.
+**When:** Code constructs paths, URLs, keys, or references from variables - and the constructed value might not point where you expect.
 
 **The trap:** You read code that builds a path like `path.join(configDir, 'hooks')` and assume it's correct because it looks reasonable. But you never verified that the constructed path matches where another part of the system actually writes/reads.
 
 **How:**
 1. Find the code that **produces** the value (writer/installer/creator)
 2. Find the code that **consumes** the value (reader/checker/validator)
-3. Trace the actual resolved value in both — do they agree?
-4. Check every variable in the path construction — where does each come from? What's its actual value at runtime?
+3. Trace the actual resolved value in both - do they agree?
+4. Check every variable in the path construction - where does each come from? What's its actual value at runtime?
 
 **Common indirection bugs:**
 - Path A writes to `dir/sub/hooks/` but Path B checks `dir/hooks/` (directory mismatch)
@@ -437,16 +437,16 @@ MISMATCH: Checker looks in wrong directory → hooks "not found" → reported as
 
 ## Technique Selection
 
-| Situation | Technique |
-|-----------|-----------|
-| Large codebase, many files | Binary search |
-| Confused about what's happening | Rubber duck, Observability first |
-| Complex system, many interactions | Minimal reproduction |
-| Know the desired output | Working backwards |
-| Used to work, now doesn't | Differential debugging, Git bisect |
-| Many possible causes | Comment out everything, Binary search |
-| Paths, URLs, keys constructed from variables | Follow the indirection |
-| Always | Observability first (before making changes) |
+| Situation                                    | Technique                                   |
+| -------------------------------------------- | ------------------------------------------- |
+| Large codebase, many files                   | Binary search                               |
+| Confused about what's happening              | Rubber duck, Observability first            |
+| Complex system, many interactions            | Minimal reproduction                        |
+| Know the desired output                      | Working backwards                           |
+| Used to work, now doesn't                    | Differential debugging, Git bisect          |
+| Many possible causes                         | Comment out everything, Binary search       |
+| Paths, URLs, keys constructed from variables | Follow the indirection                      |
+| Always                                       | Observability first (before making changes) |
 
 ## Combining Techniques
 
@@ -777,7 +777,7 @@ The knowledge base is a persistent, append-only record of resolved debug session
 Each resolved session appends one entry:
 
 ```markdown
-## {slug} — {one-line description}
+## {slug} - {one-line description}
 - **Date:** {ISO date}
 - **Error patterns:** {comma-separated keywords extracted from symptoms.errors and symptoms.actual}
 - **Root cause:** {from Resolution.root_cause}
@@ -798,7 +798,7 @@ At the **end of `archive_session`**, after the session file is moved to `resolve
 
 Matching is keyword overlap, not semantic similarity. Extract nouns and error substrings from `Symptoms.errors` and `Symptoms.actual`. Scan each knowledge base entry's `Error patterns` field for overlapping tokens (case-insensitive, 2+ word overlap = candidate match).
 
-**Important:** A match is a **hypothesis candidate**, not a confirmed diagnosis. Surface it in Current Focus and test it first — but do not skip other hypotheses or assume correctness.
+**Important:** A match is a **hypothesis candidate**, not a confirmed diagnosis. Surface it in Current Focus and test it first - but do not skip other hypotheses or assume correctness.
 
 </knowledge_base_protocol>
 
@@ -864,15 +864,15 @@ files_changed: []
 
 ## Update Rules
 
-| Section | Rule | When |
-|---------|------|------|
-| Frontmatter.status | OVERWRITE | Each phase transition |
-| Frontmatter.updated | OVERWRITE | Every file update |
-| Current Focus | OVERWRITE | Before every action |
-| Symptoms | IMMUTABLE | After gathering complete |
-| Eliminated | APPEND | When hypothesis disproved |
-| Evidence | APPEND | After each finding |
-| Resolution | OVERWRITE | As understanding evolves |
+| Section             | Rule      | When                      |
+| ------------------- | --------- | ------------------------- |
+| Frontmatter.status  | OVERWRITE | Each phase transition     |
+| Frontmatter.updated | OVERWRITE | Every file update         |
+| Current Focus       | OVERWRITE | Before every action       |
+| Symptoms            | IMMUTABLE | After gathering complete  |
+| Eliminated          | APPEND    | When hypothesis disproved |
+| Evidence            | APPEND    | After each finding        |
+| Resolution          | OVERWRITE | As understanding evolves  |
 
 **CRITICAL:** Update the file BEFORE taking action, not after. If context resets mid-action, the file shows what was about to happen.
 
@@ -924,7 +924,7 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved
 <step name="create_debug_file">
 **Create debug file IMMEDIATELY.**
 
-**ALWAYS use the Write tool to create files** — never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
+**ALWAYS use the Write tool to create files** - never use `Bash(cat << 'EOF')` or heredoc commands for file creation.
 
 1. Generate slug from user input (lowercase, hyphens, max 30 chars)
 2. `mkdir -p .planning/debug`
@@ -957,9 +957,9 @@ Gather symptoms through questioning. Update file after EACH answer.
 - Extract keywords from `Symptoms.errors` and `Symptoms.actual` (nouns, error substrings, identifiers)
 - Scan knowledge base entries for 2+ keyword overlap (case-insensitive)
 - If match found:
-  - Note in Current Focus: `known_pattern_candidate: "{matched slug} — {description}"`
+  - Note in Current Focus: `known_pattern_candidate: "{matched slug} - {description}"`
   - Add to Evidence: `found: Knowledge base match on [{keywords}] → Root cause was: {root_cause}. Fix was: {fix}.`
-  - Test this hypothesis FIRST in Phase 2 — but treat it as one hypothesis, not a certainty
+  - Test this hypothesis FIRST in Phase 2 - but treat it as one hypothesis, not a certainty
 - If no match: proceed normally
 
 **Phase 1: Initial evidence gathering**
@@ -1151,7 +1151,7 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 
 Then append the entry:
 ```markdown
-## {slug} — {one-line description of the bug}
+## {slug} - {one-line description of the bug}
 - **Date:** {ISO date}
 - **Error patterns:** {comma-separated keywords from Symptoms.errors + Symptoms.actual}
 - **Root cause:** {Resolution.root_cause}

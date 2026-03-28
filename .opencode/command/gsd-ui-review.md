@@ -22,7 +22,7 @@ Output: {phase_num}-UI-REVIEW.md
 </execution_context>
 
 <context>
-Phase: $ARGUMENTS — optional, defaults to last completed phase.
+Phase: $ARGUMENTS - optional, defaults to last completed phase.
 </context>
 
 <process>

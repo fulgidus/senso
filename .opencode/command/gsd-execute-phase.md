@@ -37,10 +37,10 @@ Context budget: ~15% orchestrator, 100% fresh per subagent.
 <context>
 Phase: $ARGUMENTS
 
-**Available optional flags (documentation only — not automatically active):**
-- `--wave N` — Execute only Wave `N` in the phase. Use when you want to pace execution or stay inside usage limits.
-- `--gaps-only` — Execute only gap closure plans (plans with `gap_closure: true` in frontmatter). Use after verify-work creates fix plans.
-- `--interactive` — Execute plans sequentially inline (no subagents) with user checkpoints between tasks. Lower token usage, pair-programming style. Best for small phases, bug fixes, and verification gaps.
+**Available optional flags (documentation only - not automatically active):**
+- `--wave N` - Execute only Wave `N` in the phase. Use when you want to pace execution or stay inside usage limits.
+- `--gaps-only` - Execute only gap closure plans (plans with `gap_closure: true` in frontmatter). Use after verify-work creates fix plans.
+- `--interactive` - Execute plans sequentially inline (no subagents) with user checkpoints between tasks. Lower token usage, pair-programming style. Best for small phases, bug fixes, and verification gaps.
 
 **Active flags must be derived from `$ARGUMENTS`:**
 - `--wave N` is active only if the literal `--wave` token is present in `$ARGUMENTS`

@@ -1,4 +1,4 @@
-# Phase 5: Voice Coaching Loop — Context
+# Phase 5: Voice Coaching Loop - Context
 
 **Gathered:** 2026-03-28
 **Status:** Ready for planning
@@ -12,12 +12,12 @@ Users can complete the same coaching interaction via voice with resilient text f
 
 2. **Voice output (TTS)**: Each assistant coaching response bubble gains a per-bubble play button. Clicking it fetches spoken audio from a new `POST /coaching/tts` backend endpoint (ElevenLabs API), creates an `ObjectURL`, and plays it. If ElevenLabs is unavailable (503/no key), the frontend silently falls back to `window.speechSynthesis`. The play button is only shown when TTS is functionally available (either path works).
 
-Phase 5 also introduces a **dual-channel response shape** — the most architecturally significant change. The LLM now emits two complementary outputs in a single response:
+Phase 5 also introduces a **dual-channel response shape** - the most architecturally significant change. The LLM now emits two complementary outputs in a single response:
 
-- `message` (string): Short, conversational, **voice-optimised**. Spoken flow matters — no long lists, no exact decimal numbers (say "poco più di mille euro" not "€1023.44"), no acronyms, suitable for TTS audio. This is what the TTS endpoint speaks.
-- `details_a2ui` (string | null): **A2UI JSONL string** — a sequence of Google A2UI protocol messages (`surfaceUpdate`, `dataModelUpdate`, `beginRendering`) that describe a rich, interactive UI component tree. Rendered in the chat bubble's detail panel by an `<a2ui-surface>` Lit web component. Contains the exact numbers, tables, timelines, cards, and structured breakdowns that the spoken message deliberately omits.
+- `message` (string): Short, conversational, **voice-optimised**. Spoken flow matters - no long lists, no exact decimal numbers (say "poco più di mille euro" not "€1023.44"), no acronyms, suitable for TTS audio. This is what the TTS endpoint speaks.
+- `details_a2ui` (string | null): **A2UI JSONL string** - a sequence of Google A2UI protocol messages (`surfaceUpdate`, `dataModelUpdate`, `beginRendering`) that describe a rich, interactive UI component tree. Rendered in the chat bubble's detail panel by an `<a2ui-surface>` Lit web component. Contains the exact numbers, tables, timelines, cards, and structured breakdowns that the spoken message deliberately omits.
 
-A2UI is Google's open-source declarative AI-to-UI protocol (https://github.com/google/A2UI). The LLM generates structured JSON describing UI component trees — no code execution. The Lit-based renderer (`<a2ui-surface>`) renders these declaratively in the browser. The protocol uses Gemini natively, which is already the primary LLM provider in this project.
+A2UI is Google's open-source declarative AI-to-UI protocol (https://github.com/google/A2UI). The LLM generates structured JSON describing UI component trees - no code execution. The Lit-based renderer (`<a2ui-surface>`) renders these declaratively in the browser. The protocol uses Gemini natively, which is already the primary LLM provider in this project.
 
 This phase does NOT include: persona picker UI (Phase 6), streaming responses (Phase 7), full `own_pii_unsolicited` profile cross-check (Phase 7), or fully wired Learn+Act card actions (Phase 6).
 
@@ -33,9 +33,9 @@ Phase 5 ends when a user with a confirmed profile can:
 ## Design Decisions
 
 ### D-V1: TTS runs on the backend via ElevenLabs
-`POST /coaching/tts` is a new FastAPI endpoint in the coaching router. It accepts `{ text, locale, voice_id? }`, calls the ElevenLabs Python SDK, and returns raw audio bytes with `Content-Type: audio/mpeg`. The ElevenLabs API key (`ELEVENLABS_API_KEY`) stays server-side — it is never exposed to the browser.
+`POST /coaching/tts` is a new FastAPI endpoint in the coaching router. It accepts `{ text, locale, voice_id? }`, calls the ElevenLabs Python SDK, and returns raw audio bytes with `Content-Type: audio/mpeg`. The ElevenLabs API key (`ELEVENLABS_API_KEY`) stays server-side - it is never exposed to the browser.
 
-Voice ID is configured via environment variable `ELEVENLABS_VOICE_ID` (default: the ElevenLabs Italian voice appropriate for `mentore-saggio`). The endpoint uses only the primary persona voice for Phase 5 — no per-user or per-persona selection yet.
+Voice ID is configured via environment variable `ELEVENLABS_VOICE_ID` (default: the ElevenLabs Italian voice appropriate for `mentore-saggio`). The endpoint uses only the primary persona voice for Phase 5 - no per-user or per-persona selection yet.
 
 The `elevenlabs` Python SDK (`elevenlabs>=2.40.0`) must be added to `api/pyproject.toml`.
 
@@ -46,7 +46,7 @@ Each assistant response bubble in `ChatScreen` has a speaker icon button. Clicki
 3. Plays via `HTMLAudioElement`
 4. While playing, button shows a stop/pause icon; clicking again stops playback
 
-Auto-play is intentionally deferred — the demo presenter needs control over when audio fires. An auto-play toggle is a Phase 6 concern.
+Auto-play is intentionally deferred - the demo presenter needs control over when audio fires. An auto-play toggle is a Phase 6 concern.
 
 ### D-V3: STT augments ChatScreen (no new screen)
 The mic button sits in the `ChatScreen` input area to the left of the textarea. No new route, no new screen. `ChatScreen` gains a `useVoiceInput` hook. While recording:
@@ -54,8 +54,8 @@ The mic button sits in the `ChatScreen` input area to the left of the textarea. 
 - A pulsing red mic indicator is shown
 - Pressing stop (or after silence threshold) commits the final transcript and submits it as a coaching message
 
-### D-V4: Web Speech API — feature-detect and hide on unavailable
-Feature detection runs at hook init time using `'webkitSpeechRecognition' in window || 'SpeechRecognition' in window`. If unavailable, the mic button is hidden (not rendered) — not disabled — so there is no confusing broken UI. The text input area works normally as the sole input path (VOIC-02 compliance).
+### D-V4: Web Speech API - feature-detect and hide on unavailable
+Feature detection runs at hook init time using `'webkitSpeechRecognition' in window || 'SpeechRecognition' in window`. If unavailable, the mic button is hidden (not rendered) - not disabled - so there is no confusing broken UI. The text input area works normally as the sole input path (VOIC-02 compliance).
 
 On runtime errors (permission denied, network, no-speech timeout): a small inline toast appears below the input area. The text input remains active throughout.
 
@@ -69,7 +69,7 @@ Response: Content-Type: audio/mpeg  (raw MP3 bytes)
 
 On error (no key, ElevenLabs failure): returns HTTP 503 with `{ "code": "tts_unavailable", "message": "..." }`. The frontend catches 503 and falls back to `speechSynthesis`.
 
-The endpoint is auth-guarded (same `Depends(get_current_user)` pattern). Input text is truncated server-side at 2500 chars at the nearest sentence boundary before sending to ElevenLabs (to stay within API limits). Only the `message` field (voice-optimised short text) is ever sent to TTS — never `details_a2ui` or reasoning steps.
+The endpoint is auth-guarded (same `Depends(get_current_user)` pattern). Input text is truncated server-side at 2500 chars at the nearest sentence boundary before sending to ElevenLabs (to stay within API limits). Only the `message` field (voice-optimised short text) is ever sent to TTS - never `details_a2ui` or reasoning steps.
 
 ### D-V6: ElevenLabs unavailability → silent fallback to browser speechSynthesis
 If `POST /coaching/tts` returns 503 (or if the API key is absent), the frontend `useTTS` hook silently falls back to `window.speechSynthesis`. The play button is always shown when either TTS path is available:
@@ -79,20 +79,20 @@ If `POST /coaching/tts` returns 503 (or if the API key is absent), the frontend 
 
 This ensures demo resilience: even if the ElevenLabs key is not configured, voice output still works via browser synthesis for live demos.
 
-### D-V7 (CRITICAL): Dual-channel response shape — voice-optimised message + A2UI rich detail
+### D-V7 (CRITICAL): Dual-channel response shape - voice-optimised message + A2UI rich detail
 
 The LLM now produces two complementary outputs in every coaching response:
 
-**Channel 1 — `message` (voice-optimised, short, conversational):**
+**Channel 1 - `message` (voice-optimised, short, conversational):**
 - Written for spoken delivery, not reading
 - No exact decimal numbers (use natural language approximations: "poco più di mille euro" not "€1,023.44")
 - No acronyms or financial jargon (say "il tuo margine mensile" not "il tuo MMM")
-- No bullet lists or markdown — flowing prose only
+- No bullet lists or markdown - flowing prose only
 - Maximum 3-4 sentences
 - Answers the core question directly, refers to details ("trovi i dettagli qui sotto")
 - This is the text sent to TTS
 
-**Channel 2 — `details_a2ui` (A2UI JSONL string, nullable):**
+**Channel 2 - `details_a2ui` (A2UI JSONL string, nullable):**
 - A string containing newline-separated A2UI protocol messages
 - Protocol messages: `surfaceUpdate` (component tree declaration), `dataModelUpdate` (data bindings), `beginRendering` (trigger)
 - Components available: `text`, `button`, `card`, `timeline`, `dateTimeInput`, `textField`, and others per A2UI spec
@@ -103,9 +103,9 @@ The LLM now produces two complementary outputs in every coaching response:
 The spoken message must be voice-optimised for TTS quality (no "one thousand and twenty-three euros and forty-four cents"). The UI detail panel must be precise and rich. Trying to serve both with one text field produces bad voice output or thin visual detail. The separation is clean: the `message` field is the voice layer, `details_a2ui` is the visual/detail layer.
 
 **A2UI integration approach:**
-- Backend: `details_a2ui` is a raw JSONL string in the LLM response. `CoachingService` passes it through without parsing (it's opaque to the backend — just a string field). No backend A2UI dependency.
+- Backend: `details_a2ui` is a raw JSONL string in the LLM response. `CoachingService` passes it through without parsing (it's opaque to the backend - just a string field). No backend A2UI dependency.
 - Frontend: `<a2ui-surface>` Lit web component from `@google/a2ui` (or `renderers/web_core/`) receives the JSONL string as a prop and renders it declaratively. React wraps the web component via a thin `A2UISurface` adapter component.
-- Safety: A2UI is declarative JSON — no code execution. The same output safety scanner already in place covers the JSONL string content.
+- Safety: A2UI is declarative JSON - no code execution. The same output safety scanner already in place covers the JSONL string content.
 
 ### D-V8: Coaching JSON schema change for dual-channel
 
@@ -127,16 +127,16 @@ details_a2ui: Optional[str] = None
 details_a2ui?: string | null
 ```
 
-The existing `action_cards`, `resource_cards`, and `learn_cards` arrays remain in the schema for backwards compatibility and as a fallback rendering path — but the primary rich detail path in Phase 5+ is `details_a2ui`.
+The existing `action_cards`, `resource_cards`, and `learn_cards` arrays remain in the schema for backwards compatibility and as a fallback rendering path - but the primary rich detail path in Phase 5+ is `details_a2ui`.
 
-### D-V9: Prompt update — voice-optimised `message` instruction
+### D-V9: Prompt update - voice-optimised `message` instruction
 
 `api/app/coaching/prompts/response_format.j2` gains explicit voice-optimised instructions for the `message` field:
 
 ```
 - **message**: SHORT (3-4 sentences), CONVERSATIONAL, VOICE-OPTIMISED reply. 
   Written for spoken delivery. Rules:
-  - NO exact decimal numbers — use natural approximations ("poco più di mille euro", "circa tremila euro")
+  - NO exact decimal numbers - use natural approximations ("poco più di mille euro", "circa tremila euro")
   - NO acronyms or abbreviations
   - NO bullet lists or markdown
   - NO exact monetary totals unless rounding to the nearest ten/hundred
@@ -193,41 +193,41 @@ LLM → { message: "short voice text", details_a2ui: "JSONL...", reasoning_used:
 
 **Data flow additions in Phase 5:**
 
-| Step | What changes |
-|------|-------------|
-| `response_format.j2` | New voice-optimised `message` rules + `details_a2ui` A2UI instructions + component reference |
-| `coaching_response.schema.json` | New optional `details_a2ui: string\|null` field |
-| `CoachingService.chat()` | No new logic — `details_a2ui` passes through as-is in the response dict |
-| `CoachingResponseDTO` | New `details_a2ui: Optional[str]` field |
-| `api/app/api/coaching.py` | New `POST /coaching/tts` endpoint |
-| `api/app/coaching/tts.py` | New `TTSService` wrapping ElevenLabs SDK |
-| `coachingApi.ts` | New `details_a2ui?: string | null` on `CoachingResponse`; new `fetchTTSAudio(text, locale)` function |
-| `ChatScreen.tsx` | `useVoiceInput` hook + mic button; `useTTS` hook + play button in `AssistantBubble`; `A2UISurface` in detail panel |
-| New files | `useVoiceInput.ts`, `useTTS.ts`, `A2UISurface.tsx` |
+| Step                            | What changes                                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `response_format.j2`            | New voice-optimised `message` rules + `details_a2ui` A2UI instructions + component reference                       |
+| `coaching_response.schema.json` | New optional `details_a2ui: string\|null` field                                                                    |
+| `CoachingService.chat()`        | No new logic - `details_a2ui` passes through as-is in the response dict                                            |
+| `CoachingResponseDTO`           | New `details_a2ui: Optional[str]` field                                                                            |
+| `api/app/api/coaching.py`       | New `POST /coaching/tts` endpoint                                                                                  |
+| `api/app/coaching/tts.py`       | New `TTSService` wrapping ElevenLabs SDK                                                                           |
+| `coachingApi.ts`                | New `details_a2ui?: string                                                                                         | null` on `CoachingResponse`; new `fetchTTSAudio(text, locale)` function |
+| `ChatScreen.tsx`                | `useVoiceInput` hook + mic button; `useTTS` hook + play button in `AssistantBubble`; `A2UISurface` in detail panel |
+| New files                       | `useVoiceInput.ts`, `useTTS.ts`, `A2UISurface.tsx`                                                                 |
 
 </architecture>
 
 <existing_assets>
 ## Existing Assets to Reuse
 
-| Asset | Location | How Used |
-|-------|----------|----------|
-| `CoachingService.chat()` | `api/app/coaching/service.py:149` | Passes `details_a2ui` through unchanged — no service-layer changes |
-| `ChatRequest` / `CoachingResponseDTO` | `api/app/schemas/coaching.py` | Add `details_a2ui: Optional[str]` to `CoachingResponseDTO` |
-| `coaching_response.schema.json` | `api/app/coaching/schemas/` | Add `details_a2ui` optional string field |
-| `response_format.j2` | `api/app/coaching/prompts/` | Major update: voice-optimised `message` rules + `details_a2ui` instructions |
-| `system_base.j2` | `api/app/coaching/prompts/` | No change needed |
-| `context_block.j2` | `api/app/coaching/prompts/` | No change needed |
-| `get_current_user` | `api/app/api/ingestion.py` | Auth dependency reused in TTS endpoint |
-| `LLMClient` | `api/app/ingestion/llm.py` | NOT used for TTS — ElevenLabs SDK is separate |
-| `SafetyScanner.scan_output()` | `api/app/coaching/safety.py` | TTS endpoint should run output scan on text before sending to ElevenLabs |
-| `coachingApi.ts` | `senso/src/features/coaching/coachingApi.ts` | Add `details_a2ui` to `CoachingResponse`; add `fetchTTSAudio()` |
-| `ChatScreen.tsx` | `senso/src/features/coaching/ChatScreen.tsx:1-757` | Wire mic button + play button + A2UISurface in detail panel |
-| `AssistantBubble` component | `ChatScreen.tsx:193-224` | Add `VoicePlayButton` and `A2UISurface` to the bubble's detail section |
-| `apiRequest<T>()` | `senso/src/lib/api-client.ts` | Used by `fetchTTSAudio` (returns Blob, not JSON — may need raw fetch instead) |
-| `readAccessToken()` | `senso/src/features/auth/storage.ts` | Auth token for TTS API call |
+| Asset                                 | Location                                           | How Used                                                                      |
+| ------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `CoachingService.chat()`              | `api/app/coaching/service.py:149`                  | Passes `details_a2ui` through unchanged - no service-layer changes            |
+| `ChatRequest` / `CoachingResponseDTO` | `api/app/schemas/coaching.py`                      | Add `details_a2ui: Optional[str]` to `CoachingResponseDTO`                    |
+| `coaching_response.schema.json`       | `api/app/coaching/schemas/`                        | Add `details_a2ui` optional string field                                      |
+| `response_format.j2`                  | `api/app/coaching/prompts/`                        | Major update: voice-optimised `message` rules + `details_a2ui` instructions   |
+| `system_base.j2`                      | `api/app/coaching/prompts/`                        | No change needed                                                              |
+| `context_block.j2`                    | `api/app/coaching/prompts/`                        | No change needed                                                              |
+| `get_current_user`                    | `api/app/api/ingestion.py`                         | Auth dependency reused in TTS endpoint                                        |
+| `LLMClient`                           | `api/app/ingestion/llm.py`                         | NOT used for TTS - ElevenLabs SDK is separate                                 |
+| `SafetyScanner.scan_output()`         | `api/app/coaching/safety.py`                       | TTS endpoint should run output scan on text before sending to ElevenLabs      |
+| `coachingApi.ts`                      | `senso/src/features/coaching/coachingApi.ts`       | Add `details_a2ui` to `CoachingResponse`; add `fetchTTSAudio()`               |
+| `ChatScreen.tsx`                      | `senso/src/features/coaching/ChatScreen.tsx:1-757` | Wire mic button + play button + A2UISurface in detail panel                   |
+| `AssistantBubble` component           | `ChatScreen.tsx:193-224`                           | Add `VoicePlayButton` and `A2UISurface` to the bubble's detail section        |
+| `apiRequest<T>()`                     | `senso/src/lib/api-client.ts`                      | Used by `fetchTTSAudio` (returns Blob, not JSON - may need raw fetch instead) |
+| `readAccessToken()`                   | `senso/src/features/auth/storage.ts`               | Auth token for TTS API call                                                   |
 
-**Note on `fetchTTSAudio`:** The TTS endpoint returns raw binary (audio/mpeg), not JSON. `apiRequest<T>()` is JSON-typed. `fetchTTSAudio` should use the native `fetch()` directly with the Bearer token header, and call `.blob()` on the response — similar to how file download endpoints are handled.
+**Note on `fetchTTSAudio`:** The TTS endpoint returns raw binary (audio/mpeg), not JSON. `apiRequest<T>()` is JSON-typed. `fetchTTSAudio` should use the native `fetch()` directly with the Bearer token header, and call `.blob()` on the response - similar to how file download endpoints are handled.
 
 </existing_assets>
 
@@ -236,7 +236,7 @@ LLM → { message: "short voice text", details_a2ui: "JSONL...", reasoning_used:
 
 **Source:** https://github.com/google/A2UI
 
-**What it is:** An open-source protocol from Google for LLM-generated declarative UI. The LLM emits JSONL messages that a Lit-based renderer interprets into native DOM components. No code execution — pure JSON declaration.
+**What it is:** An open-source protocol from Google for LLM-generated declarative UI. The LLM emits JSONL messages that a Lit-based renderer interprets into native DOM components. No code execution - pure JSON declaration.
 
 **Protocol messages:**
 - `surfaceUpdate`: Declares the component tree (what to render and how it's structured)
@@ -244,16 +244,16 @@ LLM → { message: "short voice text", details_a2ui: "JSONL...", reasoning_used:
 - `beginRendering`: Triggers the render pass
 
 **Available components (subset relevant to coaching):**
-- `text` — plain/rich text block
-- `card` — titled content card
-- `button` — action button (for Phase 6 wired CTAs)
-- `timeline` — ordered timeline of events/steps
-- `textField` — labelled data field (for showing exact figures)
-- `dateTimeInput` — date display
+- `text` - plain/rich text block
+- `card` - titled content card
+- `button` - action button (for Phase 6 wired CTAs)
+- `timeline` - ordered timeline of events/steps
+- `textField` - labelled data field (for showing exact figures)
+- `dateTimeInput` - date display
 
 **Renderer options:**
-- `@google/a2ui` npm package (if published) — preferred
-- `renderers/web_core/` from the GitHub repo — Lit-based standalone custom elements
+- `@google/a2ui` npm package (if published) - preferred
+- `renderers/web_core/` from the GitHub repo - Lit-based standalone custom elements
 
 **React integration:**
 A2UI uses Lit custom elements (`<a2ui-surface>`). In React, Lit web components require:
@@ -261,7 +261,7 @@ A2UI uses Lit custom elements (`<a2ui-surface>`). In React, Lit web components r
 2. The JSONL string is passed as a property (not attribute) to the element
 3. React wraps it in a thin `A2UISurface.tsx` component that uses `useRef` + `useEffect` to set the `.jsonl` property on the DOM element directly
 
-**Install approach:** Check if `@google/a2ui` is on npm; if not, install from the GitHub repo's `renderers/web_core/` dist. This needs to be confirmed during plan 05-03 execution — add a research step.
+**Install approach:** Check if `@google/a2ui` is on npm; if not, install from the GitHub repo's `renderers/web_core/` dist. This needs to be confirmed during plan 05-03 execution - add a research step.
 
 **Safety:** A2UI is declarative JSON. No `eval`, no script injection. The existing `SafetyScanner.scan_output()` runs over the full response JSON string (which includes `details_a2ui`) so the JSONL is already covered by output safety scanning.
 
@@ -278,13 +278,13 @@ This is injected into the response format prompt alongside the existing schema a
 <plan_breakdown>
 ## Plan Breakdown
 
-| Plan | Title | Wave | Depends On |
-|------|-------|------|------------|
-| 05-01 | Backend TTS endpoint | 1 | Phase 4 complete |
-| 05-02 | Dual-channel LLM response shape | 1 | Phase 4 complete |
-| 05-03 | A2UI renderer integration (frontend) | 2 | 05-02 |
-| 05-04 | Frontend voice input (STT) | 2 | Phase 4 complete |
-| 05-05 | Frontend voice output (TTS) | 2 | 05-01, 05-02 |
+| Plan  | Title                                | Wave | Depends On       |
+| ----- | ------------------------------------ | ---- | ---------------- |
+| 05-01 | Backend TTS endpoint                 | 1    | Phase 4 complete |
+| 05-02 | Dual-channel LLM response shape      | 1    | Phase 4 complete |
+| 05-03 | A2UI renderer integration (frontend) | 2    | 05-02            |
+| 05-04 | Frontend voice input (STT)           | 2    | Phase 4 complete |
+| 05-05 | Frontend voice output (TTS)          | 2    | 05-01, 05-02     |
 
 **05-01: Backend TTS endpoint**
 - Add `elevenlabs>=2.40.0` to `api/pyproject.toml`
@@ -316,11 +316,11 @@ This is injected into the response format prompt alongside the existing schema a
   ```typescript
   const { isAvailable, isRecording, transcript, startRecording, stopRecording, error } = useVoiceInput({ locale, onFinalTranscript })
   ```
-  - `isAvailable`: boolean — false if Web Speech API absent (mic button hidden in parent)
-  - `isRecording`: boolean — pulsing indicator in UI
-  - `transcript`: string — live interim + committed final text
+  - `isAvailable`: boolean - false if Web Speech API absent (mic button hidden in parent)
+  - `isRecording`: boolean - pulsing indicator in UI
+  - `transcript`: string - live interim + committed final text
   - `startRecording` / `stopRecording`: control functions
-  - `error`: string | null — shown as inline toast in ChatScreen
+  - `error`: string | null - shown as inline toast in ChatScreen
   - On `onFinalTranscript(text)`: parent calls `handleSend(text)` directly
   - Handles: `permission denied`, `network`, `no-speech` (auto-stop + error message), `aborted`
 - Update `ChatScreen.tsx`:
@@ -353,14 +353,14 @@ This is injected into the response format prompt alongside the existing schema a
 <deferred>
 ## Deferred to Later Phases
 
-- **Auto-play toggle** (play TTS automatically on each response) — Phase 6
-- **Persona-specific TTS voice selection** (different ElevenLabs voice per persona) — Phase 6
-- **Managed STT API** (Deepgram/Google STT for production cross-browser reliability) — Post-hackathon
-- **Persona picker UI** — Phase 6
-- **Learn+Act cards fully wired** (action/resource cards with real URLs and CTAs) — Phase 6
-- **Streaming responses (SSE/EventSource)** — Phase 7
-- **Full `own_pii_unsolicited` profile cross-check** — Phase 7
-- **A2UI button CTAs wired to real actions** — Phase 6 (buttons render in Phase 5 but are non-functional)
+- **Auto-play toggle** (play TTS automatically on each response) - Phase 6
+- **Persona-specific TTS voice selection** (different ElevenLabs voice per persona) - Phase 6
+- **Managed STT API** (Deepgram/Google STT for production cross-browser reliability) - Post-hackathon
+- **Persona picker UI** - Phase 6
+- **Learn+Act cards fully wired** (action/resource cards with real URLs and CTAs) - Phase 6
+- **Streaming responses (SSE/EventSource)** - Phase 7
+- **Full `own_pii_unsolicited` profile cross-check** - Phase 7
+- **A2UI button CTAs wired to real actions** - Phase 6 (buttons render in Phase 5 but are non-functional)
 
 </deferred>
 
@@ -369,9 +369,9 @@ This is injected into the response format prompt alongside the existing schema a
 
 1. **A2UI npm availability**: Is `@google/a2ui` published on npm, or must we install from the GitHub `renderers/web_core/` source? This determines 05-03's install step. Research step is explicitly included in 05-03.
 
-2. **ElevenLabs voice ID for Italian**: What is the correct ElevenLabs voice ID for the `mentore-saggio` persona (Italian, warm, educational)? This should be documented in `.env.example` and the `Settings` class default. Suggested default: `pNInz6obpgDQGcFmaJgB` (Adam, English) — to be replaced with an Italian voice ID during 05-01 execution.
+2. **ElevenLabs voice ID for Italian**: What is the correct ElevenLabs voice ID for the `mentore-saggio` persona (Italian, warm, educational)? This should be documented in `.env.example` and the `Settings` class default. Suggested default: `pNInz6obpgDQGcFmaJgB` (Adam, English) - to be replaced with an Italian voice ID during 05-01 execution.
 
-3. **A2UI JSONL in stored messages**: When a coaching message with `details_a2ui` is persisted to `chat_messages.content` as a JSON string, the JSONL is double-escaped. `parseStoredMessage` in `ChatScreen.tsx` already deserialises the stored JSON; `details_a2ui` will be a string field within it. No structural change needed — just confirm the round-trip in 05-03 testing.
+3. **A2UI JSONL in stored messages**: When a coaching message with `details_a2ui` is persisted to `chat_messages.content` as a JSON string, the JSONL is double-escaped. `parseStoredMessage` in `ChatScreen.tsx` already deserialises the stored JSON; `details_a2ui` will be a string field within it. No structural change needed - just confirm the round-trip in 05-03 testing.
 
 </open_questions>
 

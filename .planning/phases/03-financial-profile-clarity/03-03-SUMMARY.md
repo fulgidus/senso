@@ -5,17 +5,17 @@ status: complete
 completed_at: 2026-03-25
 ---
 
-# Plan 03-03 Summary — Frontend Processing Flow
+# Plan 03-03 Summary - Frontend Processing Flow
 
 ## What was built
 
 ### senso/src/lib/profile-api.ts (created)
 Full profile API client with:
-- `getProfileStatus(token)` — GET /profile/status
-- `getProfile(token)` — GET /profile
-- `triggerCategorization(token)` — POST /profile/trigger-categorization
-- `confirmProfile(token, payload)` — POST /profile/confirm
-- `submitQuestionnaire(token, mode, answers)` — POST /profile/questionnaire
+- `getProfileStatus(token)` - GET /profile/status
+- `getProfile(token)` - GET /profile
+- `triggerCategorization(token)` - POST /profile/trigger-categorization
+- `confirmProfile(token, payload)` - POST /profile/confirm
+- `submitQuestionnaire(token, mode, answers)` - POST /profile/questionnaire
 - All types exported: `CategorizationStatus`, `CategorizationStatusResponse`, `UserProfile`, `IncomeSummary`, `InsightCard`, `QuestionnaireAnswers`
 
 ### senso/src/features/profile/useProfileStatus.ts (created)
@@ -36,9 +36,9 @@ Processing screen with:
 
 ### senso/src/features/ingestion/IngestionScreen.tsx (updated)
 - Added optional `onConfirmAll?: () => void` prop
-- Wired to `FileList.onConfirmAll` — calls both internal `confirmAll()` and `onConfirmAll?.()` callback
+- Wired to `FileList.onConfirmAll` - calls both internal `confirmAll()` and `onConfirmAll?.()` callback
 
-### senso/src/features/auth/AuthedHome.tsx (updated — intermediate)
+### senso/src/features/auth/AuthedHome.tsx (updated - intermediate)
 - Replaced direct `IngestionScreen` render with screen routing
 - `screen` state: "ingestion" | "processing" | "profile"
 - On mount: checks `/profile/status` to resume correct screen
@@ -50,4 +50,4 @@ Processing screen with:
 - Build: passes (`npm run build`)
 
 ## Discoveries
-- None new — all went per plan
+- None new - all went per plan

@@ -1,7 +1,7 @@
 """
 Module registry: discovers, validates, and matches conversion modules.
 Scans builtin/, generated/, promoted/ at startup.
-Modules failing validation are skipped with a warning — no crash.
+Modules failing validation are skipped with a warning - no crash.
 """
 
 import importlib.util
@@ -123,7 +123,7 @@ class ModuleRegistry:
         return list(self.modules)
 
 
-# Singleton registry — initialized at module import time
+# Singleton registry - initialized at module import time
 _registry: ModuleRegistry | None = None
 
 

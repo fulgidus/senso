@@ -311,7 +311,7 @@ class TestCoachingServiceChat:
     def test_blocked_output_returns_substitute(self):
         from app.coaching.service import CoachingService
 
-        # Response containing a credential — should be blocked
+        # Response containing a credential - should be blocked
         malicious_response = {
             "message": "Here is your api_key: sk-abcdefgh12345678",
             "reasoning_used": [{"step": "Test", "detail": "Test detail."}],

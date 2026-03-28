@@ -8,8 +8,8 @@ Covers:
 - Addizionali regionali/comunali (approximate average: 1.73%)
 - 13ª/14ª mensilità extra months (spread across 12 months)
 - Production bonus (tassazione separata: 10% up to €3,000/y)
-- Welfare aziendale (non-taxable up to €1,000/y — 2024 threshold)
-- Buoni pasto (non-taxable up to €8/day for electronic vouchers — 2024)
+- Welfare aziendale (non-taxable up to €1,000/y - 2024 threshold)
+- Buoni pasto (non-taxable up to €8/day for electronic vouchers - 2024)
 
 All monetary amounts are in EUR.
 """
@@ -21,7 +21,7 @@ from typing import Literal
 
 
 # ── IRPEF 2024 brackets ────────────────────────────────────────────────────
-# (Legge di Bilancio 2024 — DL 216/2023 converted)
+# (Legge di Bilancio 2024 - DL 216/2023 converted)
 # Brackets: (up_to, rate)
 # last bracket has up_to=None (unbounded)
 _IRPEF_BRACKETS: list[tuple[float | None, float]] = [
@@ -35,17 +35,17 @@ INPS_RATE = 0.0919
 # INPS massimale contributivo 2024 (IVS, art. 2 co. 18 L. 335/95)
 INPS_MASSIMALE = 119_650.0
 
-# Addizionali regionali + comunali — approximate national average 2024
+# Addizionali regionali + comunali - approximate national average 2024
 ADDIZIONALE_RATE_APPROX = 0.0173
 
 # Welfare aziendale esenzione fiscale 2024
 WELFARE_EXEMPT_MAX = 1_000.0
 
-# Buoni pasto — soglia esenzione 2024: €8/day for electronic vouchers
+# Buoni pasto - soglia esenzione 2024: €8/day for electronic vouchers
 MEAL_VOUCHER_EXEMPT_MAX_ELECTRONIC = 8.0
 MEAL_VOUCHER_EXEMPT_MAX_PAPER = 4.0  # paper vouchers lower threshold
 
-# Premio di produzione — tassazione sostitutiva 10% fino a €3,000/y
+# Premio di produzione - tassazione sostitutiva 10% fino a €3,000/y
 PRODUCTION_BONUS_REDUCED_TAX_RATE = 0.10
 PRODUCTION_BONUS_MAX_REDUCED = 3_000.0
 
@@ -203,7 +203,7 @@ CCNL_PRESETS: dict[str, CCNLPreset] = {
     ),
     "agricoltura_operai": CCNLPreset(
         id="agricoltura_operai",
-        label="Agricoltura — Operai (Confagricoltura/CIA/Coldiretti)",
+        label="Agricoltura - Operai (Confagricoltura/CIA/Coldiretti)",
         extra_months=13,
         overtime_threshold_weekly=39.0,
         overtime_ordinary_multiplier=1.25,
@@ -278,7 +278,7 @@ def _compute_irpef(reddito_imponibile: float) -> tuple[float, float]:
         irpef += taxable_in_bracket * rate
         prev_limit = bracket_top
 
-    # Detrazione lavoro dipendente (art. 13 TUIR — valori 2024 post DL 3/2024)
+    # Detrazione lavoro dipendente (art. 13 TUIR - valori 2024 post DL 3/2024)
     # Flat €1,955 up to €15,000
     # Linear slide from €1,955 to €700 between €15,001 and €28,000
     # Linear slide from €700 to €0 between €28,001 and €50,000
@@ -356,7 +356,7 @@ def compute_net_from_ral(
     welfare_net = min(welfare_annual, WELFARE_EXEMPT_MAX)
     net_annual += welfare_net
 
-    # 8. Monthly net — spread over 12 months
+    # 8. Monthly net - spread over 12 months
     # extra_months means the annual salary is split into extra_months pay packets but
     # we report as monthly. E.g. RAL 30k with 13 months → 30k/13 = base monthly,
     # but employer pays that same 30k over 13 pay packets. For the user's

@@ -1,5 +1,5 @@
 """
-FinecoIT — FinecoBank Italy bank statement extractor.
+FinecoIT - FinecoBank Italy bank statement extractor.
 Supported formats: XLSX (Excel)
 Export path in Fineco UI: Portafoglio → Movimenti → Esporta → Excel
 Sample FINGERPRINT keywords (from actual file): "conto corrente", "data_operazione", "entrate", "uscite", "descrizione_completa"
@@ -132,7 +132,7 @@ def extract(file_path: str | Path):  # noqa: ANN201  (return type is ExtractionR
     for row in rows[header_idx + 1 :]:
         if not row or all(c is None for c in row):
             continue
-        # skip "Contabilizzato" filter — accept all states including reverted ones
+        # skip "Contabilizzato" filter - accept all states including reverted ones
         try:
             date_val = row[date_col] if date_col is not None else None
             if date_val is None:
@@ -174,7 +174,7 @@ def extract(file_path: str | Path):  # noqa: ANN201  (return type is ExtractionR
                 # Uscite is stored as negative float in the XLSX
                 amount = Decimal(str(debit_raw)).quantize(Decimal("0.0001"))
             else:
-                continue  # row has no amount — skip
+                continue  # row has no amount - skip
 
             desc_raw = (
                 row[desc_col] if desc_col is not None and desc_col < len(row) else None

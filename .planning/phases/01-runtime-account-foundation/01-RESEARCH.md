@@ -1,4 +1,4 @@
-# Phase 1 Research — Runtime & Account Foundation
+# Phase 1 Research - Runtime & Account Foundation
 
 **Phase:** 1 (Runtime & Account Foundation)  
 **Date:** 2026-03-23  

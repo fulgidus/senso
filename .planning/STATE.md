@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 05 — voice-coaching-loop
+**Current focus:** Phase 05 - voice-coaching-loop
 
 ## Current Position
 
@@ -37,8 +37,8 @@ Plan: Not started
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01 | 3 | 6 min | 2 min |
+| ----- | ----- | ----- | -------- |
+| 01    | 3     | 6 min | 2 min    |
 
 **Recent Trend:**
 
@@ -79,28 +79,28 @@ Recent decisions affecting current work:
 - [Phase 01]: Google OAuth endpoints return deterministic email_password fallback payload when provider config/exchange is unavailable.
 - [Phase 01]: Frontend auth shell now gates views by bootstrap session and preserves login with localStorage + refresh retry.
 - [Phase 01]: Phase runtime is standardized on docker-compose frontend/api/postgres with scripted smoke checks for judge setup.
-- [Phase 02-financial-input-ingestion]: SQLite for tests + repository-as-functions pattern for DB layer — File-based SQLite allows cross-request session reuse in tests; functional repository avoids over-engineering
-- [Phase 02-financial-input-ingestion]: LLMClient uses lazy provider imports inside methods to avoid import-time failures when SDKs are not installed — Enables clean test environments without requiring google-genai/openai packages installed at module load time
-- [Phase 02-financial-input-ingestion]: Used FastAPI dependency_overrides (not patch()) to mock get_minio_client in tests — only correct approach for Depends()-injected deps
-- [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup — avoids __import__ hack in plan sample
+- [Phase 02-financial-input-ingestion]: SQLite for tests + repository-as-functions pattern for DB layer - File-based SQLite allows cross-request session reuse in tests; functional repository avoids over-engineering
+- [Phase 02-financial-input-ingestion]: LLMClient uses lazy provider imports inside methods to avoid import-time failures when SDKs are not installed - Enables clean test environments without requiring google-genai/openai packages installed at module load time
+- [Phase 02-financial-input-ingestion]: Used FastAPI dependency_overrides (not patch()) to mock get_minio_client in tests - only correct approach for Depends()-injected deps
+- [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup - avoids __import__ hack in plan sample
 - [Phase 02-financial-input-ingestion]: IngestionError mirrors AuthError pattern (code, message, status_code) for consistent HTTP error shape across all services
-- [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case field names to match FastAPI model_dump output — API get_extracted returns raw payload_json dict with snake_case keys; using camelCase causes runtime failures
-- [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case — API model_dump returns snake_case keys, not camelCase
-- [Phase 02-financial-input-ingestion]: Ingestion UI uses readAccessToken() from storage module — getStoredTokens() does not exist
-- [Phase 03-financial-profile-clarity]: confirm-all always triggers categorization regardless of confirmed_count — Unconditional categorization trigger matches D-10 and D-02; user may have already confirmed uploads previously
-- [Phase 04]: CoachingService uses messages:list[dict] (stateless) for chat() — DB session persistence wired at API layer in 04-02
-- [Phase 04]: SafetyScanner skips pattern-less groups (own_pii_unsolicited in Phase 4) gracefully — full cross-check deferred to Phase 7
+- [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case field names to match FastAPI model_dump output - API get_extracted returns raw payload_json dict with snake_case keys; using camelCase causes runtime failures
+- [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case - API model_dump returns snake_case keys, not camelCase
+- [Phase 02-financial-input-ingestion]: Ingestion UI uses readAccessToken() from storage module - getStoredTokens() does not exist
+- [Phase 03-financial-profile-clarity]: confirm-all always triggers categorization regardless of confirmed_count - Unconditional categorization trigger matches D-10 and D-02; user may have already confirmed uploads previously
+- [Phase 04]: CoachingService uses messages:list[dict] (stateless) for chat() - DB session persistence wired at API layer in 04-02
+- [Phase 04]: SafetyScanner skips pattern-less groups (own_pii_unsolicited in Phase 4) gracefully - full cross-check deferred to Phase 7
 - [Phase 04]: API layer wires session persistence: load prior messages from DB, call CoachingService.chat(messages=list[dict]), persist user+assistant messages after response
-- [Phase 04]: Supplemental injection patterns merged at SafetyScanner init time into prompt_injection group — YAML stays as source of truth, Python covers Phase 4 corpus gaps
-- [Phase 04]: own_pii_unsolicited given Phase 4 pattern-only regex in hard-boundaries.yml — enables all 4 groups to load for test coverage; Phase 7 adds live profile cross-check
+- [Phase 04]: Supplemental injection patterns merged at SafetyScanner init time into prompt_injection group - YAML stays as source of truth, Python covers Phase 4 corpus gaps
+- [Phase 04]: own_pii_unsolicited given Phase 4 pattern-only regex in hard-boundaries.yml - enables all 4 groups to load for test coverage; Phase 7 adds live profile cross-check
 - [Phase 04]: coachingApi.ts uses 3-arg apiRequest(API_BASE, path, options) matching existing api-client.ts signature
 - [Phase 04]: CoachingApiError uses explicit property assignment (not constructor shorthand) for erasableSyntaxOnly tsconfig compliance
-- [Phase 05-voice-coaching-loop]: Dual-channel LLM response shape: voice-optimised message + nullable details_a2ui A2UI JSONL established as foundational data contract for Phase 5 — Separation of voice layer (message) and visual/detail layer (details_a2ui) enables TTS to speak optimised text while UI renders precise structured data
-- [Phase 05-voice-coaching-loop]: Used patch.object(TTSService, 'speak') for integration tests instead of dependency_overrides — avoids SQLite DB isolation issues — Settings override caused 'no such table' errors in subsequent tests due to conftest reset_db fixture interaction
-- [Phase 05-voice-coaching-loop]: Lit LitElement without decorators — erasableSyntaxOnly tsconfig requires manual property getter/setter and customElements.define() instead of @property and @customElement
-- [Phase 05-voice-coaching-loop]: Custom Web Speech API type declarations in useVoiceInput.ts — TypeScript tsconfig.app.json lib does not include SpeechRecognition globals; explicit interface declarations are portable and don't require tsconfig changes
-- [Phase 05-voice-coaching-loop]: fetchTTSAudio uses native fetch (not apiRequest) because response is binary audio/mpeg, not JSON — Enables binary Blob response handling; apiRequest<T> is JSON-typed
-- [Phase 05-voice-coaching-loop]: canPlay tied to speechSynthesis availability — ElevenLabs backend is optional; play button shown when browser synthesis exists — Demo-resilient per D-V6: voice output works even without ElevenLabs key via browser speechSynthesis fallback
+- [Phase 05-voice-coaching-loop]: Dual-channel LLM response shape: voice-optimised message + nullable details_a2ui A2UI JSONL established as foundational data contract for Phase 5 - Separation of voice layer (message) and visual/detail layer (details_a2ui) enables TTS to speak optimised text while UI renders precise structured data
+- [Phase 05-voice-coaching-loop]: Used patch.object(TTSService, 'speak') for integration tests instead of dependency_overrides - avoids SQLite DB isolation issues - Settings override caused 'no such table' errors in subsequent tests due to conftest reset_db fixture interaction
+- [Phase 05-voice-coaching-loop]: Lit LitElement without decorators - erasableSyntaxOnly tsconfig requires manual property getter/setter and customElements.define() instead of @property and @customElement
+- [Phase 05-voice-coaching-loop]: Custom Web Speech API type declarations in useVoiceInput.ts - TypeScript tsconfig.app.json lib does not include SpeechRecognition globals; explicit interface declarations are portable and don't require tsconfig changes
+- [Phase 05-voice-coaching-loop]: fetchTTSAudio uses native fetch (not apiRequest) because response is binary audio/mpeg, not JSON - Enables binary Blob response handling; apiRequest<T> is JSON-typed
+- [Phase 05-voice-coaching-loop]: canPlay tied to speechSynthesis availability - ElevenLabs backend is optional; play button shown when browser synthesis exists - Demo-resilient per D-V6: voice output works even without ElevenLabs key via browser speechSynthesis fallback
 
 ### Pending Todos
 
