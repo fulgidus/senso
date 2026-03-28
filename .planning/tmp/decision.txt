@@ -1,0 +1,1 @@
+ExtractedDocument TypeScript interface uses snake_case field names to match FastAPI model_dump output

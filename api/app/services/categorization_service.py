@@ -1,12 +1,19 @@
 """
 CategorizationService: rules-first / LLM-fallback transaction categorization + insight generation.
-MANDATORY: Category taxonomy and tag vocabulary derived from real sample transaction analysis (D-07).
+
+Fixes applied:
+  D. Transfer reconciliation: cross-upload same-amount opposite-sign ≤3-day pairs → internal_transfer
+  C. Extraordinary income: separate category for one-off large credits (inheritance, gifts, gambling, crypto, stocks)
+  B. Income filter: only category='income' counts as recurring income; recurring unknowns tagged 'possible_income'
+  A. Monthly normalization: totals divided by actual months covered by transaction dates (per-source aware)
 """
 
 import json
 import logging
 import re
-from datetime import UTC, datetime
+from collections import defaultdict
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
@@ -25,39 +32,50 @@ from app.ingestion.llm import LLMClient, LLMError
 logger = logging.getLogger(__name__)
 
 # ────────────────────────────────────────────────────────────────────
-# Category taxonomy — derived from real Italian bank/payment sample data (D-07)
-# Keys are English snake_case; shown in UI as human-readable labels.
+# Category taxonomy
 # ────────────────────────────────────────────────────────────────────
 VALID_CATEGORIES = {
-    "groceries",  # Supermarkets, food shops
-    "dining",  # Restaurants, cafes, pizzerias
-    "fast_food",  # McDonald's, Burger King, quick service
-    "food_delivery",  # Just Eat, Glovo, Deliveroo, UberEats
-    "transport",  # Taxi, rideshare, public transit, flights
-    "housing",  # Rent, condo fees, maintenance
-    "utilities",  # Electricity (Edison), gas, water
-    "telecom",  # Phone, internet, TV (Fastweb, TIM, Vodafone)
-    "subscriptions",  # Netflix, Spotify, Google, browser tools, SaaS
-    "health",  # Pharmacy (Farmacia), medical, wellness
-    "shopping",  # Clothing, electronics, general retail
-    "personal_care",  # Hygiene products, beauty (Acqua & Sapone)
-    "pets",  # Pet food, vet, supplies
-    "tech_tools",  # APIs, hosting, developer tools (OVH, Openrouter, fal.ai, GitHub)
-    "savings",  # Transfers to savings accounts, emergency funds
-    "transfers",  # Person-to-person transfers, internal moves
-    "income",  # Salary deposits, freelance income, payments received
-    "interest",  # Interest earned on deposits
-    "donations",  # Charitable contributions (Wikimedia)
-    "uncategorized",  # Fallback when no rule or LLM match
+    "groceries",
+    "dining",
+    "fast_food",
+    "food_delivery",
+    "transport",
+    "housing",
+    "utilities",
+    "telecom",
+    "subscriptions",
+    "health",
+    "shopping",
+    "personal_care",
+    "pets",
+    "tech_tools",
+    "savings",
+    "transfers",  # known internal/P2P transfer, same service
+    "internal_transfer",  # reconciled cross-source transfer (D)
+    "income",  # recurring regular income (salary, freelance)
+    "extraordinary_income",  # one-off: inheritance, gifts, gambling, crypto, stocks (C)
+    "interest",
+    "donations",
+    "uncategorized",
 }
 
 # ────────────────────────────────────────────────────────────────────
-# Rule engine — regex patterns derived from real transaction descriptions
-# Order matters: more specific rules first. Case-insensitive.
+# Rule engine
 # ────────────────────────────────────────────────────────────────────
 CATEGORY_RULES: list[tuple[str, str, list[str]]] = [
-    # (pattern, category, auto_tags)
-    # --- Income signals ---
+    # --- Extraordinary income (C) — check before generic income rules ---
+    (
+        r"eredit|eredi|successione|inheritance|donazione ricevuta|gift received|"
+        r"regalo ricevuto|lotteria|gratta e vinci|jackpot|vincita|gambling|casin[oò]|"
+        r"poker|betting|bet365|snai|sisal|lottomatica|eurobet|"
+        r"crypto|bitcoin|ethereum|binance|coinbase|kraken|bybit|"
+        r"trade republic|degiro|fineco trading|directa|banca sella trading|"
+        r"cfd |stock sale|vendita azioni|liquidazione titoli|plusvalenza|"
+        r"disinvestimento|riscatto fondo|buonuscita|tfr|trattamento fine rapporto",
+        "extraordinary_income",
+        ["extraordinary", "one_off"],
+    ),
+    # --- Regular income ---
     (
         r"payment from .+|stipendio|busta paga|bonifico stipendio|salary|payroll",
         "income",
@@ -71,12 +89,12 @@ CATEGORY_RULES: list[tuple[str, str, list[str]]] = [
     (r"interest earned|interesse maturato", "interest", ["interest", "recurring"]),
     # --- Savings & internal transfers ---
     (
-        r"to pocket|to instant access savings|pocket withdrawal|to .* savings|emergency",
+        r"to pocket|to instant access savings|pocket withdrawal|to .* savings|emergency fund",
         "savings",
         ["savings_transfer", "recurring"],
     ),
     (r"balance migration|closing transaction", "transfers", ["savings_transfer"]),
-    # --- Person-to-person transfers ---
+    # --- P2P transfers (same-service, not cross-source) ---
     (r"satispay europe|satispay", "transfers", ["peer_transfer"]),
     # --- Housing ---
     (
@@ -163,6 +181,10 @@ CATEGORY_RULES: list[tuple[str, str, list[str]]] = [
     ),
 ]
 
+# Tolerance for amount matching in transfer reconciliation (D)
+_TRANSFER_AMOUNT_TOLERANCE = Decimal("0.02")
+_TRANSFER_DATE_WINDOW_DAYS = 3
+
 
 class CategorizationService:
     def __init__(self, db: Session, llm_client: LLMClient) -> None:
@@ -171,10 +193,8 @@ class CategorizationService:
 
     def run_categorization(self, user_id: str) -> None:
         """Full categorization pipeline. Called as BackgroundTask after confirm-all."""
-        # Ensure default tags exist
         seed_default_tags(self.db)
 
-        # Update job to categorizing
         upsert_categorization_job(
             self.db,
             user_id,
@@ -186,13 +206,18 @@ class CategorizationService:
         try:
             transactions = get_confirmed_transactions_for_user(self.db, user_id)
             if not transactions:
-                # No transactions — build profile from questionnaire/payslip only
                 self._finalize_profile(user_id, transactions)
                 return
 
-            # Step 1: Rules pass
+            # Step D: Transfer reconciliation (before any categorization)
+            self._reconcile_transfers(transactions)
+            self.db.commit()
+
+            # Step 1: Rules pass (skip already-reconciled internal_transfer rows)
             unmatched = []
             for txn in transactions:
+                if txn.category == "internal_transfer":
+                    continue  # already handled by reconciliation
                 category, auto_tags = self._apply_rules(txn.description)
                 if category:
                     txn.category = category
@@ -202,9 +227,13 @@ class CategorizationService:
 
             self.db.commit()
 
-            # Step 2: LLM fallback for unmatched transactions
+            # Step 2: LLM fallback for unmatched
             if unmatched:
                 self._llm_classify_batch(unmatched)
+
+            # Step B: Tag recurring unknowns as possible_income
+            self._tag_possible_income(transactions)
+            self.db.commit()
 
             # Step 3: Generate insights
             upsert_categorization_job(self.db, user_id, status="generating_insights")
@@ -223,16 +252,94 @@ class CategorizationService:
             )
             self.db.commit()
 
+    # ────────────────────────────────────────────────────────────────
+    # D: Transfer reconciliation
+    # ────────────────────────────────────────────────────────────────
+
+    def _reconcile_transfers(self, transactions: list[Transaction]) -> None:
+        """
+        Detect cross-source internal transfers: same absolute amount, opposite sign,
+        within DATE_WINDOW days, from different upload_ids.
+
+        Uses a greedy O(n log n) approach: sort positives and negatives by amount,
+        then for each positive scan candidates within the tolerance window.
+
+        Both sides are marked category='internal_transfer', type='transfer',
+        tags=['reconciled_transfer']. They are excluded from income and expense
+        totals downstream.
+        """
+        # Split into credits and debits, skip already-categorized rows
+        credits = [t for t in transactions if t.amount > 0 and not t.category]
+        debits = [t for t in transactions if t.amount < 0 and not t.category]
+
+        # Sort by amount magnitude for efficient matching
+        credits_by_amt: dict[str, list[Transaction]] = defaultdict(list)
+        for t in credits:
+            key = str(abs(t.amount).quantize(Decimal("0.01")))
+            credits_by_amt[key].append(t)
+
+        matched_ids: set[str] = set()
+
+        for debit in debits:
+            if debit.id in matched_ids:
+                continue
+            debit_amt_key = str(abs(debit.amount).quantize(Decimal("0.01")))
+
+            # Look for credits within tolerance band
+            candidates = []
+            for key, txns in credits_by_amt.items():
+                try:
+                    key_dec = Decimal(key)
+                    debit_dec = Decimal(debit_amt_key)
+                    if abs(key_dec - debit_dec) <= _TRANSFER_AMOUNT_TOLERANCE:
+                        candidates.extend(txns)
+                except Exception:
+                    continue
+
+            for credit in candidates:
+                if credit.id in matched_ids:
+                    continue
+                # Must be from a different upload source
+                if credit.upload_id == debit.upload_id:
+                    continue
+                # Must be within date window
+                date_delta = abs((credit.date - debit.date).days)
+                if date_delta > _TRANSFER_DATE_WINDOW_DAYS:
+                    continue
+
+                # Match found — mark both
+                for txn in (credit, debit):
+                    txn.category = "internal_transfer"
+                    txn.type = "transfer"
+                    txn.tags = list(set(["reconciled_transfer"] + (txn.tags or [])))
+                matched_ids.add(credit.id)
+                matched_ids.add(debit.id)
+                logger.info(
+                    "Reconciled transfer: %s ↔ %s (%.2f %s, Δ%d days)",
+                    debit.id,
+                    credit.id,
+                    abs(float(debit.amount)),
+                    debit.currency,
+                    date_delta,
+                )
+                break  # one credit per debit
+
+    # ────────────────────────────────────────────────────────────────
+    # Rules engine
+    # ────────────────────────────────────────────────────────────────
+
     def _apply_rules(self, description: str) -> tuple[str | None, list[str]]:
-        """Rules-first classification. Returns (category, auto_tags) or (None, [])."""
-        desc_lower = description.lower()
+        desc_lower = (description or "").lower()
         for pattern, category, tags in CATEGORY_RULES:
             if re.search(pattern, desc_lower, re.IGNORECASE):
                 return category, tags
         return None, []
 
+    # ────────────────────────────────────────────────────────────────
+    # LLM batch fallback
+    # ────────────────────────────────────────────────────────────────
+
     def _llm_classify_batch(self, transactions: list[Transaction]) -> None:
-        """Send unmatched transactions to LLM in batches of 50."""
         BATCH_SIZE = 50
         valid_cats = sorted(VALID_CATEGORIES)
 
@@ -245,12 +352,19 @@ class CategorizationService:
             prompt = (
                 f"Classify each transaction into exactly one category from this list:\n"
                 f"{valid_cats}\n\n"
-                f"Return a JSON array with one object per transaction:\n"
+                f"IMPORTANT RULES:\n"
+                f"- Use 'income' ONLY for regular recurring salary/freelance income.\n"
+                f"- Use 'extraordinary_income' for one-off large credits: inheritance, gifts, "
+                f"gambling wins, crypto sales, stock liquidations, severance, TFR.\n"
+                f"- Use 'internal_transfer' for movements between the user's own accounts "
+                f"(e.g. top-up to Revolut, transfer to savings, PayPal transfer to bank).\n"
+                f"- Use 'transfers' only for P2P payments to other people.\n\n"
+                f"Return a JSON array:\n"
                 f'[{{"idx": 0, "category": "...", "tags": []}}, ...]\n\n'
                 f"Tags must be from: recurring, subscription, food_delivery, fast_food, "
                 f"peer_transfer, savings_transfer, refund, work_income, freelance_income, "
                 f"interest, utility, telecom, hosting, tech_tools, transport, pet, health, "
-                f"donation, condominium\n\n"
+                f"donation, condominium, extraordinary, one_off\n\n"
                 f"Transactions:\n{json.dumps(items, ensure_ascii=False)}"
             )
             try:
@@ -273,62 +387,162 @@ class CategorizationService:
                     txn.tags = list(set(item.get("tags", []) + (txn.tags or [])))
             except (LLMError, json.JSONDecodeError, Exception) as exc:
                 logger.warning("LLM batch classification failed: %s", exc)
-                # D-10: mark unclassified as uncategorized, don't fail the job
                 for txn in batch:
                     if not txn.category:
                         txn.category = "uncategorized"
 
         self.db.commit()
 
+    # ────────────────────────────────────────────────────────────────
+    # B: Tag recurring unknowns as possible_income
+    # ────────────────────────────────────────────────────────────────
+
+    def _tag_possible_income(self, transactions: list[Transaction]) -> None:
+        """
+        Among uncategorized positive transactions, find recurring ones:
+        same description prefix appearing in ≥2 distinct calendar months
+        from the same upload source. Tag them 'possible_income' so the
+        user/UI can surface them for confirmation.
+        """
+        candidates = [
+            t
+            for t in transactions
+            if t.amount > 0
+            and t.category in ("uncategorized", None)
+            and t.type != "transfer"
+        ]
+
+        # Group by (upload_id, description_prefix) — first 30 chars normalised
+        groups: dict[tuple[str, str], list[Transaction]] = defaultdict(list)
+        for t in candidates:
+            prefix = re.sub(r"\s+", " ", (t.description or "").lower().strip())[:30]
+            groups[(t.upload_id, prefix)].append(t)
+
+        for (upload_id, prefix), group in groups.items():
+            months = {(t.date.year, t.date.month) for t in group}
+            if len(months) >= 2:
+                for t in group:
+                    t.tags = list(set(["possible_income"] + (t.tags or [])))
+                logger.info(
+                    "Tagged %d txns as possible_income (upload=%s prefix='%s')",
+                    len(group),
+                    upload_id,
+                    prefix,
+                )
+
+    # ────────────────────────────────────────────────────────────────
+    # A: Monthly normalization helpers
+    # ────────────────────────────────────────────────────────────────
+
+    def _months_covered(self, transactions: list[Transaction]) -> float:
+        """
+        Compute how many months are covered by this transaction set.
+        Uses actual transaction dates (not file metadata).
+        Minimum 1.0 to avoid division by zero on single-month data.
+        """
+        dates = [t.date for t in transactions if t.date is not None]
+        if not dates:
+            return 1.0
+        min_date = min(dates)
+        max_date = max(dates)
+        days = (max_date - min_date).days
+        months = days / 30.44
+        return max(months, 1.0)
+
+    def _monthly_average(self, total: float, months: float) -> float:
+        return round(total / months, 2)
+
+    # ────────────────────────────────────────────────────────────────
+    # Profile finalization
+    # ────────────────────────────────────────────────────────────────
+
     def _finalize_profile(self, user_id: str, transactions: list[Transaction]) -> None:
-        """Compute summary stats, generate insights, save UserProfile."""
-        # Compute category totals (expenses only)
-        category_totals: dict[str, float] = {}
-        for txn in transactions:
-            if txn.type == "expense" and txn.category and txn.category != "transfers":
+        """Compute monthly-normalised summary stats, generate insights, save UserProfile."""
+        # Exclude internal_transfer from all accounting
+        accounting_txns = [
+            t
+            for t in transactions
+            if t.category not in ("internal_transfer",) and t.type != "transfer"
+        ]
+
+        months = self._months_covered(accounting_txns) if accounting_txns else 1.0
+
+        # Category totals for expenses (raw, then normalised)
+        category_totals_raw: dict[str, float] = {}
+        for txn in accounting_txns:
+            if (
+                txn.type == "expense"
+                and txn.category
+                and txn.category
+                not in (
+                    "transfers",
+                    "savings",
+                    "internal_transfer",
+                    "extraordinary_income",
+                )
+            ):
                 cat = txn.category or "uncategorized"
-                category_totals[cat] = category_totals.get(cat, 0.0) + abs(
+                category_totals_raw[cat] = category_totals_raw.get(cat, 0.0) + abs(
                     float(txn.amount)
                 )
 
-        # Compute income summary (D-19 priority chain)
-        income_summary = self._compute_income(user_id, transactions)
+        # Normalise expense categories to monthly
+        category_totals: dict[str, float] = {
+            cat: self._monthly_average(total, months)
+            for cat, total in category_totals_raw.items()
+        }
 
-        # Compute total monthly expenses
-        total_expenses = sum(category_totals.values())
+        # Extraordinary income total (raw over period, reported separately — not monthly)
+        extraordinary_raw = sum(
+            float(t.amount)
+            for t in accounting_txns
+            if t.category == "extraordinary_income" and t.amount > 0
+        )
 
-        # Compute margin
+        # Income summary (D-19 priority chain, B: strict category filter)
+        income_summary = self._compute_income(user_id, accounting_txns, months)
+
+        # Monthly expenses
+        total_expenses_monthly = sum(category_totals.values())
+
+        # Margin
         monthly_margin = None
         if income_summary:
-            monthly_margin = income_summary["amount"] - total_expenses
+            monthly_margin = round(income_summary["amount"] - total_expenses_monthly, 2)
 
-        # Determine data sources
+        # Data sources
         data_sources = []
-        if any(t.type == "income" for t in transactions):
+        if any(t.type == "income" and t.category == "income" for t in accounting_txns):
             data_sources.append("bank_statement")
         payslips = get_confirmed_payslip_documents(self.db, user_id)
         if payslips:
             data_sources.append("payslip")
-
         existing_profile = get_user_profile(self.db, user_id)
         if existing_profile and existing_profile.questionnaire_answers:
             data_sources.append("questionnaire")
 
-        # Generate LLM insight cards
+        # Insight cards
         insight_cards = self._generate_insights(
-            category_totals, income_summary, transactions
+            category_totals,
+            income_summary,
+            accounting_txns,
+            extraordinary_raw,
+            months,
         )
 
         upsert_user_profile(
             self.db,
             user_id,
             income_summary=income_summary,
-            monthly_expenses=total_expenses,
+            monthly_expenses=total_expenses_monthly,
             monthly_margin=monthly_margin,
             category_totals=category_totals,
             insight_cards=insight_cards,
             data_sources=list(set(data_sources)),
             profile_generated_at=datetime.now(UTC),
+            # Extra fields stored in JSON — frontend ignores unknown keys
+            extraordinary_income_total=round(extraordinary_raw, 2),
+            months_covered=round(months, 2),
         )
 
         upsert_categorization_job(
@@ -340,9 +554,15 @@ class CategorizationService:
         self.db.commit()
 
     def _compute_income(
-        self, user_id: str, transactions: list[Transaction]
+        self,
+        user_id: str,
+        transactions: list[Transaction],
+        months: float,
     ) -> dict | None:
-        """D-19: payslip → questionnaire → estimated from transactions."""
+        """
+        D-19 priority chain with B fix: only category='income' transactions count.
+        Returns monthly normalised amount.
+        """
         # Priority 1: payslip net_income
         payslips = get_confirmed_payslip_documents(self.db, user_id)
         if payslips:
@@ -368,42 +588,57 @@ class CategorizationService:
                     "source": "questionnaire",
                 }
 
-        # Priority 3: infer from income-type transactions (excluding obvious transfers/savings)
+        # Priority 3: infer from transactions — B: only category='income' (not None, not uncategorized)
         income_txns = [
             t
             for t in transactions
-            if t.type == "income"
-            and t.category not in ("transfers", "savings", "interest")
+            if t.category
+            == "income"  # strict: must be explicitly categorised as income
+            and t.amount > 0
         ]
         if income_txns:
-            total_income = sum(float(t.amount) for t in income_txns)
+            total_income_raw = sum(float(t.amount) for t in income_txns)
+            monthly_income = self._monthly_average(total_income_raw, months)
             return {
-                "amount": total_income,
+                "amount": monthly_income,
                 "currency": "EUR",
                 "source": "estimated_from_transactions",
             }
 
         return None
 
+    # ────────────────────────────────────────────────────────────────
+    # Insight generation
+    # ────────────────────────────────────────────────────────────────
+
     def _generate_insights(
         self,
         category_totals: dict[str, float],
         income_summary: dict | None,
         transactions: list[Transaction],
+        extraordinary_raw: float,
+        months: float,
     ) -> list[dict]:
-        """Generate 1-3 LLM insight cards highlighting non-obvious spending patterns."""
         if not category_totals:
             return []
 
-        # Compute subscription total for context
         subscription_cats = {"subscriptions", "tech_tools", "telecom"}
         subscription_total = sum(
             v for k, v in category_totals.items() if k in subscription_cats
         )
-
-        # Find transactions with "subscription" tag
         sub_txns = [t for t in transactions if "subscription" in (t.tags or [])]
         sub_count = len(set(t.description.split()[0] for t in sub_txns))
+
+        possible_income_txns = [
+            t for t in transactions if "possible_income" in (t.tags or [])
+        ]
+        possible_income_monthly = (
+            self._monthly_average(
+                sum(float(t.amount) for t in possible_income_txns), months
+            )
+            if possible_income_txns
+            else 0.0
+        )
 
         top_categories = sorted(
             category_totals.items(), key=lambda x: x[1], reverse=True
@@ -413,20 +648,29 @@ class CategorizationService:
 
         context = {
             "top_categories": top_categories,
-            "total_spending": round(total_spending, 2),
-            "subscription_total": round(subscription_total, 2),
+            "total_monthly_spending": round(total_spending, 2),
+            "subscription_monthly_total": round(subscription_total, 2),
             "subscription_service_count": sub_count,
-            "income": round(income_amount, 2) if income_amount else None,
-            "margin": round(income_amount - total_spending, 2)
+            "monthly_income": round(income_amount, 2) if income_amount else None,
+            "monthly_margin": round(income_amount - total_spending, 2)
             if income_amount
             else None,
+            "months_of_data_analysed": round(months, 1),
+            "extraordinary_income_total": round(extraordinary_raw, 2),
+            "possible_unclassified_income_monthly": round(possible_income_monthly, 2),
+            "note": "All figures are monthly averages. extraordinary_income is a raw total over the full period.",
         }
 
         prompt = (
             "You are a financial coach for young adults (18-30) in Italy. "
             "Based on the spending data below, generate 1-3 insight cards. "
             "Focus on NON-OBVIOUS patterns (subscription creep, income-to-fixed-cost ratios, "
-            "irregular large spends) — NOT just 'your top category is X'.\n\n"
+            "irregular large spends, extraordinary one-off income that inflates the apparent income) "
+            "— NOT just 'your top category is X'.\n\n"
+            "If extraordinary_income_total > 0, add a card warning the user not to treat it as "
+            "regular monthly income and to plan it separately.\n"
+            "If possible_unclassified_income_monthly > 0, note there may be unclassified income "
+            "sources worth reviewing.\n\n"
             "IMPORTANT: Use plain language, no jargon. Audience has low financial literacy.\n\n"
             f"Data: {json.dumps(context, ensure_ascii=False)}\n\n"
             "Return a JSON array of objects with exactly these fields:\n"
@@ -446,7 +690,6 @@ class CategorizationService:
             )
             cards = json.loads(raw)
             if isinstance(cards, list):
-                # Validate structure
                 valid_cards = []
                 for card in cards[:3]:
                     if all(

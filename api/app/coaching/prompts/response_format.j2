@@ -1,22 +1,23 @@
-## Formato di Risposta Richiesto
+## Required response format
 
-Rispondi ESCLUSIVAMENTE con un oggetto JSON valido conforme allo schema seguente. Nessun testo prima o dopo il JSON.
+Answer ONLY with a valid JSON object conforming to the following schema. No text before or after the JSON.
+
 
 ```json
 {{ schema_json }}
 ```
 
-### Istruzioni per i campi:
+### Field descriptions:
 
-- **message**: La risposta principale in linguaggio semplice. Obbligatorio. Usa i numeri reali dell'utente.
-- **reasoning_used**: Array di passi di ragionamento. Mostra come sei arrivato alla risposta usando i dati dell'utente. Minimo 1 elemento.
-- **action_cards**: Array di azioni suggerite. Può essere vuoto `[]` se non ci sono azioni concrete.
-- **resource_cards**: Array di risorse educative. Può essere vuoto `[]`.
-- **learn_cards**: Array di card educative sul concetto finanziario coinvolto. Può essere vuoto `[]`.
+- **message**: Main simple answer in plain language. Required. Use the user's actual numbers.
+- **reasoning_used**: Array of reasoning steps. Show how you arrived at the answer using the user's data. Minimum 1 element.
+- **action_cards**: Array of suggested actions. Can be empty `[]` if there are no concrete actions.
+- **resource_cards**: Array of educational resources. Can be empty `[]`.
+- **learn_cards**: Array of educational cards about the financial concept involved. Can be empty `[]`.
 
-### Capacità disponibili per i card:
+### Available capabilities for cards:
 ```json
 {{ capabilities_json }}
 ```
 
-NON inventare URL o link reali. Per resource_cards, usa url = null se non hai un link verificato.
+Do NOT invent real URLs or links. For resource_cards, use url = null if you don't have a verified link.

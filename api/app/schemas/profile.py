@@ -36,6 +36,11 @@ class UserProfileDTO(BaseModel):
     confirmed: bool = False
     profile_generated_at: str | None = Field(alias="profileGeneratedAt", default=None)
     updated_at: str = Field(alias="updatedAt")
+    # New fields (C + A) — optional so existing clients don't break
+    extraordinary_income_total: float | None = Field(
+        alias="extraordinaryIncomeTotal", default=None
+    )
+    months_covered: float | None = Field(alias="monthsCovered", default=None)
 
     model_config = {"populate_by_name": True}
 

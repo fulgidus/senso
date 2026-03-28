@@ -123,4 +123,6 @@ class ProfileService:
             if profile.profile_generated_at
             else None,
             updatedAt=profile.updated_at.isoformat(),
+            extraordinaryIncomeTotal=profile.extraordinary_income_total,
+            monthsCovered=profile.months_covered,
         )

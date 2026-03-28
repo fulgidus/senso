@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 from uuid import uuid4
 
+import openpyxl
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings, get_settings
@@ -123,6 +124,12 @@ class IngestionService:
         self, file_path: Path, content_type: str, llm_client: LLMClient, registry
     ) -> ExtractionResult:
         """Route to the appropriate extraction pipeline."""
+        suffix = file_path.suffix.lower()
+
+        # xlsx/xls: extract via openpyxl before any content preview
+        if suffix in (".xlsx", ".xls"):
+            return self._extract_xlsx(file_path)
+
         # Read content preview for module matching
         try:
             preview = file_path.read_bytes()[:4096].decode("utf-8", errors="ignore")
@@ -146,6 +153,166 @@ class IngestionService:
 
         # Fallback: adaptive pipeline
         return run_adaptive_pipeline(file_path, preview, llm_client, registry)
+
+    def _extract_xlsx(self, file_path: Path) -> ExtractionResult:
+        """Extract transactions from xlsx/xls using openpyxl."""
+        from app.schemas.ingestion import ExtractedDocument, Transaction
+
+        def _warn(msg: str) -> ExtractionResult:
+            return ExtractionResult(
+                document=ExtractedDocument(
+                    document_type="bank_statement",
+                    module_name="GenericXLSX",
+                    module_source="builtin",
+                    module_version="1.0.0",
+                ),
+                confidence=0.1,
+                tier_used="module",
+                warnings=[msg],
+            )
+
+        try:
+            wb = openpyxl.load_workbook(str(file_path), read_only=True, data_only=True)
+            ws = wb.active
+            rows = [list(row) for row in ws.iter_rows(values_only=True)]
+            wb.close()
+        except Exception as exc:
+            logger.warning("openpyxl failed on %s: %s", file_path.name, exc)
+            return _warn(f"Could not read xlsx file: {exc}")
+
+        if not rows:
+            return _warn("Empty xlsx file")
+
+        # Find header row in first 5 rows
+        from app.ingestion.modules.builtin.generic_csv import (
+            DATE_COLUMNS,
+            AMOUNT_COLUMNS,
+            DESC_COLUMNS,
+            BALANCE_COLUMNS,
+            _find_col,
+        )
+        from decimal import Decimal, InvalidOperation
+        from datetime import datetime as _dt
+
+        header_row_idx = 0
+        for i, row in enumerate(rows[:5]):
+            row_strs = [str(c).lower().strip() if c is not None else "" for c in row]
+            combined = " ".join(row_strs)
+            if any(cand in combined for cand in DATE_COLUMNS + AMOUNT_COLUMNS):
+                header_row_idx = i
+                break
+
+        header_row = [str(c) if c is not None else "" for c in rows[header_row_idx]]
+        date_col = _find_col(header_row, DATE_COLUMNS)
+        amount_col = _find_col(header_row, AMOUNT_COLUMNS)
+        desc_col = _find_col(header_row, DESC_COLUMNS)
+        balance_col = _find_col(header_row, BALANCE_COLUMNS)
+
+        if date_col is None or amount_col is None:
+            return _warn("GenericXLSX: could not detect required date/amount columns")
+
+        transactions = []
+        statement_start = None
+        statement_end = None
+
+        for row in rows[header_row_idx + 1 :]:
+            if not row or all(c is None for c in row):
+                continue
+            try:
+                raw_date = row[date_col] if date_col < len(row) else None
+                raw_amount = row[amount_col] if amount_col < len(row) else None
+                if raw_date is None or raw_amount is None:
+                    continue
+
+                # Date: may already be a date/datetime object from openpyxl
+                from datetime import date as _date
+
+                if isinstance(raw_date, (_dt, _date)):
+                    parsed_date = (
+                        raw_date.date() if isinstance(raw_date, _dt) else raw_date
+                    )
+                else:
+                    date_str = str(raw_date).strip()
+                    parsed_date = None
+                    for fmt in (
+                        "%Y-%m-%d %H:%M:%S",
+                        "%Y-%m-%d",
+                        "%d/%m/%Y",
+                        "%m/%d/%Y",
+                        "%d-%m-%Y",
+                    ):
+                        try:
+                            parsed_date = _dt.strptime(
+                                date_str.split(".")[0].strip(), fmt
+                            ).date()
+                            break
+                        except ValueError:
+                            continue
+                    if parsed_date is None:
+                        continue
+
+                # Amount
+                amount_str = (
+                    str(raw_amount)
+                    .strip()
+                    .replace(",", ".")
+                    .replace(" ", "")
+                    .replace("€", "")
+                    .replace("$", "")
+                )
+                amount = Decimal(amount_str).quantize(Decimal("0.0001"))
+                desc = (
+                    str(row[desc_col]).strip()
+                    if desc_col is not None
+                    and desc_col < len(row)
+                    and row[desc_col] is not None
+                    else ""
+                )
+
+                balance_after = None
+                if (
+                    balance_col is not None
+                    and balance_col < len(row)
+                    and row[balance_col] is not None
+                ):
+                    try:
+                        balance_after = Decimal(
+                            str(row[balance_col]).strip().replace(",", ".")
+                        ).quantize(Decimal("0.0001"))
+                    except InvalidOperation:
+                        pass
+
+                if statement_start is None or parsed_date < statement_start:
+                    statement_start = parsed_date
+                if statement_end is None or parsed_date > statement_end:
+                    statement_end = parsed_date
+
+                transactions.append(
+                    Transaction(
+                        date=parsed_date,
+                        description=desc,
+                        amount=amount,
+                        currency="EUR",
+                        balance_after=balance_after,
+                    )
+                )
+            except (InvalidOperation, IndexError, ValueError, TypeError):
+                continue
+
+        return ExtractionResult(
+            document=ExtractedDocument(
+                document_type="bank_statement",
+                module_name="GenericXLSX",
+                module_source="builtin",
+                module_version="1.0.0",
+                transactions=transactions,
+                statement_period_start=statement_start,
+                statement_period_end=statement_end,
+            ),
+            confidence=0.5 if transactions else 0.1,
+            tier_used="module",
+            warnings=[] if transactions else ["GenericXLSX: no transactions extracted"],
+        )
 
     def _persist_extraction(self, upload: Upload, result: ExtractionResult) -> None:
         """Persist extraction result; write Transaction rows atomically for bank_statement (D-28)."""

@@ -1,0 +1,1 @@
+API get_extracted returns raw payload_json dict with snake_case keys; using camelCase causes runtime failures
