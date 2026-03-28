@@ -2,10 +2,13 @@
 phase: 05-voice-coaching-loop
 verified: 2026-03-28T17:00:00Z
 status: passed
-score: 17/17 must-haves verified
+score: 16/17 fully verified, 1 mock-only (requires live ElevenLabs key)
 re_verification: false
 gaps: []
 human_verification:
+  - test: "POST /coaching/tts with a real ELEVENLABS_API_KEY — verify actual MP3 bytes returned (not mock)"
+    expected: "Content-Type: audio/mpeg response with non-empty, >1KB playable audio"
+    why_human: "Automated test mocks ElevenLabs SDK with b\"fake-mp3\" — real API call was never made"
   - test: "Click mic button in Chrome/Safari, speak a financial question, confirm transcript submits as coaching message"
     expected: "Transcript text appears in input, automatically submits as coaching request, AI response renders"
     why_human: "Web Speech API requires browser microphone interaction — cannot automate with grep/build checks"
@@ -25,7 +28,7 @@ human_verification:
 **Phase Goal:** Users can complete the same coaching interaction via voice with resilient text fallback — mic button for STT input, per-bubble TTS playback via ElevenLabs with speechSynthesis fallback, and dual-channel LLM responses (voice-optimised message + A2UI rich detail panel).
 **Verified:** 2026-03-28T17:00:00Z
 **Status:** ✅ PASSED
-**Re-verification:** No — initial verification
+**Score:** 16/17 fully verified; 1 mock-only (item 1 — live ElevenLabs call requires real API key)
 
 ---
 
@@ -35,7 +38,7 @@ human_verification:
 
 | #  | Truth | Status | Evidence |
 |----|-------|--------|----------|
-| 1  | POST /coaching/tts returns MP3 audio bytes when ELEVENLABS_API_KEY is set | ✓ VERIFIED | `test_tts_returns_audio_when_key_set` passes; endpoint returns `audio/mpeg` with `b"fake-mp3"` |
+| 1  | POST /coaching/tts returns MP3 audio bytes when ELEVENLABS_API_KEY is set | ⚠ MOCK ONLY | `test_tts_returns_audio_when_key_set` passes with mocked ElevenLabs SDK returning `b"fake-mp3"` — real ElevenLabs API call never made; requires live key to verify actual audio bytes |
 | 2  | POST /coaching/tts returns 503 JSON error when API key absent or ElevenLabs fails | ✓ VERIFIED | `test_tts_endpoint_returns_503_when_no_key` passes; response `detail.code == "tts_unavailable"` |
 | 3  | TTS endpoint is auth-guarded — unauthenticated requests return 401 | ✓ VERIFIED | `test_tts_endpoint_returns_401_when_unauthenticated` passes; 31/31 tests green |
 | 4  | Input text is truncated server-side at 2500 chars at nearest sentence boundary | ✓ VERIFIED | `_truncate_at_sentence` tested with 4 cases; `TTSService` applies truncation before ElevenLabs call |
@@ -53,7 +56,7 @@ human_verification:
 | 16 | Each non-welcome assistant bubble has a speaker play button | ✓ VERIFIED | `ChatScreen.tsx` line 213: `AssistantBubble` accepts `locale` prop; line 729: `<AssistantBubble msg={msg} locale={locale} />`; `VoicePlayButton` rendered for every message with `content` |
 | 17 | On 503 from backend, TTS playback silently falls back to window.speechSynthesis | ✓ VERIFIED | `useTTS.ts` lines 65-68: catch block calls `_fallbackSpeak(text, locale, ...)` on any `fetchTTSAudio` throw; `_fallbackSpeak` checks `speechSynthesis` availability |
 
-**Score:** 17/17 truths verified
+**Score:** 16/17 truths verified (1 mock-only — see item 1)
 
 ---
 
@@ -145,25 +148,31 @@ human_verification:
 
 ### Human Verification Required
 
-#### 1. Voice Input (STT) End-to-End
+#### 1. ElevenLabs live API call (item 1 — mock-only in automated tests)
+
+**Test:** With `ELEVENLABS_API_KEY` set to a valid key in `.env`, send a request to `POST /coaching/tts` with a short Italian text string.
+**Expected:** Response `Content-Type: audio/mpeg` with real MP3 bytes (non-empty, >1KB); playable audio.
+**Why human:** Automated test mocks the ElevenLabs SDK with `b"fake-mp3"` — the code path is correct but the real API was never called. Verifying actual audio output requires a live key.
+
+#### 2. Voice Input (STT) End-to-End
 
 **Test:** In Chrome or Safari, open ChatScreen with a confirmed financial profile. Click the mic button (left of textarea), speak "Posso comprare un iPhone?" and stop speaking.
 **Expected:** Live transcript appears in the textarea; after silence/stop, the text is submitted as a coaching question; an AI response appears within a few seconds.
 **Why human:** Web Speech API requires browser microphone access; no way to simulate actual audio capture in automated checks.
 
-#### 2. ElevenLabs TTS Playback
+#### 3. ElevenLabs TTS Playback (browser)
 
 **Test:** With `ELEVENLABS_API_KEY` set in `.env`, receive an AI coaching response and click the Volume2 play button on the AssistantBubble.
 **Expected:** Spoken MP3 audio plays aloud; button icon switches to Square; clicking Stop immediately halts playback; ObjectURL is cleaned up.
 **Why human:** Requires live browser audio context, real ElevenLabs API key, and audible output verification.
 
-#### 3. speechSynthesis Fallback
+#### 4. speechSynthesis Fallback
 
 **Test:** With `ELEVENLABS_API_KEY` absent (or set to empty), receive a coaching response and click the play button.
 **Expected:** Browser's built-in voice (Italian `it-IT`) speaks the message text silently falling back; no error message shown to user; play button still behaves normally.
 **Why human:** Requires runtime 503 response from /coaching/tts and browser audio output to verify.
 
-#### 4. A2UI Detail Panel Render
+#### 5. A2UI Detail Panel Render
 
 **Test:** Ask a financial question that should trigger a structured breakdown (e.g., "Quanto posso spendere ogni mese?"). Inspect the AssistantBubble.
 **Expected:** Below the spoken message text, a card panel appears with labelled financial fields (e.g., "Reddito mensile netto", "Margine disponibile") if the LLM emits `details_a2ui`. If LLM emits null, no panel appears (no error).
