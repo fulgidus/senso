@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { NavLink } from "react-router-dom"
 import { Home, User, MessageCircle, Settings, LogOut, X, Menu } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
@@ -29,13 +30,6 @@ type NavItem = {
   label: string
   icon: React.ReactNode
 }
-
-const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
-  { to: "/profile", label: "Profilo", icon: <User className="h-5 w-5" /> },
-  { to: "/chat", label: "Coach", icon: <MessageCircle className="h-5 w-5" /> },
-  { to: "/settings", label: "Impostazioni", icon: <Settings className="h-5 w-5" /> },
-]
 
 function NavItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   return (
@@ -87,11 +81,19 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const { user, signOut } = useAuthContext()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [showTopNav, setShowTopNav] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
   const topBarRef = useRef<HTMLElement>(null)
   const navContainerRef = useRef<HTMLDivElement>(null)
+
+  const NAV_ITEMS: NavItem[] = [
+    { to: "/", label: t("nav.home"), icon: <Home className="h-5 w-5" /> },
+    { to: "/profile", label: t("nav.profile"), icon: <User className="h-5 w-5" /> },
+    { to: "/chat", label: t("nav.coach"), icon: <MessageCircle className="h-5 w-5" /> },
+    { to: "/settings", label: t("nav.settings"), icon: <Settings className="h-5 w-5" /> },
+  ]
 
   // Responsive nav: use ResizeObserver to show inline nav when top bar has room
   useEffect(() => {
@@ -148,9 +150,9 @@ export function AppShell({ children }: AppShellProps) {
         ref={topBarRef}
         className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background px-4 gap-2"
       >
-        {/* Hamburger — always shown; hides drawer when top nav is visible but keeps it accessible */}
+        {/* Hamburger - always shown; hides drawer when top nav is visible but keeps it accessible */}
         <button
-          aria-label="Apri menu"
+          aria-label={t("nav.openMenu")}
           onClick={() => setOpen(true)}
           className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
@@ -162,7 +164,7 @@ export function AppShell({ children }: AppShellProps) {
           <SensoLogo />
         </div>
 
-        {/* Inline nav — only rendered/shown when there's room */}
+        {/* Inline nav - only rendered/shown when there's room */}
         <div
           ref={navContainerRef}
           className={["flex items-center gap-1 ml-4", showTopNav ? "flex" : "hidden"].join(" ")}
@@ -198,13 +200,13 @@ export function AppShell({ children }: AppShellProps) {
         ].join(" ")}
         role="dialog"
         aria-modal="true"
-        aria-label="Menu navigazione"
+        aria-label={t("nav.menuLabel")}
       >
         {/* Sidebar header */}
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
           <SensoLogo />
           <button
-            aria-label="Chiudi menu"
+            aria-label={t("nav.closeMenu")}
             onClick={() => setOpen(false)}
             className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
@@ -232,14 +234,14 @@ export function AppShell({ children }: AppShellProps) {
           ))}
         </nav>
 
-        {/* Footer — Logout only (Settings is already in NAV_ITEMS above) */}
+        {/* Footer - Logout only (Settings is already in NAV_ITEMS above) */}
         <div className="border-t border-border px-3 py-4">
           <button
             onClick={() => void handleSignOut()}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
           >
             <LogOut className="h-5 w-5" />
-            <span>Esci</span>
+            <span>{t("nav.logout")}</span>
           </button>
         </div>
       </div>

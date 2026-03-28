@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import * as RadixSlider from "@radix-ui/react-slider"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
 import {
@@ -21,51 +23,9 @@ type Props = {
 
 type PartialAnswers = Partial<QuestionnaireAnswers> & {
   expenseCategories?: Record<string, number>
+  expenseCategoryRanges?: Record<string, { min: number; max: number }>
+  expenseCategoryIsRange?: Record<string, boolean>
 }
-
-// ── Static option lists ────────────────────────────────────────────────────
-
-const EMPLOYMENT_OPTIONS = [
-  { label: "Dipendente", value: "employed" },
-  { label: "Autonomo / Freelance", value: "self_employed" },
-  { label: "Studente", value: "student" },
-  { label: "Altro", value: "other" },
-] as const
-
-const INCOME_TYPE_OPTIONS: { label: string; value: IncomeSourceType; emoji: string }[] = [
-  { label: "Stipendio netto", value: "employment_net", emoji: "💼" },
-  { label: "Stipendio lordo (RAL)", value: "employment_gross", emoji: "🇮🇹" },
-  { label: "Freelance / P.IVA", value: "self_employment", emoji: "🧾" },
-  { label: "Affitti", value: "rental", emoji: "🏠" },
-  { label: "Investimenti", value: "investment_dividends", emoji: "📈" },
-  { label: "Pensione", value: "pension", emoji: "🏦" },
-  { label: "Sussidi / Assegni", value: "benefits", emoji: "🤝" },
-  { label: "Supporto familiare", value: "family_support", emoji: "👨‍👩‍👧" },
-  { label: "Altro reddito", value: "other", emoji: "💰" },
-]
-
-const SAVINGS_OPTIONS = [
-  { label: "Non risparmio", value: "not_saving" },
-  { label: "Risparmio occasionale", value: "occasional" },
-  { label: "Risparmio regolare", value: "regular" },
-] as const
-
-const GOAL_OPTIONS = [
-  { label: "Risparmiare di più", value: "save_more" },
-  { label: "Ridurre i debiti", value: "reduce_debt" },
-  { label: "Monitorare le spese", value: "just_track" },
-] as const
-
-const EXPENSE_CATEGORIES: { key: string; label: string; max: number }[] = [
-  { key: "Affitto / Mutuo", label: "Affitto / Mutuo", max: 3000 },
-  { key: "Cibo e spesa", label: "Cibo e spesa", max: 1500 },
-  { key: "Trasporti", label: "Trasporti", max: 1000 },
-  { key: "Utenze", label: "Utenze (luce, gas, internet…)", max: 500 },
-  { key: "Abbonamenti", label: "Abbonamenti e servizi", max: 300 },
-  { key: "Salute", label: "Salute e farmaci", max: 500 },
-  { key: "Svago", label: "Svago e uscite", max: 1000 },
-  { key: "Altro", label: "Altro", max: 1000 },
-]
 
 // ── Shared sub-components ──────────────────────────────────────────────────
 
@@ -93,44 +53,179 @@ function OptionPill({
   )
 }
 
-function ExpenseCategoryRow({
-  category,
-  value,
-  currency,
+// ── Dual-thumb slider ──────────────────────────────────────────────────────
+
+function DualSlider({
+  min,
+  max,
+  step,
+  values,
   onChange,
 }: {
-  category: { key: string; label: string; max: number }
+  min: number
+  max: number
+  step: number
+  values: [number, number]
+  onChange: (v: [number, number]) => void
+}) {
+  return (
+    <RadixSlider.Root
+      className="relative flex items-center select-none touch-none w-full h-5"
+      min={min}
+      max={max}
+      step={step}
+      value={values}
+      onValueChange={(v) => onChange([v[0], v[1]] as [number, number])}
+      minStepsBetweenThumbs={0}
+    >
+      <RadixSlider.Track className="bg-secondary relative grow rounded-full h-1.5">
+        <RadixSlider.Range className="absolute bg-primary rounded-full h-full" />
+      </RadixSlider.Track>
+      <RadixSlider.Thumb className="block w-4 h-4 bg-background border-2 border-primary rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 hover:bg-primary/10 transition-colors" />
+      <RadixSlider.Thumb className="block w-4 h-4 bg-background border-2 border-primary rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 hover:bg-primary/10 transition-colors" />
+    </RadixSlider.Root>
+  )
+}
+
+function SingleSlider({
+  min,
+  max,
+  step,
+  value,
+  onChange,
+}: {
+  min: number
+  max: number
+  step: number
   value: number
-  currency: string
   onChange: (v: number) => void
 }) {
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
+    <RadixSlider.Root
+      className="relative flex items-center select-none touch-none w-full h-5"
+      min={min}
+      max={max}
+      step={step}
+      value={[value]}
+      onValueChange={(v) => onChange(v[0])}
+    >
+      <RadixSlider.Track className="bg-secondary relative grow rounded-full h-1.5">
+        <RadixSlider.Range className="absolute bg-primary rounded-full h-full" />
+      </RadixSlider.Track>
+      <RadixSlider.Thumb className="block w-4 h-4 bg-background border-2 border-primary rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 hover:bg-primary/10 transition-colors" />
+    </RadixSlider.Root>
+  )
+}
+
+// ── ExpenseCategoryRow ─────────────────────────────────────────────────────
+
+function ExpenseCategoryRow({
+  category,
+  value,
+  valueRange,
+  isRange,
+  currency,
+  onChange,
+  onRangeChange,
+  onToggleRange,
+}: {
+  category: { key: string; label: string; max: number }
+  value: number
+  valueRange: { min: number; max: number }
+  isRange: boolean
+  currency: string
+  onChange: (v: number) => void
+  onRangeChange: (v: { min: number; max: number }) => void
+  onToggleRange: () => void
+}) {
+  const { t } = useTranslation()
+  const sliderMax = category.max
+  const currencySymbol = currency === "EUR" ? "€" : currency
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
         <label className="text-sm text-foreground">{category.label}</label>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">{currency}</span>
-          <input
-            type="number"
-            min={0}
-            max={category.max * 2}
-            step={10}
-            value={value || ""}
-            placeholder="0"
-            onChange={(e) => onChange(Math.max(0, parseFloat(e.target.value) || 0))}
-            className="w-20 rounded-md border border-border bg-background px-2 py-1 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+        <div className="flex items-center gap-1.5">
+          {isRange ? (
+            <>
+              <span className="text-xs text-muted-foreground">{currencySymbol}</span>
+              <input
+                type="number"
+                min={0}
+                step={10}
+                value={valueRange.min || ""}
+                placeholder={t("questionnaire.expenseRangeMin")}
+                onChange={(e) => {
+                  const v = Math.max(0, parseFloat(e.target.value) || 0)
+                  onRangeChange({ min: v, max: Math.max(v, valueRange.max) })
+                }}
+                className="w-16 rounded-md border border-border bg-background px-2 py-1 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span className="text-xs text-muted-foreground">–</span>
+              <input
+                type="number"
+                min={0}
+                step={10}
+                value={valueRange.max || ""}
+                placeholder={t("questionnaire.expenseRangeMax")}
+                onChange={(e) => {
+                  const v = Math.max(0, parseFloat(e.target.value) || 0)
+                  onRangeChange({ min: Math.min(valueRange.min, v), max: v })
+                }}
+                className="w-16 rounded-md border border-border bg-background px-2 py-1 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </>
+          ) : (
+            <>
+              <span className="text-xs text-muted-foreground">{currencySymbol}</span>
+              <input
+                type="number"
+                min={0}
+                max={category.max * 2}
+                step={10}
+                value={value || ""}
+                placeholder="0"
+                onChange={(e) => onChange(Math.max(0, parseFloat(e.target.value) || 0))}
+                className="w-20 rounded-md border border-border bg-background px-2 py-1 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </>
+          )}
         </div>
       </div>
-      <input
-        type="range"
-        min={0}
-        max={category.max}
-        step={10}
-        value={Math.min(value || 0, category.max)}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full accent-primary"
-      />
+
+      {isRange ? (
+        <DualSlider
+          min={0}
+          max={sliderMax}
+          step={10}
+          values={[Math.min(valueRange.min, sliderMax), Math.min(valueRange.max, sliderMax)]}
+          onChange={([lo, hi]) => onRangeChange({ min: lo, max: Math.max(lo, hi) })}
+        />
+      ) : (
+        <SingleSlider
+          min={0}
+          max={sliderMax}
+          step={10}
+          value={Math.min(value || 0, sliderMax)}
+          onChange={onChange}
+        />
+      )}
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onToggleRange}
+          className={`w-8 h-4 rounded-full transition-colors ${isRange ? "bg-primary" : "bg-muted"}`}
+        >
+          <span
+            className={`block w-3 h-3 rounded-full bg-white mx-0.5 transition-transform ${
+              isRange ? "translate-x-4" : "translate-x-0"
+            }`}
+          />
+        </button>
+        <span className="text-xs text-muted-foreground">{t("questionnaire.expenseRangeToggle")}</span>
+      </div>
     </div>
   )
 }
@@ -148,6 +243,20 @@ function IncomeSourceEditor({
   onChange: (updated: IncomeSource) => void
   onRemove: () => void
 }) {
+  const { t } = useTranslation()
+
+  const INCOME_TYPE_OPTIONS: { label: string; value: IncomeSourceType; emoji: string }[] = [
+    { label: t("questionnaire.incomeTypeEmploymentNet"), value: "employment_net", emoji: "💼" },
+    { label: t("questionnaire.incomeTypeEmploymentGross"), value: "employment_gross", emoji: "🇮🇹" },
+    { label: t("questionnaire.incomeTypeSelfEmployment"), value: "self_employment", emoji: "🧾" },
+    { label: t("questionnaire.incomeTypeRental"), value: "rental", emoji: "🏠" },
+    { label: t("questionnaire.incomeTypeInvestment"), value: "investment_dividends", emoji: "📈" },
+    { label: t("questionnaire.incomeTypePension"), value: "pension", emoji: "🏦" },
+    { label: t("questionnaire.incomeTypeBenefits"), value: "benefits", emoji: "🤝" },
+    { label: t("questionnaire.incomeTypeFamilySupport"), value: "family_support", emoji: "👨‍👩‍👧" },
+    { label: t("questionnaire.incomeTypeOther"), value: "other", emoji: "💰" },
+  ]
+
   const set = <K extends keyof IncomeSource>(k: K, v: IncomeSource[K]) =>
     onChange({ ...source, [k]: v })
 
@@ -165,7 +274,6 @@ function IncomeSourceEditor({
         )
       : null
 
-  // Auto-update valueMin/valueMax when net changes
   const handleRalChange = (ral: number) => {
     const updated = { ...source, ral }
     const n = computeNetFromRal(
@@ -234,13 +342,17 @@ function IncomeSourceEditor({
 
   const currencySymbol = currency === "EUR" ? "€" : currency
 
+  // Slider max for income: sensible cap based on type
+  const incomeSliderMax = source.type === "employment_gross" ? 10000 : 8000
+  const rangeSliderMax = incomeSliderMax
+
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <input
           type="text"
-          placeholder="Nome fonte (es. Stipendio principale)"
+          placeholder={t("questionnaire.incomeSourceNamePlaceholder")}
           value={source.label}
           onChange={(e) => set("label", e.target.value)}
           className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -249,7 +361,7 @@ function IncomeSourceEditor({
           type="button"
           onClick={onRemove}
           className="shrink-0 text-xs text-muted-foreground hover:text-destructive transition-colors px-2 py-1"
-          aria-label="Rimuovi fonte"
+          aria-label={t("questionnaire.incomeSourceRemove")}
         >
           ✕
         </button>
@@ -257,7 +369,9 @@ function IncomeSourceEditor({
 
       {/* Type selector */}
       <div>
-        <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</p>
+        <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {t("questionnaire.incomeSourceTypeLabel")}
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {INCOME_TYPE_OPTIONS.map((opt) => (
             <button
@@ -276,13 +390,13 @@ function IncomeSourceEditor({
         </div>
       </div>
 
-      {/* employment_gross — RAL flow */}
+      {/* employment_gross - RAL flow */}
       {source.type === "employment_gross" ? (
         <div className="space-y-3">
           {/* RAL */}
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              RAL (Reddito Annuo Lordo)
+              {t("questionnaire.incomeRalLabel")}
             </label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{currencySymbol}</span>
@@ -301,14 +415,14 @@ function IncomeSourceEditor({
           {/* CCNL */}
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Contratto (CCNL)
+              {t("questionnaire.incomeCcnlLabel")}
             </label>
             <select
               value={source.ccnlId ?? ""}
               onChange={(e) => handleCcnlChange(e.target.value)}
               className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="">— Seleziona CCNL —</option>
+              <option value="">{t("questionnaire.incomeCcnlPlaceholder")}</option>
               {CCNL_PRESETS.map((p) => (
                 <option key={p.id} value={p.id}>{p.label}</option>
               ))}
@@ -324,7 +438,7 @@ function IncomeSourceEditor({
           {/* Extra months */}
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Mensilità
+              {t("questionnaire.incomeExtraMonths")}
             </label>
             <div className="flex gap-2">
               {[13, 14].map((m) => (
@@ -338,7 +452,7 @@ function IncomeSourceEditor({
                       : "bg-secondary text-secondary-foreground border-border hover:border-primary"
                   }`}
                 >
-                  {m}ª mensilità
+                  {m}{t("questionnaire.incomeExtraMonthsLabel")}
                 </button>
               ))}
             </div>
@@ -347,7 +461,7 @@ function IncomeSourceEditor({
           {/* Production bonus */}
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Premio di produzione annuo (opzionale)
+              {t("questionnaire.incomeProductionBonus")}
             </label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{currencySymbol}</span>
@@ -370,13 +484,15 @@ function IncomeSourceEditor({
                 className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">Tassato al 10% fino a €3.000/anno</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {t("questionnaire.incomeProductionBonusHint")}
+            </p>
           </div>
 
           {/* Welfare aziendale */}
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Welfare aziendale annuo (opzionale)
+              {t("questionnaire.incomeWelfare")}
             </label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{currencySymbol}</span>
@@ -399,18 +515,20 @@ function IncomeSourceEditor({
                 className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">Esentasse fino a €1.000/anno (2024)</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {t("questionnaire.incomeWelfareHint")}
+            </p>
           </div>
 
           {/* Buoni pasto */}
           <div className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Buoni pasto (opzionale)
+              {t("questionnaire.incomeMealVoucher")}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">
-                  Valore facciale ({currencySymbol}/giorno)
+                  {t("questionnaire.incomeMealVoucherFaceValue", { currency: currencySymbol })}
                 </label>
                 <input
                   type="number"
@@ -426,7 +544,8 @@ function IncomeSourceEditor({
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">
-                  Giorni/mese in ufficio <span className="text-amber-500">(stima)</span>
+                  {t("questionnaire.incomeMealVoucherDays")}{" "}
+                  <span className="text-amber-500">{t("questionnaire.incomeMealVoucherDaysHint")}</span>
                 </label>
                 <input
                   type="number"
@@ -457,13 +576,16 @@ function IncomeSourceEditor({
                 />
               </button>
               <span className="text-xs text-muted-foreground">
-                Buoni elettronici (esentasse fino a €8/gg vs €4 per cartacei)
+                {t("questionnaire.incomeMealVoucherElectronic")}
               </span>
             </div>
             {(source.mealVoucherFaceValue ?? 0) > 0 && (source.mealVoucherEstimatedDaysMonth ?? 0) > 0 && net && (
               <p className="text-xs text-muted-foreground">
-                Stima mensile: ~{currencySymbol}{net.mealVoucherMonthlyEstimate.toFixed(0)}/mese
-                <span className="ml-1 text-amber-500">(variabile)</span>
+                {t("questionnaire.incomeMealVoucherEstimate", {
+                  currency: currencySymbol,
+                  amount: net.mealVoucherMonthlyEstimate.toFixed(0),
+                })}
+                <span className="ml-1 text-amber-500">{t("questionnaire.incomeMealVoucherVariable")}</span>
               </p>
             )}
           </div>
@@ -472,70 +594,88 @@ function IncomeSourceEditor({
           {net && (source.ral ?? 0) > 0 && (
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 space-y-1">
               <p className="text-xs font-semibold text-primary uppercase tracking-wide">
-                Calcolo netto stimato
+                {t("questionnaire.incomeNetCalculation")}
               </p>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Netto base mensile</span>
+                <span className="text-muted-foreground">{t("questionnaire.incomeNetBase")}</span>
                 <span className="font-medium text-foreground">
                   {currencySymbol}{net.netMonthly.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
                 </span>
               </div>
               {net.mealVoucherMonthlyEstimate > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">+ Buoni pasto <span className="text-amber-500">(stima)</span></span>
+                  <span className="text-muted-foreground">
+                    {t("questionnaire.incomeMealPlusLabel")}{" "}
+                    <span className="text-amber-500">{t("questionnaire.incomeMealVoucherDaysHint")}</span>
+                  </span>
                   <span className="font-medium text-foreground">
                     +{currencySymbol}{net.mealVoucherMonthlyEstimate.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-xs text-muted-foreground border-t border-border pt-1 mt-1">
-                <span>INPS (9.19%)</span>
+                <span>{t("questionnaire.incomeInps")}</span>
                 <span>-{currencySymbol}{net.inpsAnnual.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>IRPEF</span>
+                <span>{t("questionnaire.incomeIrpef")}</span>
                 <span>-{currencySymbol}{net.irpefNet.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Addizionali (~1.73%)</span>
+                <span>{t("questionnaire.incomeAddizionali")}</span>
                 <span>-{currencySymbol}{net.addizionali.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
               </div>
             </div>
           )}
         </div>
       ) : (
-        /* All other types: direct monthly net input */
-        <div className="space-y-2">
+        /* All other types: direct monthly net input with optional range */
+        <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {source.isFixed ? "Importo mensile netto" : "Range mensile netto (min – max)"}
+              {source.isFixed
+                ? t("questionnaire.incomeFixedAmountLabel")
+                : t("questionnaire.incomeRangeLabel")}
             </label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{currencySymbol}</span>
-              {source.isFixed ? (
-                <input
-                  type="number"
-                  min={0}
-                  step={50}
-                  placeholder="0"
-                  value={source.valueMin || ""}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value) || 0
-                    onChange({ ...source, valueMin: v, valueMax: v })
-                  }}
-                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              ) : (
-                <>
+            {source.isFixed ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm text-muted-foreground">{currencySymbol}</span>
                   <input
                     type="number"
                     min={0}
                     step={50}
-                    placeholder="min"
+                    placeholder="0"
                     value={source.valueMin || ""}
-                    onChange={(e) =>
-                      set("valueMin", parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value) || 0
+                      onChange({ ...source, valueMin: v, valueMax: v })
+                    }}
+                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <SingleSlider
+                  min={0}
+                  max={incomeSliderMax}
+                  step={50}
+                  value={Math.min(source.valueMin || 0, incomeSliderMax)}
+                  onChange={(v) => onChange({ ...source, valueMin: v, valueMax: v })}
+                />
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm text-muted-foreground">{currencySymbol}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={50}
+                    placeholder={t("questionnaire.expenseRangeMin")}
+                    value={source.valueMin || ""}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value) || 0
+                      set("valueMin", v)
+                    }}
                     className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <span className="text-muted-foreground">–</span>
@@ -543,16 +683,27 @@ function IncomeSourceEditor({
                     type="number"
                     min={0}
                     step={50}
-                    placeholder="max"
+                    placeholder={t("questionnaire.expenseRangeMax")}
                     value={source.valueMax || ""}
-                    onChange={(e) =>
-                      set("valueMax", parseFloat(e.target.value) || 0)
-                    }
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value) || 0
+                      set("valueMax", v)
+                    }}
                     className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </>
-              )}
-            </div>
+                </div>
+                <DualSlider
+                  min={0}
+                  max={rangeSliderMax}
+                  step={50}
+                  values={[
+                    Math.min(source.valueMin || 0, rangeSliderMax),
+                    Math.min(source.valueMax || 0, rangeSliderMax),
+                  ]}
+                  onChange={([lo, hi]) => onChange({ ...source, valueMin: lo, valueMax: Math.max(lo, hi) })}
+                />
+              </>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -568,7 +719,9 @@ function IncomeSourceEditor({
                 }`}
               />
             </button>
-            <span className="text-xs text-muted-foreground">Importo variabile (range)</span>
+            <span className="text-xs text-muted-foreground">
+              {t("questionnaire.incomeVariableToggle")}
+            </span>
           </div>
         </div>
       )}
@@ -579,12 +732,44 @@ function IncomeSourceEditor({
 // ── Main component ─────────────────────────────────────────────────────────
 
 export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBack }: Props) {
-  // Steps for quick mode:
-  //  0 = employment type (+ job_other if "other")
-  //  1 = income sources (rich IncomeSource builder)
-  //  2 = currency
-  //  3 = monthly expenses by category
-  // Thorough mode appends 4–6 (household, savings, goal)
+  const { t } = useTranslation()
+  const effectiveGender: "masculine" | "feminine" | "neutral" =
+    _user.voiceGender && _user.voiceGender !== "indifferent"
+      ? (_user.voiceGender as "masculine" | "feminine" | "neutral")
+      : "neutral"
+
+  // ── Option arrays (inside component so t() is available) ──────────────────
+
+  const EMPLOYMENT_OPTIONS = [
+    { label: t("questionnaire.employmentEmployed"), value: "employed" },
+    { label: t("questionnaire.employmentSelfEmployed"), value: "self_employed" },
+    { label: t("questionnaire.employmentStudent"), value: "student" },
+    { label: t("questionnaire.employmentOther"), value: "other" },
+  ] as const
+
+  const SAVINGS_OPTIONS = [
+    { label: t("questionnaire.savingsNotSaving"), value: "not_saving" },
+    { label: t("questionnaire.savingsOccasional"), value: "occasional" },
+    { label: t("questionnaire.savingsRegular"), value: "regular" },
+  ] as const
+
+  const GOAL_OPTIONS = [
+    { label: t("questionnaire.goalSaveMore"), value: "save_more" },
+    { label: t("questionnaire.goalReduceDebt"), value: "reduce_debt" },
+    { label: t("questionnaire.goalJustTrack"), value: "just_track" },
+  ] as const
+
+  const EXPENSE_CATEGORIES: { key: string; label: string; max: number }[] = [
+    { key: "Affitto / Mutuo", label: t("questionnaire.expenseCategoryRent"), max: 3000 },
+    { key: "Cibo e spesa", label: t("questionnaire.expenseCategoryFood"), max: 1500 },
+    { key: "Trasporti", label: t("questionnaire.expenseCategoryTransport"), max: 1000 },
+    { key: "Utenze", label: t("questionnaire.expenseCategoryUtilities"), max: 500 },
+    { key: "Abbonamenti", label: t("questionnaire.expenseCategorySubscriptions"), max: 300 },
+    { key: "Salute", label: t("questionnaire.expenseCategoryHealth"), max: 500 },
+    { key: "Svago", label: t("questionnaire.expenseCategoryLeisure"), max: 1000 },
+    { key: "Altro", label: t("questionnaire.expenseCategoryOther"), max: 1000 },
+  ]
+
   const QUICK_STEPS = 4
   const totalQuestions = mode === "quick" ? QUICK_STEPS : QUICK_STEPS + 3
 
@@ -592,6 +777,8 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
   const [answers, setAnswers] = useState<PartialAnswers>({
     currency: "EUR",
     expenseCategories: {},
+    expenseCategoryRanges: {},
+    expenseCategoryIsRange: {},
     incomeSources: [],
   })
   const [loading, setLoading] = useState(false)
@@ -608,6 +795,25 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
       ...prev,
       expenseCategories: { ...(prev.expenseCategories ?? {}), [key]: value },
     }))
+  }
+
+  const setExpenseCategoryRange = (key: string, value: { min: number; max: number }) => {
+    setAnswers((prev) => ({
+      ...prev,
+      expenseCategoryRanges: { ...(prev.expenseCategoryRanges ?? {}), [key]: value },
+      // Keep expenseCategories in sync with min value for downstream use
+      expenseCategories: { ...(prev.expenseCategories ?? {}), [key]: value.min },
+    }))
+  }
+
+  const toggleExpenseCategoryRange = (key: string) => {
+    setAnswers((prev) => {
+      const wasRange = (prev.expenseCategoryIsRange ?? {})[key] ?? false
+      return {
+        ...prev,
+        expenseCategoryIsRange: { ...(prev.expenseCategoryIsRange ?? {}), [key]: !wasRange },
+      }
+    })
   }
 
   const incomeSources: IncomeSource[] = (answers.incomeSources as IncomeSource[]) ?? []
@@ -628,7 +834,6 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
     setAnswer("incomeSources", incomeSources.filter((_, i) => i !== idx))
   }
 
-  // Derived monthly net income from income sources (sum of valueMin, non-hidden)
   const derivedMonthlyNet = incomeSources
     .filter((s) => !s.hideFromAssistant)
     .reduce((sum, s) => sum + (s.valueMin || 0), 0)
@@ -637,7 +842,6 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
     switch (step) {
       case 0: return !!answers.employmentType
       case 1: {
-        // At least one source with a non-zero value
         const sources = incomeSources
         if (sources.length === 0) return false
         return sources.every((s) => {
@@ -646,7 +850,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         })
       }
       case 2: return !!answers.currency
-      case 3: return true // expense categories optional
+      case 3: return true
       default: return true
     }
   }
@@ -675,7 +879,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
       })
       onComplete()
     } catch {
-      setError("Profilo non salvato. Controlla la connessione e riprova.")
+      setError(t("questionnaire.errorSave"))
     } finally {
       setLoading(false)
     }
@@ -688,7 +892,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Qual è la tua situazione lavorativa?
+              {t("questionnaire.step0Title")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {EMPLOYMENT_OPTIONS.map((opt) => (
@@ -703,11 +907,11 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
             {answers.employmentType === "other" && (
               <div className="mt-4">
                 <label className="mb-1 block text-sm text-muted-foreground">
-                  Specifica (opzionale)
+                  {t("questionnaire.step0OtherLabel")}
                 </label>
                 <input
                   type="text"
-                  placeholder="es. Pensionato, Casalingo, Volontario…"
+                  placeholder={t(`questionnaire.step0OtherPlaceholder.${effectiveGender}`)}
                   value={answers.jobOther ?? ""}
                   onChange={(e) => setAnswer("jobOther", e.target.value || null)}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -717,15 +921,15 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
           </div>
         )
 
-      // ── Step 1: Income sources (rich builder) ───────────────────────────
+      // ── Step 1: Income sources ──────────────────────────────────────────
       case 1:
         return (
           <div>
             <h2 className="mb-1 text-xl font-semibold text-foreground">
-              Da dove proviene il tuo reddito?
+              {t("questionnaire.step1Title")}
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              Aggiungi una o più fonti di reddito con i dettagli.
+              {t("questionnaire.step1Subtitle")}
             </p>
 
             <div className="space-y-3">
@@ -745,12 +949,14 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
               onClick={addIncomeSource}
               className="mt-3 w-full rounded-xl border border-dashed border-primary/40 py-3 text-sm text-primary hover:border-primary hover:bg-primary/5 transition-colors"
             >
-              + Aggiungi fonte di reddito
+              {t("questionnaire.step1AddSource")}
             </button>
 
             {derivedMonthlyNet > 0 && (
               <div className="mt-4 rounded-lg bg-secondary/50 px-4 py-2 flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Totale netto mensile (base)</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("questionnaire.step1TotalNet")}
+                </span>
                 <span className="text-sm font-semibold text-foreground">
                   {currency === "EUR" ? "€" : currency}
                   {derivedMonthlyNet.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
@@ -765,17 +971,17 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Qual è la tua valuta principale?
+              {t("questionnaire.step2Title")}
             </h2>
             <select
               value={currency}
               onChange={(e) => setAnswer("currency", e.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="EUR">EUR — Euro</option>
-              <option value="USD">USD — Dollaro americano</option>
-              <option value="GBP">GBP — Sterlina britannica</option>
-              <option value="CHF">CHF — Franco svizzero</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="USD">USD - Dollaro americano</option>
+              <option value="GBP">GBP - Sterlina britannica</option>
+              <option value="CHF">CHF - Franco svizzero</option>
               <option value="other">Altra valuta</option>
             </select>
           </div>
@@ -784,29 +990,36 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
       // ── Step 3: Expenses by category ────────────────────────────────────
       case 3: {
         const cats = answers.expenseCategories ?? {}
-        const total = Object.values(cats).reduce((s, v) => s + (v || 0), 0)
+        const catRanges = answers.expenseCategoryRanges ?? {}
+        const catIsRange = answers.expenseCategoryIsRange ?? {}
+        const total = Object.entries(cats).reduce((s, [, v]) => s + (v || 0), 0)
         return (
           <div>
             <h2 className="mb-1 text-xl font-semibold text-foreground">
-              Quanto spendi ogni mese?
+              {t("questionnaire.step3Title")}
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              Imposta le categorie che ti riguardano — le altre restano a zero.
+              {t("questionnaire.step3Subtitle")}
             </p>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {EXPENSE_CATEGORIES.map((cat) => (
                 <ExpenseCategoryRow
                   key={cat.key}
                   category={cat}
                   value={cats[cat.key] ?? 0}
+                  valueRange={catRanges[cat.key] ?? { min: cats[cat.key] ?? 0, max: cats[cat.key] ?? 0 }}
+                  isRange={catIsRange[cat.key] ?? false}
                   currency={currency}
                   onChange={(v) => setExpenseCategory(cat.key, v)}
+                  onRangeChange={(v) => setExpenseCategoryRange(cat.key, v)}
+                  onToggleRange={() => toggleExpenseCategoryRange(cat.key)}
                 />
               ))}
             </div>
             {total > 0 && (
               <p className="mt-4 text-right text-sm font-medium text-foreground">
-                Totale: <span className="text-primary">{currency} {total.toLocaleString("it-IT")}</span>
+                {t("questionnaire.step3Total")}{" "}
+                <span className="text-primary">{currency} {total.toLocaleString("it-IT")}</span>
               </p>
             )}
           </div>
@@ -818,7 +1031,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Quante persone nel tuo nucleo familiare?
+              {t("questionnaire.step4Title")}
             </h2>
             <div className="flex items-center gap-4">
               <Button
@@ -846,7 +1059,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Con che frequenza risparmi?
+              {t("questionnaire.step5Title")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {SAVINGS_OPTIONS.map((opt) => (
@@ -865,7 +1078,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
         return (
           <div>
             <h2 className="mb-4 text-xl font-semibold text-foreground">
-              Qual è il tuo principale obiettivo finanziario?
+              {t("questionnaire.step6Title")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {GOAL_OPTIONS.map((opt) => (
@@ -887,10 +1100,9 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
-      <div className="mb-8 flex items-start justify-between">
-        <h1 className="text-2xl font-bold text-foreground">S.E.N.S.O.</h1>
+      <div className="mb-8 flex items-center justify-end">
         <span className="text-sm text-muted-foreground">
-          Domanda {step + 1} di {totalQuestions}
+          {t("questionnaire.stepCounter", { current: step + 1, total: totalQuestions })}
         </span>
       </div>
 
@@ -905,7 +1117,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
               variant="ghost"
               onClick={step === 0 ? onBack : () => setStep((s) => s - 1)}
             >
-              Indietro
+              {t("questionnaire.back")}
             </Button>
             <Button
               variant="default"
@@ -913,10 +1125,10 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
               onClick={() => void handleNext()}
             >
               {loading
-                ? "Salvataggio..."
+                ? t("questionnaire.saving")
                 : step === totalQuestions - 1
-                  ? "Fine"
-                  : "Avanti"}
+                  ? t("questionnaire.finish")
+                  : t("questionnaire.next")}
             </Button>
           </div>
         </div>

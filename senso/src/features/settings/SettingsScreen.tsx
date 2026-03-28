@@ -127,7 +127,7 @@ export function SettingsScreen() {
 
         {/* Read-only email */}
         <div className="space-y-1 pt-2 border-t border-border">
-          <label className="block text-sm text-muted-foreground">Email</label>
+          <label className="block text-sm text-muted-foreground">{t("settings.email")}</label>
           <input
             type="text"
             readOnly
@@ -180,31 +180,35 @@ export function SettingsScreen() {
             ))}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Premi <kbd className="rounded border border-border px-1 py-0.5 font-mono text-xs">D</kbd> in qualsiasi schermata per cambiare tema rapidamente
+            {t("settings.themeShortcutHint")} <kbd className="rounded border border-border px-1 py-0.5 font-mono text-xs">{t("settings.themeShortcutKey")}</kbd> {t("settings.themeShortcutSuffix")}
           </p>
         </div>
       </section>
 
       {/* App info */}
       <section className="rounded-2xl border border-border bg-card p-6 space-y-2">
-        <h2 className="text-base font-semibold text-foreground">Informazioni</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("settings.infoTitle")}</h2>
         <p className="text-sm text-muted-foreground">
-          <strong className="text-foreground">S.E.N.S.O.</strong> — Sistema Educativo per Numeri, Spese e Obiettivi
+          <strong className="text-foreground">S.E.N.S.O.</strong> - Sistema Educativo per Numeri, Spese e Obiettivi
         </p>
         <p className="text-xs text-muted-foreground">
-          Assistente finanziario educativo. Non fornisce consulenza finanziaria professionale.
+          {t("settings.infoDescription")}
         </p>
       </section>
 
       {/* Sign out */}
       <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
-        <h2 className="text-base font-semibold text-foreground mb-2">Sessione</h2>
+        <h2 className="text-base font-semibold text-foreground mb-2">{t("settings.sessionTitle")}</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Esci dal tuo account su questo dispositivo.
+          {t("settings.sessionDescription")}
         </p>
         <Button
           variant="destructive"
-          onClick={() => void signOut()}
+          onClick={() => {
+            const gender: "masculine" | "feminine" | "neutral" =
+              voiceGender !== "indifferent" ? (voiceGender as "masculine" | "feminine" | "neutral") : "neutral"
+            if (window.confirm(t(`settings.logoutConfirm.${gender}`))) void signOut()
+          }}
           className="w-full sm:w-auto"
         >
           <LogOut className="h-4 w-4 mr-2" />

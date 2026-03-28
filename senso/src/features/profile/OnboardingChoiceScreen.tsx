@@ -1,4 +1,5 @@
 import { FileUp, MessageSquare } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
 
@@ -13,11 +14,13 @@ export function OnboardingChoiceScreen({
   onChooseFiles,
   onChooseQuestionnaire,
 }: Props) {
+  const { t } = useTranslation()
+
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
       <div className="mx-auto max-w-[480px]">
         <h2 className="mb-6 text-xl font-semibold text-foreground text-center">
-          Come costruiamo il tuo profilo?
+          {t("onboarding.heading")}
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -27,13 +30,13 @@ export function OnboardingChoiceScreen({
               <FileUp className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-2 text-base font-semibold text-foreground text-center">
-              Dai tuoi file
+              {t("onboarding.fromFilesTitle")}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground text-center">
-              Usa i documenti che hai già caricato.
+              {t("onboarding.fromFilesBody")}
             </p>
             <Button variant="default" className="w-full" onClick={onChooseFiles}>
-              Usa i miei upload
+              {t("onboarding.fromFilesCta")}
             </Button>
           </div>
 
@@ -43,17 +46,17 @@ export function OnboardingChoiceScreen({
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="mb-2 text-base font-semibold text-foreground text-center">
-              Rispondi a qualche domanda
+              {t("onboarding.questionnaireTitle")}
             </h3>
             <p className="mb-4 text-sm text-muted-foreground text-center">
-              Setup rapido in 3 domande o profilo completo in 7–10 domande.
+              {t("onboarding.questionnaireBody")}
             </p>
             <Button
               variant="outline"
               className="w-full"
               onClick={onChooseQuestionnaire}
             >
-              Inizia il questionario
+              {t("onboarding.questionnaireCta")}
             </Button>
           </div>
         </div>

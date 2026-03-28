@@ -1,5 +1,5 @@
 /**
- * <a2ui-surface> — minimal A2UI JSONL renderer using Lit.
+ * <a2ui-surface> - minimal A2UI JSONL renderer using Lit.
  * Handles surfaceUpdate protocol messages.
  * Components: text, card, textField, timeline, button.
  *
@@ -10,45 +10,45 @@
 import { LitElement, html, css } from "lit"
 
 interface A2UIComponent {
-  type: "text" | "card" | "textField" | "timeline" | "button"
-  id: string
-  value?: string
-  title?: string
-  label?: string
-  children?: A2UIComponent[]
-  items?: Array<{ label: string; description: string }>
-  action?: string
+    type: "text" | "card" | "textField" | "timeline" | "button"
+    id: string
+    value?: string
+    title?: string
+    label?: string
+    children?: A2UIComponent[]
+    items?: Array<{ label: string; description: string }>
+    action?: string
 }
 
 function renderComponent(c: A2UIComponent): ReturnType<typeof html> {
-  switch (c.type) {
-    case "text":
-      return html`<p class="a2ui-text">${c.value ?? ""}</p>`
-    case "textField":
-      return html`<div class="a2ui-field">
+    switch (c.type) {
+        case "text":
+            return html`<p class="a2ui-text">${c.value ?? ""}</p>`
+        case "textField":
+            return html`<div class="a2ui-field">
         <span class="a2ui-label">${c.label}</span>
         <span class="a2ui-value">${c.value}</span>
       </div>`
-    case "card":
-      return html`<div class="a2ui-card">
+        case "card":
+            return html`<div class="a2ui-card">
         <div class="a2ui-card-title">${c.title}</div>
         ${(c.children ?? []).map(renderComponent)}
       </div>`
-    case "timeline":
-      return html`<ol class="a2ui-timeline">
+        case "timeline":
+            return html`<ol class="a2ui-timeline">
         ${(c.items ?? []).map(
-          (item) => html`<li><strong>${item.label}</strong> — ${item.description}</li>`,
-        )}
+                (item) => html`<li><strong>${item.label}</strong> - ${item.description}</li>`,
+            )}
       </ol>`
-    case "button":
-      return html`<button class="a2ui-button">${c.label}</button>`
-    default:
-      return html``
-  }
+        case "button":
+            return html`<button class="a2ui-button">${c.label}</button>`
+        default:
+            return html``
+    }
 }
 
 export class A2UISurfaceElement extends LitElement {
-  static styles = css`
+    static styles = css`
     :host {
       display: block;
       font-size: 0.85rem;
@@ -96,42 +96,42 @@ export class A2UISurfaceElement extends LitElement {
     }
   `
 
-  // Manual reactive property (no @property decorator, compatible with erasableSyntaxOnly)
-  private _jsonl: string | null = null
+    // Manual reactive property (no @property decorator, compatible with erasableSyntaxOnly)
+    private _jsonl: string | null = null
 
-  get jsonl(): string | null {
-    return this._jsonl
-  }
-
-  set jsonl(value: string | null) {
-    const old = this._jsonl
-    this._jsonl = value
-    this.requestUpdate("jsonl", old)
-  }
-
-  render() {
-    if (!this._jsonl) return html``
-    try {
-      const lines = this._jsonl
-        .trim()
-        .split("\n")
-        .filter(Boolean)
-      let surface: A2UIComponent | null = null
-      for (const line of lines) {
-        const msg = JSON.parse(line) as { type: string; surface?: A2UIComponent }
-        if (msg.type === "surfaceUpdate" && msg.surface) {
-          surface = msg.surface
-        }
-      }
-      if (!surface) return html``
-      return renderComponent(surface)
-    } catch {
-      return html``
+    get jsonl(): string | null {
+        return this._jsonl
     }
-  }
+
+    set jsonl(value: string | null) {
+        const old = this._jsonl
+        this._jsonl = value
+        this.requestUpdate("jsonl", old)
+    }
+
+    render() {
+        if (!this._jsonl) return html``
+        try {
+            const lines = this._jsonl
+                .trim()
+                .split("\n")
+                .filter(Boolean)
+            let surface: A2UIComponent | null = null
+            for (const line of lines) {
+                const msg = JSON.parse(line) as { type: string; surface?: A2UIComponent }
+                if (msg.type === "surfaceUpdate" && msg.surface) {
+                    surface = msg.surface
+                }
+            }
+            if (!surface) return html``
+            return renderComponent(surface)
+        } catch {
+            return html``
+        }
+    }
 }
 
 // Register the custom element (no @customElement decorator needed)
 if (!customElements.get("a2ui-surface")) {
-  customElements.define("a2ui-surface", A2UISurfaceElement)
+    customElements.define("a2ui-surface", A2UISurfaceElement)
 }

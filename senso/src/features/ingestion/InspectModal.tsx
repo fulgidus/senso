@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { ExtractedDocument } from "./types"
 
@@ -9,6 +10,7 @@ type Props = {
 }
 
 export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
+  const { t } = useTranslation()
   const [doc, setDoc] = useState<ExtractedDocument | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -20,9 +22,9 @@ export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
     setError(null)
     getExtracted(uploadId)
       .then(setDoc)
-      .catch(() => setError("Impossibile caricare i dati estratti."))
+      .catch(() => setError(t("ingestion.inspectError")))
       .finally(() => setLoading(false))
-  }, [uploadId, getExtracted])
+  }, [uploadId, getExtracted, t])
 
   if (!uploadId) return null
 
@@ -35,13 +37,13 @@ export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
     >
       <div className="w-full max-w-3xl max-h-[80vh] overflow-auto rounded-2xl border border-border bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4 sticky top-0 bg-card">
-          <h2 className="text-lg font-semibold text-foreground">Dati estratti</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t("ingestion.inspectTitle")}</h2>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Chiudi
+            {t("ingestion.inspectClose")}
           </Button>
         </div>
         <div className="px-6 py-4">
-          {loading && <p className="text-muted-foreground text-sm">Caricamento...</p>}
+          {loading && <p className="text-muted-foreground text-sm">{t("ingestion.inspectLoading")}</p>}
           {error && <p className="text-destructive text-sm">{error}</p>}
           {doc && <DocRenderer doc={doc} />}
         </div>
@@ -51,6 +53,8 @@ export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
 }
 
 function DocRenderer({ doc }: { doc: ExtractedDocument }) {
+  const { t } = useTranslation()
+
   if (doc.document_type === "bank_statement") {
     const txns = doc.transactions ?? []
     const currency = txns[0]?.currency ?? "EUR"
@@ -58,11 +62,11 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
       <div>
         <div className="flex items-center gap-3 mb-3">
           <p className="text-xs text-muted-foreground">
-            {txns.length} transazioni · modulo: {doc.module_name ?? "sconosciuto"}
+            {t("ingestion.inspectTransactions", { count: txns.length, module: doc.module_name ?? "sconosciuto" })}
           </p>
           {doc.account_holder && (
             <p className="text-xs text-muted-foreground">
-            Account: {doc.account_holder}
+              {t("ingestion.inspectAccount", { name: doc.account_holder })}
             </p>
           )}
         </div>
@@ -70,35 +74,35 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="pb-2 font-semibold pr-4">Data</th>
-                <th className="pb-2 font-semibold pr-4">Descrizione</th>
+                <th className="pb-2 font-semibold pr-4">{t("ingestion.inspectColDate")}</th>
+                <th className="pb-2 font-semibold pr-4">{t("ingestion.inspectColDescription")}</th>
                 <th className="pb-2 text-right font-semibold pr-4">
-                  Importo ({currency})
+                  {t("ingestion.inspectColAmount", { currency })}
                 </th>
-                <th className="pb-2 font-semibold">Tipo</th>
+                <th className="pb-2 font-semibold">{t("ingestion.inspectColType")}</th>
               </tr>
             </thead>
             <tbody>
-              {txns.map((t, i) => (
+              {txns.map((tx, i) => (
                 <tr key={i} className="border-b border-border/50 last:border-0">
                   <td className="py-1.5 pr-4 text-muted-foreground whitespace-nowrap">
-                    {t.date}
+                    {tx.date}
                   </td>
                   <td
                     className="py-1.5 pr-4 max-w-[300px] truncate"
-                    title={t.description}
+                    title={tx.description}
                   >
-                    {t.description}
+                    {tx.description}
                   </td>
                   <td
                     className={`py-1.5 pr-4 text-right ${
-                      Number(t.amount) < 0 ? "text-destructive" : "text-green-600"
+                      Number(tx.amount) < 0 ? "text-destructive" : "text-green-600"
                     }`}
                   >
-                    {t.amount}
+                    {tx.amount}
                   </td>
                   <td className="py-1.5 text-muted-foreground">
-                    {Number(t.amount) < 0 ? "addebito" : "accredito"}
+                    {Number(tx.amount) < 0 ? t("ingestion.inspectDebit") : t("ingestion.inspectCredit")}
                   </td>
                 </tr>
               ))}
@@ -106,7 +110,7 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
           </table>
           {txns.length === 0 && (
             <p className="text-muted-foreground text-sm mt-2">
-              Nessuna transazione estratta.
+              {t("ingestion.inspectNoTransactions")}
             </p>
           )}
         </div>
@@ -118,15 +122,17 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
     return (
       <div>
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <KV label="Datore di lavoro" value={doc.employer} />
-          <KV label="Dipendente" value={doc.employee_name} />
-          <KV label="Lordo" value={doc.gross_income} />
-          <KV label="Netto" value={doc.net_income} />
-          <KV label="Valuta" value={doc.currency} />
+          <KV label={t("ingestion.inspectPayslipEmployer")} value={doc.employer} />
+          <KV label={t("ingestion.inspectPayslipEmployee")} value={doc.employee_name} />
+          <KV label={t("ingestion.inspectPayslipGross")} value={doc.gross_income} />
+          <KV label={t("ingestion.inspectPayslipNet")} value={doc.net_income} />
+          <KV label={t("ingestion.inspectPayslipCurrency")} value={doc.currency} />
         </div>
         {(doc.deductions ?? []).length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">Trattenute</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">
+              {t("ingestion.inspectPayslipDeductions")}
+            </p>
             {doc.deductions!.map((d, i) => (
               <div key={i} className="flex justify-between text-sm border-b border-border/50 py-1">
                 <span>{d.label}</span>
@@ -142,18 +148,18 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
   if (doc.document_type === "utility_bill") {
     return (
       <div className="grid grid-cols-2 gap-3">
-        <KV label="Fornitore" value={doc.provider} />
-        <KV label="Servizio" value={doc.service_type} />
+        <KV label={t("ingestion.inspectUtilityProvider")} value={doc.provider} />
+        <KV label={t("ingestion.inspectUtilityService")} value={doc.service_type} />
         <KV
-          label="Periodo di fatturazione"
+          label={t("ingestion.inspectUtilityBillingPeriod")}
           value={
             doc.billing_period_start && doc.billing_period_end
               ? `${doc.billing_period_start} → ${doc.billing_period_end}`
               : null
           }
         />
-        <KV label="Totale dovuto" value={doc.total_due} />
-        <KV label="Numero conto" value={doc.account_number} />
+        <KV label={t("ingestion.inspectUtilityTotalDue")} value={doc.total_due} />
+        <KV label={t("ingestion.inspectUtilityAccountNumber")} value={doc.account_number} />
       </div>
     )
   }
@@ -162,13 +168,15 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
     return (
       <div>
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <KV label="Esercente" value={doc.merchant} />
-          <KV label="Data" value={doc.purchase_date} />
-          <KV label="Totale" value={doc.total_amount} />
+          <KV label={t("ingestion.inspectReceiptMerchant")} value={doc.merchant} />
+          <KV label={t("ingestion.inspectReceiptDate")} value={doc.purchase_date} />
+          <KV label={t("ingestion.inspectReceiptTotal")} value={doc.total_amount} />
         </div>
         {(doc.line_items ?? []).length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">Articoli</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">
+              {t("ingestion.inspectReceiptItems")}
+            </p>
             {doc.line_items!.map((item, i) => (
               <div
                 key={i}
@@ -184,7 +192,7 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
     )
   }
 
-  // unknown / fallback — show as formatted JSON
+  // unknown / fallback - show as formatted JSON
   return (
     <pre className="text-xs text-muted-foreground overflow-auto max-h-64 bg-secondary/30 rounded p-3">
       {JSON.stringify(doc, null, 2)}
@@ -196,7 +204,7 @@ function KV({ label, value }: { label: string; value: string | null | undefined 
   return (
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium text-foreground">{value ?? "—"}</p>
+      <p className="text-sm font-medium text-foreground">{value ?? "-"}</p>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import type { User } from "@/features/auth/types"
 import { readAccessToken } from "@/features/auth/storage"
 import { useIngestion } from "./useIngestion"
@@ -14,6 +15,11 @@ type Props = {
 }
 
 export function IngestionScreen({ user, onConfirmAll }: Props) {
+  const { t } = useTranslation()
+  const effectiveGender: "masculine" | "feminine" | "neutral" =
+    user.voiceGender && user.voiceGender !== "indifferent"
+      ? (user.voiceGender as "masculine" | "feminine" | "neutral")
+      : "neutral"
   const token = readAccessToken()
   const {
     uploads,
@@ -43,15 +49,17 @@ export function IngestionScreen({ user, onConfirmAll }: Props) {
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Carica documenti</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("ingestion.heading")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Benvenuto, {user.email}. Carica i tuoi documenti finanziari per iniziare.
+          {t(`ingestion.welcomeSubtitle.${effectiveGender}`, { email: user.email })}
         </p>
       </div>
 
       {/* Upload zone */}
       <section className="mb-6 rounded-2xl border border-border bg-card p-6">
-        <h2 className="mb-4 text-base font-semibold text-foreground">Upload Document</h2>
+        <h2 className="mb-4 text-base font-semibold text-foreground">
+          {t("ingestion.uploadSectionTitle")}
+        </h2>
         <UploadZone onFiles={(files) => { files.forEach((f) => void upload(f)) }} uploading={uploading} />
         {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </section>
@@ -60,7 +68,7 @@ export function IngestionScreen({ user, onConfirmAll }: Props) {
       <section className="rounded-2xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-foreground">
-            Uploaded Documents
+            {t("ingestion.uploadedSectionTitle")}
             {uploads.length > 0 && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">
                 ({uploads.length})
@@ -68,10 +76,14 @@ export function IngestionScreen({ user, onConfirmAll }: Props) {
             )}
           </h2>
           {loading && (
-            <span className="text-xs text-muted-foreground animate-pulse">Refreshing...</span>
+            <span className="text-xs text-muted-foreground animate-pulse">
+              {t("ingestion.refreshing")}
+            </span>
           )}
           {!loading && uploads.length > 0 && allConfirmed && (
-            <span className="text-xs text-green-600 font-medium">All confirmed ✓</span>
+            <span className="text-xs text-green-600 font-medium">
+              {t("ingestion.allConfirmed")}
+            </span>
           )}
         </div>
         <FileList

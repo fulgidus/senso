@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 
@@ -23,6 +24,7 @@ export function AuthScreen({
 }: AuthScreenProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const { t } = useTranslation()
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -30,10 +32,8 @@ export function AuthScreen({
   }
 
   const isLogin = mode === "login"
-  const heading = isLogin ? "Bentornato" : "Crea il tuo account"
-  const body = isLogin
-    ? "Accedi per continuare il tuo percorso finanziario."
-    : "Registrati per iniziare il tuo percorso finanziario."
+  const heading = isLogin ? t("auth.loginHeading") : t("auth.signupHeading")
+  const body = isLogin ? t("auth.loginBody") : t("auth.signupBody")
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-6 py-12">
@@ -51,7 +51,7 @@ export function AuthScreen({
             }`}
             onClick={() => onModeChange("login")}
           >
-            Accedi
+            {t("auth.tabLogin")}
           </button>
           <button
             type="button"
@@ -60,13 +60,13 @@ export function AuthScreen({
             }`}
             onClick={() => onModeChange("signup")}
           >
-            Registrati
+            {t("auth.tabSignup")}
           </button>
         </div>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <label className="block space-y-2">
-            <span className="text-sm leading-[1.5] font-semibold">Email</span>
+            <span className="text-sm leading-[1.5] font-semibold">{t("auth.email")}</span>
             <input
               className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
               type="email"
@@ -77,7 +77,7 @@ export function AuthScreen({
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm leading-[1.5] font-semibold">Password</span>
+            <span className="text-sm leading-[1.5] font-semibold">{t("auth.password")}</span>
             <input
               className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
               type="password"
@@ -90,8 +90,8 @@ export function AuthScreen({
 
           <Button className="h-11 w-full text-sm font-semibold" disabled={loading}>
             {loading
-              ? isLogin ? "Accesso in corso…" : "Registrazione in corso…"
-              : isLogin ? "Accedi" : "Crea account"}
+              ? isLogin ? t("auth.loggingIn") : t("auth.signingUp")
+              : isLogin ? t("auth.loginCta") : t("auth.signupCta")}
           </Button>
         </form>
 
@@ -99,9 +99,9 @@ export function AuthScreen({
           variant="outline"
           className="mt-4 h-11 w-full text-sm font-semibold opacity-50 cursor-not-allowed"
           disabled
-          title="Accesso con Google non disponibile"
+          title={t("auth.googleTitle")}
         >
-          Continua con Google
+          {t("auth.googleCta")}
         </Button>
 
         {googleFallback && (

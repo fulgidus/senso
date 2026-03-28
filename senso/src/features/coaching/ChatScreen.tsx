@@ -44,6 +44,7 @@ interface DisplayMessage {
 
 function ReasoningCard({ steps }: { steps: ReasoningStep[] }) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
   if (!steps.length) return null
   return (
     <div className="mt-2 text-sm border border-muted rounded-md overflow-hidden">
@@ -52,7 +53,7 @@ function ReasoningCard({ steps }: { steps: ReasoningStep[] }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        <span>Ragionamento usato</span>
+        <span>{t("coaching.reasoningLabel")}</span>
         <span>{open ? "▲" : "▼"}</span>
       </button>
       {open && (
@@ -84,13 +85,14 @@ function ActionCardStub({ card }: { card: ActionCard }) {
 }
 
 function ResourceCardStub({ card }: { card: ResourceCard }) {
+  const { t } = useTranslation()
   return (
     <div className="border border-border rounded-md px-3 py-2 bg-background text-sm">
       <div className="font-semibold">{card.title}</div>
       <div className="text-muted-foreground mt-0.5">{card.summary}</div>
       {card.estimated_read_minutes && (
         <span className="text-xs text-muted-foreground mt-1 block">
-          {card.estimated_read_minutes} min di lettura
+          {t("coaching.readingMinutes", { minutes: card.estimated_read_minutes })}
         </span>
       )}
     </div>
@@ -98,12 +100,13 @@ function ResourceCardStub({ card }: { card: ResourceCard }) {
 }
 
 function LearnCardStub({ card }: { card: LearnCard }) {
+  const { t } = useTranslation()
   return (
     <div className="border border-blue-200 rounded-md px-3 py-2 bg-blue-50 text-sm">
       <div className="font-semibold text-blue-800">{card.concept}</div>
       <div className="text-blue-700 mt-0.5">{card.plain_explanation}</div>
       {card.example && (
-        <div className="text-blue-600 text-xs mt-1 italic">Es: {card.example}</div>
+        <div className="text-blue-600 text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
       )}
     </div>
   )
@@ -133,7 +136,7 @@ function DebugPanel({ debug }: { debug: DebugPayload }) {
   const trace = debug.call_trace
   return (
     <div className="mt-3 space-y-1 border-t-2 border-yellow-400 pt-2">
-      <p className="text-xs font-bold text-yellow-700 font-mono">DEBUG — LLM_DEBUG=true</p>
+      <p className="text-xs font-bold text-yellow-700 font-mono">DEBUG - LLM_DEBUG=true</p>
       <div className="text-xs text-yellow-700 font-mono space-y-0.5">
         <div>
           Model: <span className="font-semibold">{debug.model_used}</span>
@@ -203,6 +206,7 @@ function VoicePlayButton({
   locale: "it" | "en"
   ttsConfig: TTSConfig
 }) {
+  const { t } = useTranslation()
   const { canPlay, isPlaying, isGenerating, play, stop } = useTTS(ttsConfig)
   if (!canPlay) return null
   const busy = isGenerating || isPlaying
@@ -214,8 +218,8 @@ function VoicePlayButton({
       className="h-6 w-6 text-muted-foreground hover:text-foreground"
       onClick={() => (busy ? stop() : void play(text, locale))}
       disabled={isGenerating && !isPlaying}
-      aria-label={isGenerating ? "Generazione audio..." : isPlaying ? "Ferma audio" : "Ascolta risposta"}
-      title={isGenerating ? "Generazione..." : isPlaying ? "Ferma" : "Ascolta"}
+      aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
+      title={isGenerating ? t("coaching.ttsGeneratingShort") : isPlaying ? t("coaching.ttsPlayingShort") : t("coaching.ttsPlayShort")}
     >
       {isGenerating ? (
         <Loader2 className="h-3 w-3 animate-spin" />
@@ -279,16 +283,15 @@ function AssistantBubble({
 
 // ── Error messages ────────────────────────────────────────────────────────────
 
-const ERROR_MESSAGES: Record<string, string> = {
-  input_rejected: "Messaggio non consentito. Prova a riformulare.",
-  profile_required: "Completa il profilo finanziario per ricevere coaching personalizzato.",
-  llm_error: "Coach temporaneamente non disponibile. Riprova tra poco.",
-  network_error: "Errore di connessione. Controlla la rete e riprova.",
-  unauthenticated: "Sessione scaduta. Effettua di nuovo il login.",
-}
-
-function getErrorMessage(code: string): string {
-  return ERROR_MESSAGES[code] ?? "Si è verificato un errore. Riprova."
+function getErrorMessage(code: string, t: (key: string) => string): string {
+  const map: Record<string, string> = {
+    input_rejected: t("coaching.errorInputRejected"),
+    profile_required: t("coaching.errorProfileRequired"),
+    llm_error: t("coaching.errorLlm"),
+    network_error: t("coaching.errorNetwork"),
+    unauthenticated: t("coaching.errorUnauthenticated"),
+  }
+  return map[code] ?? t("coaching.errorGeneric")
 }
 
 // ── Conversations Modal ───────────────────────────────────────────────────────
@@ -310,6 +313,7 @@ function ConversationsModal({
   onDelete,
   onClose,
 }: ConversationsModalProps) {
+  const { t } = useTranslation()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState("")
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -356,11 +360,11 @@ function ConversationsModal({
       {/* Panel */}
       <div className="relative z-10 w-full sm:max-w-md bg-background rounded-t-2xl sm:rounded-2xl border border-border shadow-xl flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-          <h2 className="font-semibold text-sm">Conversazioni</h2>
+          <h2 className="font-semibold text-sm">{t("coaching.modalTitle")}</h2>
           <button
             onClick={onClose}
             className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-            aria-label="Chiudi"
+            aria-label={t("coaching.modalClose")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -369,7 +373,7 @@ function ConversationsModal({
         <div className="overflow-y-auto flex-1">
           {sessions.length === 0 ? (
             <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-              Nessuna conversazione
+              {t("coaching.modalEmpty")}
             </p>
           ) : (
             <ul className="divide-y divide-border">
@@ -418,7 +422,7 @@ function ConversationsModal({
                         onClick={() => void commitRename(s.id)}
                         disabled={!editValue.trim() || busyId === s.id}
                         className="rounded p-1 text-primary hover:bg-primary/10 disabled:opacity-40 transition-colors"
-                        aria-label="Salva nome"
+                        aria-label={t("coaching.modalSaveName")}
                       >
                         <Check className="h-4 w-4" />
                       </button>
@@ -426,7 +430,7 @@ function ConversationsModal({
                       <button
                         onClick={() => startEdit(s)}
                         className="rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent opacity-0 group-hover:opacity-100 transition-all"
-                        aria-label="Rinomina"
+                        aria-label={t("coaching.modalRename")}
                       >
                         <PenLine className="h-4 w-4" />
                       </button>
@@ -435,7 +439,7 @@ function ConversationsModal({
                       onClick={() => void handleDelete(s.id)}
                       disabled={busyId === s.id}
                       className="rounded p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 disabled:opacity-40 transition-all"
-                      aria-label="Elimina"
+                      aria-label={t("coaching.modalDelete")}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -519,9 +523,9 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       return list
     } catch (err) {
       if (err instanceof CoachingApiError) {
-        setError({ code: err.code, message: getErrorMessage(err.code) })
+        setError({ code: err.code, message: getErrorMessage(err.code, t) })
       } else {
-        setError({ code: "network_error", message: getErrorMessage("network_error") })
+        setError({ code: "network_error", message: getErrorMessage("network_error", t) })
       }
       return []
     }
@@ -555,7 +559,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         }
         if (active?.defaultGender) setPersonaDefaultGender(active.defaultGender)
         if (active?.name) setPersonaName(active.name)
-      } catch { /* non-fatal — use DEFAULT_TTS_CONFIG */ }
+      } catch { /* non-fatal - use DEFAULT_TTS_CONFIG */ }
 
       const list = await fetchSessions()
       if (list.length > 0) {
@@ -564,7 +568,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         setSessionName(last.name)
         await loadSessionHistory(last.id)
       } else {
-        // No sessions yet — show welcome, session will be created on first send
+        // No sessions yet - show welcome, session will be created on first send
         setLoadingHistory(false)
         setWelcomeLoading(true)
         try {
@@ -697,9 +701,9 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       ])
     } catch (err) {
       if (err instanceof CoachingApiError) {
-        setError({ code: err.code, message: getErrorMessage(err.code) })
+        setError({ code: err.code, message: getErrorMessage(err.code, t) })
       } else {
-        setError({ code: "network_error", message: getErrorMessage("network_error") })
+        setError({ code: "network_error", message: getErrorMessage("network_error", t) })
       }
     } finally {
       setIsLoading(false)
@@ -738,27 +742,27 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         <SensoAvatar />
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-sm truncate">
-            {sessionName || "Nuova conversazione"}
+            {sessionName || t("coaching.newConversation")}
           </h2>
-          <p className="text-xs text-muted-foreground">Coach finanziario</p>
+          <p className="text-xs text-muted-foreground">{t("coaching.coachTitle")}</p>
         </div>
         {/* Action buttons */}
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => void handleNewConversation()}
-            title="Nuova conversazione"
+            title={t("coaching.newConversation")}
             className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nuova</span>
+            <span className="hidden sm:inline">{t("coaching.newConversationShort")}</span>
           </button>
           <button
             onClick={() => setShowModal(true)}
-            title="Conversazioni precedenti"
+            title={t("coaching.history")}
             className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Storico</span>
+            <span className="hidden sm:inline">{t("coaching.history")}</span>
           </button>
         </div>
       </div>
@@ -813,7 +817,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
               onClick={onNavigateBack}
               className="text-xs text-destructive underline mt-1"
             >
-              Vai al profilo
+              {t("coaching.goToProfile")}
             </button>
           )}
         </div>
@@ -830,7 +834,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
               className={isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isLoading}
-              aria-label={isRecording ? "Ferma registrazione" : "Inizia registrazione vocale"}
+              aria-label={isRecording ? t("coaching.voiceStop") : t("coaching.voiceStart")}
             >
               {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
@@ -840,7 +844,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             onChange={(e) => { if (!isRecording) setInputText(e.target.value) }}
             onKeyDown={handleKeyDown}
             disabled={isLoading || loadingHistory || isRecording}
-            placeholder={locale === "en" ? "Ask your coach..." : "Chiedi al coach..."}
+            placeholder={t("coaching.placeholder")}
             rows={1}
             className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 max-h-32 overflow-y-auto"
             style={{ minHeight: "40px" }}
@@ -851,14 +855,14 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             size="sm"
             className="shrink-0"
           >
-            {isLoading ? "..." : "Invia"}
+            {isLoading ? t("coaching.sendingButton") : t("coaching.sendButton")}
           </Button>
         </div>
         {sttErrorVisible && sttError && (
           <p className="text-xs text-red-500 mt-1 px-1">{sttError}</p>
         )}
         <p className="text-xs text-muted-foreground mt-1 text-center">
-          Invio con Invio · A scopo educativo · Non è consulenza finanziaria
+          {t("coaching.disclaimer")}
         </p>
       </div>
 

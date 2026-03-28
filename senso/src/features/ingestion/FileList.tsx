@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { UploadStatus } from "./types"
 
@@ -13,24 +14,27 @@ type Props = {
 }
 
 function ExtractionMethodCell({ upload }: { upload: UploadStatus }) {
+  const { t } = useTranslation()
   const { extractionStatus, extractionMethod, moduleSource } = upload
 
   if (extractionStatus === "failed") {
-    return <span className="text-destructive text-sm">Failed</span>
+    return <span className="text-destructive text-sm">{t("ingestion.statusFailed")}</span>
   }
   if (extractionStatus === "provider_outage") {
-    return <span className="text-destructive text-sm">System outage</span>
+    return <span className="text-destructive text-sm">{t("ingestion.statusOutage")}</span>
   }
   if (extractionStatus === "pending") {
     return (
-      <span className="text-muted-foreground text-sm animate-pulse">Processing...</span>
+      <span className="text-muted-foreground text-sm animate-pulse">
+        {t("ingestion.statusProcessing")}
+      </span>
     )
   }
   if (extractionStatus === "adaptive_failed") {
-    return <span className="text-destructive text-sm">Adaptive failed</span>
+    return <span className="text-destructive text-sm">{t("ingestion.statusAdaptiveFailed")}</span>
   }
   if (!extractionMethod) {
-    return <span className="text-muted-foreground text-sm">—</span>
+    return <span className="text-muted-foreground text-sm">-</span>
   }
 
   if (extractionMethod.startsWith("module:") || extractionMethod.startsWith("adaptive:")) {
@@ -41,20 +45,20 @@ function ExtractionMethodCell({ upload }: { upload: UploadStatus }) {
           <span className="rounded px-1.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 border border-amber-300">
             {"{NEW}"}
           </span>
-          Conversion module ({name})
+          {t("ingestion.extractionConversionNew", { name })}
         </span>
       )
     }
     if (moduleSource === "promoted") {
-      return <span className="text-sm">Conversion module (promoted: {name})</span>
+      return <span className="text-sm">{t("ingestion.extractionConversionPromoted", { name })}</span>
     }
-    return <span className="text-sm">Conversion module ({name})</span>
+    return <span className="text-sm">{t("ingestion.extractionConversion", { name })}</span>
   }
   if (extractionMethod === "ocr_text" || extractionMethod === "llm_text") {
-    return <span className="text-sm">OCR → LLM text</span>
+    return <span className="text-sm">{t("ingestion.extractionOcrLlm")}</span>
   }
   if (extractionMethod === "llm_vision") {
-    return <span className="text-sm">LLM vision</span>
+    return <span className="text-sm">{t("ingestion.extractionLlmVision")}</span>
   }
   return <span className="text-sm">{extractionMethod}</span>
 }
@@ -77,10 +81,12 @@ export function FileList({
   onConfirmOne,
   onConfirmAll,
 }: Props) {
+  const { t } = useTranslation()
+
   if (uploads.length === 0) {
     return (
       <p className="text-center text-sm text-muted-foreground py-8">
-        No files uploaded yet. Drop a file above to get started.
+        {t("ingestion.noFiles")}
       </p>
     )
   }
@@ -97,12 +103,18 @@ export function FileList({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/50">
-              <th className="px-4 py-3 text-left font-semibold text-foreground">File</th>
-              <th className="px-4 py-3 text-left font-semibold text-foreground">Type</th>
               <th className="px-4 py-3 text-left font-semibold text-foreground">
-                Extraction Method
+                {t("ingestion.colFile")}
               </th>
-              <th className="px-4 py-3 text-left font-semibold text-foreground">Actions</th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">
+                {t("ingestion.colType")}
+              </th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">
+                {t("ingestion.colExtractionMethod")}
+              </th>
+              <th className="px-4 py-3 text-left font-semibold text-foreground">
+                {t("ingestion.colActions")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +126,7 @@ export function FileList({
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     {upload.confirmed && (
-                      <span className="text-green-600 font-bold" title="Confirmed">
+                      <span className="text-green-600 font-bold" title={t("ingestion.confirmedTitle")}>
                         ✓
                       </span>
                     )}
@@ -134,7 +146,7 @@ export function FileList({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {/* Inspect — always shown but disabled when not success */}
+                    {/* Inspect - always shown but disabled when not success */}
                     <Button
                       variant="outline"
                       size="sm"
@@ -142,9 +154,9 @@ export function FileList({
                       onClick={() => onInspect(upload.id)}
                       disabled={upload.extractionStatus !== "success"}
                     >
-                      Inspect
+                      {t("ingestion.actionInspect")}
                     </Button>
-                    {/* Retry — per D-36: failed | adaptive_failed | provider_outage | generated */}
+                    {/* Retry - per D-36: failed | adaptive_failed | provider_outage | generated */}
                     {canRetry(upload) && (
                       <Button
                         variant="outline"
@@ -152,20 +164,20 @@ export function FileList({
                         className="h-7 text-xs"
                         onClick={() => onRetry(upload.id)}
                       >
-                        Retry
+                        {t("ingestion.actionRetry")}
                       </Button>
                     )}
-                    {/* Individual Confirm — success + not yet confirmed */}
+                    {/* Individual Confirm - success + not yet confirmed */}
                     {upload.extractionStatus === "success" && !upload.confirmed && (
                       <Button
                         size="sm"
                         className="h-7 text-xs"
                         onClick={() => onConfirmOne(upload.id)}
                       >
-                        Confirm
+                        {t("ingestion.actionConfirm")}
                       </Button>
                     )}
-                    {/* Report — success only per D-36 */}
+                    {/* Report - success only per D-36 */}
                     {upload.extractionStatus === "success" && (
                       <Button
                         variant="outline"
@@ -173,17 +185,17 @@ export function FileList({
                         className="h-7 text-xs text-muted-foreground"
                         onClick={() => onReport(upload.id)}
                       >
-                        Report
+                        {t("ingestion.actionReport")}
                       </Button>
                     )}
-                    {/* Remove — always shown */}
+                    {/* Remove - always shown */}
                     <Button
                       variant="outline"
                       size="sm"
                       className="h-7 text-xs text-destructive hover:text-destructive"
                       onClick={() => onRemove(upload.id)}
                     >
-                      Remove
+                      {t("ingestion.actionRemove")}
                     </Button>
                   </div>
                 </td>
@@ -193,7 +205,7 @@ export function FileList({
         </table>
       </div>
 
-      {/* Confirm all / All confirmed — only show when there are eligible files */}
+      {/* Confirm all / All confirmed - only show when there are eligible files */}
       {hasAnySuccess && (
         <div className="flex justify-end">
           <Button
@@ -201,7 +213,7 @@ export function FileList({
             onClick={onConfirmAll}
             className="min-w-36"
           >
-            {allEligibleConfirmed ? "Tutti confermati" : "Conferma tutti"}
+            {allEligibleConfirmed ? t("ingestion.allEligibleConfirmed") : t("ingestion.confirmAll")}
           </Button>
         </div>
       )}

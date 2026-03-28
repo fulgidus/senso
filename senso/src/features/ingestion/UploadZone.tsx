@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export function UploadZone({ onFiles, uploading, disabled }: Props) {
+  const { t } = useTranslation()
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -49,10 +51,10 @@ export function UploadZone({ onFiles, uploading, disabled }: Props) {
         }}
       />
       <p className="text-sm font-medium text-foreground">
-        {uploading ? "Uploading..." : "Drop files here or click to select"}
+        {uploading ? t("ingestion.uploadUploading") : t("ingestion.uploadDropLabel")}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Supports: CSV, XLSX, PDF, images (max 20 MB)
+        {t("ingestion.uploadSupported")}
       </p>
       {!uploading && (
         <Button
@@ -61,7 +63,7 @@ export function UploadZone({ onFiles, uploading, disabled }: Props) {
           className="mt-3 pointer-events-none"
           tabIndex={-1}
         >
-          Choose file
+          {t("ingestion.uploadChooseFile")}
         </Button>
       )}
     </div>

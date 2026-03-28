@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Lightbulb, Plus } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import {
   Bar,
   BarChart,
@@ -20,19 +21,6 @@ import {
 } from "@/lib/profile-api"
 import { ApiClientError } from "@/lib/api-client"
 
-const DATA_SOURCE_LABELS: Record<string, string> = {
-  bank_statement: "estratto conto",
-  payslip: "busta paga",
-  questionnaire: "questionario",
-}
-
-function formatDataSources(sources: string[]): string {
-  if (!sources.length) return ""
-  return sources
-    .map((s) => DATA_SOURCE_LABELS[s] ?? s)
-    .join(", ")
-}
-
 const CHART_COLORS = [
   "var(--chart-1)",
   "var(--chart-2)",
@@ -42,7 +30,7 @@ const CHART_COLORS = [
 ]
 
 function formatCurrency(amount: number | null, currency = "EUR"): string {
-  if (amount === null) return "—"
+  if (amount === null) return "-"
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
     currency,
@@ -52,6 +40,7 @@ function formatCurrency(amount: number | null, currency = "EUR"): string {
 
 function getCategoryChartData(
   categoryTotals: Record<string, number>,
+  otherLabel: string,
 ): { name: string; value: number }[] {
   const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])
   if (entries.length <= 5) {
@@ -67,7 +56,7 @@ function getCategoryChartData(
       name: name.replace(/_/g, " "),
       value: Math.round(value),
     })),
-    { name: "Altro", value: Math.round(otherTotal) },
+    { name: otherLabel, value: Math.round(otherTotal) },
   ]
 }
 
@@ -91,6 +80,21 @@ type Props = {
 }
 
 export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile }: Props) {
+  const { t } = useTranslation()
+
+  const DATA_SOURCE_LABELS: Record<string, string> = {
+    bank_statement: t("profile.sourceBank"),
+    payslip: t("profile.sourcePayslip"),
+    questionnaire: t("profile.sourceQuestionnaire"),
+  }
+
+  function formatDataSources(sources: string[]): string {
+    if (!sources.length) return ""
+    return sources
+      .map((s) => DATA_SOURCE_LABELS[s] ?? s)
+      .join(", ")
+  }
+
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -112,7 +116,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         if (err instanceof ApiClientError && err.status === 404) {
           onNoProfile?.()
         } else {
-          setError("Impossibile caricare il profilo. Controlla la connessione e riprova.")
+          setError(t("profile.errorLoad"))
         }
       })
       .finally(() => setLoading(false))
@@ -131,7 +135,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch {
-      setSaveError("Profilo non salvato. Controlla la connessione e riprova.")
+      setSaveError(t("profile.errorSave"))
     } finally {
       setSaving(false)
     }
@@ -153,13 +157,13 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     return (
       <main className="mx-auto w-full max-w-4xl px-6 py-6">
         <p className="text-sm text-destructive">
-          {error ?? "Impossibile caricare il profilo. Controlla la connessione e riprova."}
+          {error ?? t("profile.errorLoad")}
         </p>
       </main>
     )
   }
 
-  const chartData = getCategoryChartData(profile.categoryTotals)
+  const chartData = getCategoryChartData(profile.categoryTotals, t("profile.otherCategory"))
   const incomeAvailable = !!profile.incomeSummary?.amount
   const confirmedDate = profile.profileGeneratedAt
     ? new Date(profile.profileGeneratedAt).toLocaleDateString("it-IT")
@@ -169,11 +173,11 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
       <div className="mb-2">
-        <h2 className="text-xl font-semibold text-foreground">Il tuo profilo finanziario</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("profile.heading")}</h2>
         {confirmedDate && (
           <p className="text-sm text-muted-foreground">
-            Aggiornato il {confirmedDate}
-            {dataSourcesLabel && <> · Fonti: {dataSourcesLabel}</>}
+            {t("profile.updatedOn", { date: confirmedDate })}
+            {dataSourcesLabel && <> · {t("profile.sources", { sources: dataSourcesLabel })}</>}
           </p>
         )}
       </div>
@@ -185,7 +189,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
           onClick={onAddDocuments}
         >
           <Plus className="h-4 w-4" />
-          Aggiungi documenti
+          {t("profile.addDocuments")}
         </Button>
       </div>
 
@@ -195,7 +199,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* Income */}
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Reddito mensile</p>
+              <p className="text-sm text-muted-foreground mb-1">{t("profile.incomeMonthly")}</p>
               <p className="text-xl font-semibold text-foreground">
                 {formatCurrency(
                   profile.incomeSummary?.amount ?? null,
@@ -213,8 +217,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             {/* Expenses */}
             <div>
               <p className="text-sm text-muted-foreground mb-1">
-                Spese mensili{" "}
-                <span className="text-xs">(ricorrenti)</span>
+                {t("profile.expensesMonthly")}{" "}
+                <span className="text-xs">{t("profile.expensesRecurring")}</span>
               </p>
               <p className="text-xl font-semibold text-foreground">
                 {formatCurrency(profile.monthlyExpenses)}
@@ -225,8 +229,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             <div>
               <p className="text-sm text-muted-foreground mb-1">
                 {(profile.monthlyMargin ?? 0) >= 0
-                  ? "Disponibile questo mese"
-                  : "In rosso questo mese"}
+                  ? t("profile.marginPositive")
+                  : t("profile.marginNegative")}
               </p>
               <p
                 className={`text-xl font-semibold ${
@@ -245,7 +249,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {chartData.length > 0 && (
           <section className="rounded-2xl border border-border bg-card p-6">
             <h3 className="mb-4 text-xl font-semibold text-foreground">
-              Dove vanno i tuoi soldi
+              {t("profile.spendingBreakdown")}
             </h3>
             <div className="min-h-[220px]">
               <ResponsiveContainer width="100%" height={220}>
@@ -275,7 +279,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       typeof value === "number"
                         ? `€${value.toLocaleString("it-IT")}`
                         : String(value ?? ""),
-                      "Totale",
+                      t("profile.chartTotal"),
                     ]}
                     contentStyle={{
                       background: "var(--card)",
@@ -315,14 +319,14 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {incomeAvailable && profile.monthlyExpenses !== null && (
           <section className="rounded-2xl border border-border bg-card p-6">
             <h3 className="mb-4 text-xl font-semibold text-foreground">
-              Entrate vs. Uscite
+              {t("profile.incomeVsExpenses")}
             </h3>
             <div className="min-h-[220px]">
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
                   data={[
                     {
-                      name: "Questo mese",
+                      name: t("profile.thisMonth"),
                       income: Math.round(profile.incomeSummary!.amount),
                       expenses: Math.round(profile.monthlyExpenses!),
                     },
@@ -347,7 +351,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       typeof value === "number"
                         ? `€${value.toLocaleString("it-IT")}`
                         : String(value ?? ""),
-                      name === "income" ? "Entrate" : "Uscite",
+                      name === "income" ? t("profile.incomeBar") : t("profile.expensesBar"),
                     ]}
                     contentStyle={{
                       background: "var(--card)",
@@ -367,7 +371,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         {/* AI Insight Cards */}
         <section>
           <h3 className="mb-4 text-xl font-semibold text-foreground">
-            Cosa dicono i tuoi dati
+            {t("profile.insightsHeading")}
           </h3>
           {profile.insightCards.length === 0 ? (
             <div className="grid gap-4 lg:grid-cols-3">
@@ -402,9 +406,9 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         <section className="rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col items-center text-center gap-3">
           <p className="text-2xl">🦉</p>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Hai una domanda sui tuoi soldi?</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t("profile.ctaHeading")}</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Chiedi al tuo Mentore Saggio: posso permettermi questa spesa? Come sto andando?
+              {t("profile.ctaBody")}
             </p>
           </div>
           <Button
@@ -412,19 +416,19 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             onClick={onNavigateToChat}
             className="w-full sm:w-auto"
           >
-            🦉 Chiedi al coach
+            {t("profile.ctaButton")}
           </Button>
         </section>
 
         {/* Confirm / Correct Section */}
         <section className="rounded-2xl border border-border bg-card p-6">
           <h3 className="mb-4 text-xl font-semibold text-foreground">
-            I dati sono corretti?
+            {t("profile.confirmHeading")}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
                 <label className="mb-1 block text-sm text-muted-foreground">
-                  Reddito mensile
+                  {t("profile.incomeMonthly")}
                   {profile.incomeSummary?.source && (
                     <span className="ml-2 text-xs">
                       ({DATA_SOURCE_LABELS[profile.incomeSummary.source] ?? profile.incomeSummary.source})
@@ -444,7 +448,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             </div>
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">
-                Spese mensili
+                {t("profile.expensesMonthly")}
               </label>
               <div className="flex items-center gap-2">
                 <span className="text-sm">€</span>
@@ -466,10 +470,10 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
               onClick={() => void handleSaveProfile()}
               className="sm:w-auto w-full"
             >
-              {saving ? "Salvataggio..." : "Salva profilo"}
+              {saving ? t("profile.saving") : t("profile.saveProfile")}
             </Button>
             {saveSuccess && (
-              <span className="text-sm text-green-600">Profilo salvato ✓</span>
+              <span className="text-sm text-green-600">{t("profile.saveSuccess")}</span>
             )}
             {saveError && (
               <span className="text-sm text-destructive">{saveError}</span>

@@ -1,4 +1,5 @@
 import type { User } from "@/features/auth/types"
+import { useTranslation } from "react-i18next"
 import { getInitials } from "@/lib/user-avatar"
 
 type UserAvatarProps = {
@@ -16,6 +17,7 @@ const SIZE_CLASSES = {
 export function UserAvatar({ user, size = "md", className = "" }: UserAvatarProps) {
   const initials = getInitials(user)
   const sizeClass = SIZE_CLASSES[size]
+  const { t } = useTranslation()
 
   return (
     <div
@@ -24,7 +26,7 @@ export function UserAvatar({ user, size = "md", className = "" }: UserAvatarProp
         sizeClass,
         className,
       ].join(" ")}
-      aria-label={`Avatar di ${user.firstName || initials}`}
+      aria-label={t("avatar.ariaLabel", { name: user.firstName || initials })}
     >
       {initials}
     </div>

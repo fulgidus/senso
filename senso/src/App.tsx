@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import { useCallback, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { AuthScreen } from "@/features/auth/AuthScreen"
 import { useAuth } from "@/features/auth/useAuth"
 import { AuthContext } from "@/features/auth/AuthContext"
@@ -61,7 +62,7 @@ function IngestionPage({ user }: { user: User }) {
 
   const handleQuestionnaireComplete = useCallback(async () => {
     if (!token) return
-    // Questionnaire directly builds the profile — no background job needed.
+    // Questionnaire directly builds the profile - no background job needed.
     // Navigate straight to /profile without going through ProcessingScreen.
     void navigate("/profile", { replace: true })
   }, [token, navigate])
@@ -160,11 +161,12 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
 
 export function App() {
   const auth = useAuth()
+  const { t } = useTranslation()
 
   if (!auth.initialized) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading session...</p>
+        <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
       </main>
     )
   }

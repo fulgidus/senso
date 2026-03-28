@@ -1,4 +1,5 @@
 import { CheckCircle2, Circle, Loader2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
 import { useProfileStatus } from "./useProfileStatus"
@@ -7,29 +8,29 @@ import type { CategorizationStatus } from "@/lib/profile-api"
 export type { CategorizationStatus }
 
 type Step = {
-  label: string
+  labelKey: string
   activeAt: CategorizationStatus[]
   doneAt: CategorizationStatus[]
 }
 
 const STEPS: Step[] = [
   {
-    label: "Categorising transactions",
+    labelKey: "processing.stepCategorising",
     activeAt: ["queued", "categorizing"],
     doneAt: ["generating_insights", "complete"],
   },
   {
-    label: "Identifying patterns",
+    labelKey: "processing.stepPatterns",
     activeAt: ["generating_insights"],
     doneAt: ["complete"],
   },
   {
-    label: "Generating insights",
+    labelKey: "processing.stepInsights",
     activeAt: ["generating_insights"],
     doneAt: ["complete"],
   },
   {
-    label: "Building your profile",
+    labelKey: "processing.stepProfile",
     activeAt: [],
     doneAt: ["complete"],
   },
@@ -64,6 +65,7 @@ type Props = {
 }
 
 export function ProcessingScreen({ token, onBack, onComplete }: Props) {
+  const { t } = useTranslation()
   const { status, errorMessage } = useProfileStatus({
     token,
     onComplete,
@@ -74,29 +76,28 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
-      {/* Processing card — narrower, centered */}
+      {/* Processing card - narrower, centered */}
       <div className="mx-auto max-w-[480px]">
         <div className="rounded-2xl border border-border bg-card p-6">
           {isFailed ? (
             <>
               <h2 className="mb-2 text-xl font-semibold text-foreground">
-                Something went wrong
+                {t("processing.headingFailed")}
               </h2>
               <p className="mb-4 text-sm text-destructive">
-                {errorMessage ??
-                  "Something went wrong. Your documents are safe — try again."}
+                {errorMessage ?? t("processing.bodyFailed")}
               </p>
               <Button variant="default" onClick={onBack}>
-                Return to uploads
+                {t("processing.returnToUploads")}
               </Button>
             </>
           ) : (
             <>
               <h2 className="mb-1 text-xl font-semibold text-foreground">
-                Analysing your finances
+                {t("processing.headingAnalysing")}
               </h2>
               <p className="mb-6 text-sm text-muted-foreground">
-                This usually takes 15–30 seconds.
+                {t("processing.subtitleAnalysing")}
               </p>
 
               {/* Step list */}
@@ -104,7 +105,7 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
                 {STEPS.map((step) => {
                   const state = getStepState(step, status)
                   return (
-                    <li key={step.label} className="flex items-center gap-3">
+                    <li key={step.labelKey} className="flex items-center gap-3">
                       {state === "done" ? (
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
                       ) : state === "active" ? (
@@ -121,7 +122,7 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
                               : "text-sm text-muted-foreground"
                         }
                       >
-                        {step.label}
+                        {t(step.labelKey)}
                       </span>
                     </li>
                   )
@@ -142,7 +143,7 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
                 className="text-sm text-muted-foreground"
                 onClick={onBack}
               >
-                Come back later
+                {t("processing.comeBackLater")}
               </Button>
             </>
           )}
