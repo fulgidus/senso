@@ -84,12 +84,19 @@ export interface SessionMessage {
   created_at: string | null
 }
 
+export interface PersonaTTSConfig {
+  fallback: "browser" | "none"
+  browser_fallback_enabled: boolean
+}
+
 export interface Persona {
   id: string
   name: string
   description: string
   icon: string
   available: boolean
+  tts: PersonaTTSConfig
+  defaultGender?: "masculine" | "feminine" | "neutral"
 }
 
 export class CoachingApiError extends Error {

@@ -107,12 +107,21 @@ class NameConversationResponse(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class TTSConfig(BaseModel):
+    fallback: Literal["browser", "none"] = "browser"
+    browser_fallback_enabled: bool = Field(True, alias="browserFallbackEnabled")
+
+    model_config = {"populate_by_name": True}
+
+
 class PersonaDTO(BaseModel):
     id: str
     name: str
     description: str
     icon: str
     available: bool = True
+    tts: TTSConfig = Field(default_factory=TTSConfig)
+    default_gender: str = Field(default="neutral", alias="defaultGender")
 
     model_config = {"populate_by_name": True}
 

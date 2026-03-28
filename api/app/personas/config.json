@@ -1,29 +1,61 @@
 {
+    "defaultPersonaSettings": {
+        "soulFile": "soul/mentore-saggio.md",
+        "defaultGender": "masculine",
+        "available": true,
+        "tts": {
+            "fallback": "browser",
+            "browserFallbackEnabled": true
+        },
+        "elevenlabs": {
+            "voiceIds": {
+                "any": {
+                    "masculine": "o4b57JYAECRMJyCEXyIE",
+                    "feminine": "8KInRSd4DtD5L5gK7itu",
+                    "neutral": "9rJyhPcU6dKFmhVRrfA9"
+                }
+            },
+            "normalization": "elevenlabs",
+            "stability": 0.75,
+            "similarityBoost": 0.8,
+            "style": 0.0,
+            "useSpeakerBoost": true
+        }
+    },
     "personas": [
         {
             "id": "mentore-saggio",
-            "name": "Il Mentore Saggio",
+            "name": "Mentore Saggio",
             "description": "Calmo, diretto, ti dà i fatti e poi la strada. Come un professore che vuole davvero che tu ce la faccia.",
             "icon": "🦉",
+            "defaultGender": "masculine",
             "soulFile": "soul/mentore-saggio.md",
             "available": true,
             "elevenlabs": {
-                "voiceId": "placeholder-mentore",
+                "voiceIds": {
+                    "it": {
+                        "masculine": "o4b57JYAECRMJyCEXyIE",
+                        "feminine": "8KInRSd4DtD5L5gK7itu",
+                        "neutral": "9rJyhPcU6dKFmhVRrfA9"
+                    }
+                },
+                "normalization": "elevenlabs",
                 "stability": 0.75,
                 "similarityBoost": 0.8,
-                "style": 0.3,
+                "style": 0.0,
                 "useSpeakerBoost": true
             }
         },
         {
             "id": "amico-sarcastico",
-            "name": "L'Amico Sarcastico",
+            "name": "Amico Sarcastico",
             "description": "Ti prende in giro con affetto quando stai per fare una cazzata. Ironico, ma sempre dalla tua parte.",
             "icon": "😏",
+            "defaultGender": "masculine",
             "soulFile": "soul/amico-sarcastico.md",
             "available": true,
             "elevenlabs": {
-                "voiceId": "placeholder-amico",
+                "normalization": "elevenlabs",
                 "stability": 0.55,
                 "similarityBoost": 0.75,
                 "style": 0.6,
@@ -32,13 +64,14 @@
         },
         {
             "id": "hartman",
-            "name": "Il Sergente Hartman",
+            "name": "Sergente Hartman",
             "description": "Niente sconti, niente scuse. Duro come il Sergente Hartman di Full Metal Jacket, ma il tuo portafoglio ti ringrazierà.",
             "icon": "🪖",
+            "defaultGender": "masculine",
             "soulFile": "soul/hartman.md",
             "available": true,
             "elevenlabs": {
-                "voiceId": "placeholder-hartman",
+                "normalization": "elevenlabs",
                 "stability": 0.85,
                 "similarityBoost": 0.9,
                 "style": 0.8,
@@ -47,13 +80,14 @@
         },
         {
             "id": "cheerleader",
-            "name": "La Cheerleader",
+            "name": "Cheerleader",
             "description": "Entusiasta, positiva, celebra ogni progresso. Trasforma ogni piccola scelta giusta in una vittoria.",
             "icon": "🎉",
+            "defaultGender": "feminine",
             "soulFile": "soul/cheerleader.md",
             "available": true,
             "elevenlabs": {
-                "voiceId": "placeholder-cheerleader",
+                "normalization": "elevenlabs",
                 "stability": 0.5,
                 "similarityBoost": 0.7,
                 "style": 0.7,

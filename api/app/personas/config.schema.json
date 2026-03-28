@@ -1,0 +1,195 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "personas/config.schema.json",
+    "title": "PersonasConfig",
+    "description": "Schema for api/app/personas/config.json — persona definitions and shared defaults.",
+    "type": "object",
+    "required": [
+        "defaultPersonaSettings",
+        "personas"
+    ],
+    "additionalProperties": false,
+    "properties": {
+        "defaultPersonaSettings": {
+            "$ref": "#/$defs/PersonaDefaults",
+            "description": "Fallback values merged into any persona that omits a field."
+        },
+        "personas": {
+            "type": "array",
+            "description": "Ordered list of coaching personas. Only personas with available=true are returned by the API.",
+            "items": {
+                "$ref": "#/$defs/Persona"
+            }
+        }
+    },
+    "$defs": {
+        "VoiceLocale": {
+            "description": "Supported locale codes. Add new locales here — VoiceIds picks them up automatically.",
+            "enum": [
+                "any",
+                "it",
+                "en"
+            ]
+        },
+        "VoiceGenderBucket": {
+            "type": "object",
+            "description": "Maps gender variants to ElevenLabs voice ID strings. At least one key should be present.",
+            "additionalProperties": false,
+            "properties": {
+                "masculine": {
+                    "type": "string",
+                    "description": "ElevenLabs voice ID for masculine voice."
+                },
+                "feminine": {
+                    "type": "string",
+                    "description": "ElevenLabs voice ID for feminine voice."
+                },
+                "neutral": {
+                    "type": "string",
+                    "description": "ElevenLabs voice ID for gender-neutral voice."
+                }
+            }
+        },
+        "VoiceIds": {
+            "type": "object",
+            "description": "Map of locale key to gender bucket. Add new locale codes to VoiceLocale to extend.",
+            "propertyNames": {
+                "$ref": "#/$defs/VoiceLocale"
+            },
+            "additionalProperties": {
+                "$ref": "#/$defs/VoiceGenderBucket"
+            }
+        },
+        "ElevenLabsConfig": {
+            "type": "object",
+            "description": "ElevenLabs TTS generation settings for a persona.",
+            "additionalProperties": false,
+            "properties": {
+                "voiceIds": {
+                    "$ref": "#/$defs/VoiceIds"
+                },
+                "normalization": {
+                    "type": "string",
+                    "enum": [
+                        "internal",
+                        "elevenlabs"
+                    ],
+                    "default": "elevenlabs",
+                    "description": "'elevenlabs' — let ElevenLabs normalize text (recommended); 'internal' — apply our own _truncate_at_sentence preprocessing instead."
+                },
+                "stability": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "Voice stability (0=more variable, 1=more consistent). Recommended 0.5–0.85."
+                },
+                "similarityBoost": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "Similarity boost to the original voice. Higher values reduce vocal drift."
+                },
+                "style": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "Style exaggeration (0=neutral/literal, 1=expressive). Use 0.0 to prevent the model from ad-libbing greetings or rephrasing."
+                },
+                "useSpeakerBoost": {
+                    "type": "boolean",
+                    "description": "Boost speaker similarity. Adds latency; useful for cloned voices."
+                }
+            }
+        },
+        "TTSConfig": {
+            "type": "object",
+            "description": "Frontend TTS behaviour settings.",
+            "additionalProperties": false,
+            "properties": {
+                "fallback": {
+                    "type": "string",
+                    "enum": [
+                        "browser",
+                        "none"
+                    ],
+                    "default": "browser",
+                    "description": "'browser' — fall back to window.speechSynthesis if ElevenLabs fails; 'none' — hard fail silently."
+                },
+                "browserFallbackEnabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Master switch for browser speechSynthesis fallback. If false, fallback is suppressed even when fallback='browser'."
+                }
+            }
+        },
+        "PersonaDefaults": {
+            "type": "object",
+            "description": "Shared default values. Each persona inherits these and may override individual fields.",
+            "additionalProperties": false,
+            "required": [
+                "elevenlabs"
+            ],
+            "properties": {
+                "soulFile": {
+                    "type": "string",
+                    "description": "Default soul file path relative to the personas/ directory."
+                },
+                "available": {
+                    "type": "boolean",
+                    "description": "Default availability flag."
+                },
+                "tts": {
+                    "$ref": "#/$defs/TTSConfig"
+                },
+                "elevenlabs": {
+                    "$ref": "#/$defs/ElevenLabsConfig"
+                }
+            }
+        },
+        "Persona": {
+            "type": "object",
+            "description": "A single coaching persona definition.",
+            "required": [
+                "id",
+                "name",
+                "description",
+                "icon",
+                "soulFile"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9-]+$",
+                    "description": "Unique slug used in API routes and config lookups."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Display name shown in the UI."
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Short persona description shown in the persona selector."
+                },
+                "icon": {
+                    "type": "string",
+                    "description": "Single emoji used as the persona avatar."
+                },
+                "soulFile": {
+                    "type": "string",
+                    "description": "Path to the persona soul Markdown file, relative to personas/."
+                },
+                "available": {
+                    "type": "boolean",
+                    "description": "If false, the persona is hidden from the API and UI."
+                },
+                "tts": {
+                    "$ref": "#/$defs/TTSConfig"
+                },
+                "elevenlabs": {
+                    "$ref": "#/$defs/ElevenLabsConfig"
+                }
+            }
+        }
+    }
+}
