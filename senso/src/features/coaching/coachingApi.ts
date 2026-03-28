@@ -40,6 +40,7 @@ export interface LearnCard {
 }
 
 export interface CoachingResponse {
+  session_id: string
   message: string
   reasoning_used: ReasoningStep[]
   action_cards: ActionCard[]
@@ -72,9 +73,10 @@ export class CoachingApiError extends Error {
 // ──────────────────────────────────────────────
 
 export async function sendMessage(
-  messages: ChatMessage[],
+  message: string,
   locale: "it" | "en" = "it",
   personaId: string = "mentore-saggio",
+  sessionId?: string,
 ): Promise<CoachingResponse> {
   const token = readAccessToken()
   if (!token) {
@@ -86,7 +88,8 @@ export async function sendMessage(
       method: "POST",
       token,
       body: {
-        messages,
+        message,
+        session_id: sessionId ?? null,
         locale,
         persona_id: personaId,
       },

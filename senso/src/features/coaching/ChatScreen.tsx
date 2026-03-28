@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import {
   sendMessage,
   CoachingApiError,
-  type ChatMessage,
   type CoachingResponse,
   type ReasoningStep,
   type ActionCard,
@@ -152,6 +151,7 @@ function getErrorMessage(code: string): string {
 
 export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const [messages, setMessages] = useState<DisplayMessage[]>([])
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined)
   const [inputText, setInputText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<{ code: string; message: string } | null>(null)
@@ -168,19 +168,16 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
     setError(null)
     const userMsg: DisplayMessage = { role: "user", content: trimmed }
-    const updatedMessages = [...messages, userMsg]
-    setMessages(updatedMessages)
+    setMessages((prev) => [...prev, userMsg])
     setInputText("")
     setIsLoading(true)
 
-    // Build API message history (role + content only)
-    const apiMessages: ChatMessage[] = updatedMessages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
-
     try {
-      const response = await sendMessage(apiMessages, locale, "mentore-saggio")
+      const response = await sendMessage(trimmed, locale, "mentore-saggio", sessionId)
+      // Persist session_id for subsequent messages
+      if (response.session_id) {
+        setSessionId(response.session_id)
+      }
       const assistantMsg: DisplayMessage = {
         role: "assistant",
         content: response.message,
