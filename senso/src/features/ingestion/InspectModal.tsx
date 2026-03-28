@@ -20,7 +20,7 @@ export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
     setError(null)
     getExtracted(uploadId)
       .then(setDoc)
-      .catch(() => setError("Failed to load extraction data"))
+      .catch(() => setError("Impossibile caricare i dati estratti."))
       .finally(() => setLoading(false))
   }, [uploadId, getExtracted])
 
@@ -35,13 +35,13 @@ export function InspectModal({ uploadId, onClose, getExtracted }: Props) {
     >
       <div className="w-full max-w-3xl max-h-[80vh] overflow-auto rounded-2xl border border-border bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4 sticky top-0 bg-card">
-          <h2 className="text-lg font-semibold text-foreground">Extracted Data</h2>
+          <h2 className="text-lg font-semibold text-foreground">Dati estratti</h2>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Close
+            Chiudi
           </Button>
         </div>
         <div className="px-6 py-4">
-          {loading && <p className="text-muted-foreground text-sm">Loading...</p>}
+          {loading && <p className="text-muted-foreground text-sm">Caricamento...</p>}
           {error && <p className="text-destructive text-sm">{error}</p>}
           {doc && <DocRenderer doc={doc} />}
         </div>
@@ -58,11 +58,11 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
       <div>
         <div className="flex items-center gap-3 mb-3">
           <p className="text-xs text-muted-foreground">
-            {txns.length} transactions · module: {doc.module_name ?? "unknown"}
+            {txns.length} transazioni · modulo: {doc.module_name ?? "sconosciuto"}
           </p>
           {doc.account_holder && (
             <p className="text-xs text-muted-foreground">
-              Account: {doc.account_holder}
+            Account: {doc.account_holder}
             </p>
           )}
         </div>
@@ -70,12 +70,12 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="pb-2 font-semibold pr-4">Date</th>
-                <th className="pb-2 font-semibold pr-4">Description</th>
+                <th className="pb-2 font-semibold pr-4">Data</th>
+                <th className="pb-2 font-semibold pr-4">Descrizione</th>
                 <th className="pb-2 text-right font-semibold pr-4">
-                  Amount ({currency})
+                  Importo ({currency})
                 </th>
-                <th className="pb-2 font-semibold">Type</th>
+                <th className="pb-2 font-semibold">Tipo</th>
               </tr>
             </thead>
             <tbody>
@@ -98,7 +98,7 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
                     {t.amount}
                   </td>
                   <td className="py-1.5 text-muted-foreground">
-                    {Number(t.amount) < 0 ? "debit" : "credit"}
+                    {Number(t.amount) < 0 ? "addebito" : "accredito"}
                   </td>
                 </tr>
               ))}
@@ -106,7 +106,7 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
           </table>
           {txns.length === 0 && (
             <p className="text-muted-foreground text-sm mt-2">
-              No transactions extracted.
+              Nessuna transazione estratta.
             </p>
           )}
         </div>
@@ -118,15 +118,15 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
     return (
       <div>
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <KV label="Employer" value={doc.employer} />
-          <KV label="Employee" value={doc.employee_name} />
-          <KV label="Gross Income" value={doc.gross_income} />
-          <KV label="Net Income" value={doc.net_income} />
-          <KV label="Currency" value={doc.currency} />
+          <KV label="Datore di lavoro" value={doc.employer} />
+          <KV label="Dipendente" value={doc.employee_name} />
+          <KV label="Lordo" value={doc.gross_income} />
+          <KV label="Netto" value={doc.net_income} />
+          <KV label="Valuta" value={doc.currency} />
         </div>
         {(doc.deductions ?? []).length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">Deductions</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Trattenute</p>
             {doc.deductions!.map((d, i) => (
               <div key={i} className="flex justify-between text-sm border-b border-border/50 py-1">
                 <span>{d.label}</span>
@@ -142,18 +142,18 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
   if (doc.document_type === "utility_bill") {
     return (
       <div className="grid grid-cols-2 gap-3">
-        <KV label="Provider" value={doc.provider} />
-        <KV label="Service" value={doc.service_type} />
+        <KV label="Fornitore" value={doc.provider} />
+        <KV label="Servizio" value={doc.service_type} />
         <KV
-          label="Billing Period"
+          label="Periodo di fatturazione"
           value={
             doc.billing_period_start && doc.billing_period_end
               ? `${doc.billing_period_start} → ${doc.billing_period_end}`
               : null
           }
         />
-        <KV label="Total Due" value={doc.total_due} />
-        <KV label="Account Number" value={doc.account_number} />
+        <KV label="Totale dovuto" value={doc.total_due} />
+        <KV label="Numero conto" value={doc.account_number} />
       </div>
     )
   }
@@ -162,13 +162,13 @@ function DocRenderer({ doc }: { doc: ExtractedDocument }) {
     return (
       <div>
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <KV label="Merchant" value={doc.merchant} />
-          <KV label="Date" value={doc.purchase_date} />
-          <KV label="Total" value={doc.total_amount} />
+          <KV label="Esercente" value={doc.merchant} />
+          <KV label="Data" value={doc.purchase_date} />
+          <KV label="Totale" value={doc.total_amount} />
         </div>
         {(doc.line_items ?? []).length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">Items</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">Articoli</p>
             {doc.line_items!.map((item, i) => (
               <div
                 key={i}

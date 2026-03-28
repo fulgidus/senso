@@ -27,13 +27,13 @@ export function OnboardingChoiceScreen({
               <FileUp className="h-8 w-8 text-primary" />
             </div>
             <h3 className="mb-2 text-base font-semibold text-foreground text-center">
-              From your files
+              Dai tuoi file
             </h3>
             <p className="mb-4 text-sm text-muted-foreground text-center">
-              Use documents you&apos;ve already uploaded.
+              Usa i documenti che hai già caricato.
             </p>
             <Button variant="default" className="w-full" onClick={onChooseFiles}>
-              Use my uploads
+              Usa i miei upload
             </Button>
           </div>
 
@@ -43,17 +43,17 @@ export function OnboardingChoiceScreen({
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="mb-2 text-base font-semibold text-foreground text-center">
-              Answer a few questions
+              Rispondi a qualche domanda
             </h3>
             <p className="mb-4 text-sm text-muted-foreground text-center">
-              Quick 3-question setup or a fuller 7–10 question profile.
+              Setup rapido in 3 domande o profilo completo in 7–10 domande.
             </p>
             <Button
               variant="outline"
               className="w-full"
               onClick={onChooseQuestionnaire}
             >
-              Start questionnaire
+              Inizia il questionario
             </Button>
           </div>
         </div>

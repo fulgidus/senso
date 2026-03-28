@@ -201,7 +201,7 @@ export function FileList({
             onClick={onConfirmAll}
             className="min-w-36"
           >
-            {allEligibleConfirmed ? "All confirmed" : "Confirm all"}
+            {allEligibleConfirmed ? "Tutti confermati" : "Conferma tutti"}
           </Button>
         </div>
       )}

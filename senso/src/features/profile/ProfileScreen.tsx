@@ -67,7 +67,7 @@ function getCategoryChartData(
       name: name.replace(/_/g, " "),
       value: Math.round(value),
     })),
-    { name: "Other", value: Math.round(otherTotal) },
+    { name: "Altro", value: Math.round(otherTotal) },
   ]
 }
 
@@ -131,7 +131,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch {
-      setSaveError("Profile not saved. Check your connection and try again.")
+      setSaveError("Profilo non salvato. Controlla la connessione e riprova.")
     } finally {
       setSaving(false)
     }
