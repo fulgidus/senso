@@ -10,6 +10,7 @@ dependencies = [
   "pydantic[email]>=2.9.0",
   "python-dotenv>=1.0.0",
   "sqlalchemy>=2.0.0",
+  "psycopg2-binary>=2.9.9",
   "uvicorn[standard]>=0.30.0",
   "python-multipart>=0.0.22",
   "minio>=7.2.20",
