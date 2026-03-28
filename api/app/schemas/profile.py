@@ -1,6 +1,75 @@
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field
+import uuid
+from pydantic import BaseModel, Field, field_validator
+
+
+IncomeSourceType = Literal[
+    "employment_net",  # user enters monthly net directly
+    "employment_gross",  # RAL + Italian payroll computation
+    "self_employment",  # freelance / P.IVA
+    "rental",
+    "investment_dividends",
+    "pension",
+    "benefits",
+    "family_support",
+    "other",
+]
+
+
+class IncomeSource(BaseModel):
+    """Rich income source object — replaces the old list[str] income_sources."""
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    label: str
+    type: IncomeSourceType = "employment_net"
+    currency: str = "EUR"
+
+    # --- value range ---
+    # is_fixed=True means value_min == value_max → single input in UI
+    is_fixed: bool = Field(alias="isFixed", default=True)
+    value_min: float = Field(alias="valueMin", default=0.0)
+    value_max: float = Field(alias="valueMax", default=0.0)
+
+    # --- hours / overtime (optional, per CCNL) ---
+    weekly_hours: float | None = Field(alias="weeklyHours", default=None)
+    overtime_weekly_hours_min: float | None = Field(
+        alias="overtimeWeeklyHoursMin", default=None
+    )
+    overtime_weekly_hours_max: float | None = Field(
+        alias="overtimeWeeklyHoursMax", default=None
+    )
+    overtime_multiplier: float | None = Field(alias="overtimeMultiplier", default=None)
+
+    # --- transaction matching ---
+    transaction_labels: list[str] = Field(
+        alias="transactionLabels", default_factory=list
+    )
+    transaction_labels_case_sensitive: bool = Field(
+        alias="transactionLabelsCaseSensitive", default=False
+    )
+
+    # --- visibility ---
+    hide_from_graphs: bool = Field(alias="hideFromGraphs", default=False)
+    hide_from_assistant: bool = Field(alias="hideFromAssistant", default=False)
+
+    # --- Italian employment-specific (type == "employment_gross") ---
+    ral: float | None = None  # Reddito Annuo Lordo
+    ccnl_id: str | None = Field(alias="ccnlId", default=None)
+    extra_months: int | None = Field(alias="extraMonths", default=None)  # 13 or 14
+    production_bonus_annual: float | None = Field(
+        alias="productionBonusAnnual", default=None
+    )
+    welfare_annual: float | None = Field(alias="welfareAnnual", default=None)
+    meal_voucher_face_value: float | None = Field(
+        alias="mealVoucherFaceValue", default=None
+    )
+    meal_voucher_estimated_days_month: float | None = Field(
+        alias="mealVoucherEstimatedDaysMonth", default=None
+    )
+    meal_voucher_electronic: bool = Field(alias="mealVoucherElectronic", default=True)
+
+    model_config = {"populate_by_name": True}
 
 
 class InsightCard(BaseModel):
@@ -62,12 +131,22 @@ class CategorizationStatusDTO(BaseModel):
 
 
 class QuestionnaireAnswers(BaseModel):
-    # Quick (3 questions)
+    # Quick (required)
     employment_type: Literal["employed", "self_employed", "student", "other"] = Field(
         alias="employmentType"
     )
+    # Free-text clarification when employment_type == "other"
+    job_other: str | None = Field(alias="jobOther", default=None)
     monthly_net_income: float = Field(alias="monthlyNetIncome")
     currency: str = "EUR"
+    # Income sources — rich objects (replaces old list[str])
+    income_sources: list[IncomeSource] = Field(
+        alias="incomeSources", default_factory=list
+    )
+    # Expenses by category: {"Affitto": 800, "Cibo": 400, ...}
+    expense_categories: dict[str, float] = Field(
+        alias="expenseCategories", default_factory=dict
+    )
     # Thorough extras (optional)
     fixed_monthly_costs: float | None = Field(alias="fixedMonthlyCosts", default=None)
     other_income_sources: list[str] = Field(

@@ -12,7 +12,7 @@ import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
 import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
-import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
+import { getProfileStatus } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
 import { useAuthContext } from "@/features/auth/AuthContext"
@@ -61,9 +61,10 @@ function IngestionPage({ user }: { user: User }) {
 
   const handleQuestionnaireComplete = useCallback(async () => {
     if (!token) return
-    try { await triggerCategorization(token) } catch { /* best-effort */ }
-    setPhase("processing")
-  }, [token])
+    // Questionnaire directly builds the profile — no background job needed.
+    // Navigate straight to /profile without going through ProcessingScreen.
+    void navigate("/profile", { replace: true })
+  }, [token, navigate])
 
   if (!token) return null
 

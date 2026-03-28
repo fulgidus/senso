@@ -53,9 +53,30 @@ class ProfileService:
         # even before a full document ingestion + categorization run.
         updates: dict = {"questionnaire_answers": answers}
 
+        # --- income sources (new rich object model) ---
+        income_sources: list[dict] = (
+            answers.get("incomeSources") or answers.get("income_sources", []) or []
+        )
+
+        # Derive monthly_net_income: sum value_min of non-hidden sources
+        # For employment_gross sources, value_min should already be the computed net
+        # (frontend handles the IRPEF computation and sets value_min/value_max).
+        total_net_min = 0.0
+        total_net_max = 0.0
+        for src in income_sources:
+            if not src.get("hideFromAssistant", src.get("hide_from_assistant", False)):
+                v_min = float(src.get("valueMin") or src.get("value_min") or 0.0)
+                v_max = float(src.get("valueMax") or src.get("value_max") or v_min)
+                total_net_min += v_min
+                total_net_max += v_max
+
+        # Fallback to old scalar field if no income sources provided
         monthly_net_income = answers.get("monthlyNetIncome") or answers.get(
             "monthly_net_income"
         )
+        if income_sources:
+            monthly_net_income = total_net_min  # use min (conservative)
+
         employment_type = answers.get("employmentType") or answers.get(
             "employment_type", "questionnaire"
         )
@@ -63,13 +84,27 @@ class ProfileService:
         fixed_monthly_costs = answers.get("fixedMonthlyCosts") or answers.get(
             "fixed_monthly_costs"
         )
+        expense_categories: dict = (
+            answers.get("expenseCategories")
+            or answers.get("expense_categories", {})
+            or {}
+        )
+
+        # Derive total monthly expenses from per-category breakdown when provided
+        if expense_categories:
+            fixed_monthly_costs = sum(float(v) for v in expense_categories.values())
+            updates["category_totals"] = {
+                k: float(v) for k, v in expense_categories.items()
+            }
 
         if monthly_net_income is not None:
             updates["income_summary"] = {
                 "amount": float(monthly_net_income),
+                "amount_max": round(total_net_max, 2) if income_sources else None,
                 "currency": currency,
                 "source": "questionnaire",
                 "employment_type": employment_type,
+                "income_sources_count": len(income_sources),
             }
             if fixed_monthly_costs is not None:
                 updates["monthly_expenses"] = float(fixed_monthly_costs)
