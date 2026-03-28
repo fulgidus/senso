@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Runtime & Account Foundation** - Reproducible local run and persistent user access.
 - [x] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts. (completed 2026-03-24)
 - [x] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data. (completed 2026-03-25)
-- [ ] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement.
+- [x] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement. (completed 2026-03-28)
 - [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
 - [ ] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable.
 
@@ -83,7 +83,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
 - [x] 04-02-PLAN.md — Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
-- [ ] 04-03-PLAN.md — Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
+- [x] 04-03-PLAN.md — Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
 - [x] 04-04-PLAN.md — Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
 **UI hint**: yes
 
@@ -131,7 +131,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Runtime & Account Foundation | 3/3 | Complete | 2026-03-23 |
 | 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
 | 3. Financial Profile Clarity | 4/4 | Complete   | 2026-03-25 |
-| 4. Safe Grounded Text Coaching | 1/4 | In Progress|  |
+| 4. Safe Grounded Text Coaching | 4/4 | Complete   | 2026-03-28 |
 | 5. Voice Coaching Loop | 0/TBD | Not started | - |
 | 6. Learn+Act Cards & Demo Hardening | 0/TBD | Not started | - |
 | 7. Streaming & Nice-to-Have Polish | 0/TBD | Not started | - |
