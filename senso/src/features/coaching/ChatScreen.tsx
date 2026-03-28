@@ -22,8 +22,9 @@ import {
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2 } from "lucide-react"
 import { useVoiceInput } from "./useVoiceInput"
+import { useTTS } from "./useTTS"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -191,13 +192,34 @@ function SensoAvatar() {
   )
 }
 
-function AssistantBubble({ msg }: { msg: DisplayMessage }) {
+function VoicePlayButton({ text, locale }: { text: string; locale: "it" | "en" }) {
+  const { canPlay, isPlaying, play, stop } = useTTS()
+  if (!canPlay) return null
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+      onClick={() => (isPlaying ? stop() : void play(text, locale))}
+      aria-label={isPlaying ? "Ferma audio" : "Ascolta risposta"}
+      title={isPlaying ? "Ferma" : "Ascolta"}
+    >
+      {isPlaying ? <Square className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+    </Button>
+  )
+}
+
+function AssistantBubble({ msg, locale }: { msg: DisplayMessage; locale: "it" | "en" }) {
   const resp = msg.response
   return (
     <div className="flex items-start gap-2 max-w-[90%]">
       <SensoAvatar />
       <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0">
         <p className="whitespace-pre-wrap">{msg.content}</p>
+        <div className="flex justify-end mt-1">
+          <VoicePlayButton text={msg.content} locale={locale} />
+        </div>
         {resp && (
           <>
             {SHOW_REASONING && <ReasoningCard steps={resp.reasoning_used} />}
@@ -704,7 +726,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
                 <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
               </div>
             ) : (
-              <AssistantBubble msg={msg} />
+              <AssistantBubble msg={msg} locale={locale} />
             )}
           </div>
         ))}
