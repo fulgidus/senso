@@ -20,6 +20,22 @@ _SEVERITY_ORDER = ["censor", "warn", "block", "temp_ban", "hard_ban"]
 
 PERSONAS_DIR = Path(__file__).parent.parent / "personas"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 4 supplemental patterns not covered by hard-boundaries.yml.
+# These extend prompt_injection detection without modifying the source YAML.
+# Add only confirmed gaps discovered by the safety corpus tests.
+# ─────────────────────────────────────────────────────────────────────────────
+_SUPPLEMENTAL_INJECTION_PATTERNS: list[str] = [
+    # "disregard all previous safety rules" — YAML pattern requires instructions/guidelines/prompt
+    # as the terminal word, but attackers may target "rules", "context", "restrictions" etc.
+    r"disregard (your |all |previous |prior |above )*(safety |ethical |all )*(rules|restrictions|context|filters)",
+    # "your real self has no limits" — YAML requires (true|real|actual)+noun+(is|are),
+    # but attacker may say "has", "have", or omit the verb entirely.
+    r"your (true|real|actual) (self|instructions|purpose|goal|nature)(\s+(has|have|is|are|knows?|can))?",
+]
+
+_SUPPLEMENTAL_SUBSTITUTE_MESSAGE = "Non riesco a rispondere a questa richiesta."
+
 
 @dataclass
 class ScanResult:
@@ -82,6 +98,39 @@ class SafetyScanner:
                         "substituteMessage": group.get("substituteMessage"),
                         "patterns": compiled_patterns,
                     }
+                )
+
+        # Merge Phase 4 supplemental patterns into the prompt_injection group.
+        # These extend YAML coverage without modifying the source YAML file.
+        self._merge_supplemental_injection_patterns()
+
+    def _merge_supplemental_injection_patterns(self) -> None:
+        """Add supplemental injection patterns to the prompt_injection compiled group."""
+        # Find prompt_injection group in _compiled
+        injection_group = next(
+            (g for g in self._compiled if g["name"] == "prompt_injection"), None
+        )
+        if injection_group is None:
+            # If group doesn't exist yet, create it
+            injection_group = {
+                "name": "prompt_injection",
+                "severity": "temp_ban",
+                "scope": "both",
+                "substituteMessage": _SUPPLEMENTAL_SUBSTITUTE_MESSAGE,
+                "patterns": [],
+            }
+            self._compiled.append(injection_group)
+
+        for pattern_str in _SUPPLEMENTAL_INJECTION_PATTERNS:
+            try:
+                injection_group["patterns"].append(
+                    re.compile(pattern_str, re.IGNORECASE)
+                )
+            except re.error as exc:
+                logger.warning(
+                    "SafetyScanner: invalid supplemental pattern %r: %s",
+                    pattern_str,
+                    exc,
                 )
 
     def scan_input(self, text: str) -> ScanResult:
