@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr, Field
+
+VoiceGender = Literal["masculine", "feminine", "neutral", "indifferent"]
 
 
 class UserDTO(BaseModel):
@@ -6,11 +10,14 @@ class UserDTO(BaseModel):
     email: EmailStr
     first_name: str | None = None
     last_name: str | None = None
+    is_admin: bool = False
+    voice_gender: VoiceGender = "indifferent"
 
 
 class UpdateMeRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
+    voice_gender: VoiceGender | None = None
 
 
 class AuthTokensDTO(BaseModel):

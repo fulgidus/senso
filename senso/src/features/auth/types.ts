@@ -1,8 +1,11 @@
+export type VoiceGender = "masculine" | "feminine" | "neutral" | "indifferent"
+
 export type User = {
     id: string
     email: string
     firstName: string | null
     lastName?: string | null
+    voiceGender?: VoiceGender
 }
 
 export type AuthPayload = {

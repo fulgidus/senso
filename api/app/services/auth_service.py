@@ -34,10 +34,14 @@ class AuthService:
         if repository.get_user_by_email(self.db, email) is not None:
             raise AuthError("email_in_use", "Email already registered", status_code=409)
 
+        email_lower = email.lower()
+        is_admin = email_lower in self.settings.starting_admins
+
         user = User(
             id=str(uuid4()),
-            email=email.lower(),
+            email=email_lower,
             password_hash=hash_password(password),
+            is_admin=is_admin,
         )
         repository.create_user(self.db, user)
         return self._issue_auth_response(user)
@@ -92,6 +96,8 @@ class AuthService:
             email=user.email,
             first_name=user.first_name,
             last_name=user.last_name,
+            is_admin=user.is_admin,
+            voice_gender=user.voice_gender or "indifferent",
         )
 
     def logout(self, *, refresh_token: str) -> None:
@@ -143,6 +149,8 @@ class AuthService:
                 email=user.email,
                 first_name=user.first_name,
                 last_name=user.last_name,
+                is_admin=user.is_admin,
+                voice_gender=user.voice_gender or "indifferent",
             ),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
@@ -157,6 +165,8 @@ class AuthService:
             user.first_name = payload.first_name.strip() or None
         if payload.last_name is not None:
             user.last_name = payload.last_name.strip() or None
+        if payload.voice_gender is not None:
+            user.voice_gender = payload.voice_gender
         self.db.commit()
         self.db.refresh(user)
         return UserDTO(
@@ -164,6 +174,8 @@ class AuthService:
             email=user.email,
             first_name=user.first_name,
             last_name=user.last_name,
+            is_admin=user.is_admin,
+            voice_gender=user.voice_gender or "indifferent",
         )
 
     def _issue_tokens(self, user: User) -> AuthTokensDTO:

@@ -28,6 +28,9 @@ class User(Base):
     password_hash: str = Column(String(255), nullable=False)
     first_name: str | None = Column(String(100), nullable=True, default=None)
     last_name: str | None = Column(String(100), nullable=True, default=None)
+    # Voice gender preference: "masculine" | "feminine" | "neutral" | "indifferent"
+    # "indifferent" means "use the persona's default"
+    voice_gender: str = Column(String(16), nullable=False, default="indifferent")
     is_admin: bool = Column(Boolean, nullable=False, default=False)
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
