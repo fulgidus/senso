@@ -36,7 +36,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 ### Voice Experience
 
 - [x] **VOIC-01**: AI can return spoken output for each coaching response.
-- [ ] **VOIC-02**: If browser speech recognition fails or is unavailable, user can continue with typed input.
+- [x] **VOIC-02**: If browser speech recognition fails or is unavailable, user can continue with typed input.
 
 ### Learn and Act
 
@@ -99,7 +99,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COCH-04 | Phase 4 | Pending |
 | COCH-05 | Phase 4 | Pending |
 | VOIC-01 | Phase 5 | Complete |
-| VOIC-02 | Phase 5 | Pending |
+| VOIC-02 | Phase 5 | Complete |
 | ACTN-01 | Phase 6 | Pending |
 | ACTN-02 | Phase 6 | Pending |
 | ACTN-03 | Phase 6 | Pending |

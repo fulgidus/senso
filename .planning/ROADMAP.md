@@ -99,7 +99,7 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md — Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
 - [x] 05-02-PLAN.md — Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
-- [ ] 05-03-PLAN.md — A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
+- [x] 05-03-PLAN.md — A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
 - [x] 05-04-PLAN.md — Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
 - [ ] 05-05-PLAN.md — Frontend voice output (TTS): fetchTTSAudio, useTTS hook, VoicePlayButton in AssistantBubble, ElevenLabs + speechSynthesis fallback.
 **UI hint**: yes
@@ -138,6 +138,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Financial Input Ingestion | 5/5 | Complete   | 2026-03-24 |
 | 3. Financial Profile Clarity | 4/4 | Complete   | 2026-03-25 |
 | 4. Safe Grounded Text Coaching | 4/4 | Complete   | 2026-03-28 |
-| 5. Voice Coaching Loop | 0/5 | Not started | - |
+| 5. Voice Coaching Loop | 4/5 | In Progress|  |
 | 6. Learn+Act Cards & Demo Hardening | 0/TBD | Not started | - |
 | 7. Streaming & Nice-to-Have Polish | 0/TBD | Not started | - |

@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-28T15:09:51.363Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-03-28T15:13:44.858Z"
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 21
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 05 (voice-coaching-loop) — EXECUTING
-Plan: 3 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -62,6 +62,8 @@ Plan: 3 of 5
 | Phase 04 P03 | 3min | 4 tasks | 4 files |
 | Phase 05-voice-coaching-loop P02 | 6min | 2 tasks | 6 files |
 | Phase 05-voice-coaching-loop P01 | 6min | 2 tasks | 5 files |
+| Phase 05-voice-coaching-loop P03 | 8min | 2 tasks | 5 files |
+| Phase 05-voice-coaching-loop P04 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -94,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 04]: CoachingApiError uses explicit property assignment (not constructor shorthand) for erasableSyntaxOnly tsconfig compliance
 - [Phase 05-voice-coaching-loop]: Dual-channel LLM response shape: voice-optimised message + nullable details_a2ui A2UI JSONL established as foundational data contract for Phase 5 — Separation of voice layer (message) and visual/detail layer (details_a2ui) enables TTS to speak optimised text while UI renders precise structured data
 - [Phase 05-voice-coaching-loop]: Used patch.object(TTSService, 'speak') for integration tests instead of dependency_overrides — avoids SQLite DB isolation issues — Settings override caused 'no such table' errors in subsequent tests due to conftest reset_db fixture interaction
+- [Phase 05-voice-coaching-loop]: Lit LitElement without decorators — erasableSyntaxOnly tsconfig requires manual property getter/setter and customElements.define() instead of @property and @customElement
+- [Phase 05-voice-coaching-loop]: Custom Web Speech API type declarations in useVoiceInput.ts — TypeScript tsconfig.app.json lib does not include SpeechRecognition globals; explicit interface declarations are portable and don't require tsconfig changes
 
 ### Pending Todos
 
@@ -105,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T15:09:36.029Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-28T15:13:44.855Z
+Stopped at: Completed 05-04-PLAN.md
 Resume file: None
