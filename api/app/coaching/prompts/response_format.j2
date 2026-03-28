@@ -9,11 +9,25 @@ Answer ONLY with a valid JSON object conforming to the following schema. No text
 
 ### Field descriptions:
 
-- **message**: Main simple answer in plain language. Required. Use the user's actual numbers.
-- **reasoning_used**: Array of reasoning steps. Show how you arrived at the answer using the user's data. Minimum 1 element.
+- **message**: SHORT (3-4 sentences), CONVERSATIONAL, VOICE-OPTIMISED reply. Written for spoken delivery. Rules:
+  - NO exact decimal numbers — use natural approximations ("poco più di mille euro", "circa tremila euro", "quasi seicento euro")
+  - NO acronyms or financial abbreviations
+  - NO bullet lists or markdown formatting
+  - NO exact monetary totals unless rounding to the nearest ten or hundred
+  - Answer the core question first, then reference the detail panel if details_a2ui is present ("trovi i dettagli qui sotto")
+  - Plain flowing prose only. Required field.
+
+- **reasoning_used**: Array of reasoning steps. Show how you arrived at the answer using the user's data. Minimum 1 element. Use exact numbers here (reasoning is not spoken).
+
 - **action_cards**: Array of suggested actions. Can be empty `[]` if there are no concrete actions.
+
 - **resource_cards**: Array of educational resources. Can be empty `[]`.
+
 - **learn_cards**: Array of educational cards about the financial concept involved. Can be empty `[]`.
+
+- **details_a2ui**: A2UI JSONL string OR null. When the answer benefits from structured display (numbers, breakdowns, expense tables, timelines), emit A2UI protocol messages using the reference below. When the answer is simple enough for text alone, emit null.
+
+{{ a2ui_reference }}
 
 ### Available capabilities for cards:
 ```json

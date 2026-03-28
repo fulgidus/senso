@@ -77,6 +77,9 @@ class CoachingService:
             self._capabilities = json.load(f)
         with open(PERSONAS_DIR / "config.json", encoding="utf-8") as f:
             self._persona_config = json.load(f)
+        self._a2ui_reference = self._jinja_env.get_template(
+            "a2ui_reference.j2"
+        ).render()
 
     def generate_conversation_name(self, first_user_message: str) -> str:
         """
@@ -352,6 +355,7 @@ class CoachingService:
             capabilities_json=json.dumps(
                 self._capabilities, indent=2, ensure_ascii=False
             ),
+            a2ui_reference=self._a2ui_reference,
         )
 
     def _build_prompt(
