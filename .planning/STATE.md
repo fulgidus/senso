@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-28T15:09:28.434Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-28T15:09:51.363Z"
 progress:
   total_phases: 7
   completed_phases: 4
@@ -93,6 +93,7 @@ Recent decisions affecting current work:
 - [Phase 04]: coachingApi.ts uses 3-arg apiRequest(API_BASE, path, options) matching existing api-client.ts signature
 - [Phase 04]: CoachingApiError uses explicit property assignment (not constructor shorthand) for erasableSyntaxOnly tsconfig compliance
 - [Phase 05-voice-coaching-loop]: Dual-channel LLM response shape: voice-optimised message + nullable details_a2ui A2UI JSONL established as foundational data contract for Phase 5 — Separation of voice layer (message) and visual/detail layer (details_a2ui) enables TTS to speak optimised text while UI renders precise structured data
+- [Phase 05-voice-coaching-loop]: Used patch.object(TTSService, 'speak') for integration tests instead of dependency_overrides — avoids SQLite DB isolation issues — Settings override caused 'no such table' errors in subsequent tests due to conftest reset_db fixture interaction
 
 ### Pending Todos
 
@@ -104,6 +105,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T15:09:14.947Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-28T15:09:36.029Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
