@@ -116,9 +116,18 @@ groups:
       L'LLM riproduce PII dell'utente senza che fossero stati richiesti —
       possibile segnale di injection via documenti uploadati. Solo log + alert, non blocca.
     substituteMessage: null
-    # I pattern qui sono simbolici: il match engine li incrocia con i campi
-    # effettivi di session.userProfile (iban, cf, phone, email, address).
-    # Non servono regex esplicite — il runtime usa i valori reali del profilo.
+    # Phase 4: pattern-only mode. Full profile cross-check deferred to Phase 7.
+    # These patterns detect structural PII shapes (IBAN, CF, phone, email, address)
+    # that may indicate unsolicited re-emission of user profile data.
+    patterns:
+      # IBAN (same as third_party_pii but context is own user data)
+      - "[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}"
+      # Codice fiscale italiano
+      - "[A-Z]{6}\\d{2}[A-Z]\\d{2}[A-Z]\\d{3}[A-Z]"
+      # Email
+      - "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}"
+      # Numero di telefono italiano
+      - "\\b(\\+39[\\s\\-]?)?3\\d{2}[\\s\\-]?\\d{6,7}\\b"
     userProfileFields:
       - iban
       - codiceFiscale

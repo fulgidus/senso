@@ -1,32 +1,32 @@
-## Profilo Finanziario dell'Utente
+## User's Financial Profile
 
 {% if income_summary %}
-**Reddito mensile netto:** €{{ "%.2f"|format(income_summary.amount) }} (fonte: {{ income_summary.source }})
+**Net Monthly Income:** €{{ "%.2f"|format(income_summary.amount) }} (source: {{ income_summary.source }})
 {% else %}
-**Reddito mensile netto:** non disponibile
+**Net Monthly Income:** non disponibile
 {% endif %}
 
 {% if monthly_expenses is not none %}
-**Spese mensili totali:** €{{ "%.2f"|format(monthly_expenses) }}
+**Total Monthly Expenses:** €{{ "%.2f"|format(monthly_expenses) }}
 {% else %}
-**Spese mensili totali:** non disponibili
+**Total Monthly Expenses:** non disponibile
 {% endif %}
 
 {% if monthly_margin is not none %}
-**Margine mensile disponibile:** €{{ "%.2f"|format(monthly_margin) }}
+**Available Monthly Margin:** €{{ "%.2f"|format(monthly_margin) }}
 {% else %}
-**Margine mensile disponibile:** non calcolabile
+**Available Monthly Margin:** non disponibile
 {% endif %}
 
 {% if category_totals %}
-**Ripartizione spese per categoria:**
+**Expense Breakdown by Category:**
 {% for category, amount in category_totals.items() %}
 - {{ category }}: €{{ "%.2f"|format(amount) }}
 {% endfor %}
 {% endif %}
 
 {% if insight_cards %}
-**Pattern significativi rilevati:**
+**Significant Patterns Detected:**
 {% for card in insight_cards %}
 - {{ card.headline }}: {{ card.data_point }}
 {% endfor %}
