@@ -13,13 +13,17 @@ GET  /coaching/personas       — list available personas
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.ingestion import get_current_user
 from app.coaching.service import CoachingError, get_coaching_service
+from app.coaching.tts import TTSService, TTSUnavailableError
 from app.core.config import get_settings
 from app.db.models import ChatMessage, ChatSession
 from app.db.session import get_db
@@ -41,6 +45,11 @@ from app.services.profile_service import ProfileError
 router = APIRouter(prefix="/coaching", tags=["coaching"])
 
 _PERSONAS_DIR = Path(__file__).parent.parent / "personas"
+
+
+class TTSRequest(BaseModel):
+    text: str
+    locale: Literal["it", "en"] = "it"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -319,3 +328,27 @@ def get_personas(
         for p in config.get("personas", [])
         if p.get("available", False)
     ]
+
+
+@router.post("/tts")
+def tts_speak(
+    req: TTSRequest,
+    current_user: UserDTO = Depends(get_current_user),
+    settings=Depends(get_settings),
+):
+    """Convert coaching response message to MP3 audio bytes via ElevenLabs."""
+    svc = TTSService(
+        api_key=settings.elevenlabs_api_key, voice_id=settings.elevenlabs_voice_id
+    )
+    try:
+        audio_bytes = svc.speak(req.text, req.locale)
+    except TTSUnavailableError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "tts_unavailable", "message": str(exc)},
+        )
+    return StreamingResponse(
+        iter([audio_bytes]),
+        media_type="audio/mpeg",
+        headers={"Content-Disposition": "inline; filename=response.mp3"},
+    )

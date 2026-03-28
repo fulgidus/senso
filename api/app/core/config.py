@@ -23,6 +23,13 @@ class Settings:
     llm_debug: bool
     # Database URL
     database_url: str
+    # Seed users: list of (email, password) tuples to create on first startup
+    default_users: tuple[tuple[str, str], ...]
+    # Emails that receive is_admin=True automatically on registration
+    starting_admins: frozenset[str]
+    # ElevenLabs TTS settings
+    elevenlabs_api_key: str | None
+    elevenlabs_voice_id: str
 
     @property
     def google_enabled(self) -> bool:
@@ -31,6 +38,30 @@ class Settings:
             and self.google_client_secret
             and self.google_redirect_uri
         )
+
+    @property
+    def tts_enabled(self) -> bool:
+        return bool(self.elevenlabs_api_key)
+
+
+def _parse_default_users(raw: str) -> tuple[tuple[str, str], ...]:
+    """Parse DEFAULT_USERS env var into (email, password) pairs.
+
+    Format: ``email:password,email2:pass:with:colons``
+    Split on the *first* colon only so passwords may contain colons.
+    """
+    result = []
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        parts = entry.split(":", 1)
+        if len(parts) != 2:
+            continue
+        email, password = parts[0].strip(), parts[1]
+        if email and password:
+            result.append((email, password))
+    return tuple(result)
 
 
 def get_settings() -> Settings:
@@ -77,4 +108,15 @@ def get_settings() -> Settings:
         database_url=os.getenv(
             "DATABASE_URL", "postgresql://senso:senso@postgres:5432/senso"
         ),
+        # Seed users — format: "email:password,email2:pass:with:colons"
+        default_users=_parse_default_users(os.getenv("DEFAULT_USERS", "")),
+        # Starting admins — comma-separated emails granted is_admin on registration
+        starting_admins=frozenset(
+            e.strip().lower()
+            for e in os.getenv("STARTING_ADMINS", "").split(",")
+            if e.strip()
+        ),
+        # ElevenLabs TTS settings
+        elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
+        elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
     )

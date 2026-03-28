@@ -15,6 +15,7 @@ dependencies = [
   "python-multipart>=0.0.22",
   "minio>=7.2.20",
   "openai>=1.0.0",
+  "elevenlabs>=2.40.0",
   "openpyxl>=3.1.0",
   "jinja2>=3.1.6",
   "jsonschema>=4.26.0",
