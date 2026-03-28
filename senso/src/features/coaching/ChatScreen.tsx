@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config"
+import { A2UISurface } from "@/components/A2UISurface"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
 import {
@@ -213,6 +214,11 @@ function AssistantBubble({ msg }: { msg: DisplayMessage }) {
             {resp.learn_cards.length > 0 && (
               <div className="mt-2 flex flex-col gap-2">
                 {resp.learn_cards.map((c, i) => <LearnCardStub key={i} card={c} />)}
+              </div>
+            )}
+            {resp.details_a2ui && (
+              <div className="mt-2">
+                <A2UISurface jsonl={resp.details_a2ui} />
               </div>
             )}
             {LLM_DEBUG && resp.debug && <DebugPanel debug={resp.debug} />}
