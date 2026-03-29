@@ -2,15 +2,14 @@
 Document extraction pipelines for image and PDF files.
 
 PDF pipeline (extract_with_pdf_pipeline):
-  1. Extract embedded text layer (pypdf)
+  1. Extract text via liteparse (text layer, then OCR fallback within liteparse)
   2. If good text → try registry module match → run module
   3. If no module match → run adaptive pipeline (classify → gen module → tests → register)
   4. If adaptive fails → LLM text extraction
-  5. If text layer empty/garbage → Tesseract OCR → repeat steps 2-4 on OCR text
-  6. Last resort → LLM vision (vision:ocr:lg)
+  5. Last resort → LLM vision (vision:ocr:lg)
 
 Image pipeline (extract_with_image_pipeline):
-  1. Tesseract OCR
+  1. Extract text via liteparse (OCR mode)
   2. If good text → try registry module match → run module
   3. If no module match → adaptive pipeline on OCR text
   4. Fallback → LLM text extraction
@@ -26,6 +25,7 @@ import logging
 from pathlib import Path
 
 from app.ingestion.llm import LLMClient, LLMError
+from app.ingestion.liteparse_extractor import extract_text_with_liteparse
 from app.ingestion.prompts.loader import (
     get_schema,
     render_llm_text_ocr_system,
@@ -47,41 +47,19 @@ OCR_CHAR_THRESHOLD = 50  # below this → treat as empty/garbage
 
 def extract_pdf_text_layer(file_path: Path) -> str:
     """
-    Extract embedded text layer from a PDF using pypdf.
-    Returns empty string if no text layer or on any error.
+    Extract text from a PDF using liteparse (text layer first, OCR if sparse).
+    Returns empty string on any error.
     """
-    try:
-        from pypdf import PdfReader
-
-        reader = PdfReader(str(file_path))
-        pages = []
-        for page in reader.pages:
-            text = page.extract_text() or ""
-            pages.append(text)
-        return "\n".join(pages)
-    except Exception as exc:
-        logger.debug("pypdf text extraction failed for %s: %s", file_path.name, exc)
-        return ""
+    return extract_text_with_liteparse(file_path)
 
 
 def extract_text_with_tesseract(file_path: Path) -> str:
-    """Attempt OCR with pytesseract. Returns empty string on failure."""
-    try:
-        import pytesseract
-        from PIL import Image
-
-        if file_path.suffix.lower() == ".pdf":
-            from pdf2image import convert_from_path
-
-            pages = convert_from_path(str(file_path), dpi=200)
-            texts = [pytesseract.image_to_string(p) for p in pages]
-            return "\n".join(texts)
-        else:
-            img = Image.open(file_path)
-            return pytesseract.image_to_string(img)
-    except Exception as exc:
-        logger.debug("Tesseract OCR failed for %s: %s", file_path.name, exc)
-        return ""
+    """
+    Extract text from an image using liteparse OCR mode.
+    Name kept for backwards compatibility with callers; no longer uses Tesseract.
+    Returns empty string on any error.
+    """
+    return extract_text_with_liteparse(file_path, ocr_enabled=True)
 
 
 def _is_usable(text: str) -> bool:
@@ -176,65 +154,43 @@ def extract_with_pdf_pipeline(
 ) -> ExtractionResult:
     """
     Full PDF pipeline. Raises LLMError only if the absolute last resort (vision) fails.
+    liteparse handles both embedded-text-layer extraction and scanned-page OCR
+    internally, so there is no separate Tesseract step.
     """
     from app.ingestion.adaptive import run_adaptive_pipeline
 
-    # Step 1: Try embedded text layer
-    text_layer = extract_pdf_text_layer(file_path)
-    if _is_usable(text_layer):
-        logger.debug(
-            "PDF %s: text layer usable (%d chars)", file_path.name, len(text_layer)
-        )
+    # Step 1: Extract text (liteparse tries text layer then OCR automatically)
+    text = extract_pdf_text_layer(file_path)
+    if _is_usable(text):
+        logger.debug("PDF %s: text usable (%d chars)", file_path.name, len(text))
 
-        # Step 2: Module match on text layer
-        result = _try_module_match(file_path, text_layer, registry)
+        # Step 2: Module match
+        result = _try_module_match(file_path, text, registry)
         if result is not None:
             result.tier_used = "pdf_text_layer_module"  # type: ignore[assignment]
-            result.raw_text = text_layer
+            result.raw_text = text
             return result
 
-        # Step 3: Adaptive pipeline on text layer
-        result = run_adaptive_pipeline(file_path, text_layer, llm_client, registry)
+        # Step 3: Adaptive pipeline
+        result = run_adaptive_pipeline(file_path, text, llm_client, registry)
         if result.confidence >= 0.3:
             return result
 
         # Step 4: LLM text extraction
-        result = _llm_text_fallback(text_layer, llm_client, "pdf_llm_text")
+        result = _llm_text_fallback(text, llm_client, "pdf_llm_text")
         if result is not None:
             return result
 
     else:
         logger.debug(
-            "PDF %s: text layer empty/garbage (%d chars), falling back to Tesseract",
+            "PDF %s: text extraction yielded %d chars, falling back to LLM vision",
             file_path.name,
-            len(text_layer),
+            len(text),
         )
 
-    # Step 5: Tesseract OCR on the PDF
-    ocr_text = extract_text_with_tesseract(file_path)
-    if _is_usable(ocr_text):
-        # Step 2b: Module match on OCR text
-        result = _try_module_match(file_path, ocr_text, registry)
-        if result is not None:
-            result.tier_used = "image_ocr_module"  # type: ignore[assignment]
-            result.raw_text = ocr_text
-            return result
-
-        # Step 3b: Adaptive pipeline on OCR text
-        result = run_adaptive_pipeline(file_path, ocr_text, llm_client, registry)
-        if result.confidence >= 0.3:
-            return result
-
-        # Step 4b: LLM text extraction on OCR text
-        result = _llm_text_fallback(ocr_text, llm_client, "pdf_llm_text")
-        if result is not None:
-            return result
-
-    # Step 6: Last resort — LLM vision
+    # Step 5: Last resort — LLM vision
     logger.info("PDF %s: all text paths exhausted, trying LLM vision", file_path.name)
-    return _llm_vision_fallback(
-        file_path, ocr_text or text_layer or None, llm_client, "pdf_llm_vision"
-    )
+    return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -253,7 +209,7 @@ def extract_with_image_pipeline(
     """
     from app.ingestion.adaptive import run_adaptive_pipeline
 
-    # Step 1: Tesseract OCR
+    # Step 1: liteparse OCR
     ocr_text = extract_text_with_tesseract(file_path)
     if _is_usable(ocr_text):
         # Step 2: Module match

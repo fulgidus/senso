@@ -187,6 +187,8 @@ def _add_missing_columns() -> None:
         """,
         # ── Round 6: coaching insights ─────────────────────────────────────────
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS coaching_insights JSONB NOT NULL DEFAULT '[]'::jsonb",
+        # ── Round 7: uploads fingerprint ──────────────────────────────────────
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS uploads_fingerprint VARCHAR(64)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

@@ -16,6 +16,10 @@ export type CategorizationStatusResponse = {
     errorMessage?: string | null
     startedAt?: string | null
     completedAt?: string | null
+    /** SHA-256 fingerprint stored at the time of the last completed categorization */
+    uploadsFingerprint?: string | null
+    /** SHA-256 fingerprint of currently confirmed uploads (live-computed) */
+    currentUploadsFingerprint?: string | null
 }
 
 export type IncomeSummary = {

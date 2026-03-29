@@ -104,7 +104,16 @@
         "sourceBank": "bank statement",
         "sourcePayslip": "payslip",
         "sourceQuestionnaire": "questionnaire",
-        "otherCategory": "Other"
+        "otherCategory": "Other",
+        "staleWarning": "You have uploaded new documents that haven't been analysed yet. Your profile may be out of date.",
+        "retrigger": "Re-analyse documents",
+        "retriggerLoading": "Starting analysis...",
+        "staleModal": {
+            "heading": "New documents uploaded",
+            "body": "You have confirmed new documents. Do you want to update your financial profile with the new data?",
+            "update": "Update",
+            "later": "Later"
+        }
     },
     "questionnaire": {
         "heading": "S.E.N.S.O.",

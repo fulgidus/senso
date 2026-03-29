@@ -231,6 +231,9 @@ class UserProfile(Base):
     data_sources: list = Column(JSON, nullable=False, default=list)
     extraordinary_income_total: float = Column(Float, nullable=True, default=None)
     months_covered: float = Column(Float, nullable=True, default=None)
+    # SHA-256 hex of sorted confirmed upload IDs at the time of last categorization run.
+    # Compare against current confirmed upload IDs to know if profile is stale.
+    uploads_fingerprint: str | None = Column(String(64), nullable=True, default=None)
     confirmed: bool = Column(Boolean, nullable=False, default=False)
     profile_generated_at: datetime = Column(
         DateTime(timezone=True), nullable=True, default=None

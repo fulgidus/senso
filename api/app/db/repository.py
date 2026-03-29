@@ -113,6 +113,16 @@ def get_confirmed_transactions_for_user(db: Session, user_id: str) -> list[Trans
     )
 
 
+def get_confirmed_upload_ids(db: Session, user_id: str) -> list[str]:
+    """Return sorted list of confirmed upload IDs for fingerprint computation."""
+    rows = (
+        db.query(Upload.id)
+        .filter(Upload.user_id == user_id, Upload.confirmed == True)  # noqa: E712
+        .all()
+    )
+    return sorted(str(row[0]) for row in rows)
+
+
 def get_confirmed_payslip_documents(db: Session, user_id: str) -> list:
     """Return extracted payslip documents from confirmed uploads."""
     from sqlalchemy import select

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Lightbulb, Plus } from "lucide-react"
+import { AlertTriangle, Lightbulb, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import {
   Bar,
@@ -16,6 +16,8 @@ import type { User } from "@/features/auth/types"
 import {
   confirmProfile,
   getProfile,
+  getProfileStatus,
+  triggerCategorization,
   type InsightCard,
   type UserProfile,
 } from "@/lib/profile-api"
@@ -77,9 +79,10 @@ type Props = {
   onNavigateToChat: () => void
   onSignOut?: () => Promise<void>
   onNoProfile?: () => void
+  onRetrigger?: () => void
 }
 
-export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile }: Props) {
+export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile, onRetrigger }: Props) {
   const { t } = useTranslation()
 
   const DATA_SOURCE_LABELS: Record<string, string> = {
@@ -103,14 +106,26 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [incomeEdit, setIncomeEdit] = useState<string>("")
   const [expensesEdit, setExpensesEdit] = useState<string>("")
+  const [isStale, setIsStale] = useState(false)
+  const [retriggerLoading, setRetriggerLoading] = useState(false)
 
   useEffect(() => {
     setLoading(true)
-    void getProfile(token)
-      .then((p) => {
+    void Promise.all([
+      getProfile(token),
+      getProfileStatus(token),
+    ])
+      .then(([p, statusData]) => {
         setProfile(p)
         setIncomeEdit(String(p.incomeSummary?.amount ?? ""))
         setExpensesEdit(String(p.monthlyExpenses ?? ""))
+        // Profile is stale when there are confirmed uploads not yet categorized
+        if (
+          statusData.currentUploadsFingerprint &&
+          statusData.currentUploadsFingerprint !== statusData.uploadsFingerprint
+        ) {
+          setIsStale(true)
+        }
       })
       .catch((err) => {
         if (err instanceof ApiClientError && err.status === 404) {
@@ -138,6 +153,16 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
       setSaveError(t("profile.errorSave"))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleRetrigger = async () => {
+    setRetriggerLoading(true)
+    try {
+      await triggerCategorization(token)
+      onRetrigger?.()
+    } catch {
+      setRetriggerLoading(false)
     }
   }
 
@@ -181,6 +206,25 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
           </p>
         )}
       </div>
+
+      {/* Stale profile banner */}
+      {isStale && (
+        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-yellow-500/40 bg-yellow-50 px-4 py-3 dark:bg-yellow-950/30 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2 text-sm text-yellow-800 dark:text-yellow-300">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{t("profile.staleWarning")}</span>
+          </div>
+          <Button
+            variant="default"
+            size="sm"
+            disabled={retriggerLoading}
+            onClick={() => void handleRetrigger()}
+            className="shrink-0"
+          >
+            {retriggerLoading ? t("profile.retriggerLoading") : t("profile.retrigger")}
+          </Button>
+        </div>
+      )}
 
       <div className="mb-6">
         <Button

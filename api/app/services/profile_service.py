@@ -2,6 +2,7 @@
 ProfileService: profile retrieval, questionnaire saving, confirm/correct, and categorization trigger.
 """
 
+import hashlib
 from datetime import UTC, datetime
 
 from fastapi import BackgroundTasks
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.db.repository import (
     get_categorization_job,
+    get_confirmed_upload_ids,
     get_user_profile,
     upsert_categorization_job,
     upsert_user_profile,
@@ -39,13 +41,30 @@ class ProfileService:
 
     def get_status(self, user_id: str) -> CategorizationStatusDTO:
         job = get_categorization_job(self.db, user_id)
+        # Compute current fingerprint from confirmed uploads (always)
+        confirmed_ids = get_confirmed_upload_ids(self.db, user_id)
+        current_fp = (
+            hashlib.sha256(",".join(confirmed_ids).encode()).hexdigest()
+            if confirmed_ids
+            else None
+        )
+        # Stored fingerprint from the last completed categorization
+        profile = get_user_profile(self.db, user_id)
+        stored_fp = profile.uploads_fingerprint if profile else None
+
         if not job:
-            return CategorizationStatusDTO(status="not_started")
+            return CategorizationStatusDTO(
+                status="not_started",
+                uploadsFingerprint=stored_fp,
+                currentUploadsFingerprint=current_fp,
+            )
         return CategorizationStatusDTO(
             status=job.status,
             errorMessage=job.error_message,
             startedAt=job.started_at.isoformat() if job.started_at else None,
             completedAt=job.completed_at.isoformat() if job.completed_at else None,
+            uploadsFingerprint=stored_fp,
+            currentUploadsFingerprint=current_fp,
         )
 
     def save_questionnaire(self, user_id: str, answers: dict) -> dict:

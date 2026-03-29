@@ -104,7 +104,16 @@
         "sourceBank": "estratto conto",
         "sourcePayslip": "busta paga",
         "sourceQuestionnaire": "questionario",
-        "otherCategory": "Altro"
+        "otherCategory": "Altro",
+        "staleWarning": "Hai caricato nuovi documenti non ancora analizzati. Il tuo profilo potrebbe non essere aggiornato.",
+        "retrigger": "Rianalizza documenti",
+        "retriggerLoading": "Avvio analisi...",
+        "staleModal": {
+            "heading": "Nuovi documenti caricati",
+            "body": "Hai confermato nuovi documenti. Vuoi aggiornare il tuo profilo finanziario con i nuovi dati?",
+            "update": "Aggiorna",
+            "later": "Dopo"
+        }
     },
     "questionnaire": {
         "heading": "S.E.N.S.O.",

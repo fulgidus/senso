@@ -13,14 +13,47 @@ import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
 import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
-import { getProfileStatus } from "@/lib/profile-api"
+import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import type { User } from "@/features/auth/types"
 import { getBackendBaseUrl } from "@/lib/config"
+import { Button } from "@/components/ui/button"
 
 const API_BASE = getBackendBaseUrl()
+
+// ── Stale profile modal ──────────────────────────────────────────────────────
+
+function StaleProfileModal({
+  onUpdate,
+  onDismiss,
+}: {
+  onUpdate: () => void
+  onDismiss: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+        <h3 className="mb-2 text-lg font-semibold text-foreground">
+          {t("profile.staleModal.heading")}
+        </h3>
+        <p className="mb-6 text-sm text-muted-foreground">
+          {t("profile.staleModal.body")}
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button variant="ghost" onClick={onDismiss}>
+            {t("profile.staleModal.later")}
+          </Button>
+          <Button variant="default" onClick={onUpdate}>
+            {t("profile.staleModal.update")}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ── Ingestion page (handles internal processing/onboarding/questionnaire state) ──
 
@@ -36,15 +69,24 @@ function IngestionPage({ user }: { user: User }) {
     !user.firstName ? "profile_setup" : "ingestion",
   )
   const [questionnaireMode, setQuestionnaireMode] = useState<QuestionnaireMode>("quick")
+  const [showStaleModal, setShowStaleModal] = useState(false)
 
   useEffect(() => {
     // Only check profile status if we're past the profile_setup phase
     if (!token || phase === "profile_setup") return
-    void getProfileStatus(token).then((data) => {
+    void getProfileStatus(token).then(async (data) => {
       if (["queued", "categorizing", "generating_insights"].includes(data.status)) {
         setPhase("processing")
       } else if (data.status === "not_started") {
-        setPhase("onboarding")
+        // If confirmed uploads already exist, auto-trigger and go to processing
+        if (data.currentUploadsFingerprint) {
+          try {
+            await triggerCategorization(token)
+          } catch { /* best-effort */ }
+          setPhase("processing")
+        } else {
+          setPhase("onboarding")
+        }
       } else if (data.status === "complete") {
         void navigate("/chat", { replace: true })
       }
@@ -57,7 +99,17 @@ function IngestionPage({ user }: { user: User }) {
     if (!token) return
     try {
       await apiRequest(API_BASE, "/ingestion/confirm-all", { method: "POST", token })
-      setPhase("processing")
+      // Check if a profile already exists (complete status + fingerprints differ → stale)
+      const statusData = await getProfileStatus(token)
+      if (
+        statusData.status === "complete" &&
+        statusData.uploadsFingerprint !== null &&
+        statusData.uploadsFingerprint !== statusData.currentUploadsFingerprint
+      ) {
+        setShowStaleModal(true)
+      } else {
+        setPhase("processing")
+      }
     } catch { /* stay */ }
   }, [token])
 
@@ -114,11 +166,25 @@ function IngestionPage({ user }: { user: User }) {
   }
 
   return (
-    <IngestionScreen
-      user={user}
-      onSignOut={async () => { /* handled by shell */ }}
-      onConfirmAll={() => void handleConfirmAll()}
-    />
+    <>
+      <IngestionScreen
+        user={user}
+        onSignOut={async () => { /* handled by shell */ }}
+        onConfirmAll={() => void handleConfirmAll()}
+      />
+      {showStaleModal && (
+        <StaleProfileModal
+          onUpdate={() => {
+            setShowStaleModal(false)
+            setPhase("processing")
+          }}
+          onDismiss={() => {
+            setShowStaleModal(false)
+            void navigate("/chat", { replace: true })
+          }}
+        />
+      )}
+    </>
   )
 }
 
@@ -136,6 +202,7 @@ function ProfilePage({ user }: { user: User }) {
       onNavigateToChat={() => void navigate("/chat")}
       onSignOut={async () => { /* handled by shell */ }}
       onNoProfile={() => void navigate("/", { replace: true })}
+      onRetrigger={() => void navigate("/")}
     />
   )
 }

@@ -4,7 +4,7 @@ Supported formats: PDF
 Export path: N/A - generic fallback for Italian PDFs with invoice characteristics.
 Sample FINGERPRINT keywords: "fattura", "partita iva", "importo totale", "codice fiscale"
 
-Extracts key invoice fields from PDF text via pytesseract OCR.
+Extracts key invoice fields from PDF text via liteparse.
 Maps provider (from header text), total_due, billing period if present.
 document_type is "utility_bill" as best-effort mapping for generic Italian invoices.
 Used as a catch-all for any Italian-language PDF that looks like an invoice but
@@ -27,16 +27,10 @@ MODULE_VERSION: str = "1.0.0"
 
 
 def _extract_pdf_text(path: Path) -> str:
-    """Attempt pytesseract OCR on each PDF page. Returns empty string on failure."""
-    try:
-        import pytesseract  # noqa: PLC0415
-        from PIL import Image  # noqa: PLC0415
-        from pdf2image import convert_from_path  # noqa: PLC0415
+    """Extract text from PDF via liteparse (text layer + OCR fallback)."""
+    from app.ingestion.liteparse_extractor import extract_text_with_liteparse  # noqa: PLC0415
 
-        pages = convert_from_path(str(path), dpi=150)
-        return "\n".join(pytesseract.image_to_string(p, lang="ita+eng") for p in pages)
-    except Exception:
-        return ""
+    return extract_text_with_liteparse(path)
 
 
 def _parse_italian_decimal(s: str) -> Decimal:
@@ -137,7 +131,5 @@ def extract(file_path: str | Path):  # noqa: ANN201
         tier_used="module",
         warnings=[]
         if raw_text
-        else [
-            "GenericInvoiceIT: OCR unavailable - install pytesseract for better extraction"
-        ],
+        else ["GenericInvoiceIT: could not extract text from PDF"],
     )

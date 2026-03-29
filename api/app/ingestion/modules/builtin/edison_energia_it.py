@@ -4,9 +4,8 @@ Supported formats: PDF
 Export path: Edison web portal (clienti.edison.it) → Fatture → Scarica PDF
 Sample FINGERPRINT keywords: "edison", "energia", "fornitura di energia", "kwh", "codice cliente"
 
-Extracts key bill fields from PDF text via pytesseract OCR.
+Extracts key bill fields from PDF text via liteparse.
 Maps service_type (electricity / gas / electricity+gas), provider, total_due, billing period.
-Returns low confidence when OCR is unavailable (OCR tier handles this better).
 """
 
 from __future__ import annotations
@@ -26,16 +25,10 @@ MODULE_VERSION: str = "1.0.0"
 
 
 def _extract_pdf_text(path: Path) -> str:
-    """Attempt pytesseract OCR on each PDF page. Returns empty string on failure."""
-    try:
-        import pytesseract  # noqa: PLC0415
-        from PIL import Image  # noqa: PLC0415
-        from pdf2image import convert_from_path  # noqa: PLC0415
+    """Extract text from PDF via liteparse (text layer + OCR fallback)."""
+    from app.ingestion.liteparse_extractor import extract_text_with_liteparse  # noqa: PLC0415
 
-        pages = convert_from_path(str(path), dpi=150)
-        return "\n".join(pytesseract.image_to_string(p, lang="ita+eng") for p in pages)
-    except Exception:
-        return ""
+    return extract_text_with_liteparse(path)
 
 
 def _parse_italian_decimal(s: str) -> Decimal:
@@ -128,7 +121,5 @@ def extract(file_path: str | Path):  # noqa: ANN201
         tier_used="module",
         warnings=[]
         if raw_text
-        else [
-            "EdisonEnergiaIT: OCR unavailable - install pytesseract for better extraction"
-        ],
+        else ["EdisonEnergiaIT: could not extract text from PDF"],
     )

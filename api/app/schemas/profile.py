@@ -129,6 +129,12 @@ class CategorizationStatusDTO(BaseModel):
     error_message: str | None = Field(alias="errorMessage", default=None)
     started_at: str | None = Field(alias="startedAt", default=None)
     completed_at: str | None = Field(alias="completedAt", default=None)
+    # Fingerprint of uploads at last categorization vs. current confirmed uploads.
+    # If they differ, the profile is stale and re-categorization is recommended.
+    uploads_fingerprint: str | None = Field(alias="uploadsFingerprint", default=None)
+    current_uploads_fingerprint: str | None = Field(
+        alias="currentUploadsFingerprint", default=None
+    )
 
     model_config = {"populate_by_name": True}
 

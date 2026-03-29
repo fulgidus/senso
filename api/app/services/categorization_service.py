@@ -8,6 +8,7 @@ Fixes applied:
   A. Monthly normalization: totals divided by actual months covered by transaction dates (per-source aware)
 """
 
+import hashlib
 import json
 import logging
 import re
@@ -22,6 +23,7 @@ from app.db.repository import (
     get_categorization_job,
     get_confirmed_payslip_documents,
     get_confirmed_transactions_for_user,
+    get_confirmed_upload_ids,
     get_user_profile,
     seed_default_tags,
     upsert_categorization_job,
@@ -540,6 +542,9 @@ class CategorizationService:
             insight_cards=insight_cards,
             data_sources=list(set(data_sources)),
             profile_generated_at=datetime.now(UTC),
+            uploads_fingerprint=hashlib.sha256(
+                ",".join(get_confirmed_upload_ids(self.db, user_id)).encode()
+            ).hexdigest(),
             # Extra fields stored in JSON - frontend ignores unknown keys
             extraordinary_income_total=round(extraordinary_raw, 2),
             months_covered=round(months, 2),
