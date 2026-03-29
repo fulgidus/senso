@@ -103,6 +103,7 @@ export interface SessionMessage {
   role: "user" | "assistant"
   content: string
   created_at: string | null
+  persona_id?: string | null
 }
 
 export interface PersonaTTSConfig {
@@ -129,6 +130,19 @@ export interface Persona {
   available: boolean
   tts: PersonaTTSConfig
   defaultGender?: "masculine" | "feminine" | "neutral"
+  theme?: {
+    light: {
+      avatar_bg: string
+      bubble_bg: string
+      bubble_border: string
+    }
+    dark: {
+      avatar_bg: string
+      bubble_bg: string
+      bubble_border: string
+    }
+    label_tone: string
+  }
 }
 
 export class CoachingApiError extends Error {

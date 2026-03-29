@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config"
 import { A2UISurface } from "@/components/A2UISurface"
 import { useAuthContext } from "@/features/auth/AuthContext"
+import { useTheme } from "@/components/theme-provider"
 import { UserAvatar } from "@/components/UserAvatar"
 import {
   sendMessage,
@@ -23,10 +24,11 @@ import {
   type LearnCard,
   type AffordabilityVerdict,
   type DebugPayload,
+  type Persona,
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -43,11 +45,19 @@ interface DisplayMessage {
   response?: CoachingResponse
   isWelcome?: boolean
   isStreaming?: boolean
+  personaId?: string | null
+  showPersonaCue?: boolean
 }
 
 type RestoreToastState = {
   visible: boolean
   text: string
+}
+
+type PersonaThemeMode = {
+  avatar_bg: string
+  bubble_bg: string
+  bubble_border: string
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -467,6 +477,75 @@ function RestoreToast({ text }: { text: string }) {
   )
 }
 
+function PersonaSwitcher({
+  personas,
+  activePersonaId,
+  onSelect,
+  onClose,
+}: {
+  personas: Persona[]
+  activePersonaId: string
+  onSelect: (personaId: string) => void
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} aria-hidden />
+      <div className="relative z-10 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-border bg-background shadow-xl max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h2 className="text-base font-semibold text-foreground">{t("coaching.personaPickerTitle")}</h2>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            aria-label={t("coaching.modalClose")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-4 space-y-2">
+          {personas.filter((persona) => persona.available).map((persona) => {
+            const selected = persona.id === activePersonaId
+            const theme = persona.theme?.light
+            return (
+              <button
+                key={persona.id}
+                type="button"
+                onClick={() => {
+                  onSelect(persona.id)
+                  onClose()
+                }}
+                className="w-full min-h-12 rounded-xl border px-3 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                style={{
+                  borderColor: selected ? theme?.bubble_border ?? "var(--primary)" : undefined,
+                  backgroundColor: selected ? theme?.bubble_bg ?? undefined : undefined,
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
+                    style={{ backgroundColor: theme?.avatar_bg }}
+                  >
+                    {persona.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium text-foreground">{persona.name}</span>
+                      {selected && <Check className="h-4 w-4 text-primary shrink-0" />}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{persona.description}</p>
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function VoicePlayButton({
   text,
   locale,
@@ -512,17 +591,39 @@ function AssistantBubble({
   locale,
   ttsConfig,
   thinkingLabel,
+  persona,
+  resolvedTheme,
 }: {
   msg: DisplayMessage
   locale: "it" | "en"
   ttsConfig: TTSConfig
   thinkingLabel: string
+  persona?: Persona
+  resolvedTheme: "light" | "dark"
 }) {
   const resp = msg.response
+  const theme = getPersonaTheme(persona, resolvedTheme)
   return (
     <div className="flex items-start gap-2 max-w-[90%]">
-      <SensoAvatar />
-      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0">
+      <div
+        className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full text-lg select-none"
+        style={{ backgroundColor: theme?.avatar_bg }}
+      >
+        {persona?.icon ?? "🦉"}
+      </div>
+      <div
+        className="rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0 border"
+        style={{
+          backgroundColor: theme?.bubble_bg,
+          borderColor: theme?.bubble_border,
+        }}
+      >
+        {msg.showPersonaCue && persona && (
+          <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span>{persona.icon}</span>
+            <span>{persona.name}</span>
+          </div>
+        )}
         {msg.isStreaming && !msg.content ? (
           <div className="flex items-center gap-2 text-muted-foreground" aria-live="polite">
             <span className="flex gap-1">
@@ -767,12 +868,62 @@ function parseStoredMessage(m: SessionMessage): DisplayMessage {
         role: "assistant",
         content: parsed.message ?? m.content,
         response: parsed as CoachingResponse,
+        personaId: m.persona_id ?? null,
       }
     } catch {
-      return { role: "assistant", content: m.content }
+      return { role: "assistant", content: m.content, personaId: m.persona_id ?? null }
     }
   }
   return { role: "user", content: m.content }
+}
+
+function getResolvedTheme(theme: "light" | "dark" | "system"): "light" | "dark" {
+  if (theme === "system") {
+    return document.documentElement.classList.contains("dark") ? "dark" : "light"
+  }
+
+  return theme
+}
+
+function getPersonaTheme(persona: Persona | undefined, theme: "light" | "dark"): PersonaThemeMode | null {
+  if (!persona?.theme) return null
+  return theme === "dark" ? persona.theme.dark : persona.theme.light
+}
+
+function shouldShowPersonaCue(messages: DisplayMessage[], personaId: string | null | undefined): boolean {
+  if (!personaId) return false
+
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+    if (message.role !== "assistant") continue
+    return message.personaId !== personaId
+  }
+
+  return true
+}
+
+function getPersonaCueForIndex(messages: DisplayMessage[], index: number): boolean {
+  const current = messages[index]
+  if (!current || current.role !== "assistant" || !current.personaId) return false
+
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const previous = messages[cursor]
+    if (previous.role !== "assistant") continue
+    return previous.personaId !== current.personaId
+  }
+
+  return true
+}
+
+function findLastStreamingAssistantIndex(messages: DisplayMessage[]): number {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index]
+    if (message.role === "assistant" && message.isStreaming) {
+      return index
+    }
+  }
+
+  return -1
 }
 
 // ── ChatScreen ────────────────────────────────────────────────────────────────
@@ -780,6 +931,7 @@ function parseStoredMessage(m: SessionMessage): DisplayMessage {
 export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const { user } = useAuthContext()
   const { t } = useTranslation()
+  const { theme } = useTheme()
 
   // Resolve which gender key to use for translated strings:
   // user preference wins unless "indifferent", then fall back to persona default.
@@ -797,10 +949,18 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const [sessionName, setSessionName] = useState<string>("")
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [showModal, setShowModal] = useState(false)
+  const [showPersonaSwitcher, setShowPersonaSwitcher] = useState(false)
+  const [personas, setPersonas] = useState<Persona[]>([])
+  const [activePersonaId, setActivePersonaId] = useState(user.defaultPersonaId ?? "mentore-saggio")
 
   // TTS config (from active persona)
   const DEFAULT_TTS_CONFIG: TTSConfig = { fallback: "browser", browserFallbackEnabled: true }
   const [ttsConfig, setTtsConfig] = useState<TTSConfig>(DEFAULT_TTS_CONFIG)
+  const resolvedTheme = useMemo(() => getResolvedTheme(theme), [theme])
+  const activePersona = useMemo(
+    () => personas.find((persona) => persona.id === activePersonaId) ?? personas[0],
+    [personas, activePersonaId],
+  )
 
   // Message state
   const [messages, setMessages] = useState<DisplayMessage[]>([])
@@ -889,7 +1049,10 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       // Fetch personas to get TTS config (best-effort; default used on failure)
       try {
         const personas = await getPersonas()
-        const active = personas.find((p) => p.id === "mentore-saggio") ?? personas[0]
+        setPersonas(personas)
+        const initialPersonaId = user.defaultPersonaId ?? "mentore-saggio"
+        const active = personas.find((p) => p.id === initialPersonaId) ?? personas.find((p) => p.id === "mentore-saggio") ?? personas[0]
+        if (active?.id) setActivePersonaId(active.id)
         if (active?.tts) {
           setTtsConfig({
             fallback: active.tts.fallback,
@@ -928,6 +1091,13 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    const nextPersonaId = user.defaultPersonaId ?? "mentore-saggio"
+    if (!sessionId) {
+      setActivePersonaId(nextPersonaId)
+    }
+  }, [user.defaultPersonaId, sessionId])
+
   // Auto-scroll
   useEffect(() => {
     if (!shouldStickToBottomRef.current) return
@@ -948,6 +1118,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     setSessionName("")
     setMessages([])
     setError(null)
+    setActivePersonaId(user.defaultPersonaId ?? "mentore-saggio")
     setWelcomeLoading(true)
     try {
       const msg = await getWelcomeMessage(locale)
@@ -961,7 +1132,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     } finally {
       setWelcomeLoading(false)
     }
-  }, [locale])
+  }, [locale, user.defaultPersonaId])
 
   // ── Open a previous conversation ───────────────────────────────────────────
 
@@ -969,9 +1140,10 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     const found = sessions.find((s) => s.id === id)
     setSessionId(id)
     setSessionName(found?.name ?? "")
+    setActivePersonaId(found?.persona_id ?? user.defaultPersonaId ?? "mentore-saggio")
     setError(null)
     await loadSessionHistory(id)
-  }, [sessions, loadSessionHistory])
+  }, [sessions, loadSessionHistory, user.defaultPersonaId])
 
   // ── Rename ─────────────────────────────────────────────────────────────────
 
@@ -1012,6 +1184,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       role: "assistant",
       content: "",
       isStreaming: true,
+      personaId: activePersonaId,
+      showPersonaCue: shouldShowPersonaCue(messages, activePersonaId),
     }
     setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
     setInputText("")
@@ -1032,7 +1206,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       let finalResponse: CoachingResponse | null = null
 
       try {
-        finalResponse = await sendMessageStream(trimmed, locale, "mentore-saggio", sessionId, {
+        finalResponse = await sendMessageStream(trimmed, locale, activePersonaId, sessionId, {
           onMeta: (meta) => {
             if (isFirstUserMessage && meta.session_id) {
               setSessionId(meta.session_id)
@@ -1041,7 +1215,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           onDelta: (chunk) => {
             setMessages((prev) => {
               const next = [...prev]
-              const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+              const index = findLastStreamingAssistantIndex(next)
               if (index === -1) return prev
               next[index] = {
                 ...next[index],
@@ -1054,7 +1228,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             finalResponse = response
             setMessages((prev) => {
               const next = [...prev]
-              const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+              const index = findLastStreamingAssistantIndex(next)
               if (index === -1) {
                 next.push({ role: "assistant", content: response.message, response })
                 return next
@@ -1064,19 +1238,27 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
                 content: response.message,
                 response,
                 isStreaming: false,
+                personaId: activePersonaId,
+                showPersonaCue: next[index].showPersonaCue,
               }
               return next
             })
           },
         })
       } catch {
-        const fallback = await sendMessage(trimmed, locale, "mentore-saggio", sessionId)
+        const fallback = await sendMessage(trimmed, locale, activePersonaId, sessionId)
         finalResponse = fallback
         setMessages((prev) => {
           const next = [...prev]
-          const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+          const index = findLastStreamingAssistantIndex(next)
           if (index === -1) {
-            next.push({ role: "assistant", content: fallback.message, response: fallback })
+            next.push({
+              role: "assistant",
+              content: fallback.message,
+              response: fallback,
+              personaId: activePersonaId,
+              showPersonaCue: shouldShowPersonaCue(next, activePersonaId),
+            })
             return next
           }
           next[index] = {
@@ -1084,6 +1266,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             content: fallback.message,
             response: fallback,
             isStreaming: false,
+            personaId: activePersonaId,
+            showPersonaCue: next[index].showPersonaCue,
           }
           return next
         })
@@ -1126,8 +1310,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       onAssistantMessageRef.current(finalResponse.message)
     } catch (err) {
       clearTimeout(timeoutId)
-      setMessages((prev) => prev.filter((msg, index) => {
-        const lastStreamingIndex = prev.findLastIndex((candidate) => candidate.role === "assistant" && candidate.isStreaming)
+      setMessages((prev) => prev.filter((_, index) => {
+        const lastStreamingIndex = findLastStreamingAssistantIndex(prev)
         return index !== lastStreamingIndex
       }))
       if (err instanceof CoachingApiError) {
@@ -1138,7 +1322,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [inputText, isLoading, sessionId, locale, fetchSessions, setErrorWithAutoDismiss])
+  }, [inputText, isLoading, sessionId, locale, fetchSessions, setErrorWithAutoDismiss, activePersonaId, messages])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -1196,6 +1380,17 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           </h2>
           <p className="text-xs text-muted-foreground">{t("coaching.coachTitle")}</p>
         </div>
+        {activePersona && (
+          <button
+            type="button"
+            onClick={() => setShowPersonaSwitcher(true)}
+            className="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-accent transition-colors"
+          >
+            <span>{activePersona.icon}</span>
+            <span className="hidden sm:inline">{activePersona.name}</span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        )}
         {/* Action buttons */}
         <div className="flex items-center gap-1 shrink-0">
           <button
@@ -1248,10 +1443,12 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
               </div>
             ) : (
               <AssistantBubble
-                msg={msg}
+                msg={{ ...msg, showPersonaCue: msg.showPersonaCue ?? getPersonaCueForIndex(messages, i) }}
                 locale={locale}
                 ttsConfig={ttsConfig}
                 thinkingLabel={t(`coaching.thinking.${effectiveGender}`, { name: personaName })}
+                persona={personas.find((persona) => persona.id === msg.personaId) ?? activePersona}
+                resolvedTheme={resolvedTheme}
               />
             )}
           </div>
@@ -1357,6 +1554,26 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
           onRename={handleRename}
           onDelete={handleDelete}
           onClose={() => setShowModal(false)}
+        />
+      )}
+
+      {showPersonaSwitcher && (
+        <PersonaSwitcher
+          personas={personas}
+          activePersonaId={activePersonaId}
+          onSelect={(personaId) => {
+            setActivePersonaId(personaId)
+            const selected = personas.find((persona) => persona.id === personaId)
+            if (selected?.tts) {
+              setTtsConfig({
+                fallback: selected.tts.fallback,
+                browserFallbackEnabled: selected.tts.browser_fallback_enabled,
+              })
+            }
+            if (selected?.defaultGender) setPersonaDefaultGender(selected.defaultGender)
+            if (selected?.name) setPersonaName(selected.name)
+          }}
+          onClose={() => setShowPersonaSwitcher(false)}
         />
       )}
     </div>

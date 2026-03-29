@@ -266,7 +266,8 @@
         "retryLastMessage": "Retry",
         "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)",
         "restoreToast": "Restored last conversation",
-        "streamInterrupted": "Reply interrupted. Check your connection and try again."
+        "streamInterrupted": "Reply interrupted. Check your connection and try again.",
+        "personaPickerTitle": "Choose your coach"
     },
     "calculator": {
         "amount": "Amount",
@@ -371,6 +372,8 @@
         "topbarButtonsHint": "Show navigation links in the top bar (desktop only). When enabled, the hamburger is hidden on desktop.",
         "voiceGender": "Preferred voice",
         "voiceGenderHint": "Choose the coach voice gender. \"Indifferent\" uses the persona's default.",
+        "defaultCoach": "Default coach",
+        "defaultCoachHint": "New conversations start with this saved coach.",
         "voiceGenderMasculine": "Masculine",
         "voiceGenderFeminine": "Feminine",
         "voiceGenderNeutral": "Neutral",

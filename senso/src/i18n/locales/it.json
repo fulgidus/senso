@@ -266,7 +266,8 @@
         "retryLastMessage": "Riprova",
         "ttsFallbackActive": "Audio via sintesi vocale del browser (ElevenLabs non disponibile)",
         "restoreToast": "Conversazione precedente ripristinata",
-        "streamInterrupted": "Risposta interrotta. Controlla la connessione e riprova."
+        "streamInterrupted": "Risposta interrotta. Controlla la connessione e riprova.",
+        "personaPickerTitle": "Scegli il tuo coach"
     },
     "calculator": {
         "amount": "Importo",
@@ -371,6 +372,8 @@
         "topbarButtonsHint": "Mostra i link di navigazione nella barra superiore (solo desktop). Quando attivo, l'hamburger è nascosto su desktop.",
         "voiceGender": "Voce preferita",
         "voiceGenderHint": "Scegli il genere della voce del coach. \"Indifferente\" usa il default della persona.",
+        "defaultCoach": "Coach predefinito",
+        "defaultCoachHint": "Le nuove conversazioni iniziano con questo coach salvato.",
         "voiceGenderMasculine": "Maschile",
         "voiceGenderFeminine": "Femminile",
         "voiceGenderNeutral": "Neutrale",

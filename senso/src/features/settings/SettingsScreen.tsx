@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { LogOut, Save } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
@@ -10,6 +10,7 @@ import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
 import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
+import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -34,6 +35,11 @@ export function SettingsScreen() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [topbarButtons, setTopbarButtonsState] = useState(readTopbarButtons)
+  const [personas, setPersonas] = useState<Persona[]>([])
+
+  useEffect(() => {
+    void getPersonas().then(setPersonas).catch(() => setPersonas([]))
+  }, [])
 
   const isDirty =
     firstName.trim() !== (user.firstName ?? "") ||
@@ -156,6 +162,47 @@ export function SettingsScreen() {
 
       {/* Voice section */}
       <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
+        <div className="pb-4 border-b border-border space-y-3">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">{t("settings.defaultCoach")}</h2>
+            <p className="text-sm text-muted-foreground">{t("settings.defaultCoachHint")}</p>
+          </div>
+          <div className="space-y-2">
+            {personas.filter((persona) => persona.available).map((persona) => {
+              const selected = persona.id === defaultPersonaId
+              const theme = persona.theme?.light
+              return (
+                <button
+                  key={persona.id}
+                  type="button"
+                  onClick={() => setDefaultPersonaId(persona.id)}
+                  className="w-full rounded-xl border px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                  style={{
+                    borderColor: selected ? theme?.bubble_border ?? "var(--primary)" : undefined,
+                    backgroundColor: selected ? theme?.bubble_bg ?? undefined : undefined,
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base"
+                      style={{ backgroundColor: theme?.avatar_bg }}
+                    >
+                      {persona.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium text-foreground">{persona.name}</span>
+                        {selected && <span className="text-primary">✓</span>}
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{persona.description}</p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         <h2 className="text-base font-semibold text-foreground">{t("settings.voiceGender")}</h2>
         <p className="text-sm text-muted-foreground">{t("settings.voiceGenderHint")}</p>
         <div className="flex gap-2 flex-wrap">
