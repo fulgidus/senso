@@ -1,3 +1,10 @@
+from unittest.mock import MagicMock
+
+from app.api.auth import get_auth_service
+from app.main import app
+from app.services.auth_service import AuthError
+
+
 def test_signup_success(client):
     response = client.post(
         "/auth/signup",
@@ -28,6 +35,7 @@ def test_login_success(client):
     assert payload["user"]["email"] == "login@example.com"
     assert "accessToken" in payload
     assert "refreshToken" in payload
+    assert payload["user"]["default_persona_id"] == "mentore-saggio"
 
 
 def test_refresh_rotation_revokes_previous_token(client):
@@ -67,6 +75,70 @@ def test_me_requires_valid_access_token(client):
     assert unauthorized.status_code in (401, 403)
 
 
+def test_me_returns_default_persona_for_legacy_user(client):
+    signup = client.post(
+        "/auth/signup",
+        json={"email": "legacy@example.com", "password": "password123"},
+    )
+    assert signup.status_code == 201
+
+    access_token = signup.json()["accessToken"]
+    response = client.get(
+        "/auth/me",
+        headers={"authorization": f"Bearer {access_token}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["user"]["default_persona_id"] == "mentore-saggio"
+
+
+def test_patch_me_persists_default_persona_id(client):
+    signup = client.post(
+        "/auth/signup",
+        json={"email": "persona-pref@example.com", "password": "password123"},
+    )
+    assert signup.status_code == 201
+
+    access_token = signup.json()["accessToken"]
+    patch_response = client.patch(
+        "/auth/me",
+        headers={"authorization": f"Bearer {access_token}"},
+        json={"default_persona_id": "hartman"},
+    )
+
+    assert patch_response.status_code == 200
+    assert patch_response.json()["default_persona_id"] == "hartman"
+
+    me_response = client.get(
+        "/auth/me",
+        headers={"authorization": f"Bearer {access_token}"},
+    )
+    assert me_response.status_code == 200
+    assert me_response.json()["user"]["default_persona_id"] == "hartman"
+
+
+def test_patch_me_rejects_unknown_default_persona_id(client):
+    signup = client.post(
+        "/auth/signup",
+        json={"email": "bad-persona@example.com", "password": "password123"},
+    )
+    assert signup.status_code == 201
+
+    access_token = signup.json()["accessToken"]
+    response = client.patch(
+        "/auth/me",
+        headers={"authorization": f"Bearer {access_token}"},
+        json={"default_persona_id": "unknown-persona"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "code": "invalid_persona",
+        "message": "Unknown persona",
+    }
+
+
 def test_logout_revokes_refresh_token(client):
     signup = client.post(
         "/auth/signup",
@@ -83,7 +155,17 @@ def test_logout_revokes_refresh_token(client):
 
 
 def test_google_start_returns_fallback_when_provider_not_configured(client):
-    response = client.get("/auth/google/start")
+    mock_service = MagicMock()
+    mock_service.get_google_auth_url.side_effect = AuthError(
+        "google_unavailable", "Google OAuth is unavailable", status_code=503
+    )
+
+    app.dependency_overrides[get_auth_service] = lambda: mock_service
+    try:
+        response = client.get("/auth/google/start")
+    finally:
+        app.dependency_overrides.pop(get_auth_service, None)
+
     assert response.status_code == 503
     payload = response.json()
     assert payload["fallback"] == "email_password"

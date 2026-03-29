@@ -47,6 +47,7 @@ def _add_missing_columns() -> None:
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_gender VARCHAR(16) NOT NULL DEFAULT 'indifferent'",
         # ── Round 2: voice-to-voice mode ──────────────────────────────────────
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_auto_listen BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS default_persona_id VARCHAR(64) NOT NULL DEFAULT 'mentore-saggio'",
         # ── Round 3: chat relational integrity ────────────────────────────────
         # chat_sessions: drop user_id ownership in favour of session_participants
         "ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS creator_id VARCHAR(36)",

@@ -14,7 +14,19 @@ from app.core.security import (
 )
 from app.db import repository
 from app.db.models import RefreshSession, User
+from app.personas.loader import _load_config
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
+
+
+_DEFAULT_PERSONA_ID = "mentore-saggio"
+
+
+def _valid_persona_ids() -> set[str]:
+    return {
+        persona.get("id")
+        for persona in _load_config().get("personas", [])
+        if isinstance(persona.get("id"), str)
+    }
 
 
 class AuthError(Exception):
@@ -99,6 +111,7 @@ class AuthService:
             is_admin=user.is_admin,
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
+            default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
         )
 
     def logout(self, *, refresh_token: str) -> None:
@@ -153,6 +166,7 @@ class AuthService:
                 is_admin=user.is_admin,
                 voice_gender=user.voice_gender or "indifferent",
                 voice_auto_listen=bool(user.voice_auto_listen),
+                default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
             ),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
@@ -171,6 +185,11 @@ class AuthService:
             user.voice_gender = payload.voice_gender
         if payload.voice_auto_listen is not None:
             user.voice_auto_listen = payload.voice_auto_listen
+        if payload.default_persona_id is not None:
+            default_persona_id = payload.default_persona_id.strip()
+            if default_persona_id not in _valid_persona_ids():
+                raise AuthError("invalid_persona", "Unknown persona", status_code=422)
+            user.default_persona_id = default_persona_id
         self.db.commit()
         self.db.refresh(user)
         return UserDTO(
@@ -181,6 +200,7 @@ class AuthService:
             is_admin=user.is_admin,
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
+            default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
         )
 
     def _issue_tokens(self, user: User) -> AuthTokensDTO:

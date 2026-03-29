@@ -13,6 +13,7 @@ class UserDTO(BaseModel):
     is_admin: bool = False
     voice_gender: VoiceGender = "indifferent"
     voice_auto_listen: bool = False
+    default_persona_id: str = "mentore-saggio"
 
 
 class UpdateMeRequest(BaseModel):
@@ -20,6 +21,7 @@ class UpdateMeRequest(BaseModel):
     last_name: str | None = None
     voice_gender: VoiceGender | None = None
     voice_auto_listen: bool | None = None
+    default_persona_id: str | None = None
 
 
 class AuthTokensDTO(BaseModel):
