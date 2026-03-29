@@ -1181,7 +1181,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             onMicPointerDown={onMicPointerDown}
             onMicPointerUp={onMicPointerUp}
             onStopTTS={stopTTS}
-            onExitVoiceMode={toggleVoiceMode}
+            onExitVoiceMode={() => void toggleVoiceMode()}
             disabled={isLoading || loadingHistory}
           />
         ) : (
@@ -1193,7 +1193,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
                   variant="ghost"
                   size="icon"
                   className={isVoiceMode ? "text-primary" : "text-muted-foreground"}
-                  onClick={toggleVoiceMode}
+                  onClick={() => void toggleVoiceMode()}
                   disabled={isLoading}
                   aria-label={t("coaching.voiceModeActivate")}
                   title={t("coaching.voiceModeActivate")}

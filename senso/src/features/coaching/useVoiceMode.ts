@@ -31,7 +31,7 @@ export interface UseVoiceModeResult {
     /** Whether voice mode is currently active */
     isVoiceMode: boolean
     /** Toggle voice mode on/off */
-    toggleVoiceMode: () => void
+    toggleVoiceMode: () => Promise<void>
     /** Is the mic currently recording */
     isRecording: boolean
     /** Live transcript while recording */
@@ -117,7 +117,25 @@ export function useVoiceMode({
 
     // ── Voice mode toggle ─────────────────────────────────────────────────────
 
-    const toggleVoiceMode = useCallback(() => {
+    // Track whether mic permission has been granted this session so we only
+    // call getUserMedia once (subsequent toggles don't need to re-prompt).
+    const micPermissionGranted = useRef(false)
+
+    const toggleVoiceMode = useCallback(async () => {
+        // On first activation, explicitly request mic permission so the browser
+        // permission dialog appears at this deliberate user gesture — not buried
+        // inside recognition.start() later when the user presses the mic button.
+        if (!micPermissionGranted.current) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+                // Immediately release the tracks — we only needed the permission grant.
+                stream.getTracks().forEach((t) => t.stop())
+                micPermissionGranted.current = true
+            } catch {
+                // Permission denied or not supported — don't enter voice mode.
+                return
+            }
+        }
         setIsVoiceMode((prev) => {
             if (prev) {
                 // Deactivating: stop everything
