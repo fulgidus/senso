@@ -124,13 +124,19 @@ Plans:
 ### Phase 7: Streaming & Nice-to-Have Polish
 **Goal**: Improve coaching UX and production-readiness with streaming responses, persona choice, persistent history, and full PII safety cross-check.
 **Depends on**: Phase 6
-**Requirements**: TBD
+**Requirements**: COCH-05, SAFE-01
 **Success Criteria** (what must be TRUE):
   1. Coaching responses stream token-by-token via Server-Sent Events (EventSource) with graceful full-response fallback.
   2. User can select a coaching persona from the picker UI; selected persona is persisted across sessions.
   3. Conversation history is persisted in the database and loaded on returning to the chat screen.
   4. own_pii_unsolicited safety check performs full profile cross-check against live session userProfile fields (not pattern-only).
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
+- [ ] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
+- [ ] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
+- [ ] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
+**UI hint**: yes
 
 ## Progress
 
@@ -145,4 +151,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
 | 6. Learn+Act Cards & Demo Hardening | 4/4 | Complete   | 2026-03-29 |
-| 7. Streaming & Nice-to-Have Polish  | 0/TBD          | Not started | -          |
+| 7. Streaming & Nice-to-Have Polish  | 0/4            | Not started | -          |
