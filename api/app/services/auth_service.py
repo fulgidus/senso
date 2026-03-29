@@ -98,6 +98,7 @@ class AuthService:
             last_name=user.last_name,
             is_admin=user.is_admin,
             voice_gender=user.voice_gender or "indifferent",
+            voice_auto_listen=bool(user.voice_auto_listen),
         )
 
     def logout(self, *, refresh_token: str) -> None:
@@ -151,6 +152,7 @@ class AuthService:
                 last_name=user.last_name,
                 is_admin=user.is_admin,
                 voice_gender=user.voice_gender or "indifferent",
+                voice_auto_listen=bool(user.voice_auto_listen),
             ),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
@@ -167,6 +169,8 @@ class AuthService:
             user.last_name = payload.last_name.strip() or None
         if payload.voice_gender is not None:
             user.voice_gender = payload.voice_gender
+        if payload.voice_auto_listen is not None:
+            user.voice_auto_listen = payload.voice_auto_listen
         self.db.commit()
         self.db.refresh(user)
         return UserDTO(
@@ -176,6 +180,7 @@ class AuthService:
             last_name=user.last_name,
             is_admin=user.is_admin,
             voice_gender=user.voice_gender or "indifferent",
+            voice_auto_listen=bool(user.voice_auto_listen),
         )
 
     def _issue_tokens(self, user: User) -> AuthTokensDTO:

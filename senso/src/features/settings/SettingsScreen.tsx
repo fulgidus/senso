@@ -28,6 +28,7 @@ export function SettingsScreen() {
   const [firstName, setFirstName] = useState(user.firstName ?? "")
   const [lastName, setLastName] = useState(user.lastName ?? "")
   const [voiceGender, setVoiceGender] = useState<VoiceGender>(user.voiceGender ?? "indifferent")
+  const [voiceAutoListen, setVoiceAutoListen] = useState(user.voiceAutoListen ?? false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -36,7 +37,8 @@ export function SettingsScreen() {
   const isDirty =
     firstName.trim() !== (user.firstName ?? "") ||
     lastName.trim() !== (user.lastName ?? "") ||
-    voiceGender !== (user.voiceGender ?? "indifferent")
+    voiceGender !== (user.voiceGender ?? "indifferent") ||
+    voiceAutoListen !== (user.voiceAutoListen ?? false)
 
   const handleSave = async () => {
     if (!firstName.trim()) return
@@ -50,6 +52,7 @@ export function SettingsScreen() {
         firstName: firstName.trim(),
         lastName: lastName.trim() || null,
         voiceGender,
+        voiceAutoListen,
       })
       updateUser(updated)
       setSaveSuccess(true)
@@ -166,6 +169,32 @@ export function SettingsScreen() {
               {t(opt.labelKey)}
             </button>
           ))}
+        </div>
+
+        {/* Auto-listen toggle */}
+        <div className="pt-4 border-t border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("settings.voiceAutoListen")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.voiceAutoListenHint")}</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={voiceAutoListen}
+              onClick={() => setVoiceAutoListen((v) => !v)}
+              className={[
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                voiceAutoListen ? "bg-primary" : "bg-muted",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                  voiceAutoListen ? "translate-x-6" : "translate-x-1",
+                ].join(" ")}
+              />
+            </button>
+          </div>
         </div>
       </section>
 

@@ -12,12 +12,14 @@ class UserDTO(BaseModel):
     last_name: str | None = None
     is_admin: bool = False
     voice_gender: VoiceGender = "indifferent"
+    voice_auto_listen: bool = False
 
 
 class UpdateMeRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     voice_gender: VoiceGender | None = None
+    voice_auto_listen: bool | None = None
 
 
 class AuthTokensDTO(BaseModel):

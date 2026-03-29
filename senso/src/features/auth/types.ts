@@ -6,6 +6,7 @@ export type User = {
     firstName: string | null
     lastName?: string | null
     voiceGender?: VoiceGender
+    voiceAutoListen?: boolean
 }
 
 export type AuthPayload = {

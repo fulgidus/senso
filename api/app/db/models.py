@@ -31,6 +31,8 @@ class User(Base):
     # Voice gender preference: "masculine" | "feminine" | "neutral" | "indifferent"
     # "indifferent" means "use the persona's default"
     voice_gender: str = Column(String(16), nullable=False, default="indifferent")
+    # Auto-listen after TTS reply in voice mode: re-opens mic automatically
+    voice_auto_listen: bool = Column(Boolean, nullable=False, default=False)
     is_admin: bool = Column(Boolean, nullable=False, default=False)
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)

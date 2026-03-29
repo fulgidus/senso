@@ -25,8 +25,9 @@ import {
   type SessionMessage,
 } from "./coachingApi"
 import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2 } from "lucide-react"
-import { useVoiceInput } from "./useVoiceInput"
 import { useTTS, type TTSConfig } from "./useTTS"
+import { useVoiceMode } from "./useVoiceMode"
+import { VoiceModeBar } from "./VoiceModeBar"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -513,6 +514,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
   const listEndRef = useRef<HTMLDivElement>(null)
   const namingInFlight = useRef(false)
+  // Ref to break the circular dep: handleSend → onAssistantMessage ← useVoiceMode → handleSend
+  const onAssistantMessageRef = useRef<(text: string) => void>(() => {})
 
   // ── Load sessions list + restore last ──────────────────────────────────────
 
@@ -699,6 +702,8 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         ...prev,
         { role: "assistant", content: response.message, response },
       ])
+      // In voice mode, auto-play TTS for the reply
+      onAssistantMessageRef.current(response.message)
     } catch (err) {
       if (err instanceof CoachingApiError) {
         setError({ code: err.code, message: getErrorMessage(err.code, t) })
@@ -717,19 +722,39 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     }
   }
 
-  // ── Voice input ─────────────────────────────────────────────────────────────
+  // ── Voice mode ──────────────────────────────────────────────────────────────
 
-  const { isAvailable: isSttAvailable, isRecording, transcript, error: sttError, startRecording, stopRecording } = useVoiceInput({
+  const voiceAutoListen = user.voiceAutoListen ?? false
+
+  const {
+    isVoiceMode,
+    toggleVoiceMode,
+    isRecording,
+    transcript,
+    isSttAvailable,
+    sttError,
+    isGenerating: voiceIsGenerating,
+    isPlaying: voiceIsPlaying,
+    isAutoListening,
+    stopTTS,
+    onMicPointerDown,
+    onMicPointerUp,
+    onAssistantMessage,
+  } = useVoiceMode({
     locale,
-    onFinalTranscript: handleSend,
+    ttsConfig,
+    voiceAutoListen,
+    onSend: handleSend,
   })
+  // Keep ref in sync so handleSend can call it without a circular hook dep
+  onAssistantMessageRef.current = onAssistantMessage
 
   const [sttErrorVisible, setSttErrorVisible] = useState(false)
   useEffect(() => {
     if (sttError) {
       setSttErrorVisible(true)
-      const t = setTimeout(() => setSttErrorVisible(false), 4000)
-      return () => clearTimeout(t)
+      const timer = setTimeout(() => setSttErrorVisible(false), 4000)
+      return () => clearTimeout(timer)
     }
   }, [sttError])
 
@@ -825,41 +850,60 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
       {/* Input area */}
       <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0">
-        <div className="flex gap-2 items-end">
-          {isSttAvailable && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isLoading}
-              aria-label={isRecording ? t("coaching.voiceStop") : t("coaching.voiceStart")}
-            >
-              {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </Button>
-          )}
-          <textarea
-            value={isRecording ? transcript : inputText}
-            onChange={(e) => { if (!isRecording) setInputText(e.target.value) }}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading || loadingHistory || isRecording}
-            placeholder={t("coaching.placeholder")}
-            rows={1}
-            className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 max-h-32 overflow-y-auto"
-            style={{ minHeight: "40px" }}
+        {isVoiceMode ? (
+          <VoiceModeBar
+            isRecording={isRecording}
+            isGenerating={voiceIsGenerating}
+            isPlaying={voiceIsPlaying}
+            isAutoListening={isAutoListening}
+            transcript={transcript}
+            isSttAvailable={isSttAvailable}
+            onMicPointerDown={onMicPointerDown}
+            onMicPointerUp={onMicPointerUp}
+            onStopTTS={stopTTS}
+            onExitVoiceMode={toggleVoiceMode}
+            disabled={isLoading || loadingHistory}
           />
-          <Button
-            onClick={() => void handleSend()}
-            disabled={isLoading || loadingHistory || isRecording || !inputText.trim()}
-            size="sm"
-            className="shrink-0"
-          >
-            {isLoading ? t("coaching.sendingButton") : t("coaching.sendButton")}
-          </Button>
-        </div>
-        {sttErrorVisible && sttError && (
-          <p className="text-xs text-red-500 mt-1 px-1">{sttError}</p>
+        ) : (
+          <>
+            <div className="flex gap-2 items-end">
+              {isSttAvailable && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={isVoiceMode ? "text-primary" : "text-muted-foreground"}
+                  onClick={toggleVoiceMode}
+                  disabled={isLoading}
+                  aria-label={t("coaching.voiceModeActivate")}
+                  title={t("coaching.voiceModeActivate")}
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+              )}
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading || loadingHistory}
+                placeholder={t("coaching.placeholder")}
+                rows={1}
+                className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 max-h-32 overflow-y-auto"
+                style={{ minHeight: "40px" }}
+              />
+              <Button
+                onClick={() => void handleSend()}
+                disabled={isLoading || loadingHistory || !inputText.trim()}
+                size="sm"
+                className="shrink-0"
+              >
+                {isLoading ? t("coaching.sendingButton") : t("coaching.sendButton")}
+              </Button>
+            </div>
+            {sttErrorVisible && sttError && (
+              <p className="text-xs text-red-500 mt-1 px-1">{sttError}</p>
+            )}
+          </>
         )}
         <p className="text-xs text-muted-foreground mt-1 text-center">
           {t("coaching.disclaimer")}
