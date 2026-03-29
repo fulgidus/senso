@@ -28,6 +28,19 @@
             "name": "Mentore Saggio",
             "description": "Calmo, diretto, ti dà i fatti e poi la strada. Come un professore che vuole davvero che tu ce la faccia.",
             "icon": "🦉",
+            "theme": {
+                "light": {
+                    "avatar_bg": "#EAF2FB",
+                    "bubble_bg": "#EAF2FB",
+                    "bubble_border": "#3F72AF"
+                },
+                "dark": {
+                    "avatar_bg": "#1E4472",
+                    "bubble_bg": "#1E4472",
+                    "bubble_border": "#5B9BD5"
+                },
+                "label_tone": "calm"
+            },
             "defaultGender": "masculine",
             "soulFile": "soul/mentore-saggio.md",
             "available": true,
@@ -51,6 +64,19 @@
             "name": "Amico Sarcastico",
             "description": "Ti prende in giro con affetto quando stai per fare una cazzata. Ironico, ma sempre dalla tua parte.",
             "icon": "😏",
+            "theme": {
+                "light": {
+                    "avatar_bg": "#F3E8FF",
+                    "bubble_bg": "#F3E8FF",
+                    "bubble_border": "#8B5CF6"
+                },
+                "dark": {
+                    "avatar_bg": "#3B2A5A",
+                    "bubble_bg": "#3B2A5A",
+                    "bubble_border": "#A78BFA"
+                },
+                "label_tone": "playful"
+            },
             "defaultGender": "masculine",
             "soulFile": "soul/amico-sarcastico.md",
             "available": true,
@@ -67,6 +93,19 @@
             "name": "Sergente Hartman",
             "description": "Niente sconti, niente scuse. Duro come il Sergente Hartman di Full Metal Jacket, ma il tuo portafoglio ti ringrazierà.",
             "icon": "🪖",
+            "theme": {
+                "light": {
+                    "avatar_bg": "#EEF2E6",
+                    "bubble_bg": "#EEF2E6",
+                    "bubble_border": "#6B7A3A"
+                },
+                "dark": {
+                    "avatar_bg": "#334127",
+                    "bubble_bg": "#334127",
+                    "bubble_border": "#A3B86C"
+                },
+                "label_tone": "firm"
+            },
             "defaultGender": "masculine",
             "soulFile": "soul/hartman.md",
             "available": true,
@@ -83,6 +122,19 @@
             "name": "Cheerleader",
             "description": "Entusiasta, positiva, celebra ogni progresso. Trasforma ogni piccola scelta giusta in una vittoria.",
             "icon": "🎉",
+            "theme": {
+                "light": {
+                    "avatar_bg": "#FFE8F1",
+                    "bubble_bg": "#FFE8F1",
+                    "bubble_border": "#DB5E92"
+                },
+                "dark": {
+                    "avatar_bg": "#4C2435",
+                    "bubble_bg": "#4C2435",
+                    "bubble_border": "#F08BB4"
+                },
+                "label_tone": "uplifting"
+            },
             "defaultGender": "feminine",
             "soulFile": "soul/cheerleader.md",
             "available": true,

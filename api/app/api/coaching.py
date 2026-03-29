@@ -376,6 +376,7 @@ def get_personas(
             available=p.get("available", False),
             tts=get_tts_config(p["id"]),
             defaultGender=p.get("defaultGender", "neutral"),
+            theme=p["theme"],
         )
         for p in config.get("personas", [])
         if p.get("available", False)

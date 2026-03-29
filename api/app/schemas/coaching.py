@@ -118,6 +118,22 @@ class TTSConfig(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class PersonaThemeModeDTO(BaseModel):
+    avatar_bg: str
+    bubble_bg: str
+    bubble_border: str
+
+    model_config = {"populate_by_name": True}
+
+
+class PersonaThemeDTO(BaseModel):
+    light: PersonaThemeModeDTO
+    dark: PersonaThemeModeDTO
+    label_tone: str
+
+    model_config = {"populate_by_name": True}
+
+
 class PersonaDTO(BaseModel):
     id: str
     name: str
@@ -126,6 +142,7 @@ class PersonaDTO(BaseModel):
     available: bool = True
     tts: TTSConfig = Field(default_factory=TTSConfig)
     default_gender: str = Field(default="neutral", alias="defaultGender")
+    theme: PersonaThemeDTO
 
     model_config = {"populate_by_name": True}
 

@@ -420,6 +420,7 @@ def test_get_personas_returns_list(client):
         assert "name" in p
         assert "description" in p
         assert "icon" in p
+        assert "theme" in p
 
 
 def test_get_personas_includes_mentore_saggio(client):
@@ -432,6 +433,32 @@ def test_get_personas_includes_mentore_saggio(client):
     personas = resp.json()
     ids = [p["id"] for p in personas]
     assert "mentore-saggio" in ids
+
+
+def test_get_personas_returns_theme_contract(client):
+    token = _register_and_login(client, "persona-theme@example.com")
+    resp = client.get(
+        "/coaching/personas",
+        headers={"authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 200
+    personas = resp.json()
+    persona = next(p for p in personas if p["id"] == "mentore-saggio")
+
+    assert persona["theme"] == {
+        "light": {
+            "avatar_bg": "#EAF2FB",
+            "bubble_bg": "#EAF2FB",
+            "bubble_border": "#3F72AF",
+        },
+        "dark": {
+            "avatar_bg": "#1E4472",
+            "bubble_bg": "#1E4472",
+            "bubble_border": "#5B9BD5",
+        },
+        "label_tone": "calm",
+    }
 
 
 # ── Session continuity with session_not_found ────────────────────────────────
