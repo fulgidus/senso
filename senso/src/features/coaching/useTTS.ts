@@ -24,6 +24,8 @@ interface UseTTSResult {
     canPlay: boolean
     isPlaying: boolean
     isGenerating: boolean
+    ttsError: string | null
+    usingFallback: boolean
     play: (text: string, locale: "it" | "en") => Promise<void>
     stop: () => void
 }
@@ -31,6 +33,8 @@ interface UseTTSResult {
 export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
     const [isPlaying, setIsPlaying] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
+    const [ttsError, setTtsError] = useState<string | null>(null)
+    const [usingFallback, setUsingFallback] = useState(false)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const objectUrlRef = useRef<string | null>(null)
 
@@ -61,6 +65,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
         }
         setIsPlaying(false)
         setIsGenerating(false)
+        setUsingFallback(false)
     }, [config.browserFallbackEnabled, _cancelSpeechSynthesis])
 
     const play = useCallback(async (text: string, locale: "it" | "en") => {
@@ -68,6 +73,8 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
         if (isGenerating || isPlaying) return
 
         stop()
+        setTtsError(null)
+        setUsingFallback(false)
         setIsGenerating(true)
 
         try {
@@ -101,6 +108,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
             // fetchTTSAudio threw (503 or network) - fall back to speechSynthesis only when
             // explicitly permitted by config.
             console.warn("[useTTS] ElevenLabs failed, falling back to speechSynthesis:", err)
+            setTtsError("elevenlabs_unavailable")
             setIsGenerating(false)
             if (
                 config.fallback === "browser" &&
@@ -108,8 +116,12 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
                 typeof window !== "undefined" &&
                 "speechSynthesis" in window
             ) {
+                setUsingFallback(true)
                 setIsPlaying(true)
-                _fallbackSpeak(text, locale, () => setIsPlaying(false))
+                _fallbackSpeak(text, locale, () => {
+                    setIsPlaying(false)
+                    setUsingFallback(false)
+                })
             }
             // else: hard fail - isPlaying stays false, no noise
         }
@@ -126,7 +138,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
         }
     }, [])
 
-    return { canPlay, isPlaying, isGenerating, play, stop }
+    return { canPlay, isPlaying, isGenerating, ttsError, usingFallback, play, stop }
 }
 
 function _fallbackSpeak(text: string, locale: "it" | "en", onEnd: () => void): void {

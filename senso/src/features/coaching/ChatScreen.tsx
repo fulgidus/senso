@@ -460,7 +460,7 @@ function VoicePlayButton({
   ttsConfig: TTSConfig
 }) {
   const { t } = useTranslation()
-  const { canPlay, isPlaying, isGenerating, play, stop } = useTTS(ttsConfig)
+  const { canPlay, isPlaying, isGenerating, usingFallback, play, stop } = useTTS(ttsConfig)
   if (!canPlay) return null
   const busy = isGenerating || isPlaying
   return (
@@ -472,7 +472,12 @@ function VoicePlayButton({
       onClick={() => (busy ? stop() : void play(text, locale))}
       disabled={isGenerating && !isPlaying}
       aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
-      title={isGenerating ? t("coaching.ttsGeneratingShort") : isPlaying ? t("coaching.ttsPlayingShort") : t("coaching.ttsPlayShort")}
+      title={
+        usingFallback ? t("coaching.ttsFallbackActive") :
+        isGenerating ? t("coaching.ttsGeneratingShort") :
+        isPlaying ? t("coaching.ttsPlayingShort") :
+        t("coaching.ttsPlayShort")
+      }
     >
       {isGenerating ? (
         <Loader2 className="h-3 w-3 animate-spin" />
