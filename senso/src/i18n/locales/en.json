@@ -390,5 +390,22 @@
             "feminine": "Are you sure you want to log out?",
             "neutral": "Are you sure you want to log out?"
         }
+    },
+    "content": {
+        "browseTitle": "Learn",
+        "searchPlaceholder": "Search articles, videos, slides...",
+        "filterAll": "All",
+        "filterArticles": "Articles",
+        "filterVideos": "Videos",
+        "filterSlides": "Slides",
+        "filterPartners": "Partners",
+        "noResults": "No content found.",
+        "readMore": "Read",
+        "watchVideo": "Watch",
+        "viewSlides": "View slides",
+        "backToList": "Back to list",
+        "topics": "Topics",
+        "readingMinutes": "{{minutes}} min read",
+        "slides": "{{count}} slides"
     }
 }

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AuthScreen } from "@/features/auth/AuthScreen"
@@ -13,6 +13,8 @@ import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
 import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
+import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
+import { ContentDetailPage } from "@/features/content/ContentDetailPage"
 import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
@@ -229,9 +231,20 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
 
 // ── Root ──
 
-export function App() {
+function AppRoutes() {
   const auth = useAuth()
   const { t } = useTranslation()
+  const location = useLocation()
+
+  // Public routes — render regardless of auth state
+  if (location.pathname === "/learn" || location.pathname.startsWith("/learn/")) {
+    return (
+      <Routes>
+        <Route path="/learn" element={<ContentBrowsePage />} />
+        <Route path="/learn/:id" element={<ContentDetailPage />} />
+      </Routes>
+    )
+  }
 
   if (!auth.initialized) {
     return (
@@ -256,8 +269,14 @@ export function App() {
   }
 
   return (
+    <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
+  )
+}
+
+export function App() {
+  return (
     <BrowserRouter>
-      <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
+      <AppRoutes />
     </BrowserRouter>
   )
 }

@@ -390,5 +390,22 @@
             "feminine": "Sei sicura di voler uscire?",
             "neutral": "Sei sicurə di voler uscire?"
         }
+    },
+    "content": {
+        "browseTitle": "Impara",
+        "searchPlaceholder": "Cerca articoli, video, slide...",
+        "filterAll": "Tutti",
+        "filterArticles": "Articoli",
+        "filterVideos": "Video",
+        "filterSlides": "Slide",
+        "filterPartners": "Partner",
+        "noResults": "Nessun contenuto trovato.",
+        "readMore": "Leggi",
+        "watchVideo": "Guarda",
+        "viewSlides": "Vedi slide",
+        "backToList": "Torna alla lista",
+        "topics": "Argomenti",
+        "readingMinutes": "{{minutes}} min di lettura",
+        "slides": "{{count}} slide"
     }
 }
