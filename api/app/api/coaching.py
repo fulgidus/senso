@@ -13,6 +13,7 @@ GET  /coaching/personas       - list available personas
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from itertools import count
 from typing import Literal
 from uuid import uuid4
 
@@ -142,16 +143,23 @@ def _get_admin_session(
     return session
 
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
+def _chunk_message_text(message: str) -> list[str]:
+    words = message.split()
+    if not words:
+        return [""]
+    chunks: list[str] = []
+    index = 0
+    while index < len(words):
+        chunks.append(" ".join(words[index : index + 4]))
+        index += 4
+    return chunks
 
 
-@router.post("/chat", response_model=CoachingResponseDTO)
-def coaching_chat(
+def _prepare_chat_result(
     body: ChatRequest,
-    current_user: UserDTO = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Send a coaching message. Creates or continues a ChatSession."""
+    current_user: UserDTO,
+    db: Session,
+) -> tuple[dict, ChatSession]:
     # Layer 1: Input safety check
     safe, reason = check_coaching_input(body.message)
     if not safe:
@@ -163,7 +171,6 @@ def coaching_chat(
             },
         )
 
-    # Load or create session
     session: ChatSession | None = None
     if body.session_id:
         session = _get_participant_session(db, body.session_id, current_user.id)
@@ -178,9 +185,7 @@ def coaching_chat(
             updated_at=datetime.now(UTC),
         )
         db.add(session)
-        db.flush()  # get id without committing
-
-        # Auto-insert creator as session admin with full permissions
+        db.flush()
         db.add(
             SessionParticipant(
                 session_id=session.id,
@@ -193,11 +198,9 @@ def coaching_chat(
         )
         db.flush()
 
-    # Build message history from DB
     prior_messages = [{"role": m.role, "content": m.content} for m in session.messages]
     messages = prior_messages + [{"role": "user", "content": body.message}]
 
-    # Call CoachingService
     service = get_coaching_service(db=db)
     settings = get_settings()
     try:
@@ -221,7 +224,6 @@ def coaching_chat(
             detail={"code": exc.code, "message": exc.message},
         )
 
-    # Persist user message (sender_id = the user, no persona)
     user_msg_id = str(uuid_utils_lib.uuid7())
     db.add(
         ChatMessage(
@@ -235,7 +237,6 @@ def coaching_chat(
         )
     )
 
-    # Persist assistant response (sender_id = NULL, persona_id = the active persona)
     assistant_msg_id = str(uuid_utils_lib.uuid7())
     db.add(
         ChatMessage(
@@ -252,16 +253,60 @@ def coaching_chat(
     session.updated_at = datetime.now(UTC)
     db.commit()
     db.refresh(session)
+    return result, session
 
+
+def _coaching_response_dto(result: dict, session: ChatSession) -> CoachingResponseDTO:
+    settings = get_settings()
     return CoachingResponseDTO(
         message=result.get("message", ""),
         reasoning_used=result.get("reasoning_used", []),
         action_cards=result.get("action_cards", []),
         resource_cards=result.get("resource_cards", []),
         learn_cards=result.get("learn_cards", []),
+        details_a2ui=result.get("details_a2ui"),
         session_id=session.id,
         debug=result.get("_debug") if settings.llm_debug else None,
     )
+
+
+def _sse_event(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
+
+@router.post("/chat", response_model=CoachingResponseDTO)
+def coaching_chat(
+    body: ChatRequest,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Send a coaching message. Creates or continues a ChatSession."""
+    result, session = _prepare_chat_result(body, current_user, db)
+    return _coaching_response_dto(result, session)
+
+
+@router.post("/chat/stream")
+def coaching_chat_stream(
+    body: ChatRequest,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    result, session = _prepare_chat_result(body, current_user, db)
+    dto = _coaching_response_dto(result, session)
+
+    def event_stream():
+        yield _sse_event(
+            "meta", {"session_id": session.id, "persona_id": body.persona_id}
+        )
+        for chunk in _chunk_message_text(dto.message):
+            yield _sse_event("delta", {"text": chunk})
+        yield _sse_event("final", dto.model_dump())
+        yield _sse_event("done", {"session_id": session.id})
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @router.get("/sessions", response_model=list[SessionSummaryDTO])

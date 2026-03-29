@@ -265,6 +265,93 @@ def test_post_chat_continues_existing_session(client):
     assert len(messages_passed) >= 3
 
 
+def test_post_chat_stream_returns_sse_events_and_final_payload(client):
+    token = _register_and_login(client, "stream-success@example.com")
+    mock_response = {
+        "message": "Sì, puoi permetterti questa spesa senza compromettere il margine.",
+        "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}],
+        "action_cards": [],
+        "resource_cards": [],
+        "learn_cards": [],
+        "details_a2ui": None,
+    }
+
+    with patch("app.api.coaching.get_coaching_service") as mock_factory:
+        mock_service = MagicMock()
+        mock_service.chat.return_value = mock_response
+        mock_factory.return_value = mock_service
+
+        with client.stream(
+            "POST",
+            "/coaching/chat/stream",
+            headers={"authorization": f"Bearer {token}"},
+            json={"message": "Posso comprare un laptop?"},
+        ) as resp:
+            body = b"".join(resp.iter_bytes()).decode("utf-8")
+
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/event-stream")
+    assert "event: meta" in body
+    assert "event: delta" in body
+    assert "event: final" in body
+    assert "event: done" in body
+    assert '"persona_id": "mentore-saggio"' in body
+    assert (
+        '"message": "Sì, puoi permetterti questa spesa senza compromettere il margine."'
+        in body
+    )
+
+
+def test_post_chat_stream_persists_messages_once(client):
+    token = _register_and_login(client, "stream-persist@example.com")
+    mock_response = {
+        "message": "No, per ora è meglio aspettare.",
+        "reasoning_used": [
+            {"step": "Margine", "detail": "Il margine è troppo stretto."}
+        ],
+        "action_cards": [],
+        "resource_cards": [],
+        "learn_cards": [],
+        "details_a2ui": None,
+    }
+
+    with patch("app.api.coaching.get_coaching_service") as mock_factory:
+        mock_service = MagicMock()
+        mock_service.chat.return_value = mock_response
+        mock_factory.return_value = mock_service
+
+        with client.stream(
+            "POST",
+            "/coaching/chat/stream",
+            headers={"authorization": f"Bearer {token}"},
+            json={"message": "Posso comprare una console?"},
+        ) as resp:
+            _ = b"".join(resp.iter_bytes())
+
+    assert resp.status_code == 200
+
+    sessions_resp = client.get(
+        "/coaching/sessions",
+        headers={"authorization": f"Bearer {token}"},
+    )
+    assert sessions_resp.status_code == 200
+    sessions = sessions_resp.json()
+    assert len(sessions) == 1
+    session_id = sessions[0]["id"]
+    assert sessions[0]["message_count"] == 2
+
+    messages_resp = client.get(
+        f"/coaching/sessions/{session_id}/messages",
+        headers={"authorization": f"Bearer {token}"},
+    )
+    assert messages_resp.status_code == 200
+    messages = messages_resp.json()
+    assert len(messages) == 2
+    assert messages[0]["role"] == "user"
+    assert messages[0]["content"] == "Posso comprare una console?"
+    assert messages[1]["role"] == "assistant"
+
+
 # ── Session list tests ───────────────────────────────────────────────────────
 
 
