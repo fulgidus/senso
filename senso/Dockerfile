@@ -16,8 +16,10 @@ ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
 # GIT_SHA is stamped into version.json for post-deploy stale-build detection.
+# Also exposed to Vite so it's baked into the JS bundle.
 ARG GIT_SHA=unknown
 ARG BUILD_TIME=unknown
+ENV VITE_GIT_SHA=$GIT_SHA
 
 COPY . .
 
