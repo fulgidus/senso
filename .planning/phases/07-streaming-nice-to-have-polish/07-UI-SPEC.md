@@ -106,8 +106,8 @@ All strings must ship in `senso/src/i18n/locales/it.json` and `en.json`.
 | Restore toast | Restored last conversation |
 | Persona picker title | Choose your coach |
 | Settings section title | Default coach |
-| Destructive confirmation | Delete conversation: Remove this conversation from your history? This cannot be undone. |
-| Destructive confirmation | Log out: Are you sure you want to log out on this device? |
+| Destructive confirmation | Delete conversation: Remove this conversation from your history? This cannot be undone. Actions: `Keep conversation`, `Delete conversation`. |
+| Destructive confirmation | Log out: Are you sure you want to log out on this device? Actions: `Stay signed in`, `Log out`. |
 
 Copy rules:
 - Keep wording direct, calm, and jargon-light for ages 18-30.
@@ -126,6 +126,12 @@ Copy rules:
 | Chat restore | Keep auto-open-last-session and add a subtle restore toast |
 | Settings | Add persistent default persona selector alongside existing voice preferences |
 | History modal | Keep modal pattern; add destructive confirmation before delete |
+
+**Visual hierarchy contract:**
+- Primary focal point: the live assistant streaming bubble in the main chat column.
+- Secondary focal point: the composer and send/voice controls directly below the conversation.
+- Subordinate elements: restore toast, persona switcher, and history affordances must stay visually quieter than the active assistant reply.
+- Structured cards and `details_a2ui` may draw attention only after the streamed message completes; they never outrank the live reply while it is in progress.
 
 ---
 
@@ -186,8 +192,9 @@ Copy rules:
 ### 7. Destructive actions
 
 - Deleting a conversation from history requires confirmation before deletion.
-- Use a compact confirmation dialog/sheet with two actions: `Cancel` and destructive `Delete conversation`.
-- Logging out keeps the current confirmation behavior and destructive styling.
+- Use a compact confirmation dialog/sheet for delete with two actions: `Keep conversation` and destructive `Delete conversation`.
+- Logging out keeps the current confirmation behavior and destructive styling, but uses exact labels `Stay signed in` and destructive `Log out`.
+- Generic secondary labels such as `Cancel` are not allowed for destructive flows in this phase.
 
 ### 8. Motion and accessibility
 
