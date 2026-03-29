@@ -165,12 +165,22 @@ class TestPromptTemplates:
         assert "non disponibile" in rendered
 
     def test_response_format_injects_schema(self):
-        tmpl = self.env.get_template("response_format.j2")
-        rendered = tmpl.render(
-            schema_json='{"type": "object"}',
-            capabilities_json="{}",
+        import json
+        from pathlib import Path
+        from jinja2 import Environment, FileSystemLoader
+
+        prompts_dir = Path(__file__).parent.parent / "app" / "coaching" / "prompts"
+        schemas_dir = Path(__file__).parent.parent / "app" / "coaching" / "schemas"
+        env = Environment(loader=FileSystemLoader(str(prompts_dir)))
+        capabilities_path = schemas_dir / "capabilities.schema.json"
+        capabilities = json.loads(capabilities_path.read_text())
+        a2ui_ref = env.get_template("a2ui_reference.j2").render()
+        rendered = env.get_template("response_format.j2").render(
+            capabilities_json=json.dumps(capabilities, indent=2),
+            a2ui_reference=a2ui_ref,
         )
-        assert '{"type": "object"}' in rendered
+        assert "search_content" in rendered
+        assert "resource_cards" in rendered
 
 
 # ──────────────────────────────────────────────
@@ -256,7 +266,7 @@ class TestCoachingServiceChat:
 
         mock_db = MagicMock()
         mock_llm = MagicMock()
-        mock_llm.complete.return_value = json.dumps(valid_response)
+        mock_llm.complete_with_tools.return_value = json.dumps(valid_response)
 
         with patch("app.coaching.service.ProfileService") as MockPS:
             mock_profile = MagicMock()
@@ -287,7 +297,7 @@ class TestCoachingServiceChat:
 
         mock_db = MagicMock()
         mock_llm = MagicMock()
-        mock_llm.complete.side_effect = LLMError("LLM unavailable")
+        mock_llm.complete_with_tools.side_effect = LLMError("LLM unavailable")
 
         with patch("app.coaching.service.ProfileService") as MockPS:
             mock_profile = MagicMock()
@@ -322,7 +332,7 @@ class TestCoachingServiceChat:
 
         mock_db = MagicMock()
         mock_llm = MagicMock()
-        mock_llm.complete.return_value = json.dumps(malicious_response)
+        mock_llm.complete_with_tools.return_value = json.dumps(malicious_response)
 
         with patch("app.coaching.service.ProfileService") as MockPS:
             mock_profile = MagicMock()
