@@ -6,7 +6,7 @@ status: Milestone complete
 stopped_at: Completed 07-04-PLAN.md
 last_updated: "2026-03-29T20:59:15.694Z"
 progress:
-  total_phases: 7
+  total_phases: 10
   completed_phases: 7
   total_plans: 29
   completed_plans: 29
@@ -130,6 +130,12 @@ None yet.
 ### Blockers/Concerns
 
 - Docker CLI unavailable in executor environment; compose verification deferred to Docker-enabled host.
+
+### Roadmap Evolution
+
+- Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
+- Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping
+- Phase 10 added: Transparency & security with about page, encryption at rest & LLM no-data-retention
 
 ## Session Continuity
 
