@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement. (completed 2026-03-28)
 - [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
 - [x] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable. (completed 2026-03-29)
+- [x] **Phase 7: Streaming & Nice-to-Have Polish** - Streaming responses, persona choice, persistent history, and PII safety cross-check. (completed 2026-03-29)
 
 ## Phase Details
 
@@ -134,8 +135,8 @@ Plans:
 Plans:
 - [x] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
 - [x] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
-- [ ] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
-- [ ] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
+- [x] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
+- [x] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
 **UI hint**: yes
 
 ## Progress
@@ -151,4 +152,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
 | 6. Learn+Act Cards & Demo Hardening | 4/4 | Complete   | 2026-03-29 |
-| 7. Streaming & Nice-to-Have Polish  | 1/4            | In Progress |            |
+| 7. Streaming & Nice-to-Have Polish  | 4/4 | Complete   | 2026-03-29 |
