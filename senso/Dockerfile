@@ -9,24 +9,21 @@ RUN corepack enable && corepack prepare pnpm@10.32.0 --activate
 COPY pnpm-lock.yaml package.json ./
 RUN pnpm install --frozen-lockfile
 
-# CACHEBUST invalidates all layers below when set to a new value (e.g. git SHA).
-# VITE_BACKEND_URL must also be declared before COPY to bust cache on value change.
-ARG CACHEBUST=1
 ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
-
-# GIT_SHA is stamped into version.json for post-deploy stale-build detection.
-# Also exposed to Vite so it's baked into the JS bundle.
-ARG GIT_SHA=unknown
-ARG BUILD_TIME=unknown
-ENV VITE_GIT_SHA=$GIT_SHA
 
 COPY . .
 
 RUN pnpm build
 
-# Stamp version info into the built output
-RUN printf '{"sha":"%s","built_at":"%s"}\n' "$GIT_SHA" "$BUILD_TIME" > /app/dist/version.json
+# Stamp version info computed at build time — no external args needed.
+# src_hash = SHA-256 of all source files, detects stale layer cache.
+RUN sh -c '\
+  BUILT_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ") && \
+  SRC_HASH=$(find src -type f | sort | xargs cat | sha256sum | cut -c1-12) && \
+  BUNDLE=$(basename /app/dist/assets/index-*.js) && \
+  printf "{\"src_hash\":\"%s\",\"bundle\":\"%s\",\"built_at\":\"%s\"}\n" \
+    "$SRC_HASH" "$BUNDLE" "$BUILT_AT" > /app/dist/version.json'
 
 ## Stage 2: serve with nginx
 FROM nginx:1.27-alpine

@@ -13,14 +13,11 @@ const backendUrl =
     rootConfig.api?.backendUrl ??
     "http://localhost:8000"
 
-const gitSha = process.env.VITE_GIT_SHA ?? "unknown"
-
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react(), tailwindcss()],
     define: {
         "import.meta.env.VITE_BACKEND_URL": JSON.stringify(backendUrl),
-        "import.meta.env.VITE_GIT_SHA": JSON.stringify(gitSha),
     },
     resolve: {
         alias: {
