@@ -14,16 +14,16 @@ Help users make better financial decisions in the moment by combining their real
 
 - [x] Users can upload core financial inputs (bank CSV, payslip, receipts/screens) and receive a structured financial profile. *(Validated in Phase 2: Financial Input Ingestion)*
 - [x] Users receive a financial profile showing income, recurring expenses, monthly margin, and spending breakdown by category. *(Validated in Phase 3: Financial Profile Clarity)*
+- [x] Users can ask voice or text questions about purchases/choices and get personalized answers grounded in their real data. *(Validated in Phase 4: Safe Grounded Text Coaching + Phase 5: Voice Coaching Loop)*
+- [x] AI responses include transparent reasoning (what data drove the advice) and an educational explanation, not just a verdict. *(Validated in Phase 4: Safe Grounded Text Coaching)*
+- [x] Responses surface actionable cards for learning resources and relevant financial services/partner actions. *(Validated in Phase 6: Learn+Act Cards & Demo Hardening)*
+- [x] Persona-based mentor tone is configurable while preserving safety boundaries and non-harmful guidance. *(Validated in Phase 7: Streaming & Nice-to-Have Polish)*
+- [x] MVP supports a fast live demo flow (~75 seconds) from upload to spoken recommendation. *(Validated in Phase 6: Demo Hardening)*
+- [x] Users can authenticate (email/password + Google OAuth) to preserve sessions and progress. *(Validated in Phase 1: Runtime & Account Foundation)*
 
 ### Active
 
-- [ ] Users can upload core financial inputs (bank CSV, payslip, receipts/screens) and receive a structured financial profile.
-- [ ] Users can ask voice or text questions about purchases/choices and get personalized answers grounded in their real data.
-- [ ] AI responses include transparent reasoning (what data drove the advice) and an educational explanation, not just a verdict.
-- [ ] Responses surface actionable cards for learning resources and relevant financial services/partner actions.
-- [ ] Persona-based mentor tone is configurable while preserving safety boundaries and non-harmful guidance.
-- [ ] MVP supports a fast live demo flow (~75 seconds) from upload to spoken recommendation.
-- [ ] Users can authenticate (email/password + Google OAuth) to preserve sessions and progress.
+None - all v1.0 requirements validated.
 
 ### Out of Scope
 
@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after Phase 3 completion - financial profile clarity backend + UI shipped*
+*Last updated: 2026-03-29 after Phase 7 completion - all v1.0 milestone phases complete. Streaming, persona UX, PII safety cross-check, and demo polish shipped.*
