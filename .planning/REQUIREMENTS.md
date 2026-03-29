@@ -44,6 +44,15 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 - [ ] **ACTN-02**: Each coaching response can include at least one actionable service card (bank or partner) relevant to user context.
 - [ ] **ACTN-03**: User can open educational and action cards from the same response context.
 
+### Content Platform
+
+- [ ] **CONT-01**: Admin user can manage content items (create, read, update, delete) via API endpoints.
+- [ ] **CONT-02**: Static JSON catalogs are migrated into the database and seeded on first startup.
+- [ ] **CONT-03**: BM25 search index loads from the database and rebuilds when content is mutated.
+- [ ] **CONT-04**: Unauthenticated users can browse and search published content via public API.
+- [ ] **CONT-05**: Users can browse published content at /learn without authentication.
+- [ ] **CONT-06**: Individual content items are viewable at /learn/:id with type-specific rendering and shareable URLs.
+
 ### Safety and Boundaries
 
 - [x] **SAFE-01**: System enforces persona-independent safety boundaries defined by project policies.
@@ -109,10 +118,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEMO-01 | Phase 6 | Pending |
 | DEMO-02 | Phase 6 | Pending |
 | DEMO-03 | Phase 1 | Complete |
+| CONT-01 | Phase 8 | Pending |
+| CONT-02 | Phase 8 | Pending |
+| CONT-03 | Phase 8 | Pending |
+| CONT-04 | Phase 8 | Pending |
+| CONT-05 | Phase 8 | Pending |
+| CONT-06 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 25 total
-- Mapped to phases: 25
+- v1 requirements: 31 total
+- Mapped to phases: 31
 - Unmapped: 0
 
 ---

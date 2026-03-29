@@ -153,19 +153,29 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
 | 6. Learn+Act Cards & Demo Hardening | 4/4            | Complete    | 2026-03-29 |
 | 7. Streaming & Nice-to-Have Polish  | 4/4            | Complete    | 2026-03-29 |
-| 8. Content Platform & Public Serving | 0/0           | Not Planned |            |
+| 8. Content Platform & Public Serving | 0/3            | Planned     |            |
 | 9. LLM Financial Intelligence       | 0/0           | Not Planned |            |
 | 10. Transparency & Security         | 0/0           | Not Planned |            |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
 **Goal:** Articles, MARP decks, and curated links are managed through an admin/editorial flow, indexed for search, and publicly servable for sharing outside the app.
-**Requirements**: TBD
+**Requirements**: CONT-01, CONT-02, CONT-03, CONT-04, CONT-05, CONT-06
 **Depends on:** Phase 7
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. Admin user can manage content items (create, read, update, delete) via API endpoints.
+  2. Static JSON catalogs are migrated into the database and the BM25 search index loads from DB.
+  3. Content changes via admin API immediately reflect in search results after index rebuild.
+  4. Unauthenticated users can browse and search published content at /learn.
+  5. Individual content items are viewable at /learn/:id with type-specific rendering (article link, video player, slide viewer, partner CTA).
+  6. Direct URLs to /learn/:id are shareable outside the app without requiring login.
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 8 to break down)
+- [ ] 08-01-PLAN.md - ContentItem DB model, admin CRUD API, and JSON catalog seed migration.
+- [ ] 08-02-PLAN.md - DB-backed BM25 search index with rebuild + public content API endpoints.
+- [ ] 08-03-PLAN.md - Public content browse and detail pages with type-specific rendering.
+**UI hint**: yes
 
 ### Phase 9: LLM Financial Intelligence with Categorization, Tagging, Timeline Inference & Crowdsourced Merchant Mapping
 
