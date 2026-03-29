@@ -14,6 +14,7 @@ Failure modes are enumerated in AdaptiveFailureMode.
 from __future__ import annotations
 
 import json
+import jsonschema
 import logging
 import subprocess
 import sys
@@ -23,17 +24,19 @@ from enum import Enum
 from pathlib import Path
 
 from app.ingestion.llm import LLMClient, LLMError
-from app.ingestion.prompts.templates import (
-    CLASSIFY_PROMPT,
-    CLASSIFY_SYSTEM,
-    LLM_TEXT_OCR_PROMPT,
-    LLM_TEXT_OCR_RETRY_PROMPT,
-    LLM_TEXT_OCR_SYSTEM,
-    MODULE_GEN_PROMPT,
-    MODULE_GEN_RETRY_PROMPT,
-    MODULE_GEN_SYSTEM,
-    UNIT_TEST_PROMPT,
-    UNIT_TEST_SYSTEM,
+from app.ingestion.prompts.loader import (
+    get_schema,
+    render_classify_system,
+    render_classify_prompt,
+    render_llm_text_ocr_system,
+    render_llm_text_ocr_prompt,
+    render_llm_text_ocr_retry_prompt,
+    render_module_gen_system,
+    render_module_gen_prompt,
+    render_module_gen_retry_prompt,
+    render_unit_test_system,
+    render_unit_test_prompt,
+    validate,
 )
 from app.schemas.ingestion import ExtractedDocument, ExtractionResult
 
@@ -147,16 +150,15 @@ def run_adaptive_pipeline(
 def _classify_document(text: str, llm_client: LLMClient, result: AdaptiveResult) -> str:
     """Return document_type string; falls back to 'unknown' on any error."""
     try:
-        prompt = CLASSIFY_PROMPT.format_map(
-            {"text": text[:MAX_TEXT_CHARS], "max_chars": MAX_TEXT_CHARS}
-        )
+        prompt = render_classify_prompt(text, max_chars=MAX_TEXT_CHARS)
         raw = llm_client.complete(
             prompt=prompt,
-            system=CLASSIFY_SYSTEM,
-            json_mode=True,
+            system=render_classify_system(),
+            response_schema=get_schema("classify_response"),
             route="text:classification:sm",
         )
         parsed = json.loads(raw)
+        validate(parsed, "classify_response")
         doc_type = parsed.get("document_type", "unknown")
         logger.info(
             "Adaptive: classified as %r (confidence %.2f)",
@@ -171,6 +173,10 @@ def _classify_document(text: str, llm_client: LLMClient, result: AdaptiveResult)
     except (json.JSONDecodeError, KeyError) as exc:
         result.failure_modes.append(AdaptiveFailureMode.JSON_INVALID)
         result.warnings.append(f"Classification JSON parse error: {exc}")
+        return "unknown"
+    except jsonschema.ValidationError as exc:
+        result.failure_modes.append(AdaptiveFailureMode.SCHEMA_VALIDATION_FAILED)
+        result.warnings.append(f"Classification schema invalid: {exc.message}")
         return "unknown"
 
 
@@ -250,32 +256,29 @@ def _call_module_gen(
     """Call LLM to generate module code. Returns code string or None."""
     try:
         if retry_error:
-            prompt = MODULE_GEN_RETRY_PROMPT.format_map(
-                {
-                    "error": retry_error,
-                    "hint": "Fix the specific error described above",
-                    "document_type": doc_type,
-                    "text": text[:MAX_TEXT_CHARS],
-                    "max_chars": MAX_TEXT_CHARS,
-                }
+            prompt = render_module_gen_retry_prompt(
+                error=retry_error,
+                hint="Fix the specific error described above",
+                document_type=doc_type,
+                text=text,
+                max_chars=MAX_TEXT_CHARS,
             )
         else:
-            prompt = MODULE_GEN_PROMPT.format_map(
-                {
-                    "document_type": doc_type,
-                    "text": text[:MAX_TEXT_CHARS],
-                    "max_chars": MAX_TEXT_CHARS,
-                }
+            prompt = render_module_gen_prompt(
+                document_type=doc_type,
+                text=text,
+                max_chars=MAX_TEXT_CHARS,
             )
 
         raw = llm_client.complete(
             prompt=prompt,
-            system=MODULE_GEN_SYSTEM,
-            json_mode=True,
+            system=render_module_gen_system(),
+            response_schema=get_schema("module_gen_response"),
             route="text:generation:lg",
             timeout=90.0,
         )
         parsed = json.loads(raw)
+        validate(parsed, "module_gen_response")
         code = parsed.get("module_code", "")
         if not code or not isinstance(code, str):
             result.failure_modes.append(AdaptiveFailureMode.MODULE_SYNTAX_ERROR)
@@ -289,6 +292,10 @@ def _call_module_gen(
     except (json.JSONDecodeError, KeyError) as exc:
         result.failure_modes.append(AdaptiveFailureMode.JSON_INVALID)
         result.warnings.append(f"Module generation JSON parse error: {exc}")
+        return None
+    except jsonschema.ValidationError as exc:
+        result.failure_modes.append(AdaptiveFailureMode.SCHEMA_VALIDATION_FAILED)
+        result.warnings.append(f"Module gen schema invalid: {exc.message}")
         return None
 
 
@@ -346,22 +353,21 @@ def _call_test_gen(
 ) -> str | None:
     """Generate unit tests via LLM. Returns test code or None on failure."""
     try:
-        prompt = UNIT_TEST_PROMPT.format_map(
-            {
-                "module_code": module_code[:6000],
-                "text": text[:MAX_TEST_CHARS],
-                "max_chars": MAX_TEST_CHARS,
-                "file_path": str(file_path),
-            }
+        prompt = render_unit_test_prompt(
+            module_code=module_code,
+            text=text,
+            file_path=str(file_path),
+            max_chars=MAX_TEST_CHARS,
         )
         raw = llm_client.complete(
             prompt=prompt,
-            system=UNIT_TEST_SYSTEM,
-            json_mode=True,
+            system=render_unit_test_system(),
+            response_schema=get_schema("unit_test_response"),
             route="text:generation:md",
             timeout=60.0,
         )
         parsed = json.loads(raw)
+        validate(parsed, "unit_test_response")
         test_code = parsed.get("test_code", "")
         if not test_code or not isinstance(test_code, str):
             result.failure_modes.append(
@@ -373,6 +379,10 @@ def _call_test_gen(
     except (LLMError, json.JSONDecodeError, KeyError) as exc:
         result.failure_modes.append(AdaptiveFailureMode.MODULE_TEST_GENERATION_FAILED)
         result.warnings.append(f"Test generation failed: {exc}")
+        return None
+    except jsonschema.ValidationError as exc:
+        result.failure_modes.append(AdaptiveFailureMode.MODULE_TEST_GENERATION_FAILED)
+        result.warnings.append(f"Test gen schema invalid: {exc.message}")
         return None
 
 
@@ -500,27 +510,23 @@ def _llm_text_extraction(
     """Extract directly via LLM text prompt. Returns doc or None."""
     from app.schemas.ingestion import ExtractedDocument as ED
 
-    schema_str = str(ED.model_json_schema())
-    system = LLM_TEXT_OCR_SYSTEM.format_map({"schema": schema_str})
-
     for attempt in range(2):
         try:
             if attempt == 0:
-                prompt = LLM_TEXT_OCR_PROMPT.format_map({"text": text[:MAX_TEXT_CHARS]})
+                prompt = render_llm_text_ocr_prompt(text, max_chars=MAX_TEXT_CHARS)
             else:
                 last_err = result.warnings[-1] if result.warnings else "unknown error"
-                prompt = LLM_TEXT_OCR_RETRY_PROMPT.format_map(
-                    {
-                        "error": last_err,
-                        "hint": hint or "Try again more carefully",
-                        "text": text[:MAX_TEXT_CHARS],
-                    }
+                prompt = render_llm_text_ocr_retry_prompt(
+                    error=last_err,
+                    text=text,
+                    hint=hint,
+                    max_chars=MAX_TEXT_CHARS,
                 )
 
             raw = llm_client.complete(
                 prompt=prompt,
-                system=system,
-                json_mode=True,
+                system=render_llm_text_ocr_system(),
+                response_schema=get_schema("extracted_document"),
                 route="text:generation:md",
                 timeout=60.0,
             )

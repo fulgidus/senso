@@ -5,13 +5,17 @@ Model routing is driven by api/app/config.json → llm section.
 API keys are read from env vars per-provider (see LLMConfig.api_key_for).
 
 Public API:
-    LLMClient.complete(prompt, system, json_mode, timeout, route)
-    LLMClient.vision(prompt, system, image_bytes, json_mode, timeout, route)
+    LLMClient.complete(prompt, system, json_mode, response_schema, timeout, route)
+    LLMClient.vision(prompt, system, image_bytes, json_mode, response_schema, timeout, route)
 
 `route` is a "class:type:size" string e.g. "text:generation:sm".
 Defaults:
     complete()  → "text:generation:sm"
     vision()    → "vision:ocr:sm"
+
+`response_schema`: when provided (a JSON Schema dict), triggers OpenAI structured
+outputs (`response_format={"type":"json_schema",...}`) instead of the loose
+`json_object` mode.  Gemini providers fall back to `json_object` equivalent.
 
 Inject via get_llm_client() FastAPI dependency.
 """
@@ -63,6 +67,7 @@ class LLMClient:
         prompt: str,
         system: str = "",
         json_mode: bool = False,
+        response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "text:generation:sm",
     ) -> str:
@@ -70,6 +75,8 @@ class LLMClient:
         Text completion. Falls back through providers in priority order.
 
         `route` selects the model: "class:type:size" e.g. "text:generation:md".
+        `response_schema`: when provided, uses OpenAI structured outputs instead of
+        json_object mode. `json_mode` is ignored when response_schema is set.
         """
         cls, typ, size = _parse_route(route)
         model_route = self._cfg.route(cls, typ, size)
@@ -114,6 +121,7 @@ class LLMClient:
                     prompt=prompt,
                     system=system,
                     json_mode=json_mode,
+                    response_schema=response_schema,
                     timeout=effective_timeout,
                 )
                 trace.provider_used = pname
@@ -139,6 +147,7 @@ class LLMClient:
         system: str = "",
         image_bytes: bytes = b"",
         json_mode: bool = False,
+        response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "vision:ocr:sm",
     ) -> str:
@@ -146,6 +155,8 @@ class LLMClient:
         Vision completion. Falls back through providers in priority order.
 
         `route` selects the model: "class:type:size" e.g. "vision:ocr:md".
+        `response_schema`: when provided, uses OpenAI structured outputs instead of
+        json_object mode. `json_mode` is ignored when response_schema is set.
         """
         cls, typ, size = _parse_route(route)
         model_route = self._cfg.route(cls, typ, size)
@@ -179,6 +190,7 @@ class LLMClient:
                     system=system,
                     image_bytes=image_bytes,
                     json_mode=json_mode,
+                    response_schema=response_schema,
                     timeout=effective_timeout,
                 )
                 trace.provider_used = pname
@@ -230,6 +242,7 @@ class LLMClient:
         prompt: str,
         system: str,
         json_mode: bool,
+        response_schema: dict | None,
         timeout: float,
     ) -> tuple[str, dict | None]:
         if provider == "openrouter":
@@ -240,6 +253,7 @@ class LLMClient:
                 prompt=prompt,
                 system=system,
                 json_mode=json_mode,
+                response_schema=response_schema,
                 timeout=timeout,
             )
         if provider == "gemini":
@@ -248,7 +262,8 @@ class LLMClient:
                 model=model,
                 prompt=prompt,
                 system=system,
-                json_mode=json_mode,
+                json_mode=json_mode or (response_schema is not None),
+                timeout=timeout,
             )
         if provider == "openai":
             return self._openai_compat_complete(
@@ -258,6 +273,7 @@ class LLMClient:
                 prompt=prompt,
                 system=system,
                 json_mode=json_mode,
+                response_schema=response_schema,
                 timeout=timeout,
             )
         raise LLMError(f"Unknown provider: {provider!r}")
@@ -272,6 +288,7 @@ class LLMClient:
         system: str,
         image_bytes: bytes,
         json_mode: bool,
+        response_schema: dict | None,
         timeout: float,
     ) -> str:
         if provider == "openrouter":
@@ -283,6 +300,7 @@ class LLMClient:
                 system=system,
                 image_bytes=image_bytes,
                 json_mode=json_mode,
+                response_schema=response_schema,
                 timeout=timeout,
             )
         if provider == "gemini":
@@ -292,7 +310,8 @@ class LLMClient:
                 prompt=prompt,
                 system=system,
                 image_bytes=image_bytes,
-                json_mode=json_mode,
+                json_mode=json_mode or (response_schema is not None),
+                timeout=timeout,
             )
         if provider == "openai":
             return self._openai_compat_vision(
@@ -303,6 +322,7 @@ class LLMClient:
                 system=system,
                 image_bytes=image_bytes,
                 json_mode=json_mode,
+                response_schema=response_schema,
                 timeout=timeout,
             )
         raise LLMError(f"Unknown provider for vision: {provider!r}")
@@ -317,6 +337,7 @@ class LLMClient:
         prompt: str,
         system: str,
         json_mode: bool,
+        response_schema: dict | None,
         timeout: float,
     ) -> tuple[str, dict | None]:
         from openai import OpenAI
@@ -331,7 +352,20 @@ class LLMClient:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         call_kwargs: dict[str, Any] = {"model": model, "messages": messages}
-        if json_mode:
+        if response_schema is not None:
+            # Structured outputs — schema travels in the API call, not in the prompt
+            schema_name = (
+                response_schema.get("$id") or response_schema.get("title") or "response"
+            )
+            call_kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": schema_name,
+                    "schema": response_schema,
+                    "strict": True,
+                },
+            }
+        elif json_mode:
             call_kwargs["response_format"] = {"type": "json_object"}
         resp = client.chat.completions.create(**call_kwargs)
         usage = None
@@ -352,6 +386,7 @@ class LLMClient:
         system: str,
         image_bytes: bytes,
         json_mode: bool,
+        response_schema: dict | None,
         timeout: float,
     ) -> str:
         import base64
@@ -380,7 +415,19 @@ class LLMClient:
             }
         )
         call_kwargs: dict[str, Any] = {"model": model, "messages": messages}
-        if json_mode:
+        if response_schema is not None:
+            schema_name = (
+                response_schema.get("$id") or response_schema.get("title") or "response"
+            )
+            call_kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": schema_name,
+                    "schema": response_schema,
+                    "strict": True,
+                },
+            }
+        elif json_mode:
             call_kwargs["response_format"] = {"type": "json_object"}
         resp = client.chat.completions.create(**call_kwargs)
         return resp.choices[0].message.content or ""
@@ -394,18 +441,24 @@ class LLMClient:
         prompt: str,
         system: str,
         json_mode: bool,
+        timeout: float | None = None,
     ) -> tuple[str, dict | None]:
         from google import genai
+        from google.genai import types
 
         client = genai.Client(api_key=api_key)
         cfg: dict[str, Any] = {}
         if json_mode:
             cfg["response_mime_type"] = "application/json"
         full_prompt = f"{system}\n\n{prompt}" if system else prompt
+        request_options = (
+            types.RequestOptions(timeout=int(timeout * 1000)) if timeout else None
+        )
         response = client.models.generate_content(
             model=model,
             contents=full_prompt,
             config=cfg if cfg else None,
+            request_options=request_options,
         )
         usage = None
         try:
@@ -427,6 +480,7 @@ class LLMClient:
         system: str,
         image_bytes: bytes,
         json_mode: bool,
+        timeout: float | None = None,
     ) -> str:
         from google import genai
         from google.genai import types
@@ -436,6 +490,9 @@ class LLMClient:
         cfg: dict[str, Any] = {}
         if json_mode:
             cfg["response_mime_type"] = "application/json"
+        request_options = (
+            types.RequestOptions(timeout=int(timeout * 1000)) if timeout else None
+        )
         response = client.models.generate_content(
             model=model,
             contents=[
@@ -443,6 +500,7 @@ class LLMClient:
                 full_prompt,
             ],
             config=cfg if cfg else None,
+            request_options=request_options,
         )
         return response.text
 

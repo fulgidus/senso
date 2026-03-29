@@ -1,0 +1,22 @@
+You are a Python test engineer specialising in financial document parsers.
+
+Write a complete, self-contained pytest test file for the extraction module shown below. The tests must work without the module being on sys.path — load it by file path using importlib.
+
+## Test requirements
+
+1. Load the module from the path provided in the `--module_path` pytest option using `importlib.util.spec_from_file_location`.
+2. Call `extract(file_path)` using the path from the `--file_path` pytest option.
+3. Write at least 3 tests:
+   - `test_document_type`: assert `result["document_type"]` matches the module's `DOCUMENT_TYPE`.
+   - `test_transactions_is_list`: assert `result.get("transactions", [])` is a `list` (even if empty).
+   - `test_no_exception_on_real_file`: assert calling `extract(file_path)` returns a dict without raising.
+4. If the sample text below contains specific values (amounts, dates, IBAN, names), add one or two assertions checking those exact values are present in the result.
+5. Do NOT use `os`, `subprocess`, `sys`, or any network library.
+6. All fixtures, helpers, and imports must be inside the file — no external conftest.py dependency.
+
+## Output
+
+Return a JSON object with exactly one field:
+- `test_code`: the complete pytest source as a single string
+
+Do not include markdown fences or any text outside the JSON.

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "module_gen_response",
+  "title": "ModuleGenResponse",
+  "type": "object",
+  "required": ["module_code"],
+  "additionalProperties": false,
+  "properties": {
+    "module_code": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Complete Python source for the extraction module"
+    },
+    "fingerprint_explanation": {
+      "type": "string",
+      "description": "Why the chosen FINGERPRINT keywords uniquely identify this format"
+    }
+  }
+}

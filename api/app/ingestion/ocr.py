@@ -26,11 +26,12 @@ import logging
 from pathlib import Path
 
 from app.ingestion.llm import LLMClient, LLMError
-from app.ingestion.prompts.templates import (
-    LLM_TEXT_OCR_PROMPT,
-    LLM_TEXT_OCR_SYSTEM,
-    LLM_VISION_OCR_PROMPT,
-    LLM_VISION_OCR_SYSTEM,
+from app.ingestion.prompts.loader import (
+    get_schema,
+    render_llm_text_ocr_system,
+    render_llm_text_ocr_prompt,
+    render_llm_vision_ocr_system,
+    render_llm_vision_ocr_prompt,
 )
 from app.schemas.ingestion import ExtractedDocument, ExtractionResult
 
@@ -120,14 +121,11 @@ def _llm_text_fallback(
     text: str, llm_client: LLMClient, tier: str
 ) -> ExtractionResult | None:
     """Direct LLM text extraction. Returns None on failure."""
-    schema_str = str(ExtractedDocument.model_json_schema())
-    system = LLM_TEXT_OCR_SYSTEM.format_map({"schema": schema_str})
-    prompt = LLM_TEXT_OCR_PROMPT.format_map({"text": text[:8000]})
     try:
         raw = llm_client.complete(
-            prompt=prompt,
-            system=system,
-            json_mode=True,
+            prompt=render_llm_text_ocr_prompt(text),
+            system=render_llm_text_ocr_system(),
+            response_schema=get_schema("extracted_document"),
             route="text:generation:md",
             timeout=60.0,
         )
@@ -149,14 +147,12 @@ def _llm_vision_fallback(
     """
     Last-resort LLM vision extraction. Raises LLMError if all providers fail.
     """
-    schema_str = str(ExtractedDocument.model_json_schema())
-    system = LLM_VISION_OCR_SYSTEM.format_map({"schema": schema_str})
     image_bytes = file_path.read_bytes()
     raw = llm_client.vision(
-        prompt=LLM_VISION_OCR_PROMPT,
-        system=system,
+        prompt=render_llm_vision_ocr_prompt(),
+        system=render_llm_vision_ocr_system(),
         image_bytes=image_bytes,
-        json_mode=True,
+        response_schema=get_schema("extracted_document"),
         route="vision:ocr:lg",
     )
     doc = ExtractedDocument(**json.loads(raw))

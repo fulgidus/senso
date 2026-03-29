@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "unit_test_response",
+  "title": "UnitTestResponse",
+  "type": "object",
+  "required": ["test_code"],
+  "additionalProperties": false,
+  "properties": {
+    "test_code": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Complete pytest source for validating the extraction module"
+    }
+  }
+}

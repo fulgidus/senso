@@ -278,7 +278,7 @@ class CoachingService:
             raw = self.llm.complete(
                 prompt=prompt,
                 system=system_prompt,
-                json_mode=True,
+                response_schema=self._response_schema,
                 timeout=45.0,
             )
         except LLMError as exc:
@@ -426,7 +426,6 @@ class CoachingService:
     def _render_response_format(self) -> str:
         tmpl = self._jinja_env.get_template("response_format.j2")
         return tmpl.render(
-            schema_json=json.dumps(self._response_schema, indent=2, ensure_ascii=False),
             capabilities_json=json.dumps(
                 self._capabilities, indent=2, ensure_ascii=False
             ),

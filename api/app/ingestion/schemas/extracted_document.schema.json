@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "extracted_document",
+  "title": "ExtractedDocument",
+  "type": "object",
+  "required": ["document_type"],
+  "additionalProperties": false,
+  "properties": {
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "bank_statement",
+        "payslip",
+        "receipt",
+        "invoice",
+        "f24_tax_form",
+        "road_fine",
+        "certificato_unico",
+        "utility_bill",
+        "unknown"
+      ]
+    },
+    "module_name":    { "type": ["string", "null"] },
+    "module_source":  { "type": ["string", "null"], "enum": ["builtin", "generated", "promoted", null] },
+    "module_version": { "type": ["string", "null"] },
+
+    "transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "description", "amount"],
+        "additionalProperties": false,
+        "properties": {
+          "date":          { "type": "string", "description": "ISO 8601 date (YYYY-MM-DD)" },
+          "description":   { "type": "string" },
+          "amount":        { "type": "number", "description": "Negative = debit, positive = credit" },
+          "currency":      { "type": "string", "default": "EUR" },
+          "category_hint": { "type": ["string", "null"] },
+          "balance_after": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "account_holder":        { "type": ["string", "null"] },
+    "account_iban":          { "type": ["string", "null"] },
+    "statement_period_start":{ "type": ["string", "null"], "description": "ISO 8601 date" },
+    "statement_period_end":  { "type": ["string", "null"], "description": "ISO 8601 date" },
+
+    "employer":         { "type": ["string", "null"] },
+    "employee_name":    { "type": ["string", "null"] },
+    "pay_period_start": { "type": ["string", "null"], "description": "ISO 8601 date" },
+    "pay_period_end":   { "type": ["string", "null"], "description": "ISO 8601 date" },
+    "gross_income":     { "type": ["number", "null"] },
+    "net_income":       { "type": ["number", "null"] },
+    "currency":         { "type": "string", "default": "EUR" },
+    "deductions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "amount"],
+        "additionalProperties": false,
+        "properties": {
+          "label":  { "type": "string" },
+          "amount": { "type": "number" }
+        }
+      }
+    },
+
+    "merchant":       { "type": ["string", "null"] },
+    "purchase_date":  { "type": ["string", "null"], "description": "ISO 8601 date" },
+    "total_amount":   { "type": ["number", "null"] },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "amount"],
+        "additionalProperties": false,
+        "properties": {
+          "label":  { "type": "string" },
+          "amount": { "type": "number" }
+        }
+      }
+    },
+
+    "provider":               { "type": ["string", "null"] },
+    "service_type":           { "type": ["string", "null"] },
+    "billing_period_start":   { "type": ["string", "null"], "description": "ISO 8601 date" },
+    "billing_period_end":     { "type": ["string", "null"], "description": "ISO 8601 date" },
+    "total_due":              { "type": ["number", "null"] },
+    "account_number":         { "type": ["string", "null"] }
+  }
+}
