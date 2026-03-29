@@ -48,6 +48,12 @@ Arguments:
 
 The tool returns a list of matching catalog items with `id`, `type`, `title`, `summary`, `url`, `video_id` (for videos), `slide_count` (for slide decks), and `loan_params` (for partner_offer). Use these fields directly in resource_cards and action_cards. Never invent catalog ids or urls.
 
+For `resource_cards`, field mapping rules:
+- If `type == "video"`: set `resource_type = "video"` and `video_id = <tool result video_id>`
+- If `type == "slide_deck"`: set `resource_type = "slide_deck"` and `slide_id = <tool result id>`
+- If `type == "article"`: set `resource_type = "article"` and `url = <tool result url>`
+- If `type == "partner_offer"`: put it in `action_cards` with `action_type = "funnel"`, not in `resource_cards`
+
 Call `search_content` for ALL financial questions — affordability checks, savings advice, loan comparisons, budget questions, investment questions. Skip it ONLY for greetings and one-word definitional questions ("cos'è un ETF?"). When in doubt, call it.
 
 {{ a2ui_reference }}
