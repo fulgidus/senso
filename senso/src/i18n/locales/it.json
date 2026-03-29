@@ -73,7 +73,9 @@
         "stepCategorising": "Categorizzazione transazioni",
         "stepPatterns": "Identificazione schemi",
         "stepInsights": "Generazione approfondimenti",
-        "stepProfile": "Costruzione del profilo"
+        "stepProfile": "Costruzione del profilo",
+        "txnCount": "{{count}} transazioni",
+        "transactionsLabel": "transazioni elaborate"
     },
     "profile": {
         "heading": "Il tuo profilo finanziario",

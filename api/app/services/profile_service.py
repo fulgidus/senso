@@ -65,6 +65,7 @@ class ProfileService:
             completedAt=job.completed_at.isoformat() if job.completed_at else None,
             uploadsFingerprint=stored_fp,
             currentUploadsFingerprint=current_fp,
+            progressDetail=job.progress_detail,
         )
 
     def save_questionnaire(self, user_id: str, answers: dict) -> dict:

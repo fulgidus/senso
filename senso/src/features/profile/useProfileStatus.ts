@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { getProfileStatus, type CategorizationStatus } from "@/lib/profile-api"
+import { getProfileStatus, type CategorizationStatus, type ProgressDetail } from "@/lib/profile-api"
 
 type UseProfileStatusOptions = {
     token: string | null
@@ -10,6 +10,7 @@ type UseProfileStatusOptions = {
 type ProfileStatusState = {
     status: CategorizationStatus
     errorMessage: string | null
+    progressDetail: ProgressDetail | null
 }
 
 export function useProfileStatus({
@@ -20,6 +21,7 @@ export function useProfileStatus({
     const [state, setState] = useState<ProfileStatusState>({
         status: "queued",
         errorMessage: null,
+        progressDetail: null,
     })
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const completedRef = useRef(false)
@@ -35,7 +37,11 @@ export function useProfileStatus({
         if (!token || completedRef.current) return
         try {
             const data = await getProfileStatus(token)
-            setState({ status: data.status, errorMessage: data.errorMessage ?? null })
+            setState({
+                status: data.status,
+                errorMessage: data.errorMessage ?? null,
+                progressDetail: data.progressDetail ?? null,
+            })
             if (data.status === "complete" && !completedRef.current) {
                 completedRef.current = true
                 clearPolling()

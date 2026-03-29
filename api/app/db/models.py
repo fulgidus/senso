@@ -259,6 +259,12 @@ class CategorizationJob(Base):
     status: str = Column(String(32), nullable=False, default="queued")
     # "queued" | "categorizing" | "generating_insights" | "complete" | "failed"
     error_message: str | None = Column(Text, nullable=True, default=None)
+    # Granular per-file progress, updated during run. Shape:
+    # {
+    #   "files": [{"id": str, "name": str, "status": "pending"|"processing"|"done", "txn_count": int}],
+    #   "txn_total": int, "txn_categorised": int, "current_step_detail": str
+    # }
+    progress_detail: dict | None = Column(JSON, nullable=True, default=None)
     started_at: datetime | None = Column(
         DateTime(timezone=True), nullable=True, default=None
     )

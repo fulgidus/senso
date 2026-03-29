@@ -11,6 +11,20 @@ export type CategorizationStatus =
     | "complete"
     | "failed"
 
+export type ProgressFile = {
+    id: string
+    name: string
+    status: "pending" | "processing" | "done"
+    txn_count: number | null
+}
+
+export type ProgressDetail = {
+    files: ProgressFile[]
+    txn_total: number
+    txn_categorised: number
+    current_step_detail: string
+}
+
 export type CategorizationStatusResponse = {
     status: CategorizationStatus
     errorMessage?: string | null
@@ -20,6 +34,8 @@ export type CategorizationStatusResponse = {
     uploadsFingerprint?: string | null
     /** SHA-256 fingerprint of currently confirmed uploads (live-computed) */
     currentUploadsFingerprint?: string | null
+    /** Granular per-file progress populated during a categorization run */
+    progressDetail?: ProgressDetail | null
 }
 
 export type IncomeSummary = {

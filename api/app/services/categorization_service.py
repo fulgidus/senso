@@ -18,7 +18,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from app.db.models import CategorizationJob, Transaction, UserProfile
+from app.db.models import CategorizationJob, Transaction, Upload, UserProfile
 from app.db.repository import (
     get_categorization_job,
     get_confirmed_payslip_documents,
@@ -193,6 +193,31 @@ class CategorizationService:
         self.db = db
         self.llm = llm_client
 
+    # ────────────────────────────────────────────────────────────────
+    # Progress tracking
+    # ────────────────────────────────────────────────────────────────
+
+    def _update_progress(
+        self,
+        user_id: str,
+        files: list[dict],
+        txn_total: int,
+        txn_categorised: int,
+        step_detail: str,
+    ) -> None:
+        """Write granular progress to categorization_jobs.progress_detail and commit."""
+        upsert_categorization_job(
+            self.db,
+            user_id,
+            progress_detail={
+                "files": files,
+                "txn_total": txn_total,
+                "txn_categorised": txn_categorised,
+                "current_step_detail": step_detail,
+            },
+        )
+        self.db.commit()
+
     def run_categorization(self, user_id: str) -> None:
         """Full categorization pipeline. Called as BackgroundTask after confirm-all."""
         seed_default_tags(self.db)
@@ -203,6 +228,7 @@ class CategorizationService:
             status="categorizing",
             started_at=datetime.now(UTC),
             error_message=None,
+            progress_detail=None,
         )
 
         try:
@@ -211,27 +237,96 @@ class CategorizationService:
                 self._finalize_profile(user_id, transactions)
                 return
 
+            # Build per-file metadata from confirmed uploads
+            upload_ids = list({t.upload_id for t in transactions})
+            uploads: dict[str, Upload] = {}
+            for uid in upload_ids:
+                row = self.db.query(Upload).filter(Upload.id == uid).first()
+                if row:
+                    uploads[uid] = row
+
+            # Ordered list of file entries (stable order for display)
+            file_entries: list[dict] = [
+                {
+                    "id": uid,
+                    "name": uploads[uid].original_filename if uid in uploads else uid,
+                    "status": "pending",
+                    "txn_count": None,
+                }
+                for uid in upload_ids
+            ]
+            txn_total = len(transactions)
+
+            # Emit initial progress (all pending)
+            self._update_progress(
+                user_id, file_entries, txn_total, 0, "Avvio categorizzazione"
+            )
+
             # Step D: Transfer reconciliation (before any categorization)
             self._reconcile_transfers(transactions)
             self.db.commit()
 
             # Step 1: Rules pass (skip already-reconciled internal_transfer rows)
-            unmatched = []
-            for txn in transactions:
-                if txn.category == "internal_transfer":
-                    continue  # already handled by reconciliation
-                category, auto_tags = self._apply_rules(txn.description)
-                if category:
-                    txn.category = category
-                    txn.tags = list(set(auto_tags + (txn.tags or [])))
-                else:
-                    unmatched.append(txn)
+            # Process per-file to track progress
+            categorised_so_far = 0
+            unmatched: list[Transaction] = []
+
+            for idx, entry in enumerate(file_entries):
+                uid = entry["id"]
+                file_txns = [t for t in transactions if t.upload_id == uid]
+
+                # Mark this file as processing
+                file_entries[idx]["status"] = "processing"
+                self._update_progress(
+                    user_id,
+                    file_entries,
+                    txn_total,
+                    categorised_so_far,
+                    f"Regole: {entry['name']}",
+                )
+
+                file_unmatched = []
+                for txn in file_txns:
+                    if txn.category == "internal_transfer":
+                        categorised_so_far += 1
+                        continue
+                    category, auto_tags = self._apply_rules(txn.description)
+                    if category:
+                        txn.category = category
+                        txn.tags = list(set(auto_tags + (txn.tags or [])))
+                        categorised_so_far += 1
+                    else:
+                        file_unmatched.append(txn)
+
+                unmatched.extend(file_unmatched)
+
+                # Mark file done for rules phase (LLM may still touch it)
+                file_entries[idx]["status"] = "done"
+                file_entries[idx]["txn_count"] = len(file_txns)
+                self._update_progress(
+                    user_id,
+                    file_entries,
+                    txn_total,
+                    categorised_so_far,
+                    f"Regole completate: {entry['name']}",
+                )
 
             self.db.commit()
 
             # Step 2: LLM fallback for unmatched
             if unmatched:
-                self._llm_classify_batch(unmatched)
+                self._llm_classify_batch_with_progress(
+                    unmatched, user_id, file_entries, txn_total, categorised_so_far
+                )
+                categorised_so_far += len(unmatched)
+            else:
+                self._update_progress(
+                    user_id,
+                    file_entries,
+                    txn_total,
+                    categorised_so_far,
+                    "Classificazione LLM non necessaria",
+                )
 
             # Step B: Tag recurring unknowns as possible_income
             self._tag_possible_income(transactions)
@@ -239,7 +334,13 @@ class CategorizationService:
 
             # Step 3: Generate insights
             upsert_categorization_job(self.db, user_id, status="generating_insights")
-            self.db.commit()
+            self._update_progress(
+                user_id,
+                file_entries,
+                txn_total,
+                txn_total,
+                "Generazione approfondimenti",
+            )
 
             self._finalize_profile(user_id, transactions)
 
@@ -395,9 +496,88 @@ class CategorizationService:
 
         self.db.commit()
 
-    # ────────────────────────────────────────────────────────────────
-    # B: Tag recurring unknowns as possible_income
-    # ────────────────────────────────────────────────────────────────
+    def _llm_classify_batch_with_progress(
+        self,
+        transactions: list[Transaction],
+        user_id: str,
+        file_entries: list[dict],
+        txn_total: int,
+        categorised_before: int,
+    ) -> None:
+        """LLM batch classification with per-batch progress updates."""
+        BATCH_SIZE = 50
+        valid_cats = sorted(VALID_CATEGORIES)
+        categorised_now = 0
+
+        for i in range(0, len(transactions), BATCH_SIZE):
+            batch = transactions[i : i + BATCH_SIZE]
+            batch_num = i // BATCH_SIZE + 1
+            total_batches = (len(transactions) + BATCH_SIZE - 1) // BATCH_SIZE
+            step_detail = (
+                f"Classificazione LLM ({categorised_before + categorised_now + len(batch)}"
+                f"/{txn_total})"
+                if total_batches > 1
+                else f"Classificazione LLM ({len(transactions)} transazioni)"
+            )
+            self._update_progress(
+                user_id,
+                file_entries,
+                txn_total,
+                categorised_before + categorised_now,
+                step_detail,
+            )
+
+            items = [
+                {"idx": j, "description": t.description, "amount": float(t.amount)}
+                for j, t in enumerate(batch)
+            ]
+            prompt = (
+                f"Classify each transaction into exactly one category from this list:\n"
+                f"{valid_cats}\n\n"
+                f"IMPORTANT RULES:\n"
+                f"- Use 'income' ONLY for regular recurring salary/freelance income.\n"
+                f"- Use 'extraordinary_income' for one-off large credits: inheritance, gifts, "
+                f"gambling wins, crypto sales, stock liquidations, severance, TFR.\n"
+                f"- Use 'internal_transfer' for movements between the user's own accounts "
+                f"(e.g. top-up to Revolut, transfer to savings, PayPal transfer to bank).\n"
+                f"- Use 'transfers' only for P2P payments to other people.\n\n"
+                f"Return a JSON array:\n"
+                f'[{{"idx": 0, "category": "...", "tags": []}}, ...]\n\n'
+                f"Tags must be from: recurring, subscription, food_delivery, fast_food, "
+                f"peer_transfer, savings_transfer, refund, work_income, freelance_income, "
+                f"interest, utility, telecom, hosting, tech_tools, transport, pet, health, "
+                f"donation, condominium, extraordinary, one_off\n\n"
+                f"Transactions:\n{json.dumps(items, ensure_ascii=False)}"
+            )
+            try:
+                raw = self.llm.complete(
+                    prompt=prompt,
+                    system="You are a financial transaction classifier. Respond only with valid JSON.",
+                    json_mode=True,
+                    timeout=30.0,
+                )
+                results = json.loads(raw)
+                for item in results:
+                    idx = item.get("idx")
+                    if idx is None or idx >= len(batch):
+                        continue
+                    txn = batch[idx]
+                    cat = item.get("category", "uncategorized")
+                    if cat not in VALID_CATEGORIES:
+                        cat = "uncategorized"
+                    txn.category = cat
+                    txn.tags = list(set(item.get("tags", []) + (txn.tags or [])))
+            except (LLMError, json.JSONDecodeError, Exception) as exc:
+                logger.warning(
+                    "LLM batch classification failed (batch %d): %s", batch_num, exc
+                )
+                for txn in batch:
+                    if not txn.category:
+                        txn.category = "uncategorized"
+
+            categorised_now += len(batch)
+
+        self.db.commit()
 
     def _tag_possible_income(self, transactions: list[Transaction]) -> None:
         """

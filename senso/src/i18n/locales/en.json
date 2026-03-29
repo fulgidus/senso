@@ -73,7 +73,9 @@
         "stepCategorising": "Categorising transactions",
         "stepPatterns": "Identifying patterns",
         "stepInsights": "Generating insights",
-        "stepProfile": "Building your profile"
+        "stepProfile": "Building your profile",
+        "txnCount": "{{count}} transactions",
+        "transactionsLabel": "transactions processed"
     },
     "profile": {
         "heading": "Your financial profile",

@@ -135,6 +135,9 @@ class CategorizationStatusDTO(BaseModel):
     current_uploads_fingerprint: str | None = Field(
         alias="currentUploadsFingerprint", default=None
     )
+    # Granular per-file progress populated during a categorization run.
+    # Shape: {"files": [...], "txn_total": int, "txn_categorised": int, "current_step_detail": str}
+    progress_detail: dict | None = Field(alias="progressDetail", default=None)
 
     model_config = {"populate_by_name": True}
 
