@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
+import uuid_utils as uuid_utils_lib
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -32,7 +34,7 @@ from app.personas.loader import (
     get_persona_default_gender,
 )
 from app.core.config import get_settings
-from app.db.models import ChatMessage, ChatSession
+from app.db.models import ChatMessage, ChatSession, SessionParticipant
 from app.db.session import get_db
 from app.ingestion.guardrail import check_coaching_input
 from app.schemas.auth import UserDTO
@@ -59,6 +61,7 @@ class TTSRequest(BaseModel):
     locale: Literal["it", "en"] = "it"
     persona_id: str | None = None
     gender: str | None = None
+    message_id: str | None = None  # FK to chat_messages.id for AudioCache tracking
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -69,7 +72,7 @@ def _auto_session_name(session: ChatSession) -> str:
     return session.created_at.strftime("Conversazione %d %b %Y %H:%M")
 
 
-def _session_to_dto(session: ChatSession) -> SessionSummaryDTO:
+def _session_to_dto(session: ChatSession, viewer_id: str) -> SessionSummaryDTO:
     messages = session.messages
     last_preview = None
     for msg in reversed(messages):
@@ -90,6 +93,53 @@ def _session_to_dto(session: ChatSession) -> SessionSummaryDTO:
         locale=session.locale,
         persona_id=session.persona_id,
     )
+
+
+def _get_participant_session(
+    db: Session,
+    session_id: str,
+    user_id: str,
+) -> ChatSession:
+    """Return the session if the user is a participant, else raise 404."""
+    session = (
+        db.query(ChatSession)
+        .join(SessionParticipant, SessionParticipant.session_id == ChatSession.id)
+        .filter(
+            ChatSession.id == session_id,
+            SessionParticipant.participant_id == user_id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "session_not_found", "message": "Session not found"},
+        )
+    return session
+
+
+def _get_admin_session(
+    db: Session,
+    session_id: str,
+    user_id: str,
+) -> ChatSession:
+    """Return the session if the user is a session admin, else raise 404."""
+    session = (
+        db.query(ChatSession)
+        .join(SessionParticipant, SessionParticipant.session_id == ChatSession.id)
+        .filter(
+            ChatSession.id == session_id,
+            SessionParticipant.participant_id == user_id,
+            SessionParticipant.is_session_admin == True,  # noqa: E712
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "session_not_found", "message": "Session not found"},
+        )
+    return session
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -116,23 +166,12 @@ def coaching_chat(
     # Load or create session
     session: ChatSession | None = None
     if body.session_id:
-        session = (
-            db.query(ChatSession)
-            .filter(
-                ChatSession.id == body.session_id,
-                ChatSession.user_id == current_user.id,
-            )
-            .first()
-        )
-        if not session:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={"code": "session_not_found", "message": "Session not found"},
-            )
+        session = _get_participant_session(db, body.session_id, current_user.id)
     else:
+        new_id = str(uuid_utils_lib.uuid7())
         session = ChatSession(
-            id=str(uuid4()),
-            user_id=current_user.id,
+            id=new_id,
+            creator_id=current_user.id,
             persona_id=body.persona_id,
             locale=body.locale,
             created_at=datetime.now(UTC),
@@ -140,6 +179,19 @@ def coaching_chat(
         )
         db.add(session)
         db.flush()  # get id without committing
+
+        # Auto-insert creator as session admin with full permissions
+        db.add(
+            SessionParticipant(
+                session_id=session.id,
+                participant_id=current_user.id,
+                is_session_admin=True,
+                can_talk=True,
+                can_invite_participants=True,
+                can_share=True,
+            )
+        )
+        db.flush()
 
     # Build message history from DB
     prior_messages = [{"role": m.role, "content": m.content} for m in session.messages]
@@ -169,22 +221,28 @@ def coaching_chat(
             detail={"code": exc.code, "message": exc.message},
         )
 
-    # Persist user message
+    # Persist user message (sender_id = the user, no persona)
+    user_msg_id = str(uuid_utils_lib.uuid7())
     db.add(
         ChatMessage(
-            id=str(uuid4()),
+            id=user_msg_id,
             session_id=session.id,
+            sender_id=current_user.id,
+            persona_id=None,
             role="user",
             content=body.message,
             created_at=datetime.now(UTC),
         )
     )
 
-    # Persist assistant response (as JSON string)
+    # Persist assistant response (sender_id = NULL, persona_id = the active persona)
+    assistant_msg_id = str(uuid_utils_lib.uuid7())
     db.add(
         ChatMessage(
-            id=str(uuid4()),
+            id=assistant_msg_id,
             session_id=session.id,
+            sender_id=None,
+            persona_id=body.persona_id,
             role="assistant",
             content=json.dumps(result, ensure_ascii=False),
             created_at=datetime.now(UTC),
@@ -211,14 +269,15 @@ def list_sessions(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all coaching sessions for the current user, newest first."""
+    """List all coaching sessions where the current user is a participant, newest first."""
     sessions = (
         db.query(ChatSession)
-        .filter(ChatSession.user_id == current_user.id)
+        .join(SessionParticipant, SessionParticipant.session_id == ChatSession.id)
+        .filter(SessionParticipant.participant_id == current_user.id)
         .order_by(ChatSession.updated_at.desc())
         .all()
     )
-    return [_session_to_dto(s) for s in sessions]
+    return [_session_to_dto(s, current_user.id) for s in sessions]
 
 
 @router.get("/sessions/{session_id}/messages", response_model=list[ChatMessageDTO])
@@ -227,19 +286,16 @@ def get_session_messages(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get all messages in a session. 404 if not found or not owned by user."""
-    session = (
-        db.query(ChatSession)
-        .filter(ChatSession.id == session_id, ChatSession.user_id == current_user.id)
-        .first()
-    )
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "session_not_found", "message": "Session not found"},
-        )
+    """Get all messages in a session. 404 if not found or user is not a participant."""
+    session = _get_participant_session(db, session_id, current_user.id)
     return [
-        ChatMessageDTO(role=m.role, content=m.content, created_at=m.created_at)
+        ChatMessageDTO(
+            role=m.role,
+            content=m.content,
+            created_at=m.created_at,
+            sender_id=m.sender_id,
+            persona_id=m.persona_id,
+        )
         for m in session.messages
     ]
 
@@ -251,22 +307,13 @@ def rename_session(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Rename a coaching session. Rejects empty names."""
-    session = (
-        db.query(ChatSession)
-        .filter(ChatSession.id == session_id, ChatSession.user_id == current_user.id)
-        .first()
-    )
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "session_not_found", "message": "Session not found"},
-        )
+    """Rename a coaching session. Requires is_session_admin."""
+    session = _get_admin_session(db, session_id, current_user.id)
     session.name = body.name.strip()
     session.updated_at = datetime.now(UTC)
     db.commit()
     db.refresh(session)
-    return _session_to_dto(session)
+    return _session_to_dto(session, current_user.id)
 
 
 @router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -275,17 +322,8 @@ def delete_session(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete a coaching session and all its messages (cascade)."""
-    session = (
-        db.query(ChatSession)
-        .filter(ChatSession.id == session_id, ChatSession.user_id == current_user.id)
-        .first()
-    )
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": "session_not_found", "message": "Session not found"},
-        )
+    """Delete a coaching session and all its messages/audio. Requires is_session_admin."""
+    session = _get_admin_session(db, session_id, current_user.id)
     db.delete(session)
     db.commit()
 
@@ -348,10 +386,14 @@ def get_personas(
 def tts_speak(
     req: TTSRequest,
     current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
     settings=Depends(get_settings),
     minio_client=Depends(get_minio_client),
 ):
-    """Convert coaching response message to MP3 audio bytes via ElevenLabs (MinIO-cached)."""
+    """Convert coaching response message to MP3 audio bytes via ElevenLabs (MinIO-cached).
+
+    Pass message_id to link the generated audio to a ChatMessage row in audio_cache.
+    """
     # req.gender overrides the user preference; if absent, honour user's stored preference
     effective_gender = resolve_effective_gender(
         req.gender or current_user.voice_gender,
@@ -361,7 +403,7 @@ def tts_speak(
     svc = TTSService(
         api_key=settings.elevenlabs_api_key,
         minio_client=minio_client,
-        bucket=settings.minio_bucket,
+        bucket=settings.minio_tts_bucket,
     )
     el_settings = get_elevenlabs_settings(req.persona_id)
     vs = ElevenLabsVoiceSettings(
@@ -377,6 +419,8 @@ def tts_speak(
             req.locale,
             normalization=el_settings.get("normalization", "elevenlabs"),
             voice_settings=vs,
+            db=db if req.message_id else None,
+            message_id=req.message_id,
         )
     except TTSUnavailableError as exc:
         raise HTTPException(

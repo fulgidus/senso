@@ -24,6 +24,10 @@ class ChatMessageDTO(BaseModel):
     role: Literal["user", "assistant"]
     content: str
     created_at: Optional[datetime] = None
+    # For role=="user": the user who sent the message.
+    sender_id: Optional[str] = None
+    # For role=="assistant": which persona was speaking.
+    persona_id: Optional[str] = None
 
     model_config = {"populate_by_name": True}
 

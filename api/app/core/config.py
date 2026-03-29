@@ -18,7 +18,8 @@ class Settings:
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
-    minio_bucket: str
+    minio_bucket: str  # user uploads — treat as sensitive, do not nuke
+    minio_tts_bucket: str  # TTS audio cache — safe to nuke entirely
     # Debug flags
     llm_debug: bool
     # Database URL
@@ -101,6 +102,7 @@ def get_settings() -> Settings:
         minio_access_key=os.getenv("MINIO_ROOT_USER", "minioadmin"),
         minio_secret_key=os.getenv("MINIO_ROOT_PASSWORD", "minioadmin"),
         minio_bucket=os.getenv("MINIO_BUCKET", "senso-uploads"),
+        minio_tts_bucket=os.getenv("MINIO_TTS_BUCKET", "senso-tts-audio"),
         # Debug flags
         llm_debug=os.getenv("LLM_DEBUG", "false").lower() == "true",
         # Database URL

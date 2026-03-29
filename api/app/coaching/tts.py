@@ -15,6 +15,10 @@ import hashlib
 import io
 import logging
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +73,8 @@ class TTSService:
         locale: str = "it",
         normalization: str = "elevenlabs",
         voice_settings: ElevenLabsVoiceSettings | None = None,
+        db: "Session | None" = None,
+        message_id: str | None = None,
     ) -> bytes:
         """Convert text to MP3 bytes via ElevenLabs, with MinIO caching.
 
@@ -79,6 +85,9 @@ class TTSService:
             normalization: "elevenlabs" - send verbatim (recommended);
                            "internal" - truncate at sentence boundary first.
             voice_settings: ElevenLabs VoiceSettings parameters. Defaults used if None.
+            db:            Optional SQLAlchemy session. If provided alongside message_id,
+                           an AudioCache row is written after a successful cache-store.
+            message_id:    FK to chat_messages.id for AudioCache tracking.
 
         Raises TTSUnavailableError on configuration or API failure.
         """
@@ -139,6 +148,7 @@ class TTSService:
 
         # ── Cache write ───────────────────────────────────────────────────────
         if self._minio and self._bucket and audio_bytes:
+            stored = False
             try:
                 self._minio.put_object(
                     self._bucket,
@@ -148,7 +158,33 @@ class TTSService:
                     content_type="audio/mpeg",
                 )
                 logger.debug("TTS cached: %s (%d bytes)", object_name, len(audio_bytes))
+                stored = True
             except Exception as exc:
                 logger.warning("TTS cache write failed (%s): %s", object_name, exc)
+
+            # ── AudioCache DB row ─────────────────────────────────────────────
+            if stored and db is not None and message_id is not None:
+                try:
+                    from app.db.models import (
+                        AudioCache,
+                    )  # avoid circular at module level
+
+                    entry = AudioCache(
+                        message_id=message_id,
+                        minio_bucket=self._bucket,
+                        minio_key=object_name,
+                    )
+                    db.add(entry)
+                    db.commit()
+                    logger.debug(
+                        "AudioCache row written for message %s → %s",
+                        message_id,
+                        object_name,
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        "AudioCache DB write failed for message %s: %s", message_id, exc
+                    )
+                    db.rollback()
 
         return audio_bytes
