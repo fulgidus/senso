@@ -9,8 +9,8 @@
 set -euo pipefail
 
 API_URL="${API_URL:-http://localhost:8000}"
-DEMO_EMAIL="${DEMO_EMAIL:-demo@senso.app}"
-DEMO_PASSWORD="${DEMO_PASSWORD:-SensoDEMO2026!}"
+DEMO_EMAIL="${DEMO_EMAIL:-demo@sen.so}"
+DEMO_PASSWORD="${DEMO_PASSWORD:-demodemo!}"
 SAMPLES_DIR="$(dirname "$0")/../api/app/ingestion/samples"
 
 # ── Colors ───────────────────────────────────────────────────────────────────

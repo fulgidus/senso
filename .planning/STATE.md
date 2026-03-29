@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete - ready for verification
-stopped_at: Phase 7 UI-SPEC approved
-last_updated: "2026-03-29T18:48:35.724Z"
+status: Ready to execute
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-03-29T18:54:40.192Z"
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 29
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 07 (streaming-nice-to-have-polish) - EXECUTING
-Plan: 1 of 4
+Plan: 2 of 4
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Plan: 1 of 4
 | Phase 06-learn-act-cards-demo-hardening P02 | 15 | 2 tasks | 4 files |
 | Phase 06-learn-act-cards-demo-hardening P03 | 2 | 2 tasks | 2 files |
 | Phase 06-learn-act-cards-demo-hardening P04 | 12 | 2 tasks | 4 files |
+| Phase 07-streaming-nice-to-have-polish P02 | 4 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 06-learn-act-cards-demo-hardening]: setErrorWithAutoDismiss wrapper pattern — profile_required errors persistent; all other transient error codes auto-dismiss after 8s
 - [Phase 07-streaming-nice-to-have-polish]: Persisted default persona at the user level via users.default_persona_id so new conversations inherit a durable saved coach preference.
 - [Phase 07-streaming-nice-to-have-polish]: Persona theme tokens now flow from api/app/personas/config.json through PersonaDTO so frontend theming stays config-driven.
+- [Phase 07-streaming-nice-to-have-polish]: Streaming backend reuses the existing validated chat flow and emits only message deltas plus a final structured SSE payload.
+- [Phase 07-streaming-nice-to-have-polish]: own_pii_unsolicited is now enforced through a live-profile rewrite pass that trims unsolicited facts without hard-blocking normal coaching answers.
 
 ### Pending Todos
 

@@ -133,7 +133,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
-- [ ] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
+- [x] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
 - [ ] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
 - [ ] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
 **UI hint**: yes
