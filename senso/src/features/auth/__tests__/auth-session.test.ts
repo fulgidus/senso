@@ -7,6 +7,7 @@ vi.mock("@/lib/config", () => ({
 import {
   bootstrapSession,
   startGoogle,
+  updateMe,
 } from "@/features/auth/session"
 import { readAccessToken, readRefreshToken } from "@/features/auth/storage"
 
@@ -23,7 +24,7 @@ describe("auth session", () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ user: { id: "u1", email: "u@test.com" } }), {
+        new Response(JSON.stringify({ user: { id: "u1", email: "u@test.com", default_persona_id: "hartman" } }), {
           status: 200,
           headers: { "content-type": "application/json" },
         }),
@@ -34,6 +35,7 @@ describe("auth session", () => {
     expect(result.status).toBe("authenticated")
     if (result.status === "authenticated") {
       expect(result.user.email).toBe("u@test.com")
+      expect(result.user.defaultPersonaId).toBe("hartman")
     }
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/auth/me", {
       method: "GET",
@@ -105,6 +107,43 @@ describe("auth session", () => {
       kind: "fallback",
       fallback: "email_password",
       reason: "google_unavailable",
+    })
+  })
+
+  it("updateMe sends default_persona_id and parses it from the response", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          id: "u1",
+          email: "u@test.com",
+          first_name: "Ada",
+          default_persona_id: "cheerleader",
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    )
+
+    const updated = await updateMe("access-1", {
+      defaultPersonaId: "cheerleader",
+    })
+
+    expect(updated.defaultPersonaId).toBe("cheerleader")
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/auth/me", {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer access-1",
+      },
+      body: JSON.stringify({
+        first_name: undefined,
+        last_name: undefined,
+        voice_gender: undefined,
+        voice_auto_listen: undefined,
+        default_persona_id: "cheerleader",
+      }),
     })
   })
 })

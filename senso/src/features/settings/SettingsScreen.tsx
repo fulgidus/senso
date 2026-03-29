@@ -29,6 +29,7 @@ export function SettingsScreen() {
   const [lastName, setLastName] = useState(user.lastName ?? "")
   const [voiceGender, setVoiceGender] = useState<VoiceGender>(user.voiceGender ?? "indifferent")
   const [voiceAutoListen, setVoiceAutoListen] = useState(user.voiceAutoListen ?? false)
+  const [defaultPersonaId, setDefaultPersonaId] = useState(user.defaultPersonaId ?? "mentore-saggio")
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -38,7 +39,8 @@ export function SettingsScreen() {
     firstName.trim() !== (user.firstName ?? "") ||
     lastName.trim() !== (user.lastName ?? "") ||
     voiceGender !== (user.voiceGender ?? "indifferent") ||
-    voiceAutoListen !== (user.voiceAutoListen ?? false)
+    voiceAutoListen !== (user.voiceAutoListen ?? false) ||
+    defaultPersonaId !== (user.defaultPersonaId ?? "mentore-saggio")
 
   const handleSave = async () => {
     if (!firstName.trim()) return
@@ -53,8 +55,10 @@ export function SettingsScreen() {
         lastName: lastName.trim() || null,
         voiceGender,
         voiceAutoListen,
+        defaultPersonaId,
       })
       updateUser(updated)
+      setDefaultPersonaId(updated.defaultPersonaId ?? "mentore-saggio")
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch {

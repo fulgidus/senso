@@ -20,7 +20,16 @@ import type {
 
 const backendBaseUrl = getBackendBaseUrl()
 
-type RawUser = { id: string; email: string; first_name?: string | null; last_name?: string | null; voice_gender?: string | null; voice_auto_listen?: boolean | null }
+type RawUser = {
+  id: string
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+  voice_gender?: string | null
+  voice_auto_listen?: boolean | null
+  default_persona_id?: string | null
+}
+
 function parseUser(raw: RawUser): User {
   return {
     id: raw.id,
@@ -29,6 +38,7 @@ function parseUser(raw: RawUser): User {
     lastName: raw.last_name ?? null,
     voiceGender: (raw.voice_gender as VoiceGender | null) ?? "indifferent",
     voiceAutoListen: raw.voice_auto_listen ?? false,
+    defaultPersonaId: raw.default_persona_id ?? "mentore-saggio",
   }
 }
 
@@ -135,7 +145,13 @@ export async function startGoogle(): Promise<GoogleStartResult> {
 
 export async function updateMe(
   accessToken: string,
-  data: { firstName?: string | null; lastName?: string | null; voiceGender?: VoiceGender | null; voiceAutoListen?: boolean | null },
+  data: {
+    firstName?: string | null
+    lastName?: string | null
+    voiceGender?: VoiceGender | null
+    voiceAutoListen?: boolean | null
+    defaultPersonaId?: string | null
+  },
 ): Promise<User> {
   const raw = await apiRequest<RawUser>(
     backendBaseUrl,
@@ -148,6 +164,7 @@ export async function updateMe(
         last_name: data.lastName,
         voice_gender: data.voiceGender,
         voice_auto_listen: data.voiceAutoListen,
+        default_persona_id: data.defaultPersonaId,
       },
     },
   )
