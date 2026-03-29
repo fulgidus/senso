@@ -21,7 +21,7 @@ from app.db.models import (
 )
 from app.ingestion.guardrail import check_hint_safety
 from app.ingestion.llm import LLMClient, LLMError, get_llm_client
-from app.ingestion.ocr import extract_with_ocr_pipeline
+from app.ingestion.ocr import extract_with_pdf_pipeline, extract_with_image_pipeline
 from app.ingestion.adaptive import run_adaptive_pipeline
 from app.ingestion.registry import get_registry
 from app.schemas.ingestion import ExtractionResult, UploadStatusDTO
@@ -147,11 +147,14 @@ class IngestionService:
             doc = ExtractedDocument(**raw_result)
             return ER(document=doc, confidence=0.85, tier_used="module")
 
-        # No module matched - check if image/PDF → OCR pipeline
-        if content_type in IMAGE_MIME_TYPES or content_type == PDF_MIME_TYPE:
-            return extract_with_ocr_pipeline(file_path, llm_client)
+        # No module matched - route to PDF or image pipeline
+        if content_type == PDF_MIME_TYPE:
+            return extract_with_pdf_pipeline(file_path, llm_client, registry)
 
-        # Fallback: adaptive pipeline
+        if content_type in IMAGE_MIME_TYPES:
+            return extract_with_image_pipeline(file_path, llm_client, registry)
+
+        # Fallback: adaptive pipeline (e.g. plain text, CSV with no module match)
         return run_adaptive_pipeline(file_path, preview, llm_client, registry)
 
     def _extract_xlsx(self, file_path: Path) -> ExtractionResult:
@@ -319,12 +322,17 @@ class IngestionService:
         doc = result.document
 
         # Determine extraction method string
-        if result.tier_used == "module":
+        if result.tier_used in (
+            "module",
+            "pdf_text_layer_module",
+            "pdf_adaptive_module",
+            "image_ocr_module",
+        ):
             method = f"module:{doc.module_name or 'unknown'}"
         elif result.tier_used == "adaptive":
             method = f"adaptive:{doc.module_name or 'generated'}"
         else:
-            method = result.tier_used  # "ocr_text" | "llm_text" | "llm_vision"
+            method = result.tier_used
 
         upload.extraction_status = "success"
         upload.extraction_method = method

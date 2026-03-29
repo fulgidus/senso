@@ -20,7 +20,15 @@ class Transaction(BaseModel):
 
 class ExtractedDocument(BaseModel):
     document_type: Literal[
-        "bank_statement", "payslip", "receipt", "utility_bill", "unknown"
+        "bank_statement",
+        "payslip",
+        "receipt",
+        "invoice",
+        "f24_tax_form",
+        "road_fine",
+        "certificato_unico",
+        "utility_bill",
+        "unknown",
     ]
     module_name: str | None = None
     module_source: Literal["builtin", "generated", "promoted"] | None = None
@@ -62,9 +70,24 @@ class ExtractionResult(BaseModel):
     document: ExtractedDocument
     confidence: float = Field(ge=0.0, le=1.0, default=0.0)
     raw_text: str | None = None
-    tier_used: Literal["module", "ocr_text", "llm_text", "llm_vision", "adaptive"] = (
-        "module"
-    )
+    tier_used: Literal[
+        # legacy / generic
+        "module",
+        "ocr_text",
+        "llm_text",
+        "llm_vision",
+        "adaptive",
+        # PDF-specific
+        "pdf_text_layer",
+        "pdf_text_layer_module",
+        "pdf_adaptive_module",
+        "pdf_llm_text",
+        "pdf_llm_vision",
+        # image-specific
+        "image_ocr_module",
+        "image_llm_text",
+        "image_llm_vision",
+    ] = "module"
     warnings: list[str] = []
 
 
