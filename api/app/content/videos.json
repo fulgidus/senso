@@ -1,0 +1,74 @@
+[
+  {
+    "id": "it-video-budget-base",
+    "locale": "it",
+    "type": "video",
+    "title": "Come fare un budget in 5 minuti",
+    "summary": "Guida pratica per costruire il primo budget mensile: entrate, uscite fisse e variabili, e il margine disponibile.",
+    "topics": ["budget", "spese", "risparmio", "principianti"],
+    "video_id": "sVKQn2I4HDM"
+  },
+  {
+    "id": "it-video-fondo-emergenza",
+    "locale": "it",
+    "type": "video",
+    "title": "Il fondo di emergenza: quanto mettere da parte",
+    "summary": "Perché il fondo di emergenza è prioritario, come calcolarne l'importo e dove tenerlo.",
+    "topics": ["fondo emergenza", "risparmio", "sicurezza finanziaria"],
+    "video_id": "3Ez5G3LuYGs"
+  },
+  {
+    "id": "it-video-tan-taeg",
+    "locale": "it",
+    "type": "video",
+    "title": "TAN e TAEG spiegati in modo semplice",
+    "summary": "La differenza tra TAN e TAEG con esempi concreti su un prestito personale da 5.000€.",
+    "topics": ["prestito", "tasso", "TAN", "TAEG", "credito"],
+    "video_id": "qIW4R8MFFBY"
+  },
+  {
+    "id": "it-video-etf-principianti",
+    "locale": "it",
+    "type": "video",
+    "title": "ETF: cosa sono e come funzionano",
+    "summary": "Introduzione agli ETF per chi non ha mai investito: cos'è un indice, come si compra un ETF, e perché i costi contano.",
+    "topics": ["ETF", "investimento", "borsa", "principianti"],
+    "video_id": "rbGAzJLGrGs"
+  },
+  {
+    "id": "it-video-mutuo-guida",
+    "locale": "it",
+    "type": "video",
+    "title": "Mutuo: tutto quello che devi sapere prima di firmarlo",
+    "summary": "Tasso fisso vs variabile, durata ottimale, LTV, e come leggere il piano di ammortamento.",
+    "topics": ["mutuo", "casa", "tasso", "ammortamento", "acquisto immobile"],
+    "video_id": "MBuRlGWjsLM"
+  },
+  {
+    "id": "en-video-budget-basics",
+    "locale": "en",
+    "type": "video",
+    "title": "How to make a budget that actually works",
+    "summary": "A practical walkthrough of building a monthly budget from scratch: tracking income, fixed and variable expenses, and your spending margin.",
+    "topics": ["budget", "spending", "savings", "beginners"],
+    "video_id": "HQzoZfc3GwQ"
+  },
+  {
+    "id": "en-video-compound-interest",
+    "locale": "en",
+    "type": "video",
+    "title": "Compound interest explained simply",
+    "summary": "How compound interest works for you when saving and against you when in debt, with visual examples.",
+    "topics": ["compound interest", "savings", "debt", "investing"],
+    "video_id": "wf91rEttZzo"
+  },
+  {
+    "id": "en-video-index-funds",
+    "locale": "en",
+    "type": "video",
+    "title": "Index funds for beginners",
+    "summary": "Why low-cost index funds beat most actively managed funds over the long run, and how to get started.",
+    "topics": ["index funds", "ETF", "investing", "beginners"],
+    "video_id": "fwe-PjrX23o"
+  }
+]

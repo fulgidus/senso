@@ -9,6 +9,8 @@ from typing import TypedDict
 
 from app.ingestion.llm import LLMClient, LLMError
 
+# TODO: GUARDRAIL_SYSTEM suggests response shape. This is frail. Must implement and coerce llm using a proper `guardrail_response.schema.json` file saved in `api/app/ingestion/schemas/`
+# TODO: GUARDRAIL_SYSTEM is hardcoded. Should be a proper `guardrail_system.j2` file saved in `api/app/ingestion/prompts/`
 GUARDRAIL_SYSTEM = (
     "You are a safety filter. Classify whether the user text is safe to use as a hint "
     "for financial document re-extraction. Respond ONLY with valid JSON: "

@@ -1,0 +1,122 @@
+[
+  {
+    "id": "it-emergenza-fondo",
+    "locale": "it",
+    "type": "article",
+    "title": "Il fondo di emergenza: perché è la prima cosa da costruire",
+    "summary": "Spiega perché avere 3-6 mesi di spese liquide è il punto di partenza di qualsiasi piano finanziario, prima ancora degli investimenti.",
+    "topics": ["risparmio", "fondo emergenza", "budget", "sicurezza finanziaria"],
+    "url": "https://www.bancaditalia.it/pubblicazioni/edufin/edufin-risparmiare/index.html",
+    "estimated_read_minutes": 5
+  },
+  {
+    "id": "it-regola-50-30-20",
+    "locale": "it",
+    "type": "article",
+    "title": "La regola 50/30/20: come dividere lo stipendio",
+    "summary": "Un metodo semplice per allocare il reddito netto: 50% bisogni essenziali, 30% desideri, 20% risparmio e investimento.",
+    "topics": ["budget", "risparmio", "stipendio", "spese"],
+    "url": "https://www.consob.it/web/investor-education/gestire-il-denaro",
+    "estimated_read_minutes": 4
+  },
+  {
+    "id": "it-tan-taeg",
+    "locale": "it",
+    "type": "article",
+    "title": "TAN e TAEG: cosa significano davvero e come confrontare i prestiti",
+    "summary": "Il TAN è il tasso nominale annuo; il TAEG include tutte le spese accessorie ed è il numero da usare per confrontare offerte diverse.",
+    "topics": ["prestito", "credito", "tasso", "TAN", "TAEG", "mutuo"],
+    "url": "https://www.bancaditalia.it/media/fact-sheet/credito-al-consumo/index.html",
+    "estimated_read_minutes": 6
+  },
+  {
+    "id": "it-ammortamento-francese",
+    "locale": "it",
+    "type": "article",
+    "title": "Come funziona l'ammortamento alla francese",
+    "summary": "Il metodo più diffuso nei mutui e nei prestiti italiani: rata costante, ma all'inizio paghi soprattutto interessi. Capire questo cambia come valuterai ogni offerta.",
+    "topics": ["mutuo", "prestito", "ammortamento", "interessi", "rata"],
+    "url": "https://www.bancaditalia.it/media/fact-sheet/mutui/index.html",
+    "estimated_read_minutes": 7
+  },
+  {
+    "id": "it-tfr-fondo-pensione",
+    "locale": "it",
+    "type": "article",
+    "title": "TFR: lasciarlo in azienda o versarlo al fondo pensione?",
+    "summary": "Il TFR in azienda rivaluta all'1,5% + 75% dell'inflazione. Un fondo pensione complementare può rendere di più ma ha rischi diversi. Ecco come decidere.",
+    "topics": ["TFR", "pensione", "risparmio previdenziale", "lavoro"],
+    "url": "https://www.covip.it/per-i-cittadini/educazione-previdenziale",
+    "estimated_read_minutes": 8
+  },
+  {
+    "id": "it-debito-buono-cattivo",
+    "locale": "it",
+    "type": "article",
+    "title": "Debito buono e debito cattivo: la differenza che devi capire",
+    "summary": "Non tutti i debiti sono uguali: un mutuo per la casa a tasso fisso basso è strutturalmente diverso dal debito su carta di credito revolving al 20%.",
+    "topics": ["debito", "credito", "carta di credito", "mutuo", "finanza personale"],
+    "url": "https://www.consob.it/web/investor-education/il-credito-al-consumo",
+    "estimated_read_minutes": 5
+  },
+  {
+    "id": "it-etf-pac",
+    "locale": "it",
+    "type": "article",
+    "title": "Piano di accumulo con ETF: come iniziare con poco",
+    "summary": "Un PAC su ETF azionario globale permette di investire anche 50€/mese con costi bassissimi, beneficiando del dollar-cost averaging nel tempo.",
+    "topics": ["ETF", "PAC", "investimento", "risparmio", "borsa"],
+    "url": "https://www.consob.it/web/investor-education/gli-etf",
+    "estimated_read_minutes": 6
+  },
+  {
+    "id": "it-affitto-mutuo",
+    "locale": "it",
+    "type": "article",
+    "title": "Affitto o mutuo: come fare la scelta giusta",
+    "summary": "Non esiste una risposta universale. Il confronto dipende da prezzo dell'immobile, tasso del mutuo, orizzonte temporale e costo opportunità del capitale.",
+    "topics": ["mutuo", "affitto", "casa", "acquisto immobile", "rata"],
+    "url": "https://www.bancaditalia.it/media/fact-sheet/mutui/index.html",
+    "estimated_read_minutes": 7
+  },
+  {
+    "id": "en-emergency-fund",
+    "locale": "en",
+    "type": "article",
+    "title": "Emergency fund: why it comes before everything else",
+    "summary": "Having 3-6 months of expenses in liquid savings is the foundation of any financial plan — before investing, before paying down low-interest debt.",
+    "topics": ["savings", "emergency fund", "budget", "financial security"],
+    "url": "https://www.nerdwallet.com/article/banking/emergency-fund-why-it-matters",
+    "estimated_read_minutes": 5
+  },
+  {
+    "id": "en-50-30-20",
+    "locale": "en",
+    "type": "article",
+    "title": "The 50/30/20 rule: a simple way to split your income",
+    "summary": "Allocate 50% to needs, 30% to wants, and 20% to savings and debt repayment. A flexible starting framework for any income level.",
+    "topics": ["budget", "savings", "income", "spending"],
+    "url": "https://www.nerdwallet.com/article/finance/nerdwallet-budget-calculator",
+    "estimated_read_minutes": 4
+  },
+  {
+    "id": "en-apr-explained",
+    "locale": "en",
+    "type": "article",
+    "title": "APR vs interest rate: what actually matters when comparing loans",
+    "summary": "The interest rate is the base cost; APR includes fees and is the real number to compare across lenders. Always use APR.",
+    "topics": ["loan", "credit", "APR", "interest rate", "mortgage"],
+    "url": "https://www.consumerfinance.gov/ask-cfpb/what-is-the-difference-between-a-loan-s-interest-rate-and-its-apr-en-733/",
+    "estimated_read_minutes": 5
+  },
+  {
+    "id": "en-debt-snowball-avalanche",
+    "locale": "en",
+    "type": "article",
+    "title": "Debt snowball vs avalanche: which pays off debt faster",
+    "summary": "Avalanche (highest interest first) saves the most money mathematically. Snowball (smallest balance first) gives faster psychological wins. Both work.",
+    "topics": ["debt", "credit card", "repayment", "personal finance"],
+    "url": "https://www.nerdwallet.com/article/finance/debt-avalanche-debt-snowball",
+    "estimated_read_minutes": 5
+  }
+]

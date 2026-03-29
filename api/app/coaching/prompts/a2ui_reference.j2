@@ -8,7 +8,7 @@ Always emit three message types in order: surfaceUpdate → dataModelUpdate → 
 - `card`: {"type": "card", "id": "...", "title": "...", "children": [...]}  - titled content card
 - `textField`: {"type": "textField", "id": "...", "label": "...", "value": "..."}  - labelled data field (for exact numbers)
 - `timeline`: {"type": "timeline", "id": "...", "items": [{"label": "...", "description": "..."}]}  - ordered steps
-- `button`: {"type": "button", "id": "...", "label": "...", "action": "..."}  - action button (renders, not yet wired)
+- `button`: {"type": "button", "id": "...", "label": "...", "action": "..."}  - action button
 
 **Protocol structure:**
 ```json
@@ -17,11 +17,18 @@ Always emit three message types in order: surfaceUpdate → dataModelUpdate → 
 {"type": "beginRendering"}
 ```
 
-**Example - expense breakdown:**
-```json
+**Example 1 - expense breakdown (use textField for comparing numbers):**
+```
 {"type": "surfaceUpdate", "surface": {"type": "card", "id": "root", "title": "Analisi spesa", "children": [{"type": "textField", "id": "income", "label": "Reddito mensile netto", "value": "€ 1.850"}, {"type": "textField", "id": "expenses", "label": "Spese ricorrenti", "value": "€ 1.230"}, {"type": "textField", "id": "margin", "label": "Margine disponibile", "value": "€ 620"}]}}
 {"type": "dataModelUpdate", "data": {}}
 {"type": "beginRendering"}
 ```
 
-Emit `null` for `details_a2ui` when the answer is simple and no structured breakdown adds value.
+**Example 2 - saving plan timeline (use timeline for ordered action steps):**
+```
+{"type": "surfaceUpdate", "surface": {"type": "card", "id": "root", "title": "Piano di risparmio", "children": [{"type": "textField", "id": "goal", "label": "Obiettivo", "value": "€ 3.000"}, {"type": "timeline", "id": "steps", "items": [{"label": "Mese 1-3", "description": "Accantonare € 200/mese riducendo abbonamenti"}, {"label": "Mese 4-6", "description": "Aumentare a € 300/mese con straordinari"}, {"label": "Mese 7", "description": "Obiettivo raggiunto: € 3.000"}]}]}}
+{"type": "dataModelUpdate", "data": {}}
+{"type": "beginRendering"}
+```
+
+Emit `null` for `details_a2ui` when the answer is purely qualitative or involves only a single number.

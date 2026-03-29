@@ -185,6 +185,8 @@ def _add_missing_columns() -> None:
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
         """,
+        # ── Round 6: coaching insights ─────────────────────────────────────────
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS coaching_insights JSONB NOT NULL DEFAULT '[]'::jsonb",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

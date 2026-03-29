@@ -41,7 +41,21 @@ function renderComponent(c: A2UIComponent): ReturnType<typeof html> {
             )}
       </ol>`
         case "button":
-            return html`<button class="a2ui-button">${c.label}</button>`
+            return html`<button
+          class="a2ui-button"
+          @click=${(e: Event) => {
+              e.stopPropagation()
+              const host = (e.target as HTMLElement).closest("a2ui-surface")
+              const target = host ?? (e.target as HTMLElement)
+              target.dispatchEvent(
+                  new CustomEvent("a2ui-action", {
+                      bubbles: true,
+                      composed: true,
+                      detail: { action: c.action ?? c.id },
+                  }),
+              )
+          }}
+        >${c.label}</button>`
         default:
             return html``
     }

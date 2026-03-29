@@ -162,7 +162,7 @@ function ExpenseCategoryRow({
                 }}
                 className="w-16 rounded-md border border-border bg-background px-2 py-1 text-sm text-right text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <span className="text-xs text-muted-foreground">–</span>
+              <span className="text-xs text-muted-foreground">-</span>
               <input
                 type="number"
                 min={0}
@@ -678,7 +678,7 @@ function IncomeSourceEditor({
                     }}
                     className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <span className="text-muted-foreground">–</span>
+                  <span className="text-muted-foreground">-</span>
                   <input
                     type="number"
                     min={0}

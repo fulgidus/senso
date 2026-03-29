@@ -46,13 +46,13 @@
             "enum": ["funnel", "comparison", "calculator", "reminder", "external_link"]
           },
           "cta_label": { "type": "string" },
-          "payload": { "type": "object" }
+          "payload": { "type": "object", "additionalProperties": true }
         }
       }
     },
     "resource_cards": {
       "type": "array",
-      "description": "Relevant educational articles or external resources.",
+      "description": "Relevant educational articles, videos, slide decks, or partner offers from the content catalog.",
       "items": {
         "type": "object",
         "required": ["title", "summary", "resource_type"],
@@ -62,10 +62,12 @@
           "summary": { "type": "string" },
           "resource_type": {
             "type": "string",
-            "enum": ["article", "tutorial", "video", "tool"]
+            "enum": ["article", "tutorial", "video", "slide_deck", "partner_offer", "tool"]
           },
-          "url": { "type": "string", "format": "uri" },
-          "estimated_read_minutes": { "type": "integer", "minimum": 1 }
+          "url": { "type": ["string", "null"] },
+          "estimated_read_minutes": { "type": "integer", "minimum": 1 },
+          "video_id": { "type": ["string", "null"], "description": "YouTube video_id for resource_type=video" },
+          "slide_id": { "type": ["string", "null"], "description": "Slide deck id for resource_type=slide_deck" }
         }
       }
     },
@@ -86,6 +88,55 @@
     "details_a2ui": {
       "type": ["string", "null"],
       "description": "A2UI JSONL string with surfaceUpdate/dataModelUpdate/beginRendering messages for rich detail UI rendering. Null or absent if no structured detail is needed."
+    },
+    "affordability_verdict": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["verdict", "key_figures"],
+          "additionalProperties": false,
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "enum": ["yes", "no", "conditional"],
+              "description": "Whether the user can afford the item: yes, no, or conditional (can afford it but with trade-offs or caveats)."
+            },
+            "key_figures": {
+              "type": "array",
+              "description": "2-4 key numbers that support the verdict. Always include monthly margin and the item cost.",
+              "minItems": 2,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "required": ["label", "value"],
+                "additionalProperties": false,
+                "properties": {
+                  "label": { "type": "string", "description": "Short label in the response locale, e.g. 'Margine mensile'" },
+                  "value": { "type": "string", "description": "Formatted value, e.g. '€ 620' or '34%'" }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "description": "Populated only when the user asks an affordability question ('can I afford X?', 'should I buy Y?'). Null for all other question types."
+    },
+    "new_insight": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["headline", "data_point", "educational_framing"],
+          "additionalProperties": false,
+          "properties": {
+            "headline": { "type": "string", "description": "Short insight title in the response locale, e.g. 'Spendi il 40% in abbonamenti'" },
+            "data_point": { "type": "string", "description": "The specific number or fact that triggered this insight" },
+            "educational_framing": { "type": "string", "description": "One sentence explaining why this matters financially" }
+          }
+        }
+      ],
+      "description": "Emit when the conversation reveals a new pattern or insight about the user's finances not already captured in their profile insights. Null if nothing new emerged."
     }
   }
 }

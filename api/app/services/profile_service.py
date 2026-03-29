@@ -163,11 +163,22 @@ class ProfileService:
         )
         self.db.commit()
 
-        from app.services.categorization_service import CategorizationService
+        # IMPORTANT: the background task must open its OWN DB session.
+        # Reusing self.db (the request-scoped session) causes the task to hang
+        # because FastAPI closes the session after the response is sent.
+        def _run_in_own_session() -> None:
+            from app.db.session import SessionLocal
+            from app.services.categorization_service import CategorizationService
 
-        llm_client = get_llm_client()
-        svc = CategorizationService(db=self.db, llm_client=llm_client)
-        background_tasks.add_task(svc.run_categorization, user_id=user_id)
+            db = SessionLocal()
+            try:
+                llm_client = get_llm_client()
+                svc = CategorizationService(db=db, llm_client=llm_client)
+                svc.run_categorization(user_id=user_id)
+            finally:
+                db.close()
+
+        background_tasks.add_task(_run_in_own_session)
         return {"status": "queued"}
 
     def _to_dto(self, profile) -> UserProfileDTO:
@@ -179,6 +190,7 @@ class ProfileService:
             monthlyMargin=profile.monthly_margin,
             categoryTotals=profile.category_totals or {},
             insightCards=profile.insight_cards or [],
+            coachingInsights=profile.coaching_insights or [],
             questionnaireAnswers=profile.questionnaire_answers,
             dataSources=profile.data_sources or [],
             confirmed=profile.confirmed,

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "it-video-budget-base",
+    "locale": "it",
+    "video_id": "sVKQn2I4HDM",
+    "title": "Come fare un budget in 5 minuti",
+    "topics": ["budget", "spese", "risparmio", "principianti"]
+  },
+  {
+    "id": "it-video-fondo-emergenza",
+    "locale": "it",
+    "video_id": "3Ez5G3LuYGs",
+    "title": "Il fondo di emergenza: quanto mettere da parte",
+    "topics": ["fondo emergenza", "risparmio", "sicurezza finanziaria"]
+  },
+  {
+    "id": "it-video-tan-taeg",
+    "locale": "it",
+    "video_id": "qIW4R8MFFBY",
+    "title": "TAN e TAEG spiegati in modo semplice",
+    "topics": ["prestito", "tasso", "TAN", "TAEG", "credito"]
+  },
+  {
+    "id": "it-video-etf-principianti",
+    "locale": "it",
+    "video_id": "rbGAzJLGrGs",
+    "title": "ETF: cosa sono e come funzionano",
+    "topics": ["ETF", "investimento", "borsa", "principianti"]
+  },
+  {
+    "id": "it-video-mutuo-guida",
+    "locale": "it",
+    "video_id": "MBuRlGWjsLM",
+    "title": "Mutuo: tutto quello che devi sapere prima di firmarlo",
+    "topics": ["mutuo", "casa", "tasso", "ammortamento", "acquisto immobile"]
+  },
+  {
+    "id": "en-video-budget-basics",
+    "locale": "en",
+    "video_id": "HQzoZfc3GwQ",
+    "title": "How to make a budget that actually works",
+    "topics": ["budget", "spending", "savings", "beginners"]
+  },
+  {
+    "id": "en-video-compound-interest",
+    "locale": "en",
+    "video_id": "wf91rEttZzo",
+    "title": "Compound interest explained simply",
+    "topics": ["compound interest", "savings", "debt", "investing"]
+  },
+  {
+    "id": "en-video-index-funds",
+    "locale": "en",
+    "video_id": "fwe-PjrX23o",
+    "title": "Index funds for beginners",
+    "topics": ["index funds", "ETF", "investing", "beginners"]
+  }
+]

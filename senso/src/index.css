@@ -133,3 +133,127 @@
     @apply font-sans;
     }
 }
+
+/* ── MARP Slide Viewer ───────────────────────────────────────────────────── */
+
+.marp-viewer {
+  outline: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.marp-inline {
+  min-height: 220px;
+}
+
+.marp-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marp-fullscreen {
+  width: min(90vw, 800px);
+  min-height: 450px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Slide content area */
+.marp-slide {
+  flex: 1;
+  padding: 1.5rem 1.75rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-y: auto;
+}
+
+.marp-slide h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+.marp-slide h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.4rem; margin-top: 1rem; }
+.marp-slide h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; margin-top: 0.8rem; }
+.marp-slide p  { margin-bottom: 0.6rem; }
+.marp-slide ul, .marp-slide ol { margin-left: 1.2rem; margin-bottom: 0.6rem; }
+.marp-slide li { margin-bottom: 0.2rem; }
+.marp-slide blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 0.8rem;
+  margin: 0.6rem 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+.marp-slide code {
+  font-family: monospace;
+  font-size: 0.8em;
+  background: var(--muted);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+.marp-slide pre {
+  background: var(--muted);
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin-bottom: 0.6rem;
+}
+.marp-slide pre code { background: none; padding: 0; }
+.marp-slide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-bottom: 0.6rem;
+}
+.marp-slide th, .marp-slide td {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+}
+.marp-slide th { background: var(--muted); font-weight: 600; }
+.marp-slide strong { font-weight: 700; }
+
+/* Navigation bar */
+.marp-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border-top: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.marp-nav-btn {
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: transparent;
+  color: var(--foreground);
+  transition: background 0.15s;
+}
+.marp-nav-btn:hover:not(:disabled) { background: var(--accent); color: var(--accent-foreground); }
+.marp-nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+.marp-nav-counter {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  flex: 1;
+  text-align: center;
+}
+
+.marp-fullscreen-btn { margin-left: auto; }
+
+/* senso-light theme */
+.marp-viewer.senso-light .marp-slide { background: #F9F7F7; color: #112D4E; }
+.marp-viewer.senso-light .marp-slide h1,
+.marp-viewer.senso-light .marp-slide h2 { color: #3F72AF; }
+
+/* senso-dark theme */
+.marp-viewer.senso-dark .marp-slide { background: #1a3a5c; color: #F9F7F7; }
+.marp-viewer.senso-dark .marp-slide h1,
+.marp-viewer.senso-dark .marp-slide h2 { color: #5B9BD5; }
+.marp-viewer.senso-dark .marp-nav { background: #112D4E; border-color: #1e4472; }

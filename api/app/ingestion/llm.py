@@ -7,23 +7,35 @@ API keys are read from env vars per-provider (see LLMConfig.api_key_for).
 Public API:
     LLMClient.complete(prompt, system, json_mode, response_schema, timeout, route)
     LLMClient.vision(prompt, system, image_bytes, json_mode, response_schema, timeout, route)
+    LLMClient.complete_with_tools(prompt, system, tools, tool_executor,
+                                  response_schema, timeout, route)
 
-`route` is a "class:type:size" string e.g. "text:generation:sm".
+`route` is a "class:type:size" string e.g. "text:generation:md".
 Defaults:
-    complete()  → "text:generation:sm"
-    vision()    → "vision:ocr:sm"
+    complete()             → "text:generation:sm"
+    vision()               → "vision:ocr:sm"
+    complete_with_tools()  → "text:generation:md"
 
 `response_schema`: when provided (a JSON Schema dict), triggers OpenAI structured
 outputs (`response_format={"type":"json_schema",...}`) instead of the loose
 `json_object` mode.  Gemini providers fall back to `json_object` equivalent.
+
+`complete_with_tools`: performs at most ONE tool-call round-trip.
+  1. First call with tools registered; if the model requests a tool call,
+     the `tool_executor(name, arguments) -> Any` callable is invoked.
+  2. Tool result is injected back and a second call with `response_schema`
+     produces the final structured output.
+  Gemini provider does not support this flow — falls back to a single
+  `complete()` call with no tools.
 
 Inject via get_llm_client() FastAPI dependency.
 """
 
 from __future__ import annotations
 
+import json
 import time
-from typing import Any
+from typing import Any, Callable
 
 from app.core.llm_config import (
     LLMCallTrace,
@@ -207,6 +219,142 @@ class LLMClient:
             f"All vision providers failed: {'; '.join(trace.provider_errors)}"
         )
 
+    def complete_with_tools(
+        self,
+        prompt: str,
+        system: str = "",
+        tools: list[dict] | None = None,
+        tool_executor: Callable[[str, dict], Any] | None = None,
+        response_schema: dict | None = None,
+        timeout: float | None = None,
+        route: str = "text:generation:md",
+    ) -> str:
+        """
+        Text completion with at most one tool-call round-trip.
+
+        Flow (OpenAI / OpenRouter):
+          1. First call: tools registered, response_format NOT set (tool calls
+             and structured output cannot be requested simultaneously).
+          2. If model requests a tool call: invoke tool_executor(name, args),
+             inject the result, then call again WITH response_schema to get
+             the final structured output.
+          3. If model returns a plain text/JSON answer in step 1 (no tool call
+             requested): return that directly.
+
+        Gemini path: tool calling differs from OpenAI API — falls back to a
+        plain complete() with response_schema (no tool enrichment).
+
+        Args:
+            prompt: User/conversation prompt.
+            system: System prompt.
+            tools: List of OpenAI-format function schemas
+                   ({"type":"function","function":{"name":...,"description":...,"parameters":...}}).
+            tool_executor: Callable(name: str, arguments: dict) -> Any.
+                           Return value is JSON-serialised and injected as
+                           the tool result.
+            response_schema: JSON Schema for the final structured output.
+            timeout: Per-provider timeout in seconds.
+            route: Model routing key.
+        """
+        cls, typ, size = _parse_route(route)
+        model_route = self._cfg.route(cls, typ, size)
+        effective_timeout = timeout if timeout is not None else model_route.timeout
+
+        trace = LLMCallTrace()
+        t0 = time.monotonic()
+
+        ordered = self._provider_chain(model_route.provider)
+
+        for pname in ordered:
+            api_key = self._cfg.api_key_for(pname)
+            if not api_key:
+                continue
+            pcfg = self._cfg.provider_by_name(pname)
+
+            if pname == model_route.provider:
+                model = model_route.model
+            else:
+                try:
+                    fb_route = self._cfg.route(cls, typ, "sm")
+                    model = (
+                        fb_route.model
+                        if fb_route.provider == pname
+                        else self._default_text_model(pname)
+                    )
+                except KeyError:
+                    model = self._default_text_model(pname)
+
+            trace.provider_attempted.append(f"{pname}/{model}")
+
+            # Gemini does not support the OpenAI tool-calling API.
+            # Fall back to a single structured-output call without tools.
+            if pname == "gemini":
+                try:
+                    result, usage = self._gemini_complete(
+                        api_key=api_key,
+                        model=model,
+                        prompt=prompt,
+                        system=system,
+                        json_mode=(response_schema is not None),
+                        timeout=effective_timeout,
+                    )
+                    trace.provider_used = pname
+                    trace.model_used = model
+                    if usage:
+                        trace.prompt_tokens = usage.get("prompt_tokens")
+                        trace.completion_tokens = usage.get("completion_tokens")
+                        trace.total_tokens = usage.get("total_tokens")
+                    trace.latency_ms = (time.monotonic() - t0) * 1000
+                    self.last_provider_used = f"{pname}/{model}"
+                    self.last_call_trace = trace
+                    return result
+                except Exception as e:
+                    trace.provider_errors.append(f"{pname}: {e}")
+                    continue
+
+            # OpenAI-compatible path (openai + openrouter)
+            base_url = (
+                pcfg.base_url
+                if pcfg and pname == "openrouter"
+                else (
+                    pcfg.base_url
+                    if pcfg and pcfg.base_url
+                    else (
+                        "https://openrouter.ai/api/v1"
+                        if pname == "openrouter"
+                        else None
+                    )
+                )
+            )
+            try:
+                result, usage = self._openai_compat_complete_with_tools(
+                    api_key=api_key,
+                    base_url=base_url,
+                    model=model,
+                    prompt=prompt,
+                    system=system,
+                    tools=tools or [],
+                    tool_executor=tool_executor,
+                    response_schema=response_schema,
+                    timeout=effective_timeout,
+                )
+                trace.provider_used = pname
+                trace.model_used = model
+                if usage:
+                    trace.prompt_tokens = usage.get("prompt_tokens")
+                    trace.completion_tokens = usage.get("completion_tokens")
+                    trace.total_tokens = usage.get("total_tokens")
+                trace.latency_ms = (time.monotonic() - t0) * 1000
+                self.last_provider_used = f"{pname}/{model}"
+                self.last_call_trace = trace
+                return result
+            except Exception as e:
+                trace.provider_errors.append(f"{pname}: {e}")
+
+        trace.latency_ms = (time.monotonic() - t0) * 1000
+        self.last_call_trace = trace
+        raise LLMError(f"All providers failed: {'; '.join(trace.provider_errors)}")
+
     # ── Provider ordering ──────────────────────────────────────────────────────
 
     def _provider_chain(self, preferred: str) -> list[str]:
@@ -376,6 +524,131 @@ class LLMClient:
                 "total_tokens": resp.usage.total_tokens,
             }
         return resp.choices[0].message.content or "", usage
+
+    @staticmethod
+    def _openai_compat_complete_with_tools(
+        api_key: str,
+        base_url: str | None,
+        model: str,
+        prompt: str,
+        system: str,
+        tools: list[dict],
+        tool_executor: Callable[[str, dict], Any] | None,
+        response_schema: dict | None,
+        timeout: float,
+    ) -> tuple[str, dict | None]:
+        """
+        OpenAI tool-call round-trip (one hop max).
+
+        Step 1: call with tools, no response_format.
+        Step 2: if tool_calls returned, execute tool, inject result,
+                call again with response_schema and no tools.
+        Step 3: if no tool_call in step 1, call again with response_schema only.
+        """
+        from openai import OpenAI
+
+        kwargs_init: dict[str, Any] = {"api_key": api_key, "timeout": timeout}
+        if base_url:
+            kwargs_init["base_url"] = base_url
+        client = OpenAI(**kwargs_init)
+
+        messages: list[dict[str, Any]] = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        # ── Step 1: tool-discovery call ───────────────────────────────────────
+        call_kwargs_1: dict[str, Any] = {"model": model, "messages": messages}
+        if tools:
+            call_kwargs_1["tools"] = tools
+            call_kwargs_1["tool_choice"] = "auto"
+
+        resp1 = client.chat.completions.create(**call_kwargs_1)
+        choice1 = resp1.choices[0]
+        usage: dict | None = None
+        if resp1.usage:
+            usage = {
+                "prompt_tokens": resp1.usage.prompt_tokens,
+                "completion_tokens": resp1.usage.completion_tokens,
+                "total_tokens": resp1.usage.total_tokens,
+            }
+
+        # If no tool calls were made, proceed directly to final call
+        tool_calls = getattr(choice1.message, "tool_calls", None) or []
+        if not tool_calls:
+            # Model answered directly — re-call with response_schema to get
+            # the structured output (the first answer may be prose).
+            # If no schema required, return the content directly.
+            if response_schema is None:
+                return choice1.message.content or "", usage
+
+            # Append assistant's answer as context, ask for structured output
+            messages.append(
+                {"role": "assistant", "content": choice1.message.content or ""}
+            )
+            messages.append(
+                {
+                    "role": "user",
+                    "content": "Ora fornisci la risposta nel formato JSON strutturato richiesto.",
+                }
+            )
+        else:
+            # ── Step 2: execute tool calls ─────────────────────────────────────
+            # Append the assistant message with tool_calls
+            messages.append(choice1.message)  # type: ignore[arg-type]
+            for tc in tool_calls:
+                fn_name = tc.function.name
+                try:
+                    fn_args = json.loads(tc.function.arguments or "{}")
+                except json.JSONDecodeError:
+                    fn_args = {}
+
+                tool_result: Any = {}
+                if tool_executor is not None:
+                    try:
+                        tool_result = tool_executor(fn_name, fn_args)
+                    except Exception as exc:
+                        tool_result = {"error": str(exc)}
+
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": json.dumps(tool_result, ensure_ascii=False),
+                    }
+                )
+
+        # ── Step 3: final structured-output call ──────────────────────────────
+        call_kwargs_2: dict[str, Any] = {"model": model, "messages": messages}
+        if response_schema is not None:
+            schema_name = (
+                response_schema.get("$id") or response_schema.get("title") or "response"
+            )
+            call_kwargs_2["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": schema_name,
+                    "schema": response_schema,
+                    "strict": True,
+                },
+            }
+
+        resp2 = client.chat.completions.create(**call_kwargs_2)
+        if resp2.usage:
+            # Accumulate token counts across both calls
+            prior = usage or {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0,
+            }
+            usage = {
+                "prompt_tokens": prior["prompt_tokens"] + resp2.usage.prompt_tokens,
+                "completion_tokens": prior["completion_tokens"]
+                + resp2.usage.completion_tokens,
+                "total_tokens": prior["total_tokens"] + resp2.usage.total_tokens,
+            }
+
+        return resp2.choices[0].message.content or "", usage
 
     @staticmethod
     def _openai_compat_vision(

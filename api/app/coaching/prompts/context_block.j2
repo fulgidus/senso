@@ -45,8 +45,15 @@
 {% endif %}
 
 {% if insight_cards %}
-**Significant Patterns Detected:**
+**Significant Patterns Detected (from document ingestion):**
 {% for card in insight_cards %}
 - {{ card.headline }}: {{ card.data_point }}
+{% endfor %}
+{% endif %}
+
+{% if coaching_insights %}
+**Patterns Discovered During Coaching (chat-time insights):**
+{% for ci in coaching_insights %}
+- {{ ci.headline }}: {{ ci.data_point }}{% if ci.educational_framing %} — {{ ci.educational_framing }}{% endif %}
 {% endfor %}
 {% endif %}

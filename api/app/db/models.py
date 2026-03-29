@@ -226,6 +226,7 @@ class UserProfile(Base):
     monthly_margin: float = Column(Float, nullable=True, default=None)
     category_totals: dict = Column(JSON, nullable=False, default=dict)
     insight_cards: list = Column(JSON, nullable=False, default=list)
+    coaching_insights: list = Column(JSON, nullable=False, default=list)
     questionnaire_answers: dict = Column(JSON, nullable=True, default=None)
     data_sources: list = Column(JSON, nullable=False, default=list)
     extraordinary_income_total: float = Column(Float, nullable=True, default=None)

@@ -11,7 +11,7 @@
  * Hold-to-talk: pointerDown starts recording, pointerUp stops it.
  */
 import { useTranslation } from "react-i18next"
-import { Mic, Square, Volume2, Loader2, MicOff } from "lucide-react"
+import { Mic, Square, Loader2, MicOff } from "lucide-react"
 
 interface VoiceModeBarProps {
     isRecording: boolean

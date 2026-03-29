@@ -1,0 +1,50 @@
+[
+  {
+    "id": "it-slide-budget-base",
+    "locale": "it",
+    "title": "Come costruire un budget",
+    "summary": "5 slide per capire entrate, uscite, margine e il primo passo verso il risparmio consapevole.",
+    "topics": ["budget", "spese", "risparmio", "principianti"],
+    "slide_count": 5
+  },
+  {
+    "id": "it-slide-tan-taeg",
+    "locale": "it",
+    "title": "TAN e TAEG: capire il costo reale di un prestito",
+    "summary": "6 slide per confrontare prestiti in modo corretto, con esempi numerici su un prestito da 5.000€.",
+    "topics": ["prestito", "TAN", "TAEG", "credito", "tasso"],
+    "slide_count": 6
+  },
+  {
+    "id": "it-slide-fondo-emergenza",
+    "locale": "it",
+    "title": "Il fondo di emergenza",
+    "summary": "4 slide su perché costruirlo, quanto accantonare e dove tenerlo.",
+    "topics": ["fondo emergenza", "risparmio", "sicurezza finanziaria"],
+    "slide_count": 4
+  },
+  {
+    "id": "it-slide-etf-intro",
+    "locale": "it",
+    "title": "ETF: investire in modo semplice",
+    "summary": "6 slide su cosa sono gli ETF, come funziona un PAC e perché i costi contano.",
+    "topics": ["ETF", "PAC", "investimento", "borsa"],
+    "slide_count": 6
+  },
+  {
+    "id": "en-slide-budget-basics",
+    "locale": "en",
+    "title": "How to build a budget",
+    "summary": "5 slides covering income, expenses, spending margin, and your first saving target.",
+    "topics": ["budget", "spending", "savings", "beginners"],
+    "slide_count": 5
+  },
+  {
+    "id": "en-slide-compound-interest",
+    "locale": "en",
+    "title": "Compound interest: the most powerful force in finance",
+    "summary": "5 slides showing how compound interest works for savers and against borrowers, with charts.",
+    "topics": ["compound interest", "savings", "debt", "investing"],
+    "slide_count": 5
+  }
+]

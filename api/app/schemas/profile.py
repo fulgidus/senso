@@ -98,6 +98,9 @@ class UserProfileDTO(BaseModel):
     monthly_margin: float | None = Field(alias="monthlyMargin", default=None)
     category_totals: dict = Field(alias="categoryTotals", default_factory=dict)
     insight_cards: list[dict] = Field(alias="insightCards", default_factory=list)
+    coaching_insights: list[dict] = Field(
+        alias="coachingInsights", default_factory=list
+    )
     questionnaire_answers: dict | None = Field(
         alias="questionnaireAnswers", default=None
     )

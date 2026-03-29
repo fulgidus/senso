@@ -6,6 +6,17 @@
             "driver": "SQLite",
             "name": "test",
             "database": "./api/test.db"
+        },
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "Senso",
+            "database": "senso",
+            "username": "senso"
         }
     ]
 }

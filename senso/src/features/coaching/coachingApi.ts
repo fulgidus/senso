@@ -13,7 +13,7 @@ export interface ReasoningStep {
 export interface ActionCard {
   title: string
   description: string
-  action_type: string
+  action_type: "calculator" | "funnel" | "comparison" | "reminder" | "external_link" | string
   cta_label?: string
   payload?: Record<string, unknown>
 }
@@ -22,14 +22,32 @@ export interface ResourceCard {
   title: string
   summary: string
   resource_type: string
-  url?: string
+  url?: string | null
   estimated_read_minutes?: number
+  video_id?: string | null
+  slide_id?: string | null
 }
 
 export interface LearnCard {
   concept: string
   plain_explanation: string
   example?: string
+}
+
+export interface AffordabilityKeyFigure {
+  label: string
+  value: string
+}
+
+export interface AffordabilityVerdict {
+  verdict: "yes" | "no" | "conditional"
+  key_figures: AffordabilityKeyFigure[]
+}
+
+export interface NewInsight {
+  headline: string
+  data_point: string
+  educational_framing: string
 }
 
 export interface LLMCallTrace {
@@ -64,6 +82,8 @@ export interface CoachingResponse {
   resource_cards: ResourceCard[]
   learn_cards: LearnCard[]
   details_a2ui?: string | null
+  affordability_verdict?: AffordabilityVerdict | null
+  new_insight?: NewInsight | null
   debug?: DebugPayload
 }
 
