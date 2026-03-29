@@ -153,7 +153,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
 | 6. Learn+Act Cards & Demo Hardening | 4/4            | Complete    | 2026-03-29 |
 | 7. Streaming & Nice-to-Have Polish  | 4/4            | Complete    | 2026-03-29 |
-| 8. Content Platform & Public Serving | 0/3            | Planned     |            |
+| 8. Content Platform & Public Serving | 3/3            | Complete    | 2026-03-30 |
 | 9. LLM Financial Intelligence       | 0/0           | Not Planned |            |
 | 10. Transparency & Security         | 0/0           | Not Planned |            |
 
@@ -172,9 +172,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 **Plans:** 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md - ContentItem DB model, admin CRUD API, and JSON catalog seed migration.
-- [ ] 08-02-PLAN.md - DB-backed BM25 search index with rebuild + public content API endpoints.
-- [ ] 08-03-PLAN.md - Public content browse and detail pages with type-specific rendering.
+- [x] 08-01-PLAN.md - ContentItem DB model, admin CRUD API, and JSON catalog seed migration.
+- [x] 08-02-PLAN.md - DB-backed BM25 search index with rebuild + public content API endpoints.
+- [x] 08-03-PLAN.md - Public content browse and detail pages with type-specific rendering.
 **UI hint**: yes
 
 ### Phase 9: LLM Financial Intelligence with Categorization, Tagging, Timeline Inference & Crowdsourced Merchant Mapping

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Milestone complete
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-03-29T20:59:15.694Z"
+status: In Progress
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-30T00:35:00.000Z"
 progress:
   total_phases: 10
-  completed_phases: 7
-  total_plans: 29
-  completed_plans: 29
+  completed_phases: 8
+  total_plans: 32
+  completed_plans: 32
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 08 - content-platform-management-indexing-and-public-serving
+**Current focus:** Phase 09 - llm-financial-intelligence
 
 ## Current Position
 
-Phase: 08
-Plan: Not started
+Phase: 08 (complete)
+Plan: 3 of 3 (all done)
 
 ## Performance Metrics
 
@@ -71,6 +71,9 @@ Plan: Not started
 | Phase 06-learn-act-cards-demo-hardening P04 | 12 | 2 tasks | 4 files |
 | Phase 07-streaming-nice-to-have-polish P02 | 4 | 2 tasks | 5 files |
 | Phase 07-streaming-nice-to-have-polish P04 | 2min | 3 tasks | 0 files |
+| Phase 08-content-platform P01 | 15min | 2 tasks | 7 files |
+| Phase 08-content-platform P02 | 8min | 2 tasks | 6 files |
+| Phase 08-content-platform P03 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -122,6 +125,11 @@ Recent decisions affecting current work:
 - [Phase 07-streaming-nice-to-have-polish]: Streaming backend reuses the existing validated chat flow and emits only message deltas plus a final structured SSE payload.
 - [Phase 07-streaming-nice-to-have-polish]: own_pii_unsolicited is now enforced through a live-profile rewrite pass that trims unsolicited facts without hard-blocking normal coaching answers.
 - [Phase 07-streaming-nice-to-have-polish]: All persona UX work pre-completed in prior plans (07-01/02/03); 07-04 verified acceptance criteria and auto-approved visual checkpoint.
+- [Phase 08-content-platform]: ContentItemDTO uses serialization_alias='metadata' instead of alias='metadata' to avoid SQLAlchemy MetaData conflict when from_attributes=True.
+- [Phase 08-content-platform]: BM25 index loads from DB first, falls back to static JSON if empty/unavailable — ensures search works during migration.
+- [Phase 08-content-platform]: Public content API has no auth dependency — fully open for content sharing and SEO.
+- [Phase 08-content-platform]: BrowserRouter moved to root level; AppRoutes checks pathname for /learn prefix to render public routes before auth gate.
+- [Phase 08-content-platform]: MarpSlideViewer reused directly from coaching feature for slide_deck detail rendering.
 
 ### Pending Todos
 
@@ -139,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T20:51:36.181Z
-Stopped at: Completed 07-04-PLAN.md
+Last session: 2026-03-30T00:35:00.000Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
