@@ -20,14 +20,16 @@ import {
   type ActionCard,
   type ResourceCard,
   type LearnCard,
+  type AffordabilityVerdict,
   type DebugPayload,
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2 } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
+import { MarpSlideViewer } from "./MarpSlideViewer"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -71,7 +73,137 @@ function ReasoningCard({ steps }: { steps: ReasoningStep[] }) {
   )
 }
 
-function ActionCardStub({ card }: { card: ActionCard }) {
+// ── Action cards ──────────────────────────────────────────────────────────────
+
+function LoanCalculatorCard({ card }: { card: ActionCard }) {
+  const { t } = useTranslation()
+  const payload = card.payload ?? {}
+  const defaultAmount = Number(payload.amount ?? 5000)
+  const defaultMonths = Number(payload.months ?? 24)
+  const defaultTan = Number(payload.tan ?? 8)
+
+  const [amount, setAmount] = useState(defaultAmount)
+  const [months, setMonths] = useState(defaultMonths)
+  const [tan, setTan] = useState(defaultTan)
+
+  // French amortization: monthly payment = P * r / (1 - (1+r)^-n)
+  const r = tan / 100 / 12
+  const monthlyPayment =
+    r === 0
+      ? amount / months
+      : (amount * r) / (1 - Math.pow(1 + r, -months))
+  const totalRepayable = monthlyPayment * months
+  const totalInterest = totalRepayable - amount
+
+  return (
+    <div className="border border-border rounded-xl bg-background overflow-hidden text-sm">
+      <div className="px-3 py-2 bg-muted/50 font-semibold text-sm">{card.title}</div>
+      <div className="px-3 py-3 space-y-3">
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>{t("calculator.amount")}</span>
+            <span className="font-semibold text-foreground">€{amount.toLocaleString("it-IT")}</span>
+          </div>
+          <input
+            type="range"
+            min={500} max={50000} step={500}
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
+            className="w-full accent-primary"
+          />
+        </div>
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>{t("calculator.months")}</span>
+            <span className="font-semibold text-foreground">{months} mesi</span>
+          </div>
+          <input
+            type="range"
+            min={6} max={84} step={6}
+            value={months}
+            onChange={(e) => setMonths(Number(e.target.value))}
+            className="w-full accent-primary"
+          />
+        </div>
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>{t("calculator.tan")}</span>
+            <span className="font-semibold text-foreground">{tan.toFixed(1)}%</span>
+          </div>
+          <input
+            type="range"
+            min={1} max={24} step={0.5}
+            value={tan}
+            onChange={(e) => setTan(Number(e.target.value))}
+            className="w-full accent-primary"
+          />
+        </div>
+        <div className="border-t pt-2 space-y-1">
+          <div className="flex justify-between font-semibold">
+            <span>{t("calculator.monthlyPayment")}</span>
+            <span className="text-primary">€{monthlyPayment.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{t("calculator.totalInterest")}</span>
+            <span>€{totalInterest.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{t("calculator.totalRepayable")}</span>
+            <span>€{totalRepayable.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PartnerOfferCard({ card }: { card: ActionCard }) {
+  const payload = card.payload ?? {}
+  const funnelId = String(payload.funnel_id ?? "")
+  const offerType = String(payload.offer_type ?? "")
+  const partnerName = String(payload.partner_name ?? card.title)
+  const ctaUrl = payload.cta_url ? String(payload.cta_url) : null
+
+  const colorMap: Record<string, string> = {
+    conto_corrente: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
+    prestito: "bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-800",
+    investimento: "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800",
+    assicurazione: "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
+  }
+  const colorClass = colorMap[offerType] ?? "bg-muted/30 border-border"
+
+  return (
+    <div className={`border rounded-xl overflow-hidden text-sm ${colorClass}`}>
+      <div className="px-3 py-2 flex items-center justify-between">
+        <div>
+          <div className="font-semibold">{partnerName}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{card.description}</div>
+        </div>
+        <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center text-sm font-bold shrink-0 ml-2">
+          {partnerName.charAt(0).toUpperCase()}
+        </div>
+      </div>
+      {ctaUrl ? (
+        <a
+          href={ctaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between px-3 py-2 bg-background/60 hover:bg-background/80 transition-colors font-medium text-xs text-primary border-t"
+          data-funnel-id={funnelId}
+        >
+          <span>{card.cta_label ?? "Scopri l'offerta"}</span>
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      ) : (
+        <div className="px-3 py-2 bg-background/60 text-xs text-muted-foreground border-t">
+          {card.cta_label ?? "Scopri l'offerta"}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GenericActionCard({ card }: { card: ActionCard }) {
   return (
     <div className="border border-border rounded-md px-3 py-2 bg-background text-sm">
       <div className="font-semibold">{card.title}</div>
@@ -85,10 +217,60 @@ function ActionCardStub({ card }: { card: ActionCard }) {
   )
 }
 
-function ResourceCardStub({ card }: { card: ResourceCard }) {
-  const { t } = useTranslation()
+function ActionCardRouter({ card }: { card: ActionCard }) {
+  if (card.action_type === "calculator") return <LoanCalculatorCard card={card} />
+  if (card.action_type === "funnel") return <PartnerOfferCard card={card} />
+  return <GenericActionCard card={card} />
+}
+
+// ── Resource cards ────────────────────────────────────────────────────────────
+
+function VideoCard({ card }: { card: ResourceCard }) {
+  const [expanded, setExpanded] = useState(false)
+  const videoId = card.video_id
+  if (!videoId) return <ArticleCard card={card} />
   return (
-    <div className="border border-border rounded-md px-3 py-2 bg-background text-sm">
+    <div className="border border-border rounded-xl overflow-hidden text-sm bg-background">
+      {expanded ? (
+        <div className="aspect-video w-full">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+            title={card.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        </div>
+      ) : (
+        <button
+          onClick={() => setExpanded(true)}
+          className="w-full relative aspect-video bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+          aria-label={`Riproduci: ${card.title}`}
+        >
+          <img
+            src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+            alt={card.title}
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
+          />
+          <span className="relative z-10 h-12 w-12 rounded-full bg-black/70 flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="white" className="h-6 w-6 ml-0.5">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+        </button>
+      )}
+      <div className="px-3 py-2">
+        <div className="font-semibold">{card.title}</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{card.summary}</div>
+      </div>
+    </div>
+  )
+}
+
+function ArticleCard({ card }: { card: ResourceCard }) {
+  const { t } = useTranslation()
+  const inner = (
+    <div className={`border border-border rounded-md px-3 py-2 bg-background text-sm ${card.url ? "hover:border-primary/50 transition-colors" : ""}`}>
       <div className="font-semibold">{card.title}</div>
       <div className="text-muted-foreground mt-0.5">{card.summary}</div>
       {card.estimated_read_minutes && (
@@ -96,8 +278,29 @@ function ResourceCardStub({ card }: { card: ResourceCard }) {
           {t("coaching.readingMinutes", { minutes: card.estimated_read_minutes })}
         </span>
       )}
+      {card.url && (
+        <span className="flex items-center gap-1 text-xs text-primary mt-1">
+          <ExternalLink className="h-3 w-3" /> {t("coaching.readMore")}
+        </span>
+      )}
     </div>
   )
+  if (card.url) {
+    return (
+      <a href={card.url} target="_blank" rel="noopener noreferrer">
+        {inner}
+      </a>
+    )
+  }
+  return inner
+}
+
+function ResourceCardRouter({ card }: { card: ResourceCard }) {
+  if (card.resource_type === "video") return <VideoCard card={card} />
+  if (card.resource_type === "slide_deck" && card.slide_id) {
+    return <MarpSlideViewer slideId={card.slide_id} title={card.title} />
+  }
+  return <ArticleCard card={card} />
 }
 
 function LearnCardStub({ card }: { card: LearnCard }) {
@@ -108,6 +311,55 @@ function LearnCardStub({ card }: { card: LearnCard }) {
       <div className="text-blue-700 mt-0.5">{card.plain_explanation}</div>
       {card.example && (
         <div className="text-blue-600 text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
+      )}
+    </div>
+  )
+}
+
+function AffordabilityVerdictCard({ verdict }: { verdict: AffordabilityVerdict }) {
+  const { t } = useTranslation()
+  const verdictConfig = {
+    yes: {
+      label: t("coaching.verdictYes"),
+      bg: "bg-green-50 dark:bg-green-950/30",
+      border: "border-green-300 dark:border-green-700",
+      badge: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
+      icon: "✓",
+    },
+    no: {
+      label: t("coaching.verdictNo"),
+      bg: "bg-red-50 dark:bg-red-950/30",
+      border: "border-red-300 dark:border-red-700",
+      badge: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
+      icon: "✗",
+    },
+    conditional: {
+      label: t("coaching.verdictConditional"),
+      bg: "bg-amber-50 dark:bg-amber-950/30",
+      border: "border-amber-300 dark:border-amber-700",
+      badge: "bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200",
+      icon: "~",
+    },
+  }
+  const cfg = verdictConfig[verdict.verdict]
+  return (
+    <div className={`mt-2 rounded-xl border ${cfg.border} ${cfg.bg} overflow-hidden`}>
+      <div className={`px-3 py-2 flex items-center gap-2 ${cfg.badge}`}>
+        <span className="font-bold text-base leading-none">{cfg.icon}</span>
+        <span className="font-semibold text-sm">{cfg.label}</span>
+      </div>
+      {verdict.key_figures.length > 0 && (
+        <div className="px-3 py-2 space-y-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+            {t("coaching.verdictKeyFigures")}
+          </p>
+          {verdict.key_figures.map((kf, i) => (
+            <div key={i} className="flex justify-between items-baseline gap-2 text-sm">
+              <span className="text-muted-foreground">{kf.label}</span>
+              <span className="font-semibold tabular-nums">{kf.value}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )
@@ -256,12 +508,12 @@ function AssistantBubble({
             {SHOW_REASONING && <ReasoningCard steps={resp.reasoning_used} />}
             {resp.action_cards.length > 0 && (
               <div className="mt-2 flex flex-col gap-2">
-                {resp.action_cards.map((c, i) => <ActionCardStub key={i} card={c} />)}
+                {resp.action_cards.map((c, i) => <ActionCardRouter key={i} card={c} />)}
               </div>
             )}
             {resp.resource_cards.length > 0 && (
               <div className="mt-2 flex flex-col gap-2">
-                {resp.resource_cards.map((c, i) => <ResourceCardStub key={i} card={c} />)}
+                {resp.resource_cards.map((c, i) => <ResourceCardRouter key={i} card={c} />)}
               </div>
             )}
             {resp.learn_cards.length > 0 && (
@@ -269,9 +521,18 @@ function AssistantBubble({
                 {resp.learn_cards.map((c, i) => <LearnCardStub key={i} card={c} />)}
               </div>
             )}
+            {resp.affordability_verdict && (
+              <AffordabilityVerdictCard verdict={resp.affordability_verdict} />
+            )}
             {resp.details_a2ui && (
               <div className="mt-2">
-                <A2UISurface jsonl={resp.details_a2ui} />
+                <A2UISurface
+                  jsonl={resp.details_a2ui}
+                  onAction={(action) => {
+                    // Dispatch to the page so other components (calculator, funnel) can react
+                    window.dispatchEvent(new CustomEvent("senso:a2ui-action", { detail: { action } }))
+                  }}
+                />
               </div>
             )}
             {LLM_DEBUG && resp.debug && <DebugPanel debug={resp.debug} />}
@@ -511,11 +772,27 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [welcomeLoading, setWelcomeLoading] = useState(false)
   const [error, setError] = useState<{ code: string; message: string } | null>(null)
+  const lastUserMessageRef = useRef<string>("")
 
   const listEndRef = useRef<HTMLDivElement>(null)
   const namingInFlight = useRef(false)
   // Ref to break the circular dep: handleSend → onAssistantMessage ← useVoiceMode → handleSend
   const onAssistantMessageRef = useRef<(text: string) => void>(() => {})
+  // Track auto-dismiss timer so it can be cleared on new error
+  const errorDismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Wrapper that auto-dismisses transient errors after 8 seconds.
+  // profile_required errors are kept persistent (they have a navigation CTA).
+  const setErrorWithAutoDismiss = useCallback((err: { code: string; message: string } | null) => {
+    if (errorDismissTimerRef.current) {
+      clearTimeout(errorDismissTimerRef.current)
+      errorDismissTimerRef.current = null
+    }
+    setError(err)
+    if (err && err.code !== "profile_required") {
+      errorDismissTimerRef.current = setTimeout(() => setError(null), 8000)
+    }
+  }, [])
 
   // ── Load sessions list + restore last ──────────────────────────────────────
 
@@ -526,13 +803,13 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       return list
     } catch (err) {
       if (err instanceof CoachingApiError) {
-        setError({ code: err.code, message: getErrorMessage(err.code, t) })
+        setErrorWithAutoDismiss({ code: err.code, message: getErrorMessage(err.code, t) })
       } else {
-        setError({ code: "network_error", message: getErrorMessage("network_error", t) })
+        setErrorWithAutoDismiss({ code: "network_error", message: getErrorMessage("network_error", t) })
       }
       return []
     }
-  }, [])
+  }, [setErrorWithAutoDismiss])
 
   const loadSessionHistory = useCallback(async (id: string) => {
     setLoadingHistory(true)
@@ -661,6 +938,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     if (!trimmed || isLoading) return
 
     setError(null)
+    lastUserMessageRef.current = trimmed
     const userMsg: DisplayMessage = { role: "user", content: trimmed }
     setMessages((prev) => [...prev, userMsg])
     setInputText("")
@@ -668,8 +946,17 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
     const isFirstUserMessage = !sessionId
 
+    // 35s client-side timeout — well below the backend's 60s LLM timeout.
+    // If the backend hits its timeout first, we get a 502 error; if the connection
+    // hangs (network issue), the frontend recovers and shows a Retry button.
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false)
+      setErrorWithAutoDismiss({ code: "network_error", message: getErrorMessage("network_error", t) })
+    }, 35000)
+
     try {
       const response = await sendMessage(trimmed, locale, "mentore-saggio", sessionId)
+      clearTimeout(timeoutId)
       const newSessionId = response.session_id
 
       // If this was the first message, a new session was created
@@ -705,15 +992,16 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       // In voice mode, auto-play TTS for the reply
       onAssistantMessageRef.current(response.message)
     } catch (err) {
+      clearTimeout(timeoutId)
       if (err instanceof CoachingApiError) {
-        setError({ code: err.code, message: getErrorMessage(err.code, t) })
+        setErrorWithAutoDismiss({ code: err.code, message: getErrorMessage(err.code, t) })
       } else {
-        setError({ code: "network_error", message: getErrorMessage("network_error", t) })
+        setErrorWithAutoDismiss({ code: "network_error", message: getErrorMessage("network_error", t) })
       }
     } finally {
       setIsLoading(false)
     }
-  }, [inputText, isLoading, sessionId, locale, fetchSessions])
+  }, [inputText, isLoading, sessionId, locale, fetchSessions, setErrorWithAutoDismiss])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -824,8 +1112,24 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         {isLoading && (
           <div className="flex items-start gap-2">
             <SensoAvatar />
-            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-muted-foreground">
-              <span className="animate-pulse">{t(`coaching.thinking.${effectiveGender}`, { name: personaName })}</span>
+            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0 max-w-[90%] space-y-2">
+              {/* Thinking label */}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="flex gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+                </span>
+                <span className="text-xs">{t(`coaching.thinking.${effectiveGender}`, { name: personaName })}</span>
+              </div>
+              {/* Skeleton lines — simulate response text */}
+              <div className="space-y-1.5 pt-1">
+                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-full" />
+                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-[85%]" />
+                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-[70%]" />
+              </div>
+              {/* Skeleton card placeholder — signals cards are coming */}
+              <div className="mt-2 h-16 bg-muted-foreground/10 rounded-xl animate-pulse border border-muted-foreground/10" />
             </div>
           </div>
         )}
@@ -843,6 +1147,17 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
               className="text-xs text-destructive underline mt-1"
             >
               {t("coaching.goToProfile")}
+            </button>
+          )}
+          {(error.code === "llm_error" || error.code === "network_error") && lastUserMessageRef.current && (
+            <button
+              onClick={() => {
+                setError(null)
+                void handleSend(lastUserMessageRef.current)
+              }}
+              className="text-xs text-destructive underline mt-1"
+            >
+              {t("coaching.retryLastMessage")}
             </button>
           )}
         </div>

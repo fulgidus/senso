@@ -157,7 +157,7 @@
         "incomeIrpef": "IRPEF",
         "incomeAddizionali": "Surcharges (~1.73%)",
         "incomeFixedAmountLabel": "Monthly net amount",
-        "incomeRangeLabel": "Monthly net amount (min – max)",
+        "incomeRangeLabel": "Monthly net amount (min - max)",
         "incomeVariableToggle": "Variable amount",
         "incomeExtraMonthsLabel": "th instalment",
         "employmentEmployed": "Employed",
@@ -245,7 +245,23 @@
         "errorLlm": "Coach temporarily unavailable. Try again shortly.",
         "errorNetwork": "Connection error. Check your network and try again.",
         "errorUnauthenticated": "Session expired. Please log in again.",
-        "errorGeneric": "An error occurred. Please try again."
+        "errorGeneric": "An error occurred. Please try again.",
+        "verdictYes": "Yes, you can afford it",
+        "verdictNo": "No, now is not the right time",
+        "verdictConditional": "You can do it, but with some care",
+        "verdictKeyFigures": "Key figures",
+        "insightNewLabel": "New insight detected",
+        "readMore": "Read article",
+        "retryLastMessage": "Retry",
+        "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)"
+    },
+    "calculator": {
+        "amount": "Amount",
+        "months": "Duration (months)",
+        "tan": "Annual rate (%)",
+        "monthlyPayment": "Monthly payment",
+        "totalInterest": "Total interest",
+        "totalRepayable": "Total repayable"
     },
     "ingestion": {
         "heading": "Upload documents",

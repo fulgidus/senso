@@ -157,7 +157,7 @@
         "incomeIrpef": "IRPEF",
         "incomeAddizionali": "Addizionali (~1.73%)",
         "incomeFixedAmountLabel": "Importo mensile netto",
-        "incomeRangeLabel": "Importo mensile netto (min – max)",
+        "incomeRangeLabel": "Importo mensile netto (min - max)",
         "incomeVariableToggle": "Importo variabile",
         "incomeExtraMonthsLabel": "ª mensilità",
         "employmentEmployed": "Dipendente",
@@ -245,7 +245,23 @@
         "errorLlm": "Coach temporaneamente non disponibile. Riprova tra poco.",
         "errorNetwork": "Errore di connessione. Controlla la rete e riprova.",
         "errorUnauthenticated": "Sessione scaduta. Effettua di nuovo il login.",
-        "errorGeneric": "Si è verificato un errore. Riprova."
+        "errorGeneric": "Si è verificato un errore. Riprova.",
+        "verdictYes": "Sì, puoi permettertelo",
+        "verdictNo": "No, non è il momento giusto",
+        "verdictConditional": "Puoi farlo, ma con qualche accorgimento",
+        "verdictKeyFigures": "Dati chiave",
+        "insightNewLabel": "Nuovo spunto rilevato",
+        "readMore": "Leggi l'articolo",
+        "retryLastMessage": "Riprova",
+        "ttsFallbackActive": "Audio via sintesi vocale del browser (ElevenLabs non disponibile)"
+    },
+    "calculator": {
+        "amount": "Importo",
+        "months": "Durata (mesi)",
+        "tan": "TAN (%)",
+        "monthlyPayment": "Rata mensile",
+        "totalInterest": "Interessi totali",
+        "totalRepayable": "Totale da restituire"
     },
     "ingestion": {
         "heading": "Carica documenti",
