@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-29T07:39:41.139Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-29T07:45:47.767Z"
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 25
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 06 (learn-act-cards-demo-hardening) - EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Plan: 2 of 4
 | Phase 05-voice-coaching-loop P04 | 6min | 2 tasks | 3 files |
 | Phase 05-voice-coaching-loop P05 | 3min | 2 tasks | 5 files |
 | Phase 06-learn-act-cards-demo-hardening P01 | 11 | 2 tasks | 6 files |
+| Phase 06-learn-act-cards-demo-hardening P02 | 15 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Recent decisions affecting current work:
 - [Phase 06-learn-act-cards-demo-hardening]: Fallback injection trigger uses affordability_verdict is None — skip for conversational responses, inject for financial decisions regardless of message length
 - [Phase 06-learn-act-cards-demo-hardening]: _repair_response() made unconditional in CoachingService.chat() — ensures arrays always exist before fallback injection runs
 - [Phase 06-learn-act-cards-demo-hardening]: Docker test setup: uv sync without --no-dev + COPY tests enables pytest inside container — required for CI and all Phase 6 test verification
+- [Phase 06-learn-act-cards-demo-hardening]: MARP slide separator regex uses /\n[ \t]*---[ \t]*\n/ to handle actual \n\n---\n\n pattern in .md files
+- [Phase 06-learn-act-cards-demo-hardening]: STT mute implemented via isPlaying rising-edge useEffect (wasPlayingRef pattern) - cleaner than inside onAssistantMessage
 
 ### Pending Todos
 
@@ -116,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T07:39:41.136Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-29T07:45:47.765Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
