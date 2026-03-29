@@ -87,8 +87,13 @@ PROMPTS_DIR = COACHING_DIR / "prompts"
 _SUPPORTED_LOCALES = {"it", "en"}
 _DEFAULT_LOCALE = "it"
 _DEFAULT_PERSONA_ID = "mentore-saggio"
-# Phase 4: only default persona supported
-_ALLOWED_PERSONAS = {"mentore-saggio"}
+# Phase 7: allow all configured personas while defaulting safely when unknown
+_ALLOWED_PERSONAS = {
+    "mentore-saggio",
+    "amico-sarcastico",
+    "hartman",
+    "cheerleader",
+}
 
 _BLOCKED_RESPONSE_TEMPLATE = {
     "message": "Non riesco a rispondere a questa richiesta.",
@@ -378,6 +383,17 @@ class CoachingService:
                 blocked["message"] = scan_result.substitute_message
             return blocked
 
+        current_user_snapshot = self._load_current_user_snapshot(user_id)
+        profile_snapshot = (
+            profile_dto.model_dump() if hasattr(profile_dto, "model_dump") else {}
+        )
+        response_data = self._sanitize_own_pii_unsolicited(
+            response_data=response_data,
+            user_message=messages[-1].get("content", "") if messages else "",
+            current_user=current_user_snapshot,
+            profile_snapshot=profile_snapshot,
+        )
+
         if debug:
             response_data["_debug"] = self._build_debug_payload(
                 system_prompt=system_prompt,
@@ -389,6 +405,41 @@ class CoachingService:
             )
 
         return response_data
+
+    def _load_current_user_snapshot(self, user_id: str) -> dict[str, Any]:
+        from app.db.repository import get_user_by_id  # noqa: PLC0415
+
+        user = get_user_by_id(self.db, user_id)
+        if user is None:
+            return {}
+        return {
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+        }
+
+    def _sanitize_own_pii_unsolicited(
+        self,
+        response_data: dict[str, Any],
+        user_message: str,
+        current_user: dict[str, Any],
+        profile_snapshot: dict[str, Any],
+    ) -> dict[str, Any]:
+        from app.coaching.safety import sanitize_unsolicited_profile_details  # noqa: PLC0415
+
+        sanitized = sanitize_unsolicited_profile_details(
+            response=response_data,
+            user_message=user_message,
+            current_user=current_user,
+            profile_snapshot=profile_snapshot,
+        )
+        if not sanitized.get("message", "").strip():
+            fallback = dict(_BLOCKED_RESPONSE_TEMPLATE)
+            fallback["message"] = (
+                "Ti rispondo senza ripetere dati del tuo profilo che non hai chiesto esplicitamente."
+            )
+            return fallback
+        return sanitized
 
     def _persist_coaching_insight(self, user_id: str, new_insight: dict) -> None:
         """Append a new_insight emitted by the coach to user_profiles.coaching_insights.

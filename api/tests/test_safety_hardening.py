@@ -195,6 +195,89 @@ class TestOutputBoundaryVerification:
         assert len(hard_ban_groups) >= 1, "Expected at least 1 hard_ban group"
 
 
+class TestOwnPiiRewrite:
+    def test_rewrite_unsolicited_profile_fact_from_response_payload(self):
+        from app.coaching.safety import sanitize_unsolicited_profile_details
+
+        response = {
+            "message": "Puoi aspettare. Il tuo margine mensile è 700 EUR e la spesa pesa troppo.",
+            "reasoning_used": [
+                {"step": "Margine", "detail": "Hai un margine mensile di 700 EUR."}
+            ],
+            "action_cards": [],
+            "resource_cards": [],
+            "learn_cards": [],
+            "details_a2ui": '{"kind":"comparison","value":"700 EUR"}',
+            "affordability_verdict": {
+                "verdict": "no",
+                "key_figures": [
+                    {"label": "Margine mensile", "value": "700 EUR"},
+                    {"label": "Costo", "value": "900 EUR"},
+                ],
+            },
+        }
+        current_user = {
+            "email": "user@example.com",
+            "first_name": "Luca",
+            "last_name": "Rossi",
+        }
+        profile = {
+            "monthly_margin": 700,
+            "monthly_expenses": 1100,
+            "income_summary": {"amount": 1800, "currency": "EUR"},
+            "category_totals": {"food_delivery": 120},
+            "insight_cards": [{"headline": "Spendi 120 EUR in food delivery"}],
+            "questionnaire_answers": {"monthlyNetIncome": 1800},
+        }
+
+        sanitized = sanitize_unsolicited_profile_details(
+            response,
+            user_message="Posso comprare una bici da 900 EUR?",
+            current_user=current_user,
+            profile_snapshot=profile,
+        )
+
+        assert sanitized["message"] == "Puoi aspettare. e la spesa pesa troppo."
+        assert (
+            sanitized["reasoning_used"][0]["detail"]
+            == "Hai un margine mensile di [dato profilo rimosso]."
+        )
+        assert sanitized["affordability_verdict"]["key_figures"] == [
+            {"label": "Costo", "value": "900 EUR"}
+        ]
+        assert "700 EUR" not in sanitized["details_a2ui"]
+
+    def test_rewrite_keeps_asked_profile_fact_when_grounded(self):
+        from app.coaching.safety import sanitize_unsolicited_profile_details
+
+        response = {
+            "message": "Hai 700 EUR di margine mensile, quindi la bici da 300 EUR è gestibile.",
+            "reasoning_used": [
+                {"step": "Margine", "detail": "Hai 700 EUR di margine mensile."}
+            ],
+            "action_cards": [],
+            "resource_cards": [],
+            "learn_cards": [],
+            "details_a2ui": None,
+            "affordability_verdict": {
+                "verdict": "yes",
+                "key_figures": [
+                    {"label": "Margine mensile", "value": "700 EUR"},
+                    {"label": "Costo", "value": "300 EUR"},
+                ],
+            },
+        }
+
+        sanitized = sanitize_unsolicited_profile_details(
+            response,
+            user_message="Con 700 EUR di margine mensile, posso comprare una bici da 300 EUR?",
+            current_user={"email": "user@example.com"},
+            profile_snapshot={"monthly_margin": 700},
+        )
+
+        assert sanitized == response
+
+
 # ──────────────────────────────────────────────
 # 3. Schema Validation
 # ──────────────────────────────────────────────

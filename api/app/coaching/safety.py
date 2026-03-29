@@ -5,11 +5,13 @@ Phase 4: pattern-only matching. own_pii_unsolicited uses patterns only - live
 userProfile cross-check deferred to Phase 7. Groups with no patterns[] are skipped.
 """
 
+import copy
+import json
 import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import yaml
 
@@ -193,3 +195,163 @@ class SafetyScanner:
                                 is_warn=True,
                             )
         return ScanResult(safe=True, reason="No safety violations detected")
+
+
+_PROFILE_FIELD_HINTS: dict[str, set[str]] = {
+    "email": {"email", "mail"},
+    "first_name": {"nome", "name"},
+    "last_name": {"cognome", "surname", "last name"},
+    "monthly_margin": {"margine", "margin"},
+    "monthly_expenses": {"spese", "expenses", "costi", "costs"},
+    "income_summary": {"reddito", "income", "stipendio", "salary"},
+    "category_totals": {"categoria", "category", "spese", "expenses"},
+    "insight_cards": {"insight", "abitudini", "pattern", "trend"},
+    "questionnaire_answers": {"questionario", "questionnaire", "income", "reddito"},
+}
+
+
+def _flatten_profile_candidates(
+    current_user: dict[str, Any], profile_snapshot: dict[str, Any]
+) -> list[dict[str, str]]:
+    candidates: list[dict[str, str]] = []
+
+    def add_candidate(field: str, value: Any) -> None:
+        if value is None:
+            return
+        if isinstance(value, bool):
+            return
+        if isinstance(value, (int, float)):
+            text = str(int(value)) if float(value).is_integer() else str(value)
+            candidates.append(
+                {
+                    "field": field,
+                    "token": text,
+                    "topic": " ".join(_PROFILE_FIELD_HINTS.get(field, {field})),
+                }
+            )
+            return
+        if isinstance(value, str):
+            token = value.strip()
+            if token:
+                candidates.append(
+                    {
+                        "field": field,
+                        "token": token,
+                        "topic": " ".join(_PROFILE_FIELD_HINTS.get(field, {field})),
+                    }
+                )
+            return
+        if isinstance(value, dict):
+            for nested_key, nested_value in value.items():
+                add_candidate(field, nested_value)
+                if isinstance(nested_key, str):
+                    add_candidate(field, nested_key)
+            return
+        if isinstance(value, list):
+            for item in value:
+                add_candidate(field, item)
+
+    for key, value in current_user.items():
+        add_candidate(key, value)
+    for key, value in profile_snapshot.items():
+        add_candidate(key, value)
+    return candidates
+
+
+def _question_mentions_candidate(user_message: str, candidate: dict[str, str]) -> bool:
+    lower_question = user_message.lower()
+    token = candidate["token"].lower()
+    if token and token in lower_question:
+        return True
+    for hint in _PROFILE_FIELD_HINTS.get(candidate["field"], set()):
+        if hint in lower_question:
+            return True
+    return False
+
+
+def _replace_token(text: str, token: str, replacement: str) -> str:
+    if not text or not token:
+        return text
+    return re.sub(re.escape(token), replacement, text, flags=re.IGNORECASE)
+
+
+def _remove_message_profile_phrase(text: str, candidate: dict[str, str]) -> str:
+    if not text:
+        return text
+    token = re.escape(candidate["token"])
+    patterns: list[str] = []
+    if candidate["field"] == "monthly_margin":
+        patterns = [
+            rf"Il tuo margine mensile è\s*{token}(?:\s*EUR)?\s*",
+            rf"Hai\s*{token}(?:\s*EUR)?\s*di margine mensile\s*",
+        ]
+    elif candidate["field"] == "monthly_expenses":
+        patterns = [
+            rf"Le tue spese mensili sono\s*{token}(?:\s*EUR)?\s*",
+            rf"Hai\s*{token}(?:\s*EUR)?\s*di spese mensili\s*",
+        ]
+    elif candidate["field"] == "income_summary":
+        patterns = [
+            rf"Il tuo reddito è\s*{token}(?:\s*EUR)?\s*",
+            rf"Guadagni\s*{token}(?:\s*EUR)?\s*",
+        ]
+
+    updated = text
+    for pattern in patterns:
+        updated = re.sub(pattern, "", updated, flags=re.IGNORECASE)
+    updated = re.sub(rf"{token}(?:\s*EUR)?", "", updated, flags=re.IGNORECASE)
+    return updated
+
+
+def sanitize_unsolicited_profile_details(
+    response: dict[str, Any],
+    user_message: str,
+    current_user: dict[str, Any],
+    profile_snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    sanitized = copy.deepcopy(response)
+    candidates = [
+        candidate
+        for candidate in _flatten_profile_candidates(current_user, profile_snapshot)
+        if candidate["token"]
+        and not _question_mentions_candidate(user_message, candidate)
+    ]
+
+    if not candidates:
+        return sanitized
+
+    for candidate in candidates:
+        token = candidate["token"]
+        sanitized["message"] = _remove_message_profile_phrase(
+            sanitized.get("message", ""), candidate
+        )
+
+        for step in sanitized.get("reasoning_used", []) or []:
+            if isinstance(step, dict) and step.get("detail"):
+                step["detail"] = re.sub(
+                    rf"{re.escape(token)}(?:\s*EUR)?",
+                    "[dato profilo rimosso]",
+                    step["detail"],
+                    flags=re.IGNORECASE,
+                )
+
+        verdict = sanitized.get("affordability_verdict")
+        if isinstance(verdict, dict):
+            figures = verdict.get("key_figures") or []
+            verdict["key_figures"] = [
+                figure
+                for figure in figures
+                if token.lower() not in str(figure.get("value", "")).lower()
+            ]
+
+        details_a2ui = sanitized.get("details_a2ui")
+        if isinstance(details_a2ui, str):
+            sanitized["details_a2ui"] = re.sub(
+                rf"{re.escape(token)}(?:\s*EUR)?",
+                "[dato profilo rimosso]",
+                details_a2ui,
+                flags=re.IGNORECASE,
+            )
+
+    sanitized["message"] = re.sub(r"\s{2,}", " ", sanitized.get("message", "")).strip()
+    return sanitized
