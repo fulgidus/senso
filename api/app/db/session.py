@@ -28,6 +28,7 @@ def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
     _add_missing_columns()
     _seed_default_users()
+    _seed_content_from_json()
 
 
 def _add_missing_columns() -> None:
@@ -248,5 +249,71 @@ def _seed_default_users() -> None:
             )
             repository.create_user(db, user)
             logger.info("Seeded default user: %s (admin=%s)", email_lower, is_admin)
+    finally:
+        db.close()
+
+
+def _seed_content_from_json() -> None:
+    """Seed content_items table from static JSON catalog files (idempotent).
+
+    Skips if the table already contains any rows.
+    Merges type-specific fields into the metadata_ JSONB column.
+    """
+    import json  # noqa: PLC0415
+    from pathlib import Path  # noqa: PLC0415
+
+    from app.db.models import ContentItem  # noqa: PLC0415
+
+    db = SessionLocal()
+    try:
+        existing_count = db.query(ContentItem).count()
+        if existing_count > 0:
+            logger.debug(
+                "content_items already has %d rows, skipping seed.", existing_count
+            )
+            return
+
+        content_dir = Path(__file__).resolve().parent.parent / "content"
+        # Common top-level keys shared by all content types
+        shared_keys = {"id", "locale", "type", "title", "summary", "topics"}
+
+        catalog_files = {
+            "articles.json": "article",
+            "videos.json": "video",
+            "slides.json": "slide_deck",
+            "partners.json": "partner_offer",
+        }
+
+        items_to_add: list[ContentItem] = []
+        for fname, expected_type in catalog_files.items():
+            path = content_dir / fname
+            if not path.exists():
+                logger.warning("Catalog file not found: %s", path)
+                continue
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            for entry in raw:
+                # Build metadata from all keys that aren't shared
+                metadata = {k: v for k, v in entry.items() if k not in shared_keys}
+                item = ContentItem(
+                    id=entry["id"],
+                    locale=entry.get("locale", "it"),
+                    type=entry.get("type", expected_type),
+                    title=entry.get("title", ""),
+                    summary=entry.get("summary", entry.get("description", "")),
+                    topics=entry.get("topics", []),
+                    metadata_=metadata,
+                    is_published=True,
+                )
+                items_to_add.append(item)
+
+        if items_to_add:
+            db.bulk_save_objects(items_to_add)
+            db.commit()
+            logger.info(
+                "Seeded %d content items from JSON catalogs.", len(items_to_add)
+            )
+    except Exception as exc:
+        logger.warning("Failed to seed content items: %s", exc)
+        db.rollback()
     finally:
         db.close()

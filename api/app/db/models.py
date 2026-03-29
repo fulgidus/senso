@@ -521,3 +521,35 @@ def _audio_cache_after_delete(mapper, connection, target: AudioCache) -> None:
 
 
 event.listen(AudioCache, "after_delete", _audio_cache_after_delete)
+
+
+class ContentItem(Base):
+    """Stores all content catalog items (articles, videos, slide decks, partner offers).
+
+    Replaces static JSON catalog files with a database-backed content store.
+    Type-specific fields live in the ``metadata_`` JSONB column.
+    """
+
+    __tablename__ = "content_items"
+
+    id: str = Column(String, primary_key=True)  # e.g. "it-emergenza-fondo"
+    locale: str = Column(String(5), nullable=False, index=True)  # "it" | "en"
+    type: str = Column(
+        String(30), nullable=False, index=True
+    )  # "article" | "video" | "slide_deck" | "partner_offer"
+    title: str = Column(String(500), nullable=False)
+    summary: str | None = Column(Text, nullable=True)
+    topics: list = Column(JSON, nullable=False, default=list)  # list[str]
+    metadata_: dict = Column(
+        "metadata", JSON, nullable=False, default=dict
+    )  # type-specific fields
+    is_published: bool = Column(Boolean, nullable=False, default=True)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    updated_at: datetime = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
