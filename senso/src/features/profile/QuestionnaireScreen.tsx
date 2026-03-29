@@ -75,7 +75,7 @@ function DualSlider({
       max={max}
       step={step}
       value={values}
-      onValueChange={(v) => onChange([v[0], v[1]] as [number, number])}
+      onValueChange={(v: number[]) => onChange([v[0], v[1]] as [number, number])}
       minStepsBetweenThumbs={0}
     >
       <RadixSlider.Track className="bg-secondary relative grow rounded-full h-1.5">
@@ -107,7 +107,7 @@ function SingleSlider({
       max={max}
       step={step}
       value={[value]}
-      onValueChange={(v) => onChange(v[0])}
+      onValueChange={(v: number[]) => onChange(v[0])}
     >
       <RadixSlider.Track className="bg-secondary relative grow rounded-full h-1.5">
         <RadixSlider.Range className="absolute bg-primary rounded-full h-full" />
