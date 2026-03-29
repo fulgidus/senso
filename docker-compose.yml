@@ -91,6 +91,8 @@ services:
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:8000}
         CACHEBUST: ${CACHEBUST:-1}
+        GIT_SHA: ${GIT_SHA:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     depends_on:
       api:
         condition: service_healthy

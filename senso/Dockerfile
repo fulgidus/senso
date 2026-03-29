@@ -15,20 +15,31 @@ ARG CACHEBUST=1
 ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
+# GIT_SHA is stamped into version.json for post-deploy stale-build detection.
+ARG GIT_SHA=unknown
+ARG BUILD_TIME=unknown
+
 COPY . .
 
 RUN pnpm build
+
+# Stamp version info into the built output
+RUN printf '{"sha":"%s","built_at":"%s"}\n' "$GIT_SHA" "$BUILD_TIME" > /app/dist/version.json
 
 ## Stage 2: serve with nginx
 FROM nginx:1.27-alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# SPA fallback: all routes return index.html
+# SPA fallback: all routes return index.html; /version.json served directly
 RUN printf 'server {\n\
     listen 3001;\n\
     root /usr/share/nginx/html;\n\
     index index.html;\n\
+    location = /version.json {\n\
+        add_header Cache-Control "no-cache, no-store, must-revalidate";\n\
+        add_header Content-Type application/json;\n\
+    }\n\
     location /health {\n\
         access_log off;\n\
         return 200 "ok";\n\
