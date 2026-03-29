@@ -97,9 +97,10 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
                 setIsPlaying(false)
             }
             await audio.play()
-        } catch {
+        } catch (err) {
             // fetchTTSAudio threw (503 or network) - fall back to speechSynthesis only when
             // explicitly permitted by config.
+            console.warn("[useTTS] ElevenLabs failed, falling back to speechSynthesis:", err)
             setIsGenerating(false)
             if (
                 config.fallback === "browser" &&

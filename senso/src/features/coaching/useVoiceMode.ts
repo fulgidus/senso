@@ -6,8 +6,13 @@
  *   2. User holds the mic button → STT starts (pointerDown).
  *   3. User releases the mic button → STT stops → onFinalTranscript fires → message sent.
  *   4. When the assistant reply arrives, caller calls `onAssistantMessage(text)`.
- *   5. TTS auto-plays the reply.
+ *   5. TTS auto-plays the reply — STT is immediately stopped to prevent feedback loop.
  *   6. When TTS finishes, if `voiceAutoListen` is true → mic reopens automatically.
+ *
+ * STT-TTS feedback loop prevention:
+ *   When TTS starts playing (isPlaying rising edge), stopRecording() is called so the
+ *   microphone cannot pick up the assistant's audio and loop it as user input.
+ *   When TTS stops (falling edge), startRecording() re-enables listening if voiceAutoListen.
  *
  * Hold-to-talk is implemented via pointer events (mouse + touch unified).
  */
@@ -84,16 +89,22 @@ export function useVoiceMode({
 
     const { isPlaying, isGenerating, play, stop: stopTTS } = useTTS(ttsConfig)
 
-    // Track when TTS finishes to trigger auto-listen
-    const isPlayingRef = useRef(isPlaying)
+    // Track isPlaying transitions to implement STT-TTS feedback loop prevention.
+    // wasPlayingRef holds the previous value of isPlaying across renders.
     const wasPlayingRef = useRef(false)
-    isPlayingRef.current = isPlaying
 
     useEffect(() => {
-        // Detect falling edge: was playing → stopped
-        if (wasPlayingRef.current && !isPlaying) {
+        const wasPlaying = wasPlayingRef.current
+        wasPlayingRef.current = isPlaying
+
+        if (!wasPlaying && isPlaying) {
+            // Rising edge: TTS just started — immediately stop STT to prevent
+            // the microphone from picking up the assistant's audio output.
+            stopRecording()
+        } else if (wasPlaying && !isPlaying) {
+            // Falling edge: TTS just finished — re-enable STT if auto-listen is on.
             if (voiceAutoListenRef.current && isVoiceMode) {
-                // Start recording again after a short delay (avoids echo / UI flash)
+                // Small delay to avoid echo / UI flash before mic reopens.
                 setIsAutoListening(true)
                 const timer = setTimeout(() => {
                     setIsAutoListening(false)
@@ -102,8 +113,7 @@ export function useVoiceMode({
                 return () => clearTimeout(timer)
             }
         }
-        wasPlayingRef.current = isPlaying
-    }, [isPlaying, isVoiceMode, startRecording])
+    }, [isPlaying, isVoiceMode, startRecording, stopRecording])
 
     // ── Voice mode toggle ─────────────────────────────────────────────────────
 
@@ -151,7 +161,8 @@ export function useVoiceMode({
 
     const onAssistantMessage = useCallback((text: string) => {
         if (!isVoiceMode) return
-        // Auto-play TTS
+        // Auto-play TTS. STT is stopped automatically via the isPlaying rising-edge
+        // effect above when useTTS sets isPlaying=true.
         void play(text, locale)
     }, [isVoiceMode, play, locale])
 
