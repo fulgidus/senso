@@ -1,0 +1,19 @@
+# Local development overrides — NOT used in production (Dokploy ignores this file).
+# Restores host port bindings so services are reachable directly on localhost.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  api:
+    ports:
+      - "8000:8000"
+
+  frontend:
+    ports:
+      - "3001:3001"
