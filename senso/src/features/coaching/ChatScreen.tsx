@@ -7,6 +7,7 @@ import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
 import {
   sendMessage,
+  sendMessageStream,
   getWelcomeMessage,
   listSessions,
   getSessionMessages,
@@ -41,6 +42,12 @@ interface DisplayMessage {
   content: string
   response?: CoachingResponse
   isWelcome?: boolean
+  isStreaming?: boolean
+}
+
+type RestoreToastState = {
+  visible: boolean
+  text: string
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -450,6 +457,16 @@ function SensoAvatar() {
   )
 }
 
+function RestoreToast({ text }: { text: string }) {
+  return (
+    <div className="px-4 pt-3" role="status" aria-live="polite">
+      <div className="mx-auto w-fit max-w-full rounded-full border border-primary/30 bg-card px-3 py-2 text-xs text-muted-foreground shadow-sm">
+        {text}
+      </div>
+    </div>
+  )
+}
+
 function VoicePlayButton({
   text,
   locale,
@@ -494,22 +511,37 @@ function AssistantBubble({
   msg,
   locale,
   ttsConfig,
+  thinkingLabel,
 }: {
   msg: DisplayMessage
   locale: "it" | "en"
   ttsConfig: TTSConfig
+  thinkingLabel: string
 }) {
   const resp = msg.response
   return (
     <div className="flex items-start gap-2 max-w-[90%]">
       <SensoAvatar />
       <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0">
-        <p className="whitespace-pre-wrap">{msg.content}</p>
-        <div className="flex justify-end mt-1">
-          <VoicePlayButton text={msg.content} locale={locale} ttsConfig={ttsConfig} />
-        </div>
+        {msg.isStreaming && !msg.content ? (
+          <div className="flex items-center gap-2 text-muted-foreground" aria-live="polite">
+            <span className="flex gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
+            </span>
+            <span className="text-xs">{thinkingLabel}</span>
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{msg.content}</p>
+        )}
+        {!msg.isStreaming && msg.content && (
+          <div className="flex justify-end mt-1">
+            <VoicePlayButton text={msg.content} locale={locale} ttsConfig={ttsConfig} />
+          </div>
+        )}
         {resp && (
-          <>
+          <div className="animate-in fade-in duration-200 slide-in-from-bottom-1 motion-reduce:animate-none">
             {SHOW_REASONING && <ReasoningCard steps={resp.reasoning_used} />}
             {resp.action_cards.length > 0 && (
               <div className="mt-2 flex flex-col gap-2">
@@ -541,7 +573,7 @@ function AssistantBubble({
               </div>
             )}
             {LLM_DEBUG && resp.debug && <DebugPanel debug={resp.debug} />}
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -776,15 +808,19 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [welcomeLoading, setWelcomeLoading] = useState(false)
+  const [restoreToast, setRestoreToast] = useState<RestoreToastState>({ visible: false, text: "" })
   const [error, setError] = useState<{ code: string; message: string } | null>(null)
   const lastUserMessageRef = useRef<string>("")
 
   const listEndRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const namingInFlight = useRef(false)
   // Ref to break the circular dep: handleSend → onAssistantMessage ← useVoiceMode → handleSend
   const onAssistantMessageRef = useRef<(text: string) => void>(() => {})
   // Track auto-dismiss timer so it can be cleared on new error
   const errorDismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const shouldStickToBottomRef = useRef(true)
 
   // Wrapper that auto-dismisses transient errors after 8 seconds.
   // profile_required errors are kept persistent (they have a navigation CTA).
@@ -797,6 +833,17 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     if (err && err.code !== "profile_required") {
       errorDismissTimerRef.current = setTimeout(() => setError(null), 8000)
     }
+  }, [])
+
+  const showRestoreToast = useCallback((text: string) => {
+    if (restoreToastTimerRef.current) {
+      clearTimeout(restoreToastTimerRef.current)
+    }
+    setRestoreToast({ visible: true, text })
+    restoreToastTimerRef.current = setTimeout(() => {
+      setRestoreToast((prev) => ({ ...prev, visible: false }))
+      restoreToastTimerRef.current = null
+    }, 2500)
   }, [])
 
   // ── Load sessions list + restore last ──────────────────────────────────────
@@ -829,6 +876,13 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     }
   }, [])
 
+  const updateStickiness = useCallback(() => {
+    const container = listRef.current
+    if (!container) return
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
+    shouldStickToBottomRef.current = distanceFromBottom <= 120
+  }, [])
+
   // On mount: load sessions, restore last or fetch welcome for empty new session
   useEffect(() => {
     void (async () => {
@@ -852,6 +906,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         setSessionId(last.id)
         setSessionName(last.name)
         await loadSessionHistory(last.id)
+        showRestoreToast(t("coaching.restoreToast"))
       } else {
         // No sessions yet - show welcome, session will be created on first send
         setLoadingHistory(false)
@@ -875,8 +930,16 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
 
   // Auto-scroll
   useEffect(() => {
-    listEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (!shouldStickToBottomRef.current) return
+    listEndRef.current?.scrollIntoView({ behavior: isLoading ? "auto" : "smooth" })
   }, [messages, isLoading])
+
+  useEffect(() => {
+    return () => {
+      if (errorDismissTimerRef.current) clearTimeout(errorDismissTimerRef.current)
+      if (restoreToastTimerRef.current) clearTimeout(restoreToastTimerRef.current)
+    }
+  }, [])
 
   // ── New conversation ───────────────────────────────────────────────────────
 
@@ -945,9 +1008,15 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     setError(null)
     lastUserMessageRef.current = trimmed
     const userMsg: DisplayMessage = { role: "user", content: trimmed }
-    setMessages((prev) => [...prev, userMsg])
+    const assistantPlaceholder: DisplayMessage = {
+      role: "assistant",
+      content: "",
+      isStreaming: true,
+    }
+    setMessages((prev) => [...prev, userMsg, assistantPlaceholder])
     setInputText("")
     setIsLoading(true)
+    shouldStickToBottomRef.current = true
 
     const isFirstUserMessage = !sessionId
 
@@ -960,9 +1029,72 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
     }, 35000)
 
     try {
-      const response = await sendMessage(trimmed, locale, "mentore-saggio", sessionId)
+      let finalResponse: CoachingResponse | null = null
+
+      try {
+        finalResponse = await sendMessageStream(trimmed, locale, "mentore-saggio", sessionId, {
+          onMeta: (meta) => {
+            if (isFirstUserMessage && meta.session_id) {
+              setSessionId(meta.session_id)
+            }
+          },
+          onDelta: (chunk) => {
+            setMessages((prev) => {
+              const next = [...prev]
+              const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+              if (index === -1) return prev
+              next[index] = {
+                ...next[index],
+                content: `${next[index].content}${chunk}`,
+              }
+              return next
+            })
+          },
+          onFinal: (response) => {
+            finalResponse = response
+            setMessages((prev) => {
+              const next = [...prev]
+              const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+              if (index === -1) {
+                next.push({ role: "assistant", content: response.message, response })
+                return next
+              }
+              next[index] = {
+                role: "assistant",
+                content: response.message,
+                response,
+                isStreaming: false,
+              }
+              return next
+            })
+          },
+        })
+      } catch {
+        const fallback = await sendMessage(trimmed, locale, "mentore-saggio", sessionId)
+        finalResponse = fallback
+        setMessages((prev) => {
+          const next = [...prev]
+          const index = next.findLastIndex((msg) => msg.role === "assistant" && msg.isStreaming)
+          if (index === -1) {
+            next.push({ role: "assistant", content: fallback.message, response: fallback })
+            return next
+          }
+          next[index] = {
+            role: "assistant",
+            content: fallback.message,
+            response: fallback,
+            isStreaming: false,
+          }
+          return next
+        })
+      }
+
       clearTimeout(timeoutId)
-      const newSessionId = response.session_id
+      if (!finalResponse) {
+        throw new CoachingApiError("network_error", "Missing response payload")
+      }
+
+      const newSessionId = finalResponse.session_id
 
       // If this was the first message, a new session was created
       if (isFirstUserMessage && newSessionId) {
@@ -990,14 +1122,14 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         }
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: response.message, response },
-      ])
       // In voice mode, auto-play TTS for the reply
-      onAssistantMessageRef.current(response.message)
+      onAssistantMessageRef.current(finalResponse.message)
     } catch (err) {
       clearTimeout(timeoutId)
+      setMessages((prev) => prev.filter((msg, index) => {
+        const lastStreamingIndex = prev.findLastIndex((candidate) => candidate.role === "assistant" && candidate.isStreaming)
+        return index !== lastStreamingIndex
+      }))
       if (err instanceof CoachingApiError) {
         setErrorWithAutoDismiss({ code: err.code, message: getErrorMessage(err.code, t) })
       } else {
@@ -1085,8 +1217,14 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         </div>
       </div>
 
+      {restoreToast.visible && <RestoreToast text={restoreToast.text} />}
+
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        onScroll={updateStickiness}
+      >
         {(loadingHistory || welcomeLoading) && (
           <div className="flex items-start gap-2">
             <SensoAvatar />
@@ -1109,35 +1247,15 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
                 <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
               </div>
             ) : (
-              <AssistantBubble msg={msg} locale={locale} ttsConfig={ttsConfig} />
+              <AssistantBubble
+                msg={msg}
+                locale={locale}
+                ttsConfig={ttsConfig}
+                thinkingLabel={t(`coaching.thinking.${effectiveGender}`, { name: personaName })}
+              />
             )}
           </div>
         ))}
-
-        {isLoading && (
-          <div className="flex items-start gap-2">
-            <SensoAvatar />
-            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex-1 min-w-0 max-w-[90%] space-y-2">
-              {/* Thinking label */}
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="flex gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
-                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
-                </span>
-                <span className="text-xs">{t(`coaching.thinking.${effectiveGender}`, { name: personaName })}</span>
-              </div>
-              {/* Skeleton lines — simulate response text */}
-              <div className="space-y-1.5 pt-1">
-                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-full" />
-                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-[85%]" />
-                <div className="h-3 bg-muted-foreground/20 rounded animate-pulse w-[70%]" />
-              </div>
-              {/* Skeleton card placeholder — signals cards are coming */}
-              <div className="mt-2 h-16 bg-muted-foreground/10 rounded-xl animate-pulse border border-muted-foreground/10" />
-            </div>
-          </div>
-        )}
 
         <div ref={listEndRef} />
       </div>
