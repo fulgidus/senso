@@ -192,6 +192,8 @@ def _add_missing_columns() -> None:
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS uploads_fingerprint VARCHAR(64)",
         # ── Round 8: per-file progress detail ─────────────────────────────────
         "ALTER TABLE categorization_jobs ADD COLUMN IF NOT EXISTS progress_detail JSONB",
+        # ── Round 9: ingestion watchdog queue timestamp ───────────────────────
+        "ALTER TABLE uploads ADD COLUMN IF NOT EXISTS extraction_queued_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

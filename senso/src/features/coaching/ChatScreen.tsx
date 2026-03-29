@@ -28,7 +28,7 @@ import {
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -47,6 +47,7 @@ interface DisplayMessage {
   isStreaming?: boolean
   personaId?: string | null
   showPersonaCue?: boolean
+  status?: "sent" | "failed"
 }
 
 type RestoreToastState = {
@@ -1310,19 +1311,171 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       onAssistantMessageRef.current(finalResponse.message)
     } catch (err) {
       clearTimeout(timeoutId)
-      setMessages((prev) => prev.filter((_, index) => {
+      const errorCode = err instanceof CoachingApiError ? err.code : "network_error"
+      const isRetryable = errorCode === "llm_error" || errorCode === "network_error"
+      // Remove the streaming assistant placeholder AND mark the last user message as failed
+      setMessages((prev) => {
         const lastStreamingIndex = findLastStreamingAssistantIndex(prev)
-        return index !== lastStreamingIndex
-      }))
-      if (err instanceof CoachingApiError) {
-        setErrorWithAutoDismiss({ code: err.code, message: getErrorMessage(err.code, t) })
-      } else {
-        setErrorWithAutoDismiss({ code: "network_error", message: getErrorMessage("network_error", t) })
+        return prev
+          .filter((_, index) => index !== lastStreamingIndex)
+          .map((msg, index, arr) => {
+            // Find the last user message and mark it failed (for retryable errors)
+            if (isRetryable && msg.role === "user" && index === arr.length - 1) {
+              return { ...msg, status: "failed" as const }
+            }
+            return msg
+          })
+      })
+      if (!isRetryable) {
+        // Non-retryable errors (profile_required, input_rejected, etc.) show banner
+        setErrorWithAutoDismiss({ code: errorCode, message: getErrorMessage(errorCode, t) })
       }
     } finally {
       setIsLoading(false)
     }
   }, [inputText, isLoading, sessionId, locale, fetchSessions, setErrorWithAutoDismiss, activePersonaId, messages])
+
+  // Retry a failed user message without duplicating it in the chat
+  const handleRetry = useCallback((failedMessageIndex: number) => {
+    const failedMsg = messages[failedMessageIndex]
+    if (!failedMsg || failedMsg.role !== "user" || failedMsg.status !== "failed") return
+
+    // Clear the failed status on the message, then resend
+    setMessages((prev) =>
+      prev.map((msg, i) =>
+        i === failedMessageIndex ? { ...msg, status: undefined } : msg,
+      ),
+    )
+    // Use handleSend with the message text — but we need to prevent it from
+    // adding a new user message. Instead, we reset the failed msg above and
+    // manually add the assistant placeholder + trigger the send.
+    setError(null)
+    lastUserMessageRef.current = failedMsg.content
+    const assistantPlaceholder: DisplayMessage = {
+      role: "assistant",
+      content: "",
+      isStreaming: true,
+      personaId: activePersonaId,
+      showPersonaCue: shouldShowPersonaCue(messages, activePersonaId),
+    }
+    setMessages((prev) => [...prev, assistantPlaceholder])
+    setIsLoading(true)
+    shouldStickToBottomRef.current = true
+
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false)
+      setErrorWithAutoDismiss({ code: "network_error", message: getErrorMessage("network_error", t) })
+    }, 35000)
+
+    void (async () => {
+      try {
+        let finalResponse: CoachingResponse | null = null
+
+        try {
+          finalResponse = await sendMessageStream(failedMsg.content, locale, activePersonaId, sessionId, {
+            onMeta: (meta) => {
+              if (!sessionId && meta.session_id) {
+                setSessionId(meta.session_id)
+              }
+            },
+            onDelta: (chunk) => {
+              setMessages((prev) => {
+                const next = [...prev]
+                const index = findLastStreamingAssistantIndex(next)
+                if (index === -1) return prev
+                next[index] = {
+                  ...next[index],
+                  content: `${next[index].content}${chunk}`,
+                }
+                return next
+              })
+            },
+            onFinal: (response) => {
+              finalResponse = response
+              setMessages((prev) => {
+                const next = [...prev]
+                const index = findLastStreamingAssistantIndex(next)
+                if (index === -1) {
+                  next.push({ role: "assistant", content: response.message, response })
+                  return next
+                }
+                next[index] = {
+                  role: "assistant",
+                  content: response.message,
+                  response,
+                  isStreaming: false,
+                  personaId: activePersonaId,
+                  showPersonaCue: next[index].showPersonaCue,
+                }
+                return next
+              })
+            },
+          })
+        } catch {
+          const fallback = await sendMessage(failedMsg.content, locale, activePersonaId, sessionId)
+          finalResponse = fallback
+          setMessages((prev) => {
+            const next = [...prev]
+            const index = findLastStreamingAssistantIndex(next)
+            if (index === -1) {
+              next.push({
+                role: "assistant",
+                content: fallback.message,
+                response: fallback,
+                personaId: activePersonaId,
+                showPersonaCue: shouldShowPersonaCue(next, activePersonaId),
+              })
+              return next
+            }
+            next[index] = {
+              role: "assistant",
+              content: fallback.message,
+              response: fallback,
+              isStreaming: false,
+              personaId: activePersonaId,
+              showPersonaCue: next[index].showPersonaCue,
+            }
+            return next
+          })
+        }
+
+        clearTimeout(timeoutId)
+        if (!finalResponse) {
+          throw new CoachingApiError("network_error", "Missing response payload")
+        }
+
+        const newSessionId = finalResponse.session_id
+        if (!sessionId && newSessionId) {
+          setSessionId(newSessionId)
+          const list = await fetchSessions()
+          const created = list.find((s) => s.id === newSessionId)
+          setSessionName(created?.name ?? "")
+        }
+
+        onAssistantMessageRef.current(finalResponse.message)
+      } catch (retryErr) {
+        clearTimeout(timeoutId)
+        const errorCode = retryErr instanceof CoachingApiError ? retryErr.code : "network_error"
+        const isRetryable = errorCode === "llm_error" || errorCode === "network_error"
+        setMessages((prev) => {
+          const lastStreamingIndex = findLastStreamingAssistantIndex(prev)
+          return prev
+            .filter((_, index) => index !== lastStreamingIndex)
+            .map((msg, index, arr) => {
+              if (isRetryable && msg.role === "user" && index === arr.length - 1) {
+                return { ...msg, status: "failed" as const }
+              }
+              return msg
+            })
+        })
+        if (!isRetryable) {
+          setErrorWithAutoDismiss({ code: errorCode, message: getErrorMessage(errorCode, t) })
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    })()
+  }, [messages, activePersonaId, sessionId, locale, fetchSessions, setErrorWithAutoDismiss, t])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -1435,11 +1588,27 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "user" ? (
-              <div className="flex items-end gap-2 max-w-[90%]">
-                <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3 text-sm">
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+              <div className="flex flex-col items-end gap-1 max-w-[90%]">
+                <div className="flex items-end gap-2">
+                  <div className={`rounded-2xl rounded-tr-sm px-4 py-3 text-sm ${
+                    msg.status === "failed"
+                      ? "bg-destructive/10 text-destructive border border-destructive/30"
+                      : "bg-primary text-primary-foreground"
+                  }`}>
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                  <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
                 </div>
-                <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
+                {msg.status === "failed" && (
+                  <button
+                    onClick={() => handleRetry(i)}
+                    disabled={isLoading}
+                    className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors mr-9 disabled:opacity-50"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    {t("coaching.retryLastMessage")}
+                  </button>
+                )}
               </div>
             ) : (
               <AssistantBubble
@@ -1457,7 +1626,7 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
         <div ref={listEndRef} />
       </div>
 
-      {/* Error banner */}
+      {/* Error banner — only for non-retryable errors (retryable ones show inline retry on the message) */}
       {error && (
         <div className="px-4 py-2 bg-destructive/10 border-t border-destructive/20 shrink-0">
           <p className="text-sm text-destructive">{error.message}</p>
@@ -1467,17 +1636,6 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
               className="text-xs text-destructive underline mt-1"
             >
               {t("coaching.goToProfile")}
-            </button>
-          )}
-          {(error.code === "llm_error" || error.code === "network_error") && lastUserMessageRef.current && (
-            <button
-              onClick={() => {
-                setError(null)
-                void handleSend(lastUserMessageRef.current)
-              }}
-              className="text-xs text-destructive underline mt-1"
-            >
-              {t("coaching.retryLastMessage")}
             </button>
           )}
         </div>

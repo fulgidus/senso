@@ -115,6 +115,9 @@ class Upload(Base):
     uploaded_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
+    extraction_queued_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
     extraction_status: str = Column(String(32), nullable=False, default="pending")
     extraction_method: str | None = Column(String(256), nullable=True, default=None)
     module_source: str | None = Column(String(32), nullable=True, default=None)

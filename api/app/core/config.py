@@ -14,6 +14,7 @@ class Settings:
     google_redirect_uri: str | None
     frontend_url: str
     frontend_origins: tuple[str, ...]
+    stale_upload_timeout_seconds: int
     # MinIO object storage fields
     minio_endpoint: str
     minio_access_key: str
@@ -74,14 +75,16 @@ def get_settings() -> Settings:
             return f"{parsed.scheme}://{parsed.netloc}"
         return value.strip().rstrip("/")
 
+    origin_values: list[str] = []
     if raw_origins:
-        frontend_origins = tuple(
+        origin_values.extend(
             normalize_origin(origin)
             for origin in raw_origins.split(",")
             if origin.strip()
         )
-    else:
-        frontend_origins = (normalize_origin(frontend_url),)
+    origin_values.append(normalize_origin(frontend_url))
+
+    frontend_origins = tuple(dict.fromkeys(origin_values))
 
     return Settings(
         jwt_secret=os.getenv(
@@ -97,6 +100,9 @@ def get_settings() -> Settings:
         google_redirect_uri=os.getenv("GOOGLE_REDIRECT_URI"),
         frontend_url=frontend_url,
         frontend_origins=frontend_origins,
+        stale_upload_timeout_seconds=int(
+            os.getenv("STALE_UPLOAD_TIMEOUT_SECONDS", str(15 * 60))
+        ),
         # MinIO fields
         minio_endpoint=os.getenv("MINIO_ENDPOINT_URL", "http://minio:9000"),
         minio_access_key=os.getenv("MINIO_ROOT_USER", "minioadmin"),

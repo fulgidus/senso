@@ -6,6 +6,7 @@ Extraction runs asynchronously (BackgroundTask). Status polled by client.
 import io
 import logging
 import tempfile
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -25,6 +26,7 @@ from app.ingestion.ocr import extract_with_pdf_pipeline, extract_with_image_pipe
 from app.ingestion.adaptive import run_adaptive_pipeline
 from app.ingestion.registry import get_registry
 from app.schemas.ingestion import ExtractionResult, UploadStatusDTO
+from app.db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +87,7 @@ class IngestionService:
             minio_key=minio_key,
             content_type=content_type,
             size_bytes=len(file_bytes),
+            extraction_queued_at=datetime.now(UTC),
             extraction_status="pending",
         )
         self.db.add(upload)
@@ -94,31 +97,65 @@ class IngestionService:
 
     def run_extraction_background(self, upload_id: str, file_bytes: bytes) -> None:
         """Run extraction pipeline. Called as BackgroundTask."""
-        upload = self.db.query(Upload).filter(Upload.id == upload_id).first()
-        if not upload:
-            return
-
-        llm_client = get_llm_client()
-        registry = get_registry()
-        suffix = Path(upload.original_filename).suffix.lower() or ".bin"
-
-        # Write to temp file for module/OCR processing
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-            tmp.write(file_bytes)
-            tmp_path = Path(tmp.name)
-
+        db = SessionLocal()
         try:
-            result = self._extract(tmp_path, upload.content_type, llm_client, registry)
-            self._persist_extraction(upload, result)
-        except LLMError:
-            upload.extraction_status = "provider_outage"
-            self.db.commit()
-        except Exception as exc:
-            logger.exception("Extraction failed for upload %s: %s", upload_id, exc)
-            upload.extraction_status = "failed"
-            self.db.commit()
+            upload = db.query(Upload).filter(Upload.id == upload_id).first()
+            if not upload:
+                return
+
+            llm_client = get_llm_client()
+            registry = get_registry()
+            suffix = Path(upload.original_filename).suffix.lower() or ".bin"
+
+            # Write to temp file for module/OCR processing
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+                tmp.write(file_bytes)
+                tmp_path = Path(tmp.name)
+
+            background_service = IngestionService(
+                db=db,
+                settings=self.settings,
+                minio_client=self.minio,
+            )
+            try:
+                result = background_service._extract(
+                    tmp_path, upload.content_type, llm_client, registry
+                )
+                background_service._persist_extraction(upload, result)
+            except LLMError:
+                upload.extraction_status = "provider_outage"
+                db.commit()
+            except Exception as exc:
+                logger.exception("Extraction failed for upload %s: %s", upload_id, exc)
+                upload.extraction_status = "failed"
+                db.commit()
+            finally:
+                tmp_path.unlink(missing_ok=True)
         finally:
-            tmp_path.unlink(missing_ok=True)
+            db.close()
+
+    def fail_stale_pending_uploads(self, user_id: str | None = None) -> int:
+        cutoff = datetime.now(UTC) - timedelta(
+            seconds=self.settings.stale_upload_timeout_seconds
+        )
+        query = self.db.query(Upload).filter(
+            Upload.extraction_status == "pending",
+            Upload.extraction_queued_at < cutoff,
+        )
+        if user_id is not None:
+            query = query.filter(Upload.user_id == user_id)
+
+        stale_uploads = query.all()
+        if not stale_uploads:
+            return 0
+
+        for upload in stale_uploads:
+            upload.extraction_status = "failed"
+            upload.extraction_method = "watchdog:stale_pending"
+            upload.module_source = None
+
+        self.db.commit()
+        return len(stale_uploads)
 
     def _extract(
         self, file_path: Path, content_type: str, llm_client: LLMClient, registry
@@ -368,6 +405,7 @@ class IngestionService:
         self.db.commit()
 
     def list_uploads(self, user_id: str) -> list[UploadStatusDTO]:
+        self.fail_stale_pending_uploads(user_id=user_id)
         uploads = (
             self.db.query(Upload)
             .filter(Upload.user_id == user_id)
@@ -377,10 +415,12 @@ class IngestionService:
         return [self._to_dto(u) for u in uploads]
 
     def get_upload(self, user_id: str, upload_id: str) -> UploadStatusDTO:
+        self.fail_stale_pending_uploads(user_id=user_id)
         upload = self._get_upload_for_user(user_id, upload_id)
         return self._to_dto(upload)
 
     def get_extracted(self, user_id: str, upload_id: str) -> dict:
+        self.fail_stale_pending_uploads(user_id=user_id)
         self._get_upload_for_user(user_id, upload_id)
         extracted = (
             self.db.query(ExtractedDocumentModel)
@@ -423,16 +463,25 @@ class IngestionService:
 
     def retry_upload(self, user_id: str, upload_id: str, hint: str | None) -> dict:
         upload = self._get_upload_for_user(user_id, upload_id)
-        llm_client = get_llm_client()
 
         safe_hint: str | None = None
         if hint:
+            llm_client = get_llm_client()
             guardrail_result = check_hint_safety(hint, llm_client)
             if guardrail_result["safe"]:
                 safe_hint = hint
             # If unsafe, hint is silently dropped (D-32)
 
+        if upload.extracted_document is not None:
+            self.db.delete(upload.extracted_document)
+        for txn in list(upload.transactions):
+            self.db.delete(txn)
+
+        upload.confirmed = False
         upload.extraction_status = "pending"
+        upload.extraction_method = None
+        upload.module_source = None
+        upload.extraction_queued_at = datetime.now(UTC)
         self.db.commit()
 
         return {"status": "retrying", "hint_used": safe_hint is not None}

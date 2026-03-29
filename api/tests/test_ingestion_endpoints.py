@@ -7,6 +7,7 @@ Uses:
 - TestClient from FastAPI
 """
 
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -38,6 +39,32 @@ def _mock_minio():
     mock.put_object.return_value = None
     mock.remove_object.return_value = None
     return mock
+
+
+def _create_pending_upload_for_user(email: str) -> tuple[str, str]:
+    from app.db.models import Upload, User
+    from app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        assert user is not None
+        upload = Upload(
+            user_id=user.id,
+            original_filename="manual.csv",
+            minio_bucket="bucket",
+            minio_key=f"{user.id}/manual/manual.csv",
+            content_type="text/csv",
+            size_bytes=16,
+            extraction_status="pending",
+            extraction_queued_at=datetime.now(UTC),
+        )
+        db.add(upload)
+        db.commit()
+        db.refresh(upload)
+        return user.id, upload.id
+    finally:
+        db.close()
 
 
 # ---------------------------------------------------------------------------
@@ -203,14 +230,7 @@ def test_confirm_pending_upload_returns_400(client_with_mock_minio):
     client = client_with_mock_minio
     token = _signup_and_get_token(client)
 
-    # Upload a file (creates pending upload)
-    upload_resp = client.post(
-        "/ingestion/upload",
-        files={"file": ("test.csv", b"date,amount\n2024-01-01,50\n", "text/csv")},
-        headers=_auth_headers(token),
-    )
-    assert upload_resp.status_code == 202
-    upload_id = upload_resp.json()["upload_id"]
+    _, upload_id = _create_pending_upload_for_user("user@test.com")
 
     # Confirm while still pending → should fail
     confirm_resp = client.post(
@@ -326,3 +346,27 @@ def test_confirm_all_queues_categorization_job(client):
         "categorizing",
         "generating_insights",
     )
+
+
+def test_list_uploads_transitions_stale_pending_to_failed(client_with_mock_minio):
+    client = client_with_mock_minio
+    email = "stale-list@test.com"
+    token = _signup_and_get_token(client, email)
+    _, upload_id = _create_pending_upload_for_user(email)
+
+    from app.db.models import Upload
+    from app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        upload = db.query(Upload).filter(Upload.id == upload_id).first()
+        upload.extraction_queued_at = datetime.now(UTC) - timedelta(minutes=20)
+        db.commit()
+    finally:
+        db.close()
+
+    list_resp = client.get("/ingestion/uploads", headers=_auth_headers(token))
+
+    assert list_resp.status_code == 200
+    assert list_resp.json()[0]["extractionStatus"] == "failed"
+    assert list_resp.json()[0]["extractionMethod"] == "watchdog:stale_pending"
