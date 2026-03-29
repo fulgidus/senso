@@ -28,6 +28,12 @@ RUN sh -c '\
 ## Stage 2: serve with nginx
 FROM nginx:1.27-alpine
 
+WORKDIR /app
+
+RUN apk add --no-cache nodejs npm && npm install -g pnpm@10.32.0
+
+COPY --from=builder /app /app
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # SPA fallback: all routes return index.html; /version.json served directly

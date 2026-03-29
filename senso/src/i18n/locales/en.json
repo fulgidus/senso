@@ -264,7 +264,9 @@
         "insightNewLabel": "New insight detected",
         "readMore": "Read article",
         "retryLastMessage": "Retry",
-        "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)"
+        "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)",
+        "restoreToast": "Restored last conversation",
+        "streamInterrupted": "Reply interrupted. Check your connection and try again."
     },
     "calculator": {
         "amount": "Amount",

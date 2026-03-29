@@ -110,6 +110,17 @@ export interface PersonaTTSConfig {
   browser_fallback_enabled: boolean
 }
 
+export interface StreamMetaEvent {
+  session_id: string
+  persona_id: string
+}
+
+export interface StreamCallbacks {
+  onMeta?: (meta: StreamMetaEvent) => void
+  onDelta?: (chunk: string) => void
+  onFinal?: (response: CoachingResponse) => void
+}
+
 export interface Persona {
   id: string
   name: string
@@ -130,6 +141,30 @@ export class CoachingApiError extends Error {
     this.code = code
     this.statusCode = statusCode
   }
+}
+
+function splitSseBlocks(buffer: string): { blocks: string[]; remainder: string } {
+  const normalized = buffer.replace(/\r\n/g, "\n")
+  const parts = normalized.split("\n\n")
+  const remainder = parts.pop() ?? ""
+  return { blocks: parts.filter(Boolean), remainder }
+}
+
+function parseSseBlock(block: string): { event: string; data: string } | null {
+  const lines = block.split("\n")
+  let event = "message"
+  const dataLines: string[] = []
+
+  for (const line of lines) {
+    if (line.startsWith("event:")) {
+      event = line.slice(6).trim()
+    } else if (line.startsWith("data:")) {
+      dataLines.push(line.slice(5).trim())
+    }
+  }
+
+  if (!dataLines.length) return null
+  return { event, data: dataLines.join("\n") }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -171,6 +206,80 @@ export async function sendMessage(
   } catch (err) {
     wrapError(err)
   }
+}
+
+export async function sendMessageStream(
+  message: string,
+  locale: "it" | "en" = "it",
+  personaId: string = "mentore-saggio",
+  sessionId?: string,
+  callbacks: StreamCallbacks = {},
+): Promise<CoachingResponse> {
+  const token = requireToken()
+  const response = await fetch(`${API_BASE}/coaching/chat/stream`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+      accept: "text/event-stream",
+    },
+    body: JSON.stringify({
+      message,
+      session_id: sessionId ?? null,
+      locale,
+      persona_id: personaId,
+    }),
+  })
+
+  if (!response.ok) {
+    try {
+      const data = (await response.json()) as unknown
+      throw new ApiClientError("Request failed", response.status, data)
+    } catch (err) {
+      if (err instanceof ApiClientError) wrapError(err)
+      throw new CoachingApiError("network_error", "Network request failed", response.status)
+    }
+  }
+
+  if (!response.body) {
+    throw new CoachingApiError("stream_unavailable", "Streaming body unavailable")
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let finalResponse: CoachingResponse | null = null
+
+  while (true) {
+    const { done, value } = await reader.read()
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done })
+
+    const { blocks, remainder } = splitSseBlocks(buffer)
+    buffer = remainder
+
+    for (const block of blocks) {
+      const parsed = parseSseBlock(block)
+      if (!parsed) continue
+
+      if (parsed.event === "meta") {
+        callbacks.onMeta?.(JSON.parse(parsed.data) as StreamMetaEvent)
+      } else if (parsed.event === "delta") {
+        const payload = JSON.parse(parsed.data) as { text?: string }
+        callbacks.onDelta?.(payload.text ?? "")
+      } else if (parsed.event === "final") {
+        finalResponse = JSON.parse(parsed.data) as CoachingResponse
+        callbacks.onFinal?.(finalResponse)
+      } else if (parsed.event === "done" && finalResponse) {
+        return finalResponse
+      }
+    }
+
+    if (done) {
+      break
+    }
+  }
+
+  throw new CoachingApiError("stream_interrupted", "Streaming ended before final payload")
 }
 
 export async function getWelcomeMessage(locale: "it" | "en" = "it"): Promise<string> {
