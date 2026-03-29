@@ -48,18 +48,28 @@ OCR_CHAR_THRESHOLD = 50  # below this → treat as empty/garbage
 def extract_pdf_text_layer(file_path: Path) -> str:
     """
     Extract text from a PDF using liteparse (text layer first, OCR if sparse).
-    Returns empty string on any error.
+    Returns empty string on any error (including if liteparse is not installed).
     """
-    return extract_text_with_liteparse(file_path)
+    try:
+        return extract_text_with_liteparse(file_path)
+    except ImportError:
+        logger.warning(
+            "liteparse unavailable — skipping text extraction for %s", file_path.name
+        )
+        return ""
 
 
 def extract_text_with_tesseract(file_path: Path) -> str:
     """
     Extract text from an image using liteparse OCR mode.
     Name kept for backwards compatibility with callers; no longer uses Tesseract.
-    Returns empty string on any error.
+    Returns empty string on any error (including if liteparse is not installed).
     """
-    return extract_text_with_liteparse(file_path, ocr_enabled=True)
+    try:
+        return extract_text_with_liteparse(file_path, ocr_enabled=True)
+    except ImportError:
+        logger.warning("liteparse unavailable — skipping OCR for %s", file_path.name)
+        return ""
 
 
 def _is_usable(text: str) -> bool:
