@@ -24,13 +24,15 @@ from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
 from app.coaching.safety import SafetyScanner
+from app.db.models import WelcomeCache
 from app.ingestion.llm import LLMClient, LLMError
 from app.services.profile_service import ProfileError, ProfileService
 
 logger = logging.getLogger(__name__)
 
-# Module-level cache so it survives across request-scoped CoachingService instances.
-_welcome_cache: dict[str, str] = {}
+# Module-level soul-hash cache: avoids re-reading the soul file on every request.
+# Invalidated only when the process restarts (file changes require a redeploy anyway).
+_soul_hash_cache: dict[str, str] = {}
 
 COACHING_DIR = Path(__file__).parent
 PERSONAS_DIR = COACHING_DIR.parent / "personas"
@@ -108,30 +110,74 @@ class CoachingService:
         except LLMError:
             return first_user_message[:60]
 
+    def _soul_hash(self, persona_id: str) -> str:
+        """Return a SHA3-256 hex digest of the soul file for `persona_id`.
+
+        Cached in-process after first read; changes require a container restart,
+        which is the correct invalidation boundary (soul edits → redeploy).
+        """
+        if persona_id not in _soul_hash_cache:
+            soul_text = self._load_soul(persona_id)
+            _soul_hash_cache[persona_id] = hashlib.sha3_256(
+                soul_text.encode()
+            ).hexdigest()
+        return _soul_hash_cache[persona_id]
+
+    def _welcome_cache_key(
+        self,
+        first_name: str | None,
+        voice_gender: str,
+        persona_id: str,
+        locale: str,
+    ) -> str:
+        """Stable, content-addressed cache key for a welcome message.
+
+        Inputs that affect the generated text:
+          - first_name  : personalisation
+          - voice_gender: grammatical gender of the coach addressing the user
+          - persona_id  : determines the soul file and system prompt
+          - locale      : language of the output
+          - soul_hash   : invalidates the entry when the soul file is edited
+        """
+        soul_hash = self._soul_hash(persona_id)
+        raw = f"{first_name or ''}:{voice_gender}:{persona_id}:{locale}:{soul_hash}"
+        return "SHA3:" + hashlib.sha3_256(raw.encode()).hexdigest()
+
     def get_welcome(
         self,
         user_id: str,
         first_name: str | None = None,
+        voice_gender: str = "indifferent",
         locale: str = _DEFAULT_LOCALE,
+        persona_id: str = _DEFAULT_PERSONA_ID,
     ) -> str:
-        """
-        Generate a short, warm, personalised welcome message for the chat screen.
-        Uses the LLM directly - no profile required (graceful fallback if unavailable).
+        """Generate (or return cached) a short personalised welcome message.
 
-        Results are cached in-memory keyed on (user_id, first_name, locale) so repeated
-        mounts / new-conversation calls don't fire a fresh LLM call.
+        Cache strategy: Postgres `welcome_cache` table, keyed on a SHA3-256
+        digest of (first_name, voice_gender, persona_id, locale, soul_hash).
+        The key is content-addressed — it changes only when personalisation
+        inputs or the soul file change, not on every container restart.
 
-        Returns a plain string.
+        `user_id` is intentionally NOT part of the key: two users with the
+        same name/gender/persona/locale get the same cached text, which is
+        fine (the message is generic personalisation, not user-specific data).
         """
         locale = locale if locale in _SUPPORTED_LOCALES else _DEFAULT_LOCALE
 
-        # ── Cache lookup ──────────────────────────────────────────────────────
-        cache_key = hashlib.md5(
-            f"{user_id}:{first_name or ''}:{locale}".encode()
-        ).hexdigest()
-        if cache_key in _welcome_cache:
-            return _welcome_cache[cache_key]
+        cache_key = self._welcome_cache_key(
+            first_name, voice_gender, persona_id, locale
+        )
 
+        # ── Postgres cache read ───────────────────────────────────────────────
+        cached = (
+            self.db.query(WelcomeCache)
+            .filter(WelcomeCache.cache_key == cache_key)
+            .first()
+        )
+        if cached:
+            return cached.text
+
+        # ── Build prompt ──────────────────────────────────────────────────────
         name_part = f" {first_name}" if first_name else ""
         if locale == "en":
             prompt = (
@@ -150,7 +196,7 @@ class CoachingService:
                 f"Solo testo - nessun JSON."
             )
 
-        soul_text = self._load_soul(_DEFAULT_PERSONA_ID)
+        soul_text = self._load_soul(persona_id)
         system_prompt = self._render_system(soul_text, locale)
 
         try:
@@ -167,7 +213,16 @@ class CoachingService:
             else:
                 result = f"Ciao{name_part}! Sono il tuo Mentore Saggio. Chiedimi qualcosa sul tuo budget, le tue spese o i tuoi obiettivi finanziari."
 
-        _welcome_cache[cache_key] = result
+        # ── Postgres cache write ──────────────────────────────────────────────
+        try:
+            entry = WelcomeCache(cache_key=cache_key, text=result)
+            self.db.add(entry)
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            # Non-fatal: we still return the result; next request will regenerate.
+            logger.warning("welcome_cache write failed for key %s", cache_key)
+
         return result
 
     def chat(

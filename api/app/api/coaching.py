@@ -305,6 +305,7 @@ def name_conversation(
 @router.get("/welcome", response_model=WelcomeResponseDTO)
 def get_welcome(
     locale: str = "it",
+    persona_id: str = "mentore-saggio",
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -313,7 +314,9 @@ def get_welcome(
     message = service.get_welcome(
         user_id=current_user.id,
         first_name=current_user.first_name,
+        voice_gender=current_user.voice_gender or "indifferent",
         locale=locale,
+        persona_id=persona_id,
     )
     return WelcomeResponseDTO(message=message)
 

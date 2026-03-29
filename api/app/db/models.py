@@ -281,3 +281,25 @@ class ChatMessage(Base):
     )
 
     session = relationship("ChatSession", back_populates="messages")
+
+
+class WelcomeCache(Base):
+    """
+    Persistent cache for LLM-generated welcome messages.
+
+    Cache key is a SHA-3-256 hex digest of:
+        "{first_name}:{voice_gender}:{persona_id}:{locale}:{soul_hash}"
+    where soul_hash is SHA-3-256 of the persona's soul file content.
+
+    This ensures the cached text is regenerated whenever any personalisation
+    input changes (name, gender, persona, locale) or the soul file is edited,
+    but is reused across container restarts and worker resets.
+    """
+
+    __tablename__ = "welcome_cache"
+
+    cache_key: str = Column(String(64), primary_key=True)  # SHA3-256 hex, 64 chars
+    text: str = Column(Text, nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
