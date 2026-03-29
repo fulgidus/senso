@@ -210,13 +210,15 @@ function ProfilePage({ user }: { user: User }) {
 // ── Protected app wrapper (renders shell + routes only when authenticated) ──
 
 function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () => Promise<void>; updateUser: (updated: Partial<User>) => void }) {
+  const { i18n } = useTranslation()
+  const locale = i18n.language.startsWith("en") ? "en" : "it"
   return (
     <AuthContext.Provider value={{ user, signOut, updateUser }}>
       <AppShell>
         <Routes>
           <Route path="/" element={<IngestionPage user={user} />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
-          <Route path="/chat" element={<ChatScreen onNavigateBack={() => history.back()} locale="it" />} />
+          <Route path="/chat" element={<ChatScreen onNavigateBack={() => history.back()} locale={locale} />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
