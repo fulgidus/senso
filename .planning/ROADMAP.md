@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data. (completed 2026-03-25)
 - [x] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement. (completed 2026-03-28)
 - [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
-- [ ] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable.
+- [x] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable. (completed 2026-03-29)
 
 ## Phase Details
 
@@ -118,7 +118,7 @@ Plans:
 - [x] 06-01-PLAN.md — Card reliability: prompt hardening + server-side fallback injection + backend integration tests
 - [x] 06-02-PLAN.md — MARP visual QA + speech-to-speech end-to-end fix
 - [x] 06-03-PLAN.md — Demo seed script + reset script
-- [ ] 06-04-PLAN.md — Loading states + error recovery polish
+- [x] 06-04-PLAN.md — Loading states + error recovery polish
 **UI hint**: yes
 
 ### Phase 7: Streaming & Nice-to-Have Polish
@@ -144,5 +144,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Financial Profile Clarity        | 4/4            | Complete    | 2026-03-25 |
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
-| 6. Learn+Act Cards & Demo Hardening | 3/4 | In Progress|  |
+| 6. Learn+Act Cards & Demo Hardening | 4/4 | Complete   | 2026-03-29 |
 | 7. Streaming & Nice-to-Have Polish  | 0/TBD          | Not started | -          |

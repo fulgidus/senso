@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-03-29T07:50:17.455Z"
+status: Phase complete - ready for verification
+stopped_at: Completed 06-04-PLAN.md
+last_updated: "2026-03-29T07:57:17.344Z"
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 25
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # Project State
@@ -68,6 +68,7 @@ Plan: 4 of 4
 | Phase 06-learn-act-cards-demo-hardening P01 | 11 | 2 tasks | 6 files |
 | Phase 06-learn-act-cards-demo-hardening P02 | 15 | 2 tasks | 4 files |
 | Phase 06-learn-act-cards-demo-hardening P03 | 2 | 2 tasks | 2 files |
+| Phase 06-learn-act-cards-demo-hardening P04 | 12 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 06-learn-act-cards-demo-hardening]: AuthResponseDTO flat token shape: access_token is top-level key, not nested under tokens — plan template assumption was wrong
 - [Phase 06-learn-act-cards-demo-hardening]: FK CASCADE delete from users is sufficient for full reset — all 12 child tables cascade automatically per models.py
 - [Phase 06-learn-act-cards-demo-hardening]: Table names in reset script: uploads (not ingestion_uploads), chat_sessions (not coaching_sessions), chat_messages (not coaching_messages)
+- [Phase 06-learn-act-cards-demo-hardening]: 35s client-side timeout: below backend 60s LLM timeout so backend 502 fires first on LLM failure; 35s catches connection hangs during demo
+- [Phase 06-learn-act-cards-demo-hardening]: setErrorWithAutoDismiss wrapper pattern — profile_required errors persistent; all other transient error codes auto-dismiss after 8s
 
 ### Pending Todos
 
@@ -123,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T07:50:17.452Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-03-29T07:57:17.341Z
+Stopped at: Completed 06-04-PLAN.md
 Resume file: None
