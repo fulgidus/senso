@@ -115,7 +115,7 @@ Plans:
   4. The scripted flow (upload -> profile summary -> voice question -> grounded spoken recommendation -> cards) runs end-to-end in under 90 seconds.
 **Plans**: 4 plans
 Plans:
-- [ ] 06-01-PLAN.md — Card reliability: prompt hardening + server-side fallback injection + backend integration tests
+- [x] 06-01-PLAN.md — Card reliability: prompt hardening + server-side fallback injection + backend integration tests
 - [ ] 06-02-PLAN.md — MARP visual QA + speech-to-speech end-to-end fix
 - [ ] 06-03-PLAN.md — Demo seed script + reset script
 - [ ] 06-04-PLAN.md — Loading states + error recovery polish
@@ -144,5 +144,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Financial Profile Clarity        | 4/4            | Complete    | 2026-03-25 |
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
-| 6. Learn+Act Cards & Demo Hardening | 0/4            | Not started | -          |
+| 6. Learn+Act Cards & Demo Hardening | 1/4 | In Progress|  |
 | 7. Streaming & Nice-to-Have Polish  | 0/TBD          | Not started | -          |

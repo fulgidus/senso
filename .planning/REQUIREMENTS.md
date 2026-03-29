@@ -40,7 +40,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Learn and Act
 
-- [ ] **ACTN-01**: Each coaching response can include at least one educational resource card (article or video) relevant to the question.
+- [x] **ACTN-01**: Each coaching response can include at least one educational resource card (article or video) relevant to the question.
 - [ ] **ACTN-02**: Each coaching response can include at least one actionable service card (bank or partner) relevant to user context.
 - [ ] **ACTN-03**: User can open educational and action cards from the same response context.
 
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COCH-05 | Phase 4 | Pending |
 | VOIC-01 | Phase 5 | Complete |
 | VOIC-02 | Phase 5 | Complete |
-| ACTN-01 | Phase 6 | Pending |
+| ACTN-01 | Phase 6 | Complete |
 | ACTN-02 | Phase 6 | Pending |
 | ACTN-03 | Phase 6 | Pending |
 | SAFE-01 | Phase 4 | Complete |
