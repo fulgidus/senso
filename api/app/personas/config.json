@@ -10,9 +10,9 @@
         "elevenlabs": {
             "voiceIds": {
                 "any": {
-                    "masculine": "o4b57JYAECRMJyCEXyIE",
-                    "feminine": "8KInRSd4DtD5L5gK7itu",
-                    "neutral": "9rJyhPcU6dKFmhVRrfA9"
+                    "masculine": "ErXwobaYiN019PkySvjV",
+                    "feminine": "EXAVITQu4vr4xnSDxMaL",
+                    "neutral": "pNInz6obpgDQGcFmaJgB"
                 }
             },
             "normalization": "elevenlabs",
@@ -34,9 +34,9 @@
             "elevenlabs": {
                 "voiceIds": {
                     "it": {
-                        "masculine": "o4b57JYAECRMJyCEXyIE",
-                        "feminine": "8KInRSd4DtD5L5gK7itu",
-                        "neutral": "9rJyhPcU6dKFmhVRrfA9"
+                        "masculine": "ErXwobaYiN019PkySvjV",
+                        "feminine": "EXAVITQu4vr4xnSDxMaL",
+                        "neutral": "pNInz6obpgDQGcFmaJgB"
                     }
                 },
                 "normalization": "elevenlabs",
