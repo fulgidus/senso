@@ -23,7 +23,7 @@ interface VoiceModeBarProps {
     onMicPointerDown: (e: React.PointerEvent) => void
     onMicPointerUp: (e: React.PointerEvent) => void
     onStopTTS: () => void
-    onExitVoiceMode: () => Promise<void>
+    onExitVoiceMode: () => void
     disabled?: boolean
 }
 
