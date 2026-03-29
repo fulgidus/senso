@@ -5,12 +5,17 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@10.32.0 --activate
 
-# VITE_BACKEND_URL must be declared before COPY to bust cache when the value changes
+# Copy lockfile first for a best-effort cache hit on pnpm install
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
+
+# CACHEBUST invalidates all layers below when set to a new value (e.g. git SHA).
+# VITE_BACKEND_URL must also be declared before COPY to bust cache on value change.
+ARG CACHEBUST=1
 ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
 COPY . .
-RUN pnpm install --frozen-lockfile
 
 RUN pnpm build
 
