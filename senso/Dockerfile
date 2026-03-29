@@ -26,6 +26,11 @@ RUN printf 'server {\n\
     listen 3001;\n\
     root /usr/share/nginx/html;\n\
     index index.html;\n\
+    location /health {\n\
+        access_log off;\n\
+        return 200 "ok";\n\
+        add_header Content-Type text/plain;\n\
+    }\n\
     location / {\n\
         try_files $uri $uri/ /index.html;\n\
     }\n\
