@@ -18,8 +18,9 @@ import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import type { User } from "@/features/auth/types"
+import { getBackendBaseUrl } from "@/lib/config"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+const API_BASE = getBackendBaseUrl()
 
 // ── Ingestion page (handles internal processing/onboarding/questionnaire state) ──
 

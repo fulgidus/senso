@@ -9,8 +9,9 @@ import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
+import { getBackendBaseUrl } from "@/lib/config"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+const API_BASE = getBackendBaseUrl()
 
 type Screen = "ingestion" | "processing" | "profile" | "onboarding" | "questionnaire" | "chat"
 type QuestionnaireMode = "quick" | "thorough"

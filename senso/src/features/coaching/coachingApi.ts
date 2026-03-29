@@ -1,7 +1,8 @@
 import { apiRequest, ApiClientError } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
+import { getBackendBaseUrl } from "@/lib/config"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+const API_BASE = getBackendBaseUrl()
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
