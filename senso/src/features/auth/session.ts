@@ -25,6 +25,7 @@ type RawUser = {
   email: string
   first_name?: string | null
   last_name?: string | null
+  is_admin?: boolean | null
   voice_gender?: string | null
   voice_auto_listen?: boolean | null
   default_persona_id?: string | null
@@ -36,6 +37,7 @@ function parseUser(raw: RawUser): User {
     email: raw.email,
     firstName: raw.first_name ?? null,
     lastName: raw.last_name ?? null,
+    isAdmin: raw.is_admin ?? false,
     voiceGender: (raw.voice_gender as VoiceGender | null) ?? "indifferent",
     voiceAutoListen: raw.voice_auto_listen ?? false,
     defaultPersonaId: raw.default_persona_id ?? "mentore-saggio",

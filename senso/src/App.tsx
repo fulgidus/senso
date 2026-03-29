@@ -15,6 +15,7 @@ import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
 import { ContentDetailPage } from "@/features/content/ContentDetailPage"
+import { ContentAdminPage } from "@/features/admin/ContentAdminPage"
 import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
@@ -222,6 +223,9 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
           <Route path="/profile" element={<ProfilePage user={user} />} />
           <Route path="/chat" element={<ChatScreen onNavigateBack={() => history.back()} locale={locale} />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          {user.isAdmin && (
+            <Route path="/admin/content" element={<ContentAdminPage />} />
+          )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>
