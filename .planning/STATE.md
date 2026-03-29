@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete - ready for verification
-stopped_at: Phase 7 context gathered
-last_updated: "2026-03-29T18:17:03.692Z"
+stopped_at: Phase 7 UI-SPEC approved
+last_updated: "2026-03-29T18:48:35.724Z"
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 29
+  completed_plans: 26
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 06 - learn-act-cards-demo-hardening
+**Current focus:** Phase 07 - streaming-nice-to-have-polish
 
 ## Current Position
 
-Phase: 06 (learn-act-cards-demo-hardening) - EXECUTING
-Plan: 4 of 4
+Phase: 07 (streaming-nice-to-have-polish) - EXECUTING
+Plan: 1 of 4
 
 ## Performance Metrics
 
@@ -115,6 +115,8 @@ Recent decisions affecting current work:
 - [Phase 06-learn-act-cards-demo-hardening]: Table names in reset script: uploads (not ingestion_uploads), chat_sessions (not coaching_sessions), chat_messages (not coaching_messages)
 - [Phase 06-learn-act-cards-demo-hardening]: 35s client-side timeout: below backend 60s LLM timeout so backend 502 fires first on LLM failure; 35s catches connection hangs during demo
 - [Phase 06-learn-act-cards-demo-hardening]: setErrorWithAutoDismiss wrapper pattern — profile_required errors persistent; all other transient error codes auto-dismiss after 8s
+- [Phase 07-streaming-nice-to-have-polish]: Persisted default persona at the user level via users.default_persona_id so new conversations inherit a durable saved coach preference.
+- [Phase 07-streaming-nice-to-have-polish]: Persona theme tokens now flow from api/app/personas/config.json through PersonaDTO so frontend theming stays config-driven.
 
 ### Pending Todos
 
@@ -126,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T18:17:03.689Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-streaming-nice-to-have-polish/07-CONTEXT.md
+Last session: 2026-03-29T18:48:35.724Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: /home/fulgidus/Documents/senso/.planning/phases/07-streaming-nice-to-have-polish/07-02-PLAN.md

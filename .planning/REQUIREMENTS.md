@@ -31,7 +31,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 - [x] **COCH-02**: User can ask a purchase/decision question by voice input.
 - [x] **COCH-03**: AI response is personalized using the user financial profile and relevant retrieved context.
 - [ ] **COCH-04**: AI response includes explicit reasoning with user-specific numbers used in the recommendation.
-- [ ] **COCH-05**: User can ask follow-up clarification questions and receive coherent contextual responses.
+- [x] **COCH-05**: User can ask follow-up clarification questions and receive coherent contextual responses.
 
 ### Voice Experience
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COCH-02 | Phase 5 | Complete |
 | COCH-03 | Phase 4 | Complete |
 | COCH-04 | Phase 4 | Pending |
-| COCH-05 | Phase 4 | Pending |
+| COCH-05 | Phase 4 | Complete |
 | VOIC-01 | Phase 5 | Complete |
 | VOIC-02 | Phase 5 | Complete |
 | ACTN-01 | Phase 6 | Complete |

@@ -132,7 +132,7 @@ Plans:
   4. own_pii_unsolicited safety check performs full profile cross-check against live session userProfile fields (not pattern-only).
 **Plans**: 4 plans
 Plans:
-- [ ] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
+- [x] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
 - [ ] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
 - [ ] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
 - [ ] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
@@ -151,4 +151,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
 | 5. Voice Coaching Loop              | 4/5            | In Progress |            |
 | 6. Learn+Act Cards & Demo Hardening | 4/4 | Complete   | 2026-03-29 |
-| 7. Streaming & Nice-to-Have Polish  | 0/4            | Not started | -          |
+| 7. Streaming & Nice-to-Have Polish  | 1/4            | In Progress |            |
