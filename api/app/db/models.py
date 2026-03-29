@@ -283,11 +283,12 @@ class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
     id: str = Column(String(36), primary_key=True, default=_uuid7)
-    # creator_id: immutable record of who started the session.
-    # Access control is governed by session_participants; this is audit/display only.
-    creator_id: str = Column(
+    # owner_id: current session owner. Cascade-deletes the session when the owner
+    # deletes their account. Transfer ownership via PATCH before account deletion
+    # if you want the session to survive.
+    owner_id: str = Column(
         String(36),
-        ForeignKey("users.id", ondelete="SET NULL"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
     )
@@ -304,7 +305,7 @@ class ChatSession(Base):
         onupdate=lambda: datetime.now(UTC),
     )
 
-    creator = relationship("User", foreign_keys=[creator_id])
+    owner = relationship("User", foreign_keys=[owner_id])
     participants = relationship(
         "SessionParticipant",
         back_populates="session",

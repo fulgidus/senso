@@ -61,7 +61,7 @@ class TTSRequest(BaseModel):
     locale: Literal["it", "en"] = "it"
     persona_id: str | None = None
     gender: str | None = None
-    message_id: str | None = None  # FK to chat_messages.id for AudioCache tracking
+    message_id: str  # FK to chat_messages.id — required for AudioCache tracking
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ def coaching_chat(
         new_id = str(uuid_utils_lib.uuid7())
         session = ChatSession(
             id=new_id,
-            creator_id=current_user.id,
+            owner_id=current_user.id,
             persona_id=body.persona_id,
             locale=body.locale,
             created_at=datetime.now(UTC),
@@ -419,7 +419,7 @@ def tts_speak(
             req.locale,
             normalization=el_settings.get("normalization", "elevenlabs"),
             voice_settings=vs,
-            db=db if req.message_id else None,
+            db=db,
             message_id=req.message_id,
         )
     except TTSUnavailableError as exc:

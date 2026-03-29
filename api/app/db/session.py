@@ -98,6 +98,39 @@ def _add_missing_columns() -> None:
         "ALTER TABLE welcome_cache ALTER COLUMN cache_key TYPE VARCHAR(72)",
         # Truncate any existing oversized keys (none should exist, but be safe)
         "DELETE FROM welcome_cache WHERE length(cache_key) > 72",
+        # ── Round 5: rename creator_id → owner_id with CASCADE ───────────────
+        # Safe to run on both old DBs (has creator_id) and new DBs (already
+        # named owner_id — each statement is guarded and will SAVEPOINT-skip).
+        """
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'chat_sessions' AND column_name = 'creator_id'
+          ) THEN
+            ALTER TABLE chat_sessions RENAME COLUMN creator_id TO owner_id;
+          END IF;
+        END$$
+        """,
+        # Drop old SET NULL FK (may not exist on fresh DBs — skip via SAVEPOINT)
+        "ALTER TABLE chat_sessions DROP CONSTRAINT IF EXISTS chat_sessions_creator_id_fkey",
+        # Add new CASCADE FK (idempotent DO$$ guard)
+        """
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE constraint_name = 'chat_sessions_owner_id_fkey'
+          ) THEN
+            ALTER TABLE chat_sessions
+              ADD CONSTRAINT chat_sessions_owner_id_fkey
+              FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE;
+          END IF;
+        END$$
+        """,
+        # Drop old index, create new one
+        "DROP INDEX IF EXISTS ix_chat_sessions_creator_id",
+        "CREATE INDEX IF NOT EXISTS ix_chat_sessions_owner_id ON chat_sessions(owner_id)",
         # ── Round 4: new tables (create_all handles these on fresh DBs) ───────
         # session_participants, audio_cache, orphaned_s3_objects are created by
         # Base.metadata.create_all() — the DO$$ blocks below make them idempotent
