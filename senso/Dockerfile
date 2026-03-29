@@ -8,11 +8,11 @@ RUN corepack enable && corepack prepare pnpm@10.32.0 --activate
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-COPY . .
-
-# VITE_BACKEND_URL must be set as a build ARG (Vite bakes env vars at build time)
+# VITE_BACKEND_URL must be declared before COPY to bust cache when the value changes
 ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
+COPY . .
 
 RUN pnpm build
 
