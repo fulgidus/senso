@@ -1,8 +1,8 @@
 """
 Content search using in-process BM25 (rank_bm25).
 
-Indexes all catalog items (articles, videos, slides, partners) at module load time.
-Exposes search(query, locale, top_k) -> list[SearchResult].
+Loads content from the database (ContentItem table). Falls back to static JSON
+catalog files if the DB is empty or unavailable.
 
 Locale filtering is applied BEFORE BM25 scoring — the LLM always gets
 locale-matched results only.
@@ -11,6 +11,7 @@ locale-matched results only.
 from __future__ import annotations
 
 import json
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +20,7 @@ from typing import Any
 from rank_bm25 import BM25Okapi  # type: ignore[import-untyped]
 
 _CONTENT_DIR = Path(__file__).parent
+logger = logging.getLogger(__name__)
 
 
 # ── Data model ─────────────────────────────────────────────────────────────────
@@ -74,10 +76,11 @@ def _tokenize(text: str) -> list[str]:
     return [t for t in text.split() if len(t) > 1]
 
 
-# ── Catalog loader ─────────────────────────────────────────────────────────────
+# ── Catalog loaders ───────────────────────────────────────────────────────────
 
 
-def _load_catalog() -> list[dict[str, Any]]:
+def _load_catalog_from_json() -> list[dict[str, Any]]:
+    """Load content items from static JSON catalog files (original loader)."""
     items: list[dict[str, Any]] = []
     for fname in ("articles.json", "videos.json", "slides.json", "partners.json"):
         path = _CONTENT_DIR / fname
@@ -85,6 +88,33 @@ def _load_catalog() -> list[dict[str, Any]]:
             raw = json.loads(path.read_text(encoding="utf-8"))
             items.extend(raw)
     return items
+
+
+def _load_catalog_from_db() -> list[dict[str, Any]]:
+    """Load all published content items from the database."""
+    from app.db.session import SessionLocal  # noqa: PLC0415
+    from app.db.models import ContentItem  # noqa: PLC0415
+
+    db = SessionLocal()
+    try:
+        rows = db.query(ContentItem).filter(ContentItem.is_published == True).all()  # noqa: E712
+        items: list[dict[str, Any]] = []
+        for row in rows:
+            item: dict[str, Any] = {
+                "id": row.id,
+                "locale": row.locale,
+                "type": row.type,
+                "title": row.title,
+                "summary": row.summary or "",
+                "topics": row.topics or [],
+            }
+            # Merge type-specific metadata into top-level dict
+            if row.metadata_:
+                item.update(row.metadata_)
+            items.append(item)
+        return items
+    finally:
+        db.close()
 
 
 def _item_to_searchable_text(item: dict[str, Any]) -> str:
@@ -118,12 +148,36 @@ def _item_to_result(item: dict[str, Any], score: float) -> SearchResult:
 
 
 class ContentIndex:
-    """BM25 index over the full content catalog, locale-partitioned."""
+    """BM25 index over the full content catalog, locale-partitioned.
+
+    Loads from the database first; falls back to static JSON if the DB is
+    empty or unavailable.
+    """
 
     def __init__(self) -> None:
-        self._all_items = _load_catalog()
-        # Build per-locale indexes lazily on first access
+        try:
+            self._all_items = _load_catalog_from_db()
+        except Exception:
+            logger.debug("DB load failed, falling back to JSON catalogs.")
+            self._all_items = _load_catalog_from_json()
+        if not self._all_items:
+            self._all_items = _load_catalog_from_json()
+        # Build per-locale indexes
         self._locale_index: dict[str, tuple[list[dict[str, Any]], BM25Okapi]] = {}
+        self._build_all_locales()
+
+    def rebuild(self) -> None:
+        """Reload content from DB and rebuild all locale indexes."""
+        try:
+            self._all_items = _load_catalog_from_db()
+        except Exception:
+            logger.debug(
+                "DB load failed during rebuild, falling back to JSON catalogs."
+            )
+            self._all_items = _load_catalog_from_json()
+        if not self._all_items:
+            self._all_items = _load_catalog_from_json()
+        self._locale_index.clear()
         self._build_all_locales()
 
     def _build_all_locales(self) -> None:
@@ -199,6 +253,15 @@ def get_index() -> ContentIndex:
     if _index is None:
         _index = ContentIndex()
     return _index
+
+
+def rebuild_index() -> None:
+    """Rebuild the singleton index from current DB state."""
+    global _index
+    if _index is not None:
+        _index.rebuild()
+    else:
+        _index = ContentIndex()
 
 
 def search_content(

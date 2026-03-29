@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.admin import require_admin
+from app.content.search import rebuild_index
 from app.db.session import get_db
 from app.schemas.auth import UserDTO
 from app.schemas.content import ContentItemCreate, ContentItemDTO, ContentItemUpdate
@@ -54,7 +55,9 @@ def create_content_item(
 ):
     service = ContentService(db)
     try:
-        return service.create_item(data)
+        item = service.create_item(data)
+        rebuild_index()
+        return item
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
 
@@ -68,7 +71,9 @@ def update_content_item(
 ):
     service = ContentService(db)
     try:
-        return service.update_item(item_id, data)
+        item = service.update_item(item_id, data)
+        rebuild_index()
+        return item
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
@@ -82,6 +87,7 @@ def delete_content_item(
     service = ContentService(db)
     try:
         service.delete_item(item_id)
+        rebuild_index()
         return {"deleted": True}
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
