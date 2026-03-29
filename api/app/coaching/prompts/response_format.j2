@@ -10,17 +10,45 @@ Answer ONLY with a valid JSON object. No text before or after the JSON.
   - NO bullet lists or markdown formatting
   - NO exact monetary totals unless rounding to the nearest ten or hundred
   - Answer the core question first, then reference the detail panel if details_a2ui is present ("trovi i dettagli qui sotto")
+  - If affordability_verdict is present, open with the verdict ("Sì, puoi permettertelo" / "No, non è il momento giusto" / "Puoi farlo, ma con qualche accorgimento")
   - Plain flowing prose only. Required field.
 
 - **reasoning_used**: Array of reasoning steps. Show how you arrived at the answer using the user's data. Minimum 1 element. Use exact numbers here (reasoning is not spoken).
 
-- **action_cards**: Array of suggested actions. Can be empty `[]` if there are no concrete actions.
+- **action_cards**: Array of at least one suggested action for any financial question (affordability, savings, loan, budget, investment). For affordability or loan questions always include a `calculator` or `funnel` action card. Only emit `[]` for greetings or purely definitional questions.
 
-- **resource_cards**: Array of educational resources. Can be empty `[]`.
+- **resource_cards**: Array of educational resources. For any financial question you MUST call the `search_content` tool first and include ≥1 result in `resource_cards` — use the returned ids, titles, and urls verbatim. Emit `null` for url if the tool returned no url for that item. Only emit `[]` for greetings or purely definitional questions.
 
 - **learn_cards**: Array of educational cards about the financial concept involved. Can be empty `[]`.
 
-- **details_a2ui**: A2UI JSONL string OR null. When the answer benefits from structured display (numbers, breakdowns, expense tables, timelines), emit A2UI protocol messages using the reference below. When the answer is simple enough for text alone, emit null.
+- **details_a2ui**: A2UI JSONL string OR null.
+  - **Emit A2UI** whenever the response involves **2 or more numbers the user needs to compare side-by-side**: expense breakdowns, income vs. expenses vs. margin, before/after comparisons, multi-item budget allocations, monthly saving plans, timeline steps with amounts.
+  - **Emit null** when the answer is purely qualitative (definitions, explanations, motivation) or involves only a single figure.
+  - Use `textField` rows for key figures. Use `timeline` for ordered steps. Use `card` as the root container. Always include the user's real numbers verbatim in the panel.
+  - Reference the panel in `message` with "trovi i dettagli qui sotto" or similar.
+  - See A2UI component reference below for exact protocol.
+
+- **affordability_verdict**: Populated ONLY when the user asks whether they can afford something, whether to buy something, or whether a purchase/expense is wise given their finances. Null for all other questions.
+  - `verdict`: `"yes"` if the margin comfortably covers it, `"no"` if it would damage their financial health, `"conditional"` if it is possible but requires trade-offs.
+  - `key_figures`: 2–4 rows. Always include the item cost and the monthly margin. Add others (e.g. savings rate impact, months to save) as relevant.
+  - Labels and values must be in the response locale.
+
+- **new_insight**: Emit when this conversation has revealed a concrete new pattern about the user's finances not already captured in their profile insights (e.g. they revealed a new income source, or a calculation exposed an unexpectedly high expense ratio). Null if nothing genuinely new emerged — do not manufacture insights.
+
+### Tool: `search_content`
+
+You have access to a `search_content` tool that queries the educational content and partner offer catalog.
+Call it BEFORE generating resource_cards or recommending partner offers.
+
+Arguments:
+- `query` (string): keywords describing what the user needs (e.g. "prestito personale confronto", "fondo emergenza", "budgeting 50/30/20")
+- `locale` (string): match the response locale — `"it"` or `"en"`
+- `top_k` (integer, optional, default 5): maximum results to return
+- `content_types` (array of strings, optional): filter to specific types — `"article"`, `"video"`, `"slide_deck"`, `"partner_offer"`
+
+The tool returns a list of matching catalog items with `id`, `type`, `title`, `summary`, `url`, `video_id` (for videos), `slide_count` (for slide decks), and `loan_params` (for partner_offer). Use these fields directly in resource_cards and action_cards. Never invent catalog ids or urls.
+
+Call `search_content` for ALL financial questions — affordability checks, savings advice, loan comparisons, budget questions, investment questions. Skip it ONLY for greetings and one-word definitional questions ("cos'è un ETF?"). When in doubt, call it.
 
 {{ a2ui_reference }}
 
@@ -29,4 +57,4 @@ Answer ONLY with a valid JSON object. No text before or after the JSON.
 {{ capabilities_json }}
 ```
 
-Do NOT invent real URLs or links. For resource_cards, use url = null if you don't have a verified link.
+Do NOT invent real URLs or links. For resource_cards, use url = null if you don't have a verified link from the catalog.

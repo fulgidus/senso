@@ -24,11 +24,56 @@ from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
 from app.coaching.safety import SafetyScanner
+from app.content.search import search_content
 from app.db.models import WelcomeCache
 from app.ingestion.llm import LLMClient, LLMError
 from app.services.profile_service import ProfileError, ProfileService
 
 logger = logging.getLogger(__name__)
+
+# ── Tool schema for BM25 content search ───────────────────────────────────────
+
+_SEARCH_CONTENT_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "search_content",
+        "description": (
+            "Search the educational content and partner offer catalog. "
+            "Returns a ranked list of articles, videos, slide decks, and partner offers "
+            "matching the query in the specified locale. "
+            "Always call this before populating resource_cards or recommending partner offers."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Keywords describing what the user needs.",
+                },
+                "locale": {
+                    "type": "string",
+                    "enum": ["it", "en"],
+                    "description": "Locale to search in — must match the response locale.",
+                },
+                "top_k": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default 5).",
+                    "default": 5,
+                },
+                "content_types": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["article", "video", "slide_deck", "partner_offer"],
+                    },
+                    "description": "Optional filter to specific content types.",
+                },
+            },
+            "required": ["query", "locale"],
+            "additionalProperties": False,
+        },
+    },
+}
 
 # Module-level soul-hash cache: avoids re-reading the soul file on every request.
 # Invalidated only when the process restarts (file changes require a redeploy anyway).
@@ -272,14 +317,16 @@ class CoachingService:
         # Build conversation prompt
         prompt = self._build_prompt(messages, context_block, response_format)
 
-        # Call LLM
+        # Call LLM with tool-calling support for content search
         raw: str = ""
         try:
-            raw = self.llm.complete(
+            raw = self.llm.complete_with_tools(
                 prompt=prompt,
                 system=system_prompt,
+                tools=[_SEARCH_CONTENT_TOOL],
+                tool_executor=self._tool_executor(locale),
                 response_schema=self._response_schema,
-                timeout=45.0,
+                timeout=60.0,
             )
         except LLMError as exc:
             logger.error("CoachingService LLM error for user %s: %s", user_id, exc)
@@ -305,8 +352,16 @@ class CoachingService:
         except jsonschema.ValidationError as exc:
             logger.warning("CoachingService schema validation failed: %s", exc.message)
             schema_valid = False
-            # Attempt partial repair: ensure required fields exist
-            response_data = self._repair_response(response_data)
+
+        # Always repair: ensure required array fields exist (idempotent)
+        response_data = self._repair_response(response_data)
+        # Safety-net: inject fallback cards if LLM skipped tool call on financial questions
+        self._inject_fallback_cards(response_data, locale)
+
+        # Persist new_insight to user_profiles.coaching_insights if present
+        new_insight = response_data.get("new_insight")
+        if new_insight and isinstance(new_insight, dict):
+            self._persist_coaching_insight(user_id, new_insight)
 
         # Output safety scan
         response_text = json.dumps(response_data, ensure_ascii=False)
@@ -334,6 +389,49 @@ class CoachingService:
             )
 
         return response_data
+
+    def _persist_coaching_insight(self, user_id: str, new_insight: dict) -> None:
+        """Append a new_insight emitted by the coach to user_profiles.coaching_insights.
+
+        Non-fatal: logs and swallows any DB error so a failed write does not
+        block the chat response.
+        """
+        try:
+            from datetime import UTC, datetime  # noqa: PLC0415
+            from app.db.repository import get_user_profile  # noqa: PLC0415
+
+            profile = get_user_profile(self.db, user_id)
+            if profile is None:
+                return
+            existing: list = list(profile.coaching_insights or [])
+            existing.append(
+                {**new_insight, "captured_at": datetime.now(UTC).isoformat()}
+            )
+            profile.coaching_insights = existing
+            profile.updated_at = datetime.now(UTC)
+            self.db.commit()
+        except Exception as exc:
+            logger.warning(
+                "Could not persist coaching insight for user %s: %s", user_id, exc
+            )
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
+
+    def _tool_executor(self, locale: str):
+        """Return a closure that executes LLM tool calls for this coaching request."""
+
+        def execute(name: str, arguments: dict):
+            if name == "search_content":
+                query = arguments.get("query", "")
+                req_locale = arguments.get("locale", locale)
+                top_k = int(arguments.get("top_k", 5))
+                content_types = arguments.get("content_types") or None
+                return search_content(query, req_locale, top_k, content_types)
+            raise ValueError(f"Unknown tool: {name!r}")
+
+        return execute
 
     def _build_debug_payload(
         self,
@@ -403,6 +501,7 @@ class CoachingService:
         income_summary = getattr(profile_dto, "income_summary", None)
         category_totals = getattr(profile_dto, "category_totals", {})
         insight_cards = getattr(profile_dto, "insight_cards", [])
+        coaching_insights = getattr(profile_dto, "coaching_insights", [])
         monthly_expenses = getattr(profile_dto, "monthly_expenses", None)
         monthly_margin = getattr(profile_dto, "monthly_margin", None)
         # Extract income sources from questionnaire answers if present
@@ -420,6 +519,7 @@ class CoachingService:
             monthly_margin=monthly_margin,
             category_totals=category_totals or {},
             insight_cards=insight_cards or [],
+            coaching_insights=coaching_insights or [],
             income_sources=income_sources,
         )
 
@@ -457,6 +557,81 @@ class CoachingService:
         data.setdefault("resource_cards", [])
         data.setdefault("learn_cards", [])
         return data
+
+    def _inject_fallback_cards(self, data: dict, locale: str) -> None:
+        """
+        If the LLM returned empty resource_cards or action_cards after a coaching
+        response (not a blocked response), inject sensible defaults from the catalog.
+        Called only when the response is non-empty (has a message).
+        This is a safety net — the prompt should prevent empty cards on financial questions.
+
+        Trigger condition (skip if ANY of these is true):
+          - message is very short (< 15 chars) — pure greetings, one-word replies
+          - affordability_verdict is absent/null — response is conversational, not financial
+        This avoids injecting cards into short natural Italian questions like
+        "Posso comprarlo?" (16 chars) that ARE financial decisions.
+        """
+        message = data.get("message", "")
+        verdict = data.get("affordability_verdict")
+        # Skip for very short messages (greetings / one-liners under 15 chars)
+        if len(message) < 15:
+            return
+        # Skip for conversational responses that have no affordability verdict
+        # (these are informational answers, not financial decisions)
+        if verdict is None:
+            return
+
+        if not data.get("resource_cards"):
+            # Inject top-1 article or video from catalog in the correct locale
+            results = search_content(
+                "educazione finanziaria risparmio budget", locale, top_k=2
+            )
+            if results:
+                top = results[0]
+                card: dict = {
+                    "title": top["title"],
+                    "summary": top["summary"],
+                    "resource_type": top["type"]
+                    if top["type"] in ("article", "video", "slide_deck")
+                    else "article",
+                    "url": top.get("url"),
+                }
+                if top.get("video_id"):
+                    card["video_id"] = top["video_id"]
+                    card["resource_type"] = "video"
+                if top.get("slide_count"):
+                    card["slide_id"] = top["id"]
+                    card["resource_type"] = "slide_deck"
+                data["resource_cards"] = [card]
+                logger.debug("fallback resource_card injected: %s", top["id"])
+
+        if not data.get("action_cards"):
+            # Inject a generic partner funnel card from the catalog
+            partner_results = search_content(
+                "conto corrente risparmio",
+                locale,
+                top_k=1,
+                content_types=["partner_offer"],
+            )
+            if partner_results:
+                partner = partner_results[0]
+                data["action_cards"] = [
+                    {
+                        "title": partner["title"],
+                        "description": partner["summary"],
+                        "action_type": "funnel",
+                        "cta_label": "Scopri" if locale == "it" else "Discover",
+                        "payload": {
+                            "funnel_id": partner["id"],
+                            "partner_name": partner.get(
+                                "partner_name", partner["title"]
+                            ),
+                            "offer_type": partner.get("offer_type", "conto_corrente"),
+                            "cta_url": partner.get("url"),
+                        },
+                    }
+                ]
+                logger.debug("fallback action_card injected: %s", partner["id"])
 
 
 def get_coaching_service(
