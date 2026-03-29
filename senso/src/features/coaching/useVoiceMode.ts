@@ -117,30 +117,41 @@ export function useVoiceMode({
 
     // ── Voice mode toggle ─────────────────────────────────────────────────────
 
+    // Keep the MediaStream alive for the entire voice mode session.
+    // Chrome's Web Speech API runs recognition in a separate process and issues
+    // its own getUserMedia call — it only skips the permission dialog if the
+    // audio device is already in use by an active track on the page.
+    // Holding the stream open satisfies that condition for every subsequent
+    // recognition.start() call until voice mode is deactivated.
+    const micStreamRef = useRef<MediaStream | null>(null)
+
+    const releaseMicStream = useCallback(() => {
+        micStreamRef.current?.getTracks().forEach((t) => t.stop())
+        micStreamRef.current = null
+    }, [])
+
     const toggleVoiceMode = useCallback(async () => {
         if (isVoiceMode) {
-            // Deactivating: stop everything.
+            // Deactivating: stop STT/TTS then release the mic device.
             stopRecording()
             stopTTS()
             setIsAutoListening(false)
+            releaseMicStream()
             setIsVoiceMode(false)
             return
         }
-        // Activating: request mic permission via getUserMedia so the browser
-        // permission dialog appears at this deliberate gesture — not buried inside
-        // recognition.start() when the user presses the mic button later.
-        // Hold the stream open for 50ms so the browser registers the grant before
-        // we release it; this prevents Chrome from re-prompting on recognition.start().
+        // Activating: open the mic device now (user gesture) and keep it alive.
+        // This surfaces the permission dialog here rather than on the first
+        // hold-to-talk press, and keeps the device locked so recognition.start()
+        // won't re-prompt.
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            await new Promise<void>((resolve) => setTimeout(resolve, 50))
-            stream.getTracks().forEach((t) => t.stop())
+            micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true })
         } catch {
             // Permission denied or not supported — don't enter voice mode.
             return
         }
         setIsVoiceMode(true)
-    }, [isVoiceMode, stopRecording, stopTTS])
+    }, [isVoiceMode, stopRecording, stopTTS, releaseMicStream])
 
     // Stop everything when voice mode is turned off externally or on unmount
     useEffect(() => {
@@ -148,13 +159,15 @@ export function useVoiceMode({
             stopRecording()
             stopTTS()
             setIsAutoListening(false)
+            releaseMicStream()
         }
-    }, [isVoiceMode, stopRecording, stopTTS])
+    }, [isVoiceMode, stopRecording, stopTTS, releaseMicStream])
 
     useEffect(() => {
         return () => {
             stopRecording()
             stopTTS()
+            releaseMicStream()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
