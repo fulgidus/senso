@@ -93,7 +93,7 @@ services:
     expose:
       - "3001"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      test: ["CMD-SHELL", "pgrep nginx || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
