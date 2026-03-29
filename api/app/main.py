@@ -10,6 +10,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.coaching import router as coaching_router
+from app.api.content_admin import router as content_admin_router
 from app.api.ingestion import router as ingestion_router
 from app.api.profile import router as profile_router
 from app.core.config import get_settings
@@ -96,6 +97,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(ingestion_router)
     app.include_router(admin_router)
+    app.include_router(content_admin_router)
     app.include_router(profile_router)
     app.include_router(coaching_router)
 

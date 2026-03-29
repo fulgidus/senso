@@ -44,7 +44,7 @@ class ContentItemDTO(BaseModel):
     title: str
     summary: str | None
     topics: list[str]
-    metadata_: dict[str, Any] = Field(alias="metadata")
+    metadata_: dict[str, Any] = Field(serialization_alias="metadata")
     is_published: bool
     created_at: datetime | None = None
     updated_at: datetime | None = None
