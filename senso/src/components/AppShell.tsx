@@ -374,9 +374,7 @@ export function AppShell({ children }: AppShellProps) {
           "fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-background border-r border-border shadow-xl transition-transform duration-200",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("nav.menuLabel")}
+        {...(drawerOpen ? { role: "dialog", "aria-modal": "true", "aria-label": t("nav.menuLabel") } : {})}
       >
         {/* Sidebar header */}
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
