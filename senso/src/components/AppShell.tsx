@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { NavLink, useNavigate, Link } from "react-router-dom"
-import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen } from "lucide-react"
+import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen, Bell } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
+import { NotificationPanel } from "@/features/notifications/NotificationPanel"
+import { getNotifications } from "@/api/notificationsApi"
 
 // ── Topbar-buttons preference (localStorage, no backend needed) ───────────────
 
@@ -274,6 +276,22 @@ export function AppShell({ children }: AppShellProps) {
   const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
+  // ── Notification bell state ──
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const fetchUnread = useCallback(() => {
+    getNotifications(1)
+      .then((r) => setUnreadCount(r.unread_count))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 30_000)
+    return () => clearInterval(interval)
+  }, [fetchUnread])
+
   // Expose setter so SettingsScreen can update it live
   ;(window as unknown as Record<string, unknown>)["__sensoSetTopbarButtons"] = (v: boolean) => {
     writeTopbarButtons(v)
@@ -291,6 +309,16 @@ export function AppShell({ children }: AppShellProps) {
     NAV_ITEMS.push({
       to: "/admin/content",
       label: t("nav.adminContent"),
+      icon: <ShieldCheck className="h-5 w-5" />,
+    })
+    NAV_ITEMS.push({
+      to: "/admin/merchant-map",
+      label: t("admin.merchantMap.title"),
+      icon: <ShieldCheck className="h-5 w-5" />,
+    })
+    NAV_ITEMS.push({
+      to: "/admin/moderation",
+      label: t("admin.moderation.title"),
       icon: <ShieldCheck className="h-5 w-5" />,
     })
   }
@@ -364,6 +392,30 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2 shrink-0">
+          {/* Notification bell */}
+          <div className="relative">
+            <button
+              aria-label={
+                unreadCount > 0
+                  ? t("notifications.bellAriaLabel_other", { count: unreadCount })
+                  : t("notifications.bellAriaLabel_zero")
+              }
+              onClick={() => setNotifOpen((o) => !o)}
+              className="relative p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-accent-foreground"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+            <NotificationPanel
+              isOpen={notifOpen}
+              onClose={() => setNotifOpen(false)}
+              onUnreadCountChange={setUnreadCount}
+            />
+          </div>
           <LanguageSwitcher />
           <UserMenu showEmail={topbarButtons} />
         </div>
