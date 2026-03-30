@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete - ready for verification
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-30T22:38:16.387Z"
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-03-30T22:45:06.181Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 39
-  completed_plans: 34
+  completed_plans: 35
 ---
 
 # Project State
@@ -76,6 +76,7 @@ Plan: 3 of 3 (all done)
 | Phase 08-content-platform P03 | 5min | 2 tasks | 6 files |
 | Phase 09-llm-financial-intelligence P01 | 11min | 2 tasks | 2 files |
 | Phase 09-llm-financial-intelligence P02 | 15 | 2 tasks | 4 files |
+| Phase 09-llm-financial-intelligence P03 | 12 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,8 @@ Recent decisions affecting current work:
 - [Phase 09]: 3-tier escalation uses per-tier confidence thresholds: sm≥0.6, md≥0.5, lg≥0.4 — lower threshold for stronger models
 - [Phase 09]: _run_timeline_inference() implements 4 of 6 D-13 event types — relocation and debt_change deferred (insufficient transaction fields for reliable detection)
 - [Phase 09]: upsert_timeline_event matches on (user_id, event_type, event_date) to prevent duplicate events on re-runs
+- [Phase 09]: get_schema() lives in app.ingestion.prompts.loader not app.ingestion.schemas.loader — plan had wrong import path
+- [Phase 09]: TOS check defaults to clean=True on LLM error (fail open) — avoids blocking users when LLM unavailable
 
 ### Pending Todos
 
@@ -154,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T22:38:16.384Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-03-30T22:45:06.178Z
+Stopped at: Completed 09-03-PLAN.md
 Resume file: None
