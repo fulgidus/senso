@@ -27,6 +27,7 @@ def create_tables() -> None:
 
     Base.metadata.create_all(bind=engine)
     _add_missing_columns()
+    _backfill_content_slugs()
     _seed_default_users()
     _seed_content_from_json()
 
@@ -195,6 +196,19 @@ def _add_missing_columns() -> None:
         "ALTER TABLE categorization_jobs ADD COLUMN IF NOT EXISTS progress_detail JSONB",
         # ── Round 9: ingestion watchdog queue timestamp ───────────────────────
         "ALTER TABLE uploads ADD COLUMN IF NOT EXISTS extraction_queued_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+        # ── Round 10: content_items schema expansion ──────────────────────────
+        "ALTER TABLE content_items ADD COLUMN IF NOT EXISTS slug VARCHAR(300)",
+        "ALTER TABLE content_items ADD COLUMN IF NOT EXISTS body TEXT",
+        "ALTER TABLE content_items ADD COLUMN IF NOT EXISTS localization_group VARCHAR(36)",
+        "ALTER TABLE content_items ADD COLUMN IF NOT EXISTS reading_time_minutes INTEGER",
+        "ALTER TABLE content_items ADD COLUMN IF NOT EXISTS duration_seconds INTEGER",
+        # Backfill reading_time_minutes from metadata->'estimated_read_minutes'
+        """
+        UPDATE content_items
+        SET reading_time_minutes = (metadata->>'estimated_read_minutes')::integer
+        WHERE reading_time_minutes IS NULL
+          AND metadata->>'estimated_read_minutes' IS NOT NULL
+        """,
     ]
     with engine.connect() as conn:
         for stmt in migrations:
@@ -207,6 +221,71 @@ def _add_missing_columns() -> None:
                 logging.getLogger(__name__).warning(
                     "Migration skipped: %.120s - %s", stmt.strip()[:120], exc
                 )
+        conn.commit()
+
+
+def _backfill_content_slugs() -> None:
+    """Backfill slug column for content_items that have NULL slugs.
+
+    Uses slugify(title) with slugify(id) as fallback. Appends a numeric suffix
+    on collision to guarantee uniqueness. Then creates a unique index if missing.
+    Idempotent — skips rows that already have slugs. Skips for SQLite (tests).
+    """
+    if DATABASE_URL.startswith("sqlite"):
+        return
+
+    import sqlalchemy as sa  # noqa: PLC0415
+    from slugify import slugify  # noqa: PLC0415
+
+    # Phase 1: Backfill NULL slugs using raw SQL (no ORM lock issues)
+    with engine.connect() as conn:
+        rows = conn.execute(
+            sa.text("SELECT id, title, slug FROM content_items WHERE slug IS NULL")
+        ).fetchall()
+
+        if rows:
+            # Collect existing slugs
+            existing = conn.execute(
+                sa.text("SELECT slug FROM content_items WHERE slug IS NOT NULL")
+            ).fetchall()
+            used_slugs: set[str] = {r[0] for r in existing}
+
+            for row_id, title, _ in rows:
+                base_slug = slugify(title or "", max_length=280)
+                if not base_slug:
+                    base_slug = slugify(row_id or "", max_length=280)
+                if not base_slug:
+                    base_slug = row_id
+
+                slug = base_slug
+                counter = 2
+                while slug in used_slugs:
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                used_slugs.add(slug)
+
+                conn.execute(
+                    sa.text("UPDATE content_items SET slug = :slug WHERE id = :id"),
+                    {"slug": slug, "id": row_id},
+                )
+            conn.commit()
+            logger.info("Backfilled slugs for %d content items.", len(rows))
+
+    # Phase 2: Add NOT NULL constraint and unique index (separate connection)
+    ddl_stmts = [
+        "ALTER TABLE content_items ALTER COLUMN slug SET NOT NULL",
+        "CREATE UNIQUE INDEX IF NOT EXISTS ix_content_items_slug ON content_items(slug)",
+        "CREATE INDEX IF NOT EXISTS ix_content_items_localization_group ON content_items(localization_group)",
+    ]
+    with engine.connect() as conn:
+        for stmt in ddl_stmts:
+            try:
+                conn.execute(sa.text("SAVEPOINT slug_ddl"))
+                conn.execute(sa.text(stmt))
+                conn.execute(sa.text("RELEASE SAVEPOINT slug_ddl"))
+            except Exception as exc:
+                conn.execute(sa.text("ROLLBACK TO SAVEPOINT slug_ddl"))
+                logger.warning("Slug DDL skipped: %.80s - %s", stmt[:80], exc)
         conn.commit()
 
 
@@ -258,10 +337,12 @@ def _seed_content_from_json() -> None:
 
     Skips if the table already contains any rows.
     Merges type-specific fields into the metadata_ JSONB column.
+    Generates slugs from titles via python-slugify.
     """
     import json  # noqa: PLC0415
     from pathlib import Path  # noqa: PLC0415
 
+    from slugify import slugify  # noqa: PLC0415
     from app.db.models import ContentItem  # noqa: PLC0415
 
     db = SessionLocal()
@@ -284,6 +365,7 @@ def _seed_content_from_json() -> None:
             "partners.json": "partner_offer",
         }
 
+        used_slugs: set[str] = set()
         items_to_add: list[ContentItem] = []
         for fname, expected_type in catalog_files.items():
             path = content_dir / fname
@@ -294,15 +376,37 @@ def _seed_content_from_json() -> None:
             for entry in raw:
                 # Build metadata from all keys that aren't shared
                 metadata = {k: v for k, v in entry.items() if k not in shared_keys}
+
+                # Generate unique slug from title
+                title = entry.get("title", "")
+                base_slug = (
+                    slugify(title, max_length=280)
+                    if title
+                    else slugify(entry["id"], max_length=280)
+                )
+                slug = base_slug
+                counter = 2
+                while slug in used_slugs:
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                used_slugs.add(slug)
+
+                # Extract reading_time and duration from metadata
+                reading_time = metadata.get("estimated_read_minutes")
+                # slide_count can be used as a rough proxy but is not duration
+                duration = None
+
                 item = ContentItem(
                     id=entry["id"],
+                    slug=slug,
                     locale=entry.get("locale", "it"),
                     type=entry.get("type", expected_type),
-                    title=entry.get("title", ""),
+                    title=title,
                     summary=entry.get("summary", entry.get("description", "")),
                     topics=entry.get("topics", []),
                     metadata_=metadata,
                     is_published=True,
+                    reading_time_minutes=int(reading_time) if reading_time else None,
                 )
                 items_to_add.append(item)
 

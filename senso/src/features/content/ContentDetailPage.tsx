@@ -1,17 +1,22 @@
 /**
- * ContentDetailPage — public /learn/:id page for viewing a single content item.
+ * ContentDetailPage — public /learn/:slug page for viewing a single content item.
  *
  * No authentication required. Renders type-specific content:
  * - article: summary + external link
  * - video: YouTube iframe embed
  * - slide_deck: MarpSlideViewer (if in SLIDE_INDEX) or placeholder
  * - partner_offer: partner info + CTA button
+ *
+ * B2: Uses slug-based lookup (fetchContentItemBySlug).
+ * B3: Redirects to /learn with toast on 404.
+ * B4: "Discuss with coach" CTA links to /chat/about/:slug.
+ * C5: Topics are clickable, linking to /learn/t/:tag.
  */
 
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { fetchContentItem, type ContentItemDTO } from "./contentApi"
+import { fetchContentItemBySlug, type ContentItemDTO } from "./contentApi"
 import { MarpSlideViewer } from "../coaching/MarpSlideViewer"
 
 // ── Type badge colours (same as browse page) ─────────────────────────────────
@@ -40,35 +45,42 @@ const TYPE_LABELS: Record<string, string> = {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function ContentDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [item, setItem] = useState<ContentItemDTO | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!slug) return
     setLoading(true)
     setError(null)
-    fetchContentItem(id)
+    fetchContentItemBySlug(slug)
       .then(setItem)
-      .catch(() => setError("not_found"))
+      .catch(() => {
+        setError("not_found")
+        // B3: Redirect to /learn after a brief delay so the user sees the toast
+        setTimeout(() => {
+          navigate("/learn", { replace: true, state: { toast: t("content.notFoundRedirect") } })
+        }, 100)
+      })
       .finally(() => setLoading(false))
-  }, [id])
+  }, [slug, navigate, t])
 
   // Loading
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     )
   }
 
-  // Error / not found
+  // Error / not found — fallback UI while redirect fires
   if (error || !item) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-[calc(100vh-3.5rem)] bg-background">
         <div className="mx-auto max-w-3xl px-4 py-12 text-center">
           <p className="mb-4 text-lg text-muted-foreground">
             {t("content.noResults")}
@@ -89,7 +101,7 @@ export function ContentDetailPage() {
   const typeLabel = TYPE_LABELS[item.type] || "Articles"
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-background">
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Back link */}
         <Link
@@ -105,6 +117,17 @@ export function ContentDetailPage() {
             <span>{icon}</span>
             {t(`content.filter${typeLabel}`)}
           </span>
+          {/* Reading time / duration meta */}
+          {item.type === "article" && item.reading_time_minutes && (
+            <span className="text-xs text-muted-foreground">
+              {t("content.readingMinutes", { minutes: item.reading_time_minutes })}
+            </span>
+          )}
+          {item.type === "video" && item.duration_seconds && (
+            <span className="text-xs text-muted-foreground">
+              {t("content.durationMinutes", { minutes: Math.ceil(item.duration_seconds / 60) })}
+            </span>
+          )}
         </div>
 
         {/* Title */}
@@ -119,19 +142,20 @@ export function ContentDetailPage() {
           </p>
         )}
 
-        {/* Topics */}
+        {/* Topics — clickable, link to /learn/t/:tag */}
         {item.topics.length > 0 && (
           <div className="mb-6 flex flex-wrap gap-2">
             <span className="text-sm font-medium text-muted-foreground">
               {t("content.topics")}:
             </span>
             {item.topics.map((topic) => (
-              <span
+              <Link
                 key={topic}
-                className="rounded-md bg-muted px-2.5 py-1 text-sm text-muted-foreground"
+                to={`/learn/t/${encodeURIComponent(topic)}`}
+                className="rounded-md bg-muted px-2.5 py-1 text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
               >
                 {topic}
-              </span>
+              </Link>
             ))}
           </div>
         )}
@@ -142,6 +166,16 @@ export function ContentDetailPage() {
           {item.type === "video" && <VideoDetail item={item} />}
           {item.type === "slide_deck" && <SlideDetail item={item} />}
           {item.type === "partner_offer" && <PartnerDetail item={item} />}
+        </div>
+
+        {/* B4: "Discuss with coach" CTA */}
+        <div className="mt-8 border-t border-border pt-6">
+          <Link
+            to={`/chat/about/${encodeURIComponent(item.slug)}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            {t("content.discussWithCoach")} →
+          </Link>
         </div>
       </div>
     </div>
@@ -154,7 +188,8 @@ function ArticleDetail({ item }: { item: ContentItemDTO }) {
   const { t } = useTranslation()
   const md = item.metadata
   const url = md.url as string | undefined
-  const readMinutes = md.estimated_read_minutes as number | undefined
+  // Prefer top-level field, fall back to metadata
+  const readMinutes = item.reading_time_minutes ?? (md.estimated_read_minutes as number | undefined)
 
   return (
     <div className="space-y-4">

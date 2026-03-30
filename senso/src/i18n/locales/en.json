@@ -6,8 +6,10 @@
         "home": "Home",
         "profile": "Profile",
         "coach": "Coach",
+        "learn": "Learn",
         "settings": "Settings",
         "adminContent": "Content management",
+        "loginCta": "Log in",
         "openMenu": "Open menu",
         "closeMenu": "Close menu",
         "menuLabel": "Navigation menu",
@@ -407,7 +409,13 @@
         "backToList": "Back to list",
         "topics": "Topics",
         "readingMinutes": "{{minutes}} min read",
-        "slides": "{{count}} slides"
+        "slides": "{{count}} slides",
+        "tagsFilterAnd": "All tags",
+        "tagsFilterOr": "Any of",
+        "clearTags": "Clear filters",
+        "notFoundRedirect": "Content not found. Returning to list.",
+        "discussWithCoach": "Discuss with coach",
+        "durationMinutes": "{{minutes}} min"
     },
     "admin": {
         "content": {

@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from app.db.models import ContentItem, User
 from app.db.session import SessionLocal
 from app.core.security import hash_password
+from slugify import slugify
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -47,11 +48,13 @@ def _seed_item(
     """Seed a single content item directly into DB."""
     db = SessionLocal()
     try:
+        title = f"Test {content_type}"
         item = ContentItem(
             id=item_id,
+            slug=slugify(item_id) or item_id,
             locale=locale,
             type=content_type,
-            title=f"Test {content_type}",
+            title=title,
             summary=f"Summary for {item_id}",
             topics=["test"],
             metadata_={"url": "https://example.com"},
@@ -73,7 +76,8 @@ def test_list_items_returns_seeded_content(client):
 
     resp = client.get("/admin/content/items", headers=headers)
     assert resp.status_code == 200
-    items = resp.json()
+    data = resp.json()
+    items = data["items"]
     assert len(items) >= 2
     ids = [i["id"] for i in items]
     assert "it-test-1" in ids
@@ -87,7 +91,7 @@ def test_list_items_filter_by_type(client):
 
     resp = client.get("/admin/content/items?type=article", headers=headers)
     assert resp.status_code == 200
-    items = resp.json()
+    items = resp.json()["items"]
     assert all(i["type"] == "article" for i in items)
 
 
@@ -98,7 +102,7 @@ def test_list_items_filter_by_locale(client):
 
     resp = client.get("/admin/content/items?locale=it", headers=headers)
     assert resp.status_code == 200
-    items = resp.json()
+    items = resp.json()["items"]
     assert all(i["locale"] == "it" for i in items)
 
 
@@ -106,6 +110,7 @@ def test_create_item(client):
     headers = _admin_headers(client)
     body = {
         "id": "new-test-item",
+        "slug": "nuovo-articolo",
         "locale": "it",
         "type": "article",
         "title": "Nuovo articolo",
@@ -117,6 +122,7 @@ def test_create_item(client):
     assert resp.status_code == 201
     data = resp.json()
     assert data["id"] == "new-test-item"
+    assert data["slug"] == "nuovo-articolo"
     assert data["locale"] == "it"
     assert data["type"] == "article"
     assert data["title"] == "Nuovo articolo"
@@ -128,6 +134,7 @@ def test_create_duplicate_item_409(client):
     _seed_item("existing-item")
     body = {
         "id": "existing-item",
+        "slug": "existing-item-slug",
         "locale": "it",
         "type": "article",
         "title": "Duplicate",

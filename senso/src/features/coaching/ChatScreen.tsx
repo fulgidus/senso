@@ -37,6 +37,8 @@ import { MarpSlideViewer } from "./MarpSlideViewer"
 interface ChatScreenProps {
   onNavigateBack: () => void
   locale?: "it" | "en"
+  /** If set, pre-fills the input with a contextual message about this content slug. */
+  initialTopic?: string
 }
 
 interface DisplayMessage {
@@ -929,7 +931,7 @@ function findLastStreamingAssistantIndex(messages: DisplayMessage[]): number {
 
 // ── ChatScreen ────────────────────────────────────────────────────────────────
 
-export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
+export function ChatScreen({ onNavigateBack, locale = "it", initialTopic }: ChatScreenProps) {
   const { user } = useAuthContext()
   const { t } = useTranslation()
   const { theme } = useTheme()
@@ -1334,6 +1336,17 @@ export function ChatScreen({ onNavigateBack, locale = "it" }: ChatScreenProps) {
       setIsLoading(false)
     }
   }, [inputText, isLoading, sessionId, locale, fetchSessions, setErrorWithAutoDismiss, activePersonaId, messages])
+
+  // B4: Pre-fill input when navigating from /chat/about/:slug
+  const initialTopicApplied = useRef(false)
+  useEffect(() => {
+    if (initialTopic && !initialTopicApplied.current && !loadingHistory) {
+      initialTopicApplied.current = true
+      // Convert slug to readable text: "budgeting-for-beginners" → "budgeting for beginners"
+      const topicText = decodeURIComponent(initialTopic).replace(/-/g, " ")
+      setInputText(topicText)
+    }
+  }, [initialTopic, loadingHistory])
 
   // Retry a failed user message without duplicating it in the chat
   const handleRetry = useCallback((failedMessageIndex: number) => {

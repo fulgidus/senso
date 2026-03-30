@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { NavLink, useNavigate } from "react-router-dom"
-import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck } from "lucide-react"
+import { NavLink, useNavigate, Link } from "react-router-dom"
+import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
@@ -283,6 +283,7 @@ export function AppShell({ children }: AppShellProps) {
   const NAV_ITEMS: NavItem[] = [
     { to: "/profile", label: t("nav.profile"), icon: <User className="h-5 w-5" /> },
     { to: "/chat", label: t("nav.coach"), icon: <MessageCircle className="h-5 w-5" /> },
+    { to: "/learn", label: t("nav.learn"), icon: <BookOpen className="h-5 w-5" /> },
   ]
 
   // Admin-only nav items
@@ -428,6 +429,46 @@ export function AppShell({ children }: AppShellProps) {
           </button>
         </div>
       </div>
+
+      {/* Page content */}
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// ── PublicShell ───────────────────────────────────────────────────────────────
+// Lightweight shell for unauthenticated /learn visitors.
+// Shows: logo + language switcher + login CTA. No sidebar, no user menu.
+
+export function PublicShell({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Top bar */}
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background px-4 gap-2">
+        {/* Logo — clickable, goes to /learn for public visitors */}
+        <NavLink
+          to="/learn"
+          aria-label="S.E.N.S.O. — Learn"
+          className="shrink-0 flex items-center"
+        >
+          <SensoLogo />
+        </NavLink>
+
+        {/* Right side */}
+        <div className="ml-auto flex items-center gap-3 shrink-0">
+          <LanguageSwitcher />
+          <Link
+            to="/"
+            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            {t("nav.loginCta")}
+          </Link>
+        </div>
+      </header>
 
       {/* Page content */}
       <div className="flex-1 overflow-y-auto">

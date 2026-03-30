@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { AuthScreen } from "@/features/auth/AuthScreen"
 import { useAuth } from "@/features/auth/useAuth"
 import { AuthContext } from "@/features/auth/AuthContext"
-import { AppShell } from "@/components/AppShell"
+import { AppShell, PublicShell } from "@/components/AppShell"
 import { IngestionScreen } from "@/features/ingestion/IngestionScreen"
 import { ProcessingScreen } from "@/features/profile/ProcessingScreen"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
@@ -25,6 +25,32 @@ import { getBackendBaseUrl } from "@/lib/config"
 import { Button } from "@/components/ui/button"
 
 const API_BASE = getBackendBaseUrl()
+
+// ── Toast notification (minimal, for B3 redirect) ────────────────────────────
+
+function LocationToast() {
+  const location = useLocation()
+  const [toast, setToast] = useState<string | null>(null)
+
+  useEffect(() => {
+    const state = location.state as { toast?: string } | null
+    if (state?.toast) {
+      setToast(state.toast)
+      // Clear the state so it doesn't re-trigger on back navigation
+      window.history.replaceState({}, "")
+      const timer = setTimeout(() => setToast(null), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [location.state])
+
+  if (!toast) return null
+
+  return (
+    <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-2">
+      {toast}
+    </div>
+  )
+}
 
 // ── Stale profile modal ──────────────────────────────────────────────────────
 
@@ -210,6 +236,37 @@ function ProfilePage({ user }: { user: User }) {
   )
 }
 
+// ── /chat/about/:slug wrapper — pre-fills topic into ChatScreen ──
+
+function ChatAboutPage() {
+  const { slug } = useParams<{ slug: string }>()
+  const { i18n } = useTranslation()
+  const locale = i18n.language.startsWith("en") ? "en" : "it"
+  return (
+    <ChatScreen
+      onNavigateBack={() => history.back()}
+      locale={locale}
+      initialTopic={slug ?? undefined}
+    />
+  )
+}
+
+// We need useParams here for ChatAboutPage
+import { useParams } from "react-router-dom"
+
+// ── Learn routes (shared between public and authed shells) ───────────────────
+
+function LearnRoutes() {
+  return (
+    <Routes>
+      <Route index element={<ContentBrowsePage />} />
+      <Route path="q/:query" element={<ContentBrowsePage />} />
+      <Route path="t/*" element={<ContentBrowsePage />} />
+      <Route path=":slug" element={<ContentDetailPage />} />
+    </Routes>
+  )
+}
+
 // ── Protected app wrapper (renders shell + routes only when authenticated) ──
 
 function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () => Promise<void>; updateUser: (updated: Partial<User>) => void }) {
@@ -222,7 +279,9 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
           <Route path="/" element={<IngestionPage user={user} />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
           <Route path="/chat" element={<ChatScreen onNavigateBack={() => history.back()} locale={locale} />} />
+          <Route path="/chat/about/:slug" element={<ChatAboutPage />} />
           <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/learn/*" element={<LearnRoutes />} />
           {user.isAdmin && (
             <Route path="/admin/content" element={<ContentAdminPage />} />
           )}
@@ -233,6 +292,16 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
   )
 }
 
+// ── Public learn routes (unauthenticated, uses PublicShell) ──
+
+function PublicLearnRoutes() {
+  return (
+    <PublicShell>
+      <LearnRoutes />
+    </PublicShell>
+  )
+}
+
 // ── Root ──
 
 function AppRoutes() {
@@ -240,13 +309,23 @@ function AppRoutes() {
   const { t } = useTranslation()
   const location = useLocation()
 
-  // Public routes — render regardless of auth state
+  // Public /learn routes — accessible regardless of auth state.
+  // If the user IS authenticated, they get the full AppShell (handled inside AuthedRoutes).
+  // If NOT authenticated, they get PublicShell.
   if (location.pathname === "/learn" || location.pathname.startsWith("/learn/")) {
+    if (auth.initialized && auth.isAuthenticated && auth.user) {
+      return (
+        <>
+          <LocationToast />
+          <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
+        </>
+      )
+    }
     return (
-      <Routes>
-        <Route path="/learn" element={<ContentBrowsePage />} />
-        <Route path="/learn/:id" element={<ContentDetailPage />} />
-      </Routes>
+      <>
+        <LocationToast />
+        <PublicLearnRoutes />
+      </>
     )
   }
 
@@ -273,7 +352,10 @@ function AppRoutes() {
   }
 
   return (
-    <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
+    <>
+      <LocationToast />
+      <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
+    </>
   )
 }
 

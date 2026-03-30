@@ -4,6 +4,7 @@ import pytest
 
 from app.db.models import ContentItem
 from app.db.session import SessionLocal
+from slugify import slugify
 import app.content.search as search_module
 
 
@@ -79,8 +80,10 @@ def _seed_items(items: list[dict]) -> None:
     db = SessionLocal()
     try:
         for entry in items:
+            item_id = entry["id"]
             item = ContentItem(
-                id=entry["id"],
+                id=item_id,
+                slug=entry.get("slug") or slugify(item_id) or item_id,
                 locale=entry.get("locale", "it"),
                 type=entry.get("type", "article"),
                 title=entry.get("title", "Test"),
@@ -110,7 +113,7 @@ def test_list_public_items_no_auth_required(client):
     resp = client.get("/content/items?locale=it")
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 5
+    assert len(data["items"]) == 5
     _reset_search_index()
 
 
@@ -121,8 +124,8 @@ def test_list_public_items_filters_by_locale(client):
     resp = client.get("/content/items?locale=en")
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 2
-    assert all(item["locale"] == "en" for item in data)
+    assert len(data["items"]) == 2
+    assert all(item["locale"] == "en" for item in data["items"])
     _reset_search_index()
 
 
@@ -133,8 +136,8 @@ def test_list_public_items_filters_by_type(client):
     resp = client.get("/content/items?locale=it&type=video")
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 1
-    assert data[0]["type"] == "video"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["type"] == "video"
     _reset_search_index()
 
 
@@ -145,20 +148,24 @@ def test_list_public_items_pagination(client):
     resp = client.get("/content/items?locale=it&page=1&page_size=2")
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 2
+    assert len(data["items"]) == 2
+    assert data["total"] == 5
+    assert data["page"] == 1
+    assert data["page_size"] == 2
+    assert data["total_pages"] == 3
 
     resp2 = client.get("/content/items?locale=it&page=2&page_size=2")
     data2 = resp2.json()
-    assert len(data2) == 2
+    assert len(data2["items"]) == 2
 
     # Third page should have just 1
     resp3 = client.get("/content/items?locale=it&page=3&page_size=2")
     data3 = resp3.json()
-    assert len(data3) == 1
+    assert len(data3["items"]) == 1
 
     # Pages should not overlap
-    ids_p1 = {item["id"] for item in data}
-    ids_p2 = {item["id"] for item in data2}
+    ids_p1 = {item["id"] for item in data["items"]}
+    ids_p2 = {item["id"] for item in data2["items"]}
     assert ids_p1.isdisjoint(ids_p2)
     _reset_search_index()
 
@@ -183,7 +190,7 @@ def test_list_public_items_hides_unpublished(client):
     resp = client.get("/content/items?locale=it")
     assert resp.status_code == 200
     data = resp.json()
-    ids = [item["id"] for item in data]
+    ids = [item["id"] for item in data["items"]]
     assert "it-hidden-article" not in ids
     _reset_search_index()
 

@@ -533,17 +533,24 @@ class ContentItem(Base):
     __tablename__ = "content_items"
 
     id: str = Column(String, primary_key=True)  # e.g. "it-emergenza-fondo"
+    slug: str = Column(String(300), nullable=False, unique=True, index=True)
     locale: str = Column(String(5), nullable=False, index=True)  # "it" | "en"
     type: str = Column(
         String(30), nullable=False, index=True
     )  # "article" | "video" | "slide_deck" | "partner_offer"
     title: str = Column(String(500), nullable=False)
     summary: str | None = Column(Text, nullable=True)
+    body: str | None = Column(Text, nullable=True)  # rich content (MDX/markdown)
     topics: list = Column(JSON, nullable=False, default=list)  # list[str]
     metadata_: dict = Column(
         "metadata", JSON, nullable=False, default=dict
     )  # type-specific fields
     is_published: bool = Column(Boolean, nullable=False, default=True)
+    localization_group: str | None = Column(
+        String(36), nullable=True, index=True
+    )  # UUIDv7 linking translations of the same content
+    reading_time_minutes: int | None = Column(Integer, nullable=True)
+    duration_seconds: int | None = Column(Integer, nullable=True)
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
