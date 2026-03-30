@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
   bootstrapSession,
@@ -30,60 +31,43 @@ const initialState: AuthState = {
   googleFallback: null,
 }
 
-function loginErrorMessage(err: unknown): string {
+function loginErrorKey(err: unknown): string {
   if (err instanceof ApiClientError) {
     const code = (err.data as { code?: string } | null)?.code
-    if (err.status === 401 || code === "invalid_credentials") {
-      return "Email o password non corretti."
-    }
-    if (err.status === 429) {
-      return "Troppi tentativi. Aspetta qualche minuto e riprova."
-    }
-    if (err.status >= 500) {
-      return "Il server non risponde. Riprova tra poco."
-    }
+    if (err.status === 401 || code === "invalid_credentials") return "auth.errorInvalidCredentials"
+    if (err.status === 429) return "auth.errorTooManyAttempts"
+    if (err.status >= 500) return "auth.errorServerDown"
   }
-  return "Accesso non riuscito. Controlla la connessione e riprova."
+  return "auth.errorLoginFailed"
 }
 
-function signupErrorMessage(err: unknown): string {
+function signupErrorKey(err: unknown): string {
   if (err instanceof ApiClientError) {
     const code = (err.data as { code?: string } | null)?.code
-    if (err.status === 409 || code === "email_in_use") {
-      return "Questa email è già registrata. Prova ad accedere."
-    }
-    if (err.status === 422) {
-      return "Dati non validi. Controlla email e password (minimo 8 caratteri)."
-    }
-    if (err.status >= 500) {
-      return "Il server non risponde. Riprova tra poco."
-    }
+    if (err.status === 409 || code === "email_in_use") return "auth.errorEmailInUse"
+    if (err.status === 422) return "auth.errorInvalidData"
+    if (err.status >= 500) return "auth.errorServerDown"
   }
-  return "Registrazione non riuscita. Controlla la connessione e riprova."
+  return "auth.errorSignupFailed"
 }
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>(initialState)
+  const { t } = useTranslation()
 
   useEffect(() => {
     let isMounted = true
     const run = async () => {
       const result = await bootstrapSession()
-      if (!isMounted) {
-        return
-      }
-
+      if (!isMounted) return
       setState((current) => ({
         ...current,
         initialized: true,
         user: result.status === "authenticated" ? result.user : null,
       }))
     }
-
     void run()
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [])
 
   const setMode = useCallback((mode: AuthMode) => {
@@ -105,12 +89,11 @@ export function useAuth() {
           googleFallback: null,
         }))
       } catch (err) {
-        const message =
-          state.mode === "signup" ? signupErrorMessage(err) : loginErrorMessage(err)
-        setState((current) => ({ ...current, loading: false, error: message }))
+        const key = state.mode === "signup" ? signupErrorKey(err) : loginErrorKey(err)
+        setState((current) => ({ ...current, loading: false, error: t(key) }))
       }
     },
-    [state.mode],
+    [state.mode, t],
   )
 
   const beginGoogle = useCallback(async () => {
@@ -121,20 +104,19 @@ export function useAuth() {
         window.location.assign(result.authUrl)
         return
       }
-
       setState((current) => ({
         ...current,
         loading: false,
-        googleFallback: "Accesso con Google non disponibile. Usa email e password.",
+        googleFallback: t("auth.errorGoogleUnavailable"),
       }))
     } catch {
       setState((current) => ({
         ...current,
         loading: false,
-        error: "Accesso con Google non riuscito. Usa email e password.",
+        error: t("auth.errorGoogleFailed"),
       }))
     }
-  }, [])
+  }, [t])
 
   const updateUser = useCallback((updated: Partial<User>) => {
     setState((current) => ({
@@ -144,10 +126,8 @@ export function useAuth() {
   }, [])
 
   const signOut = useCallback(async () => {
-    const confirmed = window.confirm("Vuoi davvero uscire dal tuo account su questo dispositivo?")
-    if (!confirmed) {
-      return
-    }
+    const confirmed = window.confirm(t("auth.confirmSignOut"))
+    if (!confirmed) return
     await logout()
     setState((current) => ({
       ...current,
@@ -155,7 +135,7 @@ export function useAuth() {
       error: null,
       googleFallback: null,
     }))
-  }, [])
+  }, [t])
 
   return useMemo(
     () => ({

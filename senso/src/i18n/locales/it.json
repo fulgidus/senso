@@ -37,7 +37,17 @@
         "loggingIn": "Accesso in corso…",
         "signingUp": "Registrazione in corso…",
         "googleCta": "Continua con Google",
-        "googleTitle": "Accesso con Google non disponibile"
+        "googleTitle": "Accesso con Google non disponibile",
+        "errorInvalidCredentials": "Email o password non corretti.",
+        "errorTooManyAttempts": "Troppi tentativi. Aspetta qualche minuto e riprova.",
+        "errorServerDown": "Il server non risponde. Riprova tra poco.",
+        "errorLoginFailed": "Accesso non riuscito. Controlla la connessione e riprova.",
+        "errorEmailInUse": "Questa email è già registrata. Prova ad accedere.",
+        "errorInvalidData": "Dati non validi. Controlla email e password (minimo 8 caratteri).",
+        "errorSignupFailed": "Registrazione non riuscita. Controlla la connessione e riprova.",
+        "errorGoogleUnavailable": "Accesso con Google non disponibile. Usa email e password.",
+        "errorGoogleFailed": "Accesso con Google non riuscito. Usa email e password.",
+        "confirmSignOut": "Vuoi davvero uscire dal tuo account su questo dispositivo?"
     },
     "profileSetup": {
         "heading": "S.E.N.S.O.",
@@ -65,7 +75,13 @@
         "fromFilesCta": "Usa i miei upload",
         "questionnaireTitle": "Rispondi a qualche domanda",
         "questionnaireBody": "Setup rapido in 3 domande o profilo completo in 7-10 domande.",
-        "questionnaireCta": "Inizia il questionario"
+        "questionnaireCta": "Inizia il questionario",
+        "quizThoroughTitle": "Questionario completo",
+        "quizThoroughBody": "Costruisci un profilo completo con 7-10 domande. Massima precisione.",
+        "quizThoroughCta": "Inizia questionario completo",
+        "quizQuickTitle": "Setup rapido",
+        "quizQuickBody": "Inizia subito con solo 3 domande.",
+        "quizQuickCta": "Inizia veloce"
     },
     "processing": {
         "headingAnalysing": "Analisi delle tue finanze",

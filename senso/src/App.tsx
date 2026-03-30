@@ -1,32 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { AuthScreen } from "@/features/auth/AuthScreen"
 import { useAuth } from "@/features/auth/useAuth"
 import { AuthContext } from "@/features/auth/AuthContext"
 import { AppShell, PublicShell } from "@/components/AppShell"
-import { IngestionScreen } from "@/features/ingestion/IngestionScreen"
-import { ProcessingScreen } from "@/features/profile/ProcessingScreen"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
-import { OnboardingChoiceScreen } from "@/features/profile/OnboardingChoiceScreen"
-import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
-import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
-import { ChatScreen } from "@/features/coaching/ChatScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
 import { ContentDetailPage } from "@/features/content/ContentDetailPage"
 import { ContentAdminPage } from "@/features/admin/ContentAdminPage"
-import { getProfile, getProfileStatus, triggerCategorization } from "@/lib/profile-api"
-import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
-import { useAuthContext } from "@/features/auth/AuthContext"
 import type { User } from "@/features/auth/types"
-import { getBackendBaseUrl } from "@/lib/config"
-import { Button } from "@/components/ui/button"
 
-const API_BASE = getBackendBaseUrl()
+// Route modules
+import { LoginPage } from "@/routes/LoginPage"
+import { RootResolver } from "@/routes/RootResolver"
+import { SetupPage } from "@/routes/SetupPage"
+import { OnboardingRoutes } from "@/routes/OnboardingRoutes"
+import { ChatRoutes } from "@/routes/ChatRoutes"
+import { ProtectedRoute } from "@/components/ProtectedRoute"
 
-// ── Toast notification (minimal, for B3 redirect) ────────────────────────────
+// ── Toast notification (renders from location state) ─────────────────────────
 
 function LocationToast() {
   const location = useLocation()
@@ -36,7 +30,6 @@ function LocationToast() {
     const state = location.state as { toast?: string } | null
     if (state?.toast) {
       setToast(state.toast)
-      // Clear the state so it doesn't re-trigger on back navigation
       window.history.replaceState({}, "")
       const timer = setTimeout(() => setToast(null), 3000)
       return () => clearTimeout(timer)
@@ -52,212 +45,18 @@ function LocationToast() {
   )
 }
 
-// ── Stale profile modal ──────────────────────────────────────────────────────
+// ── Loading screen (reused for auth bootstrap) ──────────────────────────────
 
-function StaleProfileModal({
-  onUpdate,
-  onDismiss,
-}: {
-  onUpdate: () => void
-  onDismiss: () => void
-}) {
+function LoadingScreen() {
   const { t } = useTranslation()
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-        <h3 className="mb-2 text-lg font-semibold text-foreground">
-          {t("profile.staleModal.heading")}
-        </h3>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {t("profile.staleModal.body")}
-        </p>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button variant="ghost" onClick={onDismiss}>
-            {t("profile.staleModal.later")}
-          </Button>
-          <Button variant="default" onClick={onUpdate}>
-            {t("profile.staleModal.update")}
-          </Button>
-        </div>
-      </div>
-    </div>
+    <main className="flex min-h-screen items-center justify-center">
+      <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
+    </main>
   )
 }
 
-// ── Ingestion page (handles internal processing/onboarding/questionnaire state) ──
-
-type IngestionPhase = "profile_setup" | "ingestion" | "processing" | "onboarding" | "questionnaire"
-type QuestionnaireMode = "quick" | "thorough"
-
-function IngestionPage({ user }: { user: User }) {
-  const token = readAccessToken()
-  const navigate = useNavigate()
-  const { updateUser } = useAuthContext()
-  // If user has no first name, start at profile_setup; otherwise check categorization status
-  const [phase, setPhase] = useState<IngestionPhase>(
-    !user.firstName ? "profile_setup" : "ingestion",
-  )
-  const [questionnaireMode, setQuestionnaireMode] = useState<QuestionnaireMode>("quick")
-  const [showStaleModal, setShowStaleModal] = useState(false)
-
-  useEffect(() => {
-    // Only check profile status if we're past the profile_setup phase
-    if (!token || phase === "profile_setup") return
-    void getProfileStatus(token).then(async (data) => {
-      if (["queued", "categorizing", "generating_insights"].includes(data.status)) {
-        setPhase("processing")
-      } else if (data.status === "not_started") {
-        // If confirmed uploads already exist, auto-trigger and go to processing
-        if (data.currentUploadsFingerprint) {
-          try {
-            await triggerCategorization(token)
-          } catch { /* best-effort */ }
-          setPhase("processing")
-        } else {
-          setPhase("onboarding")
-        }
-      } else if (data.status === "complete") {
-        // Profile exists but may not be confirmed yet — send to
-        // profile review screen; ProfileScreen handles the redirect
-        // to /chat once the user confirms.
-        void navigate("/profile", { replace: true })
-      }
-      // failed / other → stay on ingestion
-    }).catch(() => { /* stay on ingestion */ })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, phase === "profile_setup"])
-
-  const handleConfirmAll = useCallback(async () => {
-    if (!token) return
-    try {
-      await apiRequest(API_BASE, "/ingestion/confirm-all", { method: "POST", token })
-      // Check if a profile already exists (complete status + fingerprints differ → stale)
-      const statusData = await getProfileStatus(token)
-      if (
-        statusData.status === "complete" &&
-        statusData.uploadsFingerprint !== null &&
-        statusData.uploadsFingerprint !== statusData.currentUploadsFingerprint
-      ) {
-        setShowStaleModal(true)
-      } else {
-        setPhase("processing")
-      }
-    } catch { /* stay */ }
-  }, [token])
-
-  const handleQuestionnaireComplete = useCallback(async () => {
-    if (!token) return
-    // Questionnaire directly builds the profile - no background job needed.
-    // Navigate straight to /chat, same as the file-ingestion path.
-    void navigate("/chat", { replace: true })
-  }, [token, navigate])
-
-  if (!token) return null
-
-  if (phase === "profile_setup") {
-    return (
-      <ProfileSetupScreen
-        onComplete={(firstName, lastName) => {
-          updateUser({ firstName, lastName })
-          setPhase("ingestion")
-        }}
-      />
-    )
-  }
-
-  if (phase === "processing") {
-    return (
-      <ProcessingScreen
-        user={user}
-        token={token}
-        onBack={() => setPhase("ingestion")}
-        onComplete={() => void navigate("/profile", { replace: true })}
-      />
-    )
-  }
-  if (phase === "onboarding") {
-    return (
-      <OnboardingChoiceScreen
-        user={user}
-        onChooseFiles={() => setPhase("ingestion")}
-        onChooseQuestionnaire={() => { setQuestionnaireMode("quick"); setPhase("questionnaire") }}
-        onSignOut={async () => { /* handled by shell */ }}
-      />
-    )
-  }
-  if (phase === "questionnaire") {
-    return (
-      <QuestionnaireScreen
-        user={user}
-        token={token}
-        mode={questionnaireMode}
-        onComplete={() => void handleQuestionnaireComplete()}
-        onBack={() => setPhase("onboarding")}
-      />
-    )
-  }
-
-  return (
-    <>
-      <IngestionScreen
-        user={user}
-        onSignOut={async () => { /* handled by shell */ }}
-        onConfirmAll={() => void handleConfirmAll()}
-      />
-      {showStaleModal && (
-        <StaleProfileModal
-          onUpdate={() => {
-            setShowStaleModal(false)
-            setPhase("processing")
-          }}
-          onDismiss={() => {
-            setShowStaleModal(false)
-            void navigate("/chat", { replace: true })
-          }}
-        />
-      )}
-    </>
-  )
-}
-
-// ── Profile page ──
-
-function ProfilePage({ user }: { user: User }) {
-  const token = readAccessToken()
-  const navigate = useNavigate()
-  if (!token) return null
-  return (
-    <ProfileScreen
-      user={user}
-      token={token}
-      onAddDocuments={() => void navigate("/")}
-      onNavigateToChat={() => void navigate("/chat")}
-      onSignOut={async () => { /* handled by shell */ }}
-      onNoProfile={() => void navigate("/", { replace: true })}
-      onRetrigger={() => void navigate("/")}
-    />
-  )
-}
-
-// ── /chat/about/:slug wrapper — pre-fills topic into ChatScreen ──
-
-function ChatAboutPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const { i18n } = useTranslation()
-  const locale = i18n.language.startsWith("en") ? "en" : "it"
-  return (
-    <ChatScreen
-      onNavigateBack={() => history.back()}
-      locale={locale}
-      initialTopic={slug ?? undefined}
-    />
-  )
-}
-
-// We need useParams here for ChatAboutPage
-import { useParams } from "react-router-dom"
-
-// ── Learn routes (shared between public and authed shells) ───────────────────
+// ── Learn routes (shared sub-router for /learn/*) ────────────────────────────
 
 function LearnRoutes() {
   return (
@@ -270,143 +69,98 @@ function LearnRoutes() {
   )
 }
 
-// ── RequireProfile guard — redirects to onboarding if profile not complete ──
+// ── Profile page (thin wrapper providing navigation callbacks) ───────────────
 
-function RequireProfile({ children }: { children: React.ReactNode }) {
+function ProfilePage({ user }: { user: User }) {
   const token = readAccessToken()
   const navigate = useNavigate()
-  const { t } = useTranslation()
-  const [ready, setReady] = useState(false)
+  if (!token) return null
+  return (
+    <ProfileScreen
+      user={user}
+      token={token}
+      onAddDocuments={() => navigate("/onboarding/upload")}
+      onNavigateToChat={() => navigate("/chat")}
+      onNoProfile={() => navigate("/", { replace: true })}
+      onRetrigger={() => navigate("/onboarding/processing#start")}
+    />
+  )
+}
 
-  useEffect(() => {
-    if (!token) return
-    let cancelled = false
-    void getProfile(token)
-      .then((profile) => {
-        if (cancelled) return
-        if (profile && profile.confirmed) {
-          setReady(true)
-        } else {
-          void navigate("/", {
-            replace: true,
-            state: { toast: t("app.profileRequired") },
-          })
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          // Profile not found (404) or network error → redirect to onboarding
-          void navigate("/", {
-            replace: true,
-            state: { toast: t("app.profileRequired") },
-          })
-        }
-      })
-    return () => { cancelled = true }
-  }, [token, navigate, t])
+// ── Root router ──────────────────────────────────────────────────────────────
+//
+// Four states, checked top-to-bottom:
+//   1. /learn/* while unauthenticated → public shell
+//   2. Auth not initialized yet → loading spinner
+//   3. /login → <LoginPage /> (works for both auth states)
+//   4. Not authenticated → redirect to /login#{currentPath}
+//   5. Authenticated → app shell + route table using new route modules
+//
 
-  if (!ready) {
+function AppRoutes() {
+  const auth = useAuth()
+  const location = useLocation()
+
+  const isLearnRoute = location.pathname === "/learn" || location.pathname.startsWith("/learn/")
+  const isLoginRoute = location.pathname === "/login"
+
+  // ── State 1: Public /learn — no auth needed ──
+  if (isLearnRoute && (!auth.initialized || !auth.isAuthenticated || !auth.user)) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
-      </main>
+      <PublicShell>
+        <LocationToast />
+        <Routes>
+          <Route path="/learn/*" element={<LearnRoutes />} />
+          <Route path="*" element={<Navigate to="/learn" replace />} />
+        </Routes>
+      </PublicShell>
     )
   }
 
-  return <>{children}</>
-}
+  // ── State 2: Auth still bootstrapping (non-learn, non-login routes) ──
+  if (!auth.initialized) return <LoadingScreen />
 
-// ── Protected app wrapper (renders shell + routes only when authenticated) ──
+  // ── State 3: /login route — show login page regardless of auth state ──
+  // LoginPage handles the redirect-on-auth internally.
+  if (isLoginRoute) {
+    return <LoginPage auth={auth} />
+  }
 
-function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () => Promise<void>; updateUser: (updated: Partial<User>) => void }) {
-  const { i18n } = useTranslation()
-  const locale = i18n.language.startsWith("en") ? "en" : "it"
+  // ── State 4: Not authenticated → redirect to /login#{currentPath} ──
+  if (!auth.isAuthenticated || !auth.user) {
+    const returnUrl = location.pathname + location.search + location.hash
+    const hash = returnUrl !== "/" ? `#${returnUrl}` : ""
+    return <Navigate to={`/login${hash}`} replace />
+  }
+
+  // ── State 5: Authenticated — route table using new route modules ──
+  const user = auth.user
   return (
-    <AuthContext.Provider value={{ user, signOut, updateUser }}>
+    <AuthContext.Provider value={{ user, signOut: auth.signOut, updateUser: auth.updateUser }}>
       <AppShell>
+        <LocationToast />
         <Routes>
-          <Route path="/" element={<IngestionPage user={user} />} />
+          <Route path="/" element={<RootResolver />} />
+          <Route path="/setup" element={<SetupPage />} />
+          <Route path="/onboarding/*" element={<OnboardingRoutes />} />
+          <Route path="/chat/*" element={<ChatRoutes />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
-          <Route path="/chat" element={<RequireProfile><ChatScreen onNavigateBack={() => history.back()} locale={locale} /></RequireProfile>} />
-          <Route path="/chat/about/:slug" element={<RequireProfile><ChatAboutPage /></RequireProfile>} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/learn/*" element={<LearnRoutes />} />
           {user.isAdmin && (
-            <Route path="/admin/content" element={<ContentAdminPage />} />
+            <Route
+              path="/admin/content"
+              element={
+                <ProtectedRoute adminOnly>
+                  <ContentAdminPage />
+                </ProtectedRoute>
+              }
+            />
           )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>
     </AuthContext.Provider>
-  )
-}
-
-// ── Public learn routes (unauthenticated, uses PublicShell) ──
-
-function PublicLearnRoutes() {
-  return (
-    <PublicShell>
-      <Routes>
-        <Route path="/learn/*" element={<LearnRoutes />} />
-      </Routes>
-    </PublicShell>
-  )
-}
-
-// ── Root ──
-
-function AppRoutes() {
-  const auth = useAuth()
-  const { t } = useTranslation()
-  const location = useLocation()
-
-  // Public /learn routes — accessible regardless of auth state.
-  // If the user IS authenticated, they get the full AppShell (handled inside AuthedRoutes).
-  // If NOT authenticated, they get PublicShell.
-  if (location.pathname === "/learn" || location.pathname.startsWith("/learn/")) {
-    if (auth.initialized && auth.isAuthenticated && auth.user) {
-      return (
-        <>
-          <LocationToast />
-          <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
-        </>
-      )
-    }
-    return (
-      <>
-        <LocationToast />
-        <PublicLearnRoutes />
-      </>
-    )
-  }
-
-  if (!auth.initialized) {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
-      </main>
-    )
-  }
-
-  if (!auth.isAuthenticated || !auth.user) {
-    return (
-      <AuthScreen
-        mode={auth.mode}
-        loading={auth.loading}
-        error={auth.error}
-        googleFallback={auth.googleFallback}
-        onModeChange={auth.setMode}
-        onSubmit={auth.submit}
-        onGoogle={auth.beginGoogle}
-      />
-    )
-  }
-
-  return (
-    <>
-      <LocationToast />
-      <AuthedRoutes user={auth.user} signOut={auth.signOut} updateUser={auth.updateUser} />
-    </>
   )
 }
 

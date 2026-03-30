@@ -37,7 +37,17 @@
         "loggingIn": "Logging in…",
         "signingUp": "Signing up…",
         "googleCta": "Continue with Google",
-        "googleTitle": "Google login not available"
+        "googleTitle": "Google login not available",
+        "errorInvalidCredentials": "Wrong email or password.",
+        "errorTooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
+        "errorServerDown": "Server is not responding. Please try again shortly.",
+        "errorLoginFailed": "Login failed. Check your connection and try again.",
+        "errorEmailInUse": "This email is already registered. Try logging in.",
+        "errorInvalidData": "Invalid data. Check your email and password (minimum 8 characters).",
+        "errorSignupFailed": "Sign-up failed. Check your connection and try again.",
+        "errorGoogleUnavailable": "Google login is not available. Use email and password.",
+        "errorGoogleFailed": "Google login failed. Use email and password.",
+        "confirmSignOut": "Are you sure you want to sign out from this device?"
     },
     "profileSetup": {
         "heading": "S.E.N.S.O.",
@@ -65,7 +75,13 @@
         "fromFilesCta": "Use my uploads",
         "questionnaireTitle": "Answer a few questions",
         "questionnaireBody": "Quick setup in 3 questions or full profile in 7-10 questions.",
-        "questionnaireCta": "Start questionnaire"
+        "questionnaireCta": "Start questionnaire",
+        "quizThoroughTitle": "Full questionnaire",
+        "quizThoroughBody": "Build a complete profile with 7-10 questions. Best accuracy.",
+        "quizThoroughCta": "Start full questionnaire",
+        "quizQuickTitle": "Quick setup",
+        "quizQuickBody": "Get started in just 3 questions.",
+        "quizQuickCta": "Quick start"
     },
     "processing": {
         "headingAnalysing": "Analysing your finances",

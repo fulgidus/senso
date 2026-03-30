@@ -39,6 +39,11 @@ interface ChatScreenProps {
   locale?: "it" | "en"
   /** If set, pre-fills the input with a contextual message about this content slug. */
   initialTopic?: string
+  /** If set, load this specific session on mount instead of auto-restoring the last one. */
+  sessionId?: string
+  /** Called when a new session is created (first message sent from /chat/new).
+   *  The route wrapper uses this to replace the URL to /chat/{id}. */
+  onSessionCreated?: (id: string) => void
 }
 
 interface DisplayMessage {
@@ -931,7 +936,7 @@ function findLastStreamingAssistantIndex(messages: DisplayMessage[]): number {
 
 // ── ChatScreen ────────────────────────────────────────────────────────────────
 
-export function ChatScreen({ onNavigateBack, locale = "it", initialTopic }: ChatScreenProps) {
+export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessionId: propSessionId, onSessionCreated }: ChatScreenProps) {
   const { user } = useAuthContext()
   const { t } = useTranslation()
   const { theme } = useTheme()
@@ -1046,7 +1051,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic }: Chat
     shouldStickToBottomRef.current = distanceFromBottom <= 120
   }, [])
 
-  // On mount: load sessions, restore last or fetch welcome for empty new session
+  // On mount: load sessions, restore specific session or last, or fetch welcome for empty new session
   useEffect(() => {
     void (async () => {
       // Fetch personas to get TTS config (best-effort; default used on failure)
@@ -1067,7 +1072,36 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic }: Chat
       } catch { /* non-fatal - use DEFAULT_TTS_CONFIG */ }
 
       const list = await fetchSessions()
-      if (list.length > 0) {
+
+      // Route-driven session loading:
+      // 1. If propSessionId is given, load that specific session
+      // 2. If no propSessionId and sessions exist, restore the last one
+      // 3. If no sessions at all, show welcome (new conversation)
+      if (propSessionId) {
+        const target = list.find((s) => s.id === propSessionId)
+        if (target) {
+          setSessionId(target.id)
+          setSessionName(target.name)
+          await loadSessionHistory(target.id)
+          showRestoreToast(t("coaching.restoreToast"))
+        } else {
+          // Session not found — treat as new conversation
+          setLoadingHistory(false)
+          setWelcomeLoading(true)
+          try {
+            const msg = await getWelcomeMessage(locale)
+            setMessages([{ role: "assistant", content: msg, isWelcome: true }])
+          } catch {
+            const fallback =
+              locale === "en"
+                ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+                : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+            setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
+          } finally {
+            setWelcomeLoading(false)
+          }
+        }
+      } else if (list.length > 0) {
         const last = list[0] // newest = index 0 (sorted by updated_at desc)
         setSessionId(last.id)
         setSessionName(last.name)
@@ -1286,6 +1320,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic }: Chat
       // If this was the first message, a new session was created
       if (isFirstUserMessage && newSessionId) {
         setSessionId(newSessionId)
+        onSessionCreated?.(newSessionId)
         // Refresh sessions list
         const list = await fetchSessions()
         const created = list.find((s) => s.id === newSessionId)
