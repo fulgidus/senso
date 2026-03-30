@@ -2,7 +2,7 @@
  * ContentBrowsePage — public /learn page for browsing published content.
  *
  * No authentication required. Displays content items in a filterable grid
- * with BM25 search and type/locale filters.
+ * with BM25 search and type filters. Content locale follows the app's UI language.
  *
  * URL patterns:
  *   /learn                — browse all
@@ -12,7 +12,7 @@
  *
  * Group C additions:
  *   C1: Sort controls (newest, oldest, reading_time, duration, title)
- *   C2: Locale filter using existing nav.languageFullName keys
+ *   C2: (Removed — locale follows app language switch)
  *   C3: Filter persistence (sessionStorage for unauthed, localStorage for authed)
  *   C4: Search suggestions (debounced BM25 suggest) + syntax hint tooltip
  *   C5: Clickable tags (done in Group B)
@@ -74,7 +74,6 @@ const FILTER_STORAGE_KEY = "senso:learnFilters"
 interface PersistedFilters {
   type?: FilterType
   sortIdx?: number
-  locale?: string
 }
 
 function readPersistedFilters(): PersistedFilters {
@@ -135,43 +134,33 @@ export function ContentBrowsePage() {
   const [sortIdx, setSortIdx] = useState(
     persisted.sortIdx != null ? persisted.sortIdx : 0,
   )
-  const [contentLocale, setContentLocale] = useState<string>(
-    searchParams.get("locale") || persisted.locale || "all",
-  )
   const [searchQuery, setSearchQuery] = useState(urlQuery || searchParams.get("q") || "")
   const [isSearching, setIsSearching] = useState(!!urlQuery)
 
   // C4: Search suggestions
   const [suggestions, setSuggestions] = useState<ContentSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedSuggestionIdx, setSelectedSuggestionIdx] = useState(-1)
   const [showSyntaxHint, setShowSyntaxHint] = useState(false)
   const suggestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  // C2: Build locale options from loaded i18n resources
-  const localeOptions = useMemo(() => {
-    const codes = Object.keys(i18n.store.data)
-    return codes.map((code) => ({
-      code,
-      label: (i18n.getResourceBundle(code, "translation") as Record<string, Record<string, string>>)?.nav?.languageFullName ?? code,
-    }))
-  }, [i18n.store.data])
-
   const sort = SORT_OPTIONS[sortIdx] ?? SORT_OPTIONS[0]
 
   // C3: Persist filter changes
   useEffect(() => {
-    writePersistedFilters({ type: filter, sortIdx, locale: contentLocale })
-  }, [filter, sortIdx, contentLocale])
+    writePersistedFilters({ type: filter, sortIdx })
+  }, [filter, sortIdx])
 
-  // Load content items (browse mode)
+  // Load content items (browse mode) — fetch ALL locales so multilingual
+  // content stays visible; dedup logic picks the preferred-locale card.
   const loadItems = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
       const data = await fetchPublicContent({
-        locale: contentLocale === "all" ? undefined : contentLocale,
+        locale: undefined,
         type: filter === "all" ? undefined : filter,
         pageSize: 50,
         sortBy: sort.key,
@@ -186,7 +175,7 @@ export function ContentBrowsePage() {
     } finally {
       setLoading(false)
     }
-  }, [contentLocale, filter, sort.key, sort.dir, urlTags.join(","), urlTagsMode])
+  }, [filter, sort.key, sort.dir, urlTags.join(","), urlTagsMode])
 
   // Perform search
   const doSearch = useCallback(async (q: string) => {
@@ -199,10 +188,9 @@ export function ContentBrowsePage() {
     setLoading(true)
     setError(null)
     try {
-      const searchLocale = contentLocale === "all" ? uiLocale : contentLocale
       const data = await searchContent({
         q,
-        locale: searchLocale,
+        locale: uiLocale,
         topK: 20,
         type: filter === "all" ? undefined : filter,
       })
@@ -213,7 +201,7 @@ export function ContentBrowsePage() {
     } finally {
       setLoading(false)
     }
-  }, [contentLocale, uiLocale, filter, loadItems])
+  }, [uiLocale, filter, loadItems])
 
   // C4: Debounced suggestions
   const fetchSuggestions = useCallback(async (q: string) => {
@@ -222,16 +210,16 @@ export function ContentBrowsePage() {
       return
     }
     try {
-      const searchLocale = contentLocale === "all" ? uiLocale : contentLocale
-      const results = await suggestContent({ q: q.trim(), locale: searchLocale, limit: 5 })
+      const results = await suggestContent({ q: q.trim(), locale: uiLocale, limit: 5 })
       setSuggestions(results)
     } catch {
       setSuggestions([])
     }
-  }, [contentLocale, uiLocale])
+  }, [uiLocale])
 
   const handleSearchInputChange = (value: string) => {
     setSearchQuery(value)
+    setSelectedSuggestionIdx(-1)
     // Debounce suggestions at 300ms
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
     if (value.trim().length >= 2) {
@@ -285,11 +273,10 @@ export function ContentBrowsePage() {
     if (!urlQuery && urlTags.length === 0) {
       const params: Record<string, string> = {}
       if (filter !== "all") params.type = filter
-      if (contentLocale !== "all") params.locale = contentLocale
       if (searchQuery && isSearching) params.q = searchQuery
       setSearchParams(params, { replace: true })
     }
-  }, [filter, contentLocale, searchQuery, isSearching, setSearchParams, urlQuery, urlTags.length])
+  }, [filter, searchQuery, isSearching, setSearchParams, urlQuery, urlTags.length])
 
   const handleFilterChange = (newFilter: FilterType) => {
     setFilter(newFilter)
@@ -310,7 +297,7 @@ export function ContentBrowsePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortIdx])
 
-  // Re-fetch when locale filter changes
+  // Re-fetch when app locale changes
   useEffect(() => {
     if (isSearching && searchQuery) {
       void doSearch(searchQuery)
@@ -318,7 +305,7 @@ export function ContentBrowsePage() {
       void loadItems()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentLocale])
+  }, [uiLocale])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -341,7 +328,49 @@ export function ContentBrowsePage() {
 
   const handleSuggestionClick = (suggestion: ContentSuggestion) => {
     setShowSuggestions(false)
+    setSelectedSuggestionIdx(-1)
     navigate(`/learn/${encodeURIComponent(suggestion.slug)}`)
+  }
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        setSelectedSuggestionIdx((prev) => {
+          const next = prev < suggestions.length - 1 ? prev + 1 : 0
+          scrollSuggestionIntoView(next)
+          return next
+        })
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        setSelectedSuggestionIdx((prev) => {
+          const next = prev > 0 ? prev - 1 : suggestions.length - 1
+          scrollSuggestionIntoView(next)
+          return next
+        })
+        break
+      case "Enter":
+        if (selectedSuggestionIdx >= 0 && selectedSuggestionIdx < suggestions.length) {
+          e.preventDefault()
+          handleSuggestionClick(suggestions[selectedSuggestionIdx])
+        }
+        // Otherwise let the form submit normally
+        break
+      case "Escape":
+        setShowSuggestions(false)
+        setSelectedSuggestionIdx(-1)
+        break
+    }
+  }
+
+  const scrollSuggestionIntoView = (idx: number) => {
+    const container = suggestionsRef.current
+    if (!container) return
+    const items = container.querySelectorAll("[data-suggestion]")
+    items[idx]?.scrollIntoView({ block: "nearest" })
   }
 
   const handleTagClick = (tag: string) => {
@@ -359,10 +388,10 @@ export function ContentBrowsePage() {
   }
 
   // E1: Dedup items by localization_group — show one card per group,
-  // prefer the card matching the user's preferred locale (contentLocale or uiLocale).
+  // prefer the card matching the app's UI locale.
   // Cards not in a group are shown as-is with only their own locale badge.
   const dedupedItems = useMemo(() => {
-    const preferredLocale = contentLocale !== "all" ? contentLocale : uiLocale
+    const preferredLocale = uiLocale
     const groups = new Map<string, ContentItemDTO[]>()
     const standalone: ContentItemDTO[] = []
 
@@ -391,7 +420,7 @@ export function ContentBrowsePage() {
     }
 
     return result
-  }, [items, contentLocale, uiLocale])
+  }, [items, uiLocale])
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-background">
@@ -419,8 +448,14 @@ export function ContentBrowsePage() {
                     // Delay hiding so click on suggestion registers
                     setTimeout(() => setShowSyntaxHint(false), 200)
                   }}
+                  onKeyDown={handleSearchKeyDown}
                   placeholder={t("content.searchPlaceholder")}
                   className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  role="combobox"
+                  aria-expanded={showSuggestions && suggestions.length > 0}
+                  aria-controls="search-suggestions-listbox"
+                  aria-activedescendant={selectedSuggestionIdx >= 0 ? `suggestion-${suggestions[selectedSuggestionIdx]?.id}` : undefined}
+                  aria-autocomplete="list"
                 />
                 {/* C4: Syntax hint tooltip */}
                 {showSyntaxHint && !searchQuery && (
@@ -432,14 +467,25 @@ export function ContentBrowsePage() {
                 {showSuggestions && suggestions.length > 0 && (
                   <div
                     ref={suggestionsRef}
+                    id="search-suggestions-listbox"
+                    role="listbox"
                     className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-border bg-card shadow-lg py-1"
                   >
-                    {suggestions.map((s) => (
+                    {suggestions.map((s, index) => (
                       <button
                         key={s.id}
+                        id={`suggestion-${s.id}`}
                         type="button"
+                        role="option"
+                        aria-selected={selectedSuggestionIdx === index}
+                        data-suggestion
                         onMouseDown={() => handleSuggestionClick(s)}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-accent transition-colors"
+                        onMouseEnter={() => setSelectedSuggestionIdx(index)}
+                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm text-left transition-colors ${
+                          selectedSuggestionIdx === index
+                            ? "bg-accent text-accent-foreground"
+                            : "hover:bg-accent"
+                        }`}
                       >
                         <span className="text-xs text-muted-foreground">{TYPE_ICON[s.type] || "📄"}</span>
                         <span className="truncate text-foreground">{s.title}</span>
@@ -485,7 +531,7 @@ export function ContentBrowsePage() {
             </div>
           )}
 
-          {/* Controls row: type filters + locale filter + sort */}
+          {/* Controls row: type filters + sort */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {/* Type filter tabs */}
             <div className="flex gap-1 overflow-x-auto">
@@ -506,18 +552,6 @@ export function ContentBrowsePage() {
 
             {/* Spacer */}
             <div className="flex-1" />
-
-            {/* C2: Locale filter */}
-            <select
-              value={contentLocale}
-              onChange={(e) => setContentLocale(e.target.value)}
-              className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="all">{t("content.localeAll")}</option>
-              {localeOptions.map((lo) => (
-                <option key={lo.code} value={lo.code}>{lo.label}</option>
-              ))}
-            </select>
 
             {/* C1: Sort dropdown */}
             <select
