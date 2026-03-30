@@ -16,4 +16,4 @@ services:
 
   frontend:
     ports:
-      - "3001:3001"
+      - "3000:3001"

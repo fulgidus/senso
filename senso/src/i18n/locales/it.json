@@ -1,6 +1,7 @@
 {
     "app": {
-        "loading": "Caricamento sessione..."
+        "loading": "Caricamento sessione...",
+        "profileRequired": "Completa il tuo profilo prima di accedere al coach."
     },
     "nav": {
         "home": "Home",

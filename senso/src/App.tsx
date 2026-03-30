@@ -16,7 +16,7 @@ import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
 import { ContentDetailPage } from "@/features/content/ContentDetailPage"
 import { ContentAdminPage } from "@/features/admin/ContentAdminPage"
-import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
+import { getProfile, getProfileStatus, triggerCategorization } from "@/lib/profile-api"
 import { apiRequest } from "@/lib/api-client"
 import { readAccessToken } from "@/features/auth/storage"
 import { useAuthContext } from "@/features/auth/AuthContext"
@@ -267,6 +267,52 @@ function LearnRoutes() {
   )
 }
 
+// ── RequireProfile guard — redirects to onboarding if profile not complete ──
+
+function RequireProfile({ children }: { children: React.ReactNode }) {
+  const token = readAccessToken()
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    void getProfile(token)
+      .then((profile) => {
+        if (cancelled) return
+        if (profile && profile.confirmed) {
+          setReady(true)
+        } else {
+          void navigate("/", {
+            replace: true,
+            state: { toast: t("app.profileRequired") },
+          })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          // Profile not found (404) or network error → redirect to onboarding
+          void navigate("/", {
+            replace: true,
+            state: { toast: t("app.profileRequired") },
+          })
+        }
+      })
+    return () => { cancelled = true }
+  }, [token, navigate, t])
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
+      </main>
+    )
+  }
+
+  return <>{children}</>
+}
+
 // ── Protected app wrapper (renders shell + routes only when authenticated) ──
 
 function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () => Promise<void>; updateUser: (updated: Partial<User>) => void }) {
@@ -278,8 +324,8 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
         <Routes>
           <Route path="/" element={<IngestionPage user={user} />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
-          <Route path="/chat" element={<ChatScreen onNavigateBack={() => history.back()} locale={locale} />} />
-          <Route path="/chat/about/:slug" element={<ChatAboutPage />} />
+          <Route path="/chat" element={<RequireProfile><ChatScreen onNavigateBack={() => history.back()} locale={locale} /></RequireProfile>} />
+          <Route path="/chat/about/:slug" element={<RequireProfile><ChatAboutPage /></RequireProfile>} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/learn/*" element={<LearnRoutes />} />
           {user.isAdmin && (
@@ -297,7 +343,9 @@ function AuthedRoutes({ user, signOut, updateUser }: { user: User; signOut: () =
 function PublicLearnRoutes() {
   return (
     <PublicShell>
-      <LearnRoutes />
+      <Routes>
+        <Route path="/learn/*" element={<LearnRoutes />} />
+      </Routes>
     </PublicShell>
   )
 }

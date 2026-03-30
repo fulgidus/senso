@@ -584,7 +584,7 @@ export function ContentAdminPage() {
 
   // D5: Selection for bulk operations
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [bulkAction, setBulkAction] = useState<"publish" | "unpublish" | "delete" | null>(null)
+  const [_bulkAction, setBulkAction] = useState<"publish" | "unpublish" | "delete" | null>(null)
   const [bulkApplyToGroup, setBulkApplyToGroup] = useState(true)
   const [bulkProcessing, setBulkProcessing] = useState(false)
 
@@ -1101,7 +1101,7 @@ export function ContentAdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       {item.localization_group ? (
-                        <Link2 className="h-3.5 w-3.5 text-primary" title={t("admin.content.l10nLinked")} />
+                        <Link2 className="h-3.5 w-3.5 text-primary" aria-label={t("admin.content.l10nLinked")} />
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
