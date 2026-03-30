@@ -64,11 +64,11 @@ All sizes from existing codebase patterns. Weights: **400 (regular)** and **600 
 | Display | 24px  | 600 (semibold)  | 1.2         |
 
 Notes:
-- Monospace font for `description_raw` merchant strings in admin table: inherit system monospace at 13px
-- Timeline event date chip: 12px / 400 / muted-foreground color (established pattern: `text-xs text-muted-foreground`)
+- Monospace font for `description_raw` merchant strings in admin table: `text-sm font-mono` (14px — Label role, system monospace stack). No bespoke size.
+- Timeline event date chip: `text-sm text-muted-foreground` (14px — Label role). Tailwind `text-xs` (12px) is NOT used; fold into Label role with `text-muted-foreground` for visual de-emphasis.
 - Category picker option text: 14px / 400 (matches existing filter/picker patterns)
 
-> Source: `index.css` body { font-size: 16px; line-height: 1.5 }; confirmed against ProfileScreen heading `text-xl font-semibold` (20px/600), label `text-sm` (14px/400), `text-2xl` (24px/600) on CTA.
+> Source: `index.css` body { font-size: 16px; line-height: 1.5 }; confirmed against ProfileScreen heading `text-xl font-semibold` (20px/600), label `text-sm` (14px/400), `text-2xl` (24px/600) on CTA. Restricted to 4 sizes max per design contract.
 
 ---
 
@@ -110,10 +110,10 @@ New components introduced in Phase 9, with their visual contracts:
 ```
 rounded-2xl border border-border bg-card p-5
 ├── Event type icon (lucide, h-4 w-4, text-primary)
-├── Date chip: rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground
+├── Date chip: rounded-full bg-secondary px-2 py-0.5 text-sm text-muted-foreground
 ├── Title: text-base font-semibold text-foreground
 ├── Description: text-sm text-muted-foreground
-├── Evidence summary: text-xs text-muted-foreground (collapsed by default, expand on click)
+├── Evidence summary: text-sm text-muted-foreground (collapsed by default, expand on click)
 ├── "Add context" button: variant="ghost" text-sm text-primary (shows textarea inline)
 └── "Dismiss" button: variant="ghost" text-sm text-muted-foreground (shows reason picker inline)
 ```
@@ -148,8 +148,8 @@ p text-sm text-muted-foreground: "{{count}} transazioni richiedono la tua attenz
 ```
 rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact list)
 ├── Left: description text-sm font-medium text-foreground (truncate at 1 line)
-│         date text-xs text-muted-foreground
-│         source filename badge: rounded-full bg-secondary px-2 py-0.5 text-xs
+│         date text-sm text-muted-foreground
+│         source filename badge: rounded-full bg-secondary px-2 py-0.5 text-sm
 ├── Centre: amount text-sm font-semibold text-foreground (right-aligned)
 └── Right: Category picker dropdown (shadcn Select or native <select>)
            Options: full VALID_CATEGORIES list, sorted alphabetically
@@ -157,7 +157,7 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
            On select: optimistic immediate save + visual confirmation (green checkmark icon fades out after 2s)
 ```
 
-**Ordering:** Frequency-first (same description appearing N times grouped), then by absolute monthly impact. Group header for repeated descriptions: `text-xs text-muted-foreground` showing `"{{n}} occorrenze · €{{total}}/mese"`.
+**Ordering:** Frequency-first (same description appearing N times grouped), then by absolute monthly impact. Group header for repeated descriptions: `text-sm text-muted-foreground` showing `"{{n}} occorrenze · €{{total}}/mese"`.
 
 **Empty state:** `CheckCircle` lucide icon (h-10 w-10 text-primary) + "Tutte le transazioni sono categorizzate" + body text.
 
@@ -179,14 +179,14 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 **Table columns:**
 | Column               | Width  | Notes                                                     |
 | -------------------- | ------ | --------------------------------------------------------- |
-| Description          | flex-1 | `text-sm font-mono text-foreground` — raw transaction text |
+| Description          | flex-1 | `text-sm font-mono text-foreground` — raw transaction text (14px, Label role) |
 | Canonical merchant   | 160px  | `text-sm text-foreground`                                 |
-| Category             | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-0.5 text-xs` |
+| Category             | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-0.5 text-sm` |
 | Confidence           | 80px   | `text-sm text-muted-foreground` — percentage format       |
 | Method               | 100px  | Small badge: manual=primary, sm/md/lg=secondary           |
-| Provider:model       | 140px  | `text-xs text-muted-foreground font-mono` (truncated)     |
-| Contributing user    | 120px  | Obfuscated `u****@domain.com` — `text-xs text-muted-foreground` |
-| Date                 | 100px  | Relative (e.g. "3 giorni fa") `text-xs text-muted-foreground` |
+| Provider:model       | 140px  | `text-sm text-muted-foreground font-mono` (truncated)     |
+| Contributing user    | 120px  | Obfuscated `u****@domain.com` — `text-sm text-muted-foreground` |
+| Date                 | 100px  | Relative (e.g. "3 giorni fa") `text-sm text-muted-foreground` |
 | Actions              | 80px   | Blacklist button (if active) / Unblacklist + reason badge (if blacklisted) |
 
 **Blacklist action:** Clicking "Blacklist" opens an inline row expansion (not modal) showing a textarea "Motivo del blacklisting" + "Conferma blacklist" button (`variant="destructive" size="sm"`).
@@ -197,11 +197,11 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 
 ### 4. Notification Bell + Panel
 
-**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center` (max display "9+").
+**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). The bell button element **must carry** `aria-label={t("notifications.bellAriaLabel")}` with i18n value `"Notifiche — {{count}} non lette"` (when count > 0) or `"Notifiche"` (when count is 0). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center` (max display "9+").
 
 **Panel:** Dropdown, `absolute right-0 top-full mt-1 z-50 w-80 max-h-[480px] overflow-y-auto rounded-xl border border-border bg-background shadow-lg` (matches existing dropdown pattern from `AppShell.tsx`).
 
-**Panel header:** `flex items-center justify-between px-4 py-3 border-b border-border` — "Notifiche" h3 text-sm font-semibold + "Segna tutto come letto" ghost button (text-xs text-primary, only shown if unread > 0).
+**Panel header:** `flex items-center justify-between px-4 py-3 border-b border-border` — "Notifiche" h3 text-sm font-semibold + "Segna tutto come letto" ghost button (text-sm text-primary, only shown if unread > 0).
 
 **Notification item:**
 ```
@@ -209,7 +209,7 @@ px-4 py-3 hover:bg-accent transition-colors cursor-pointer
 [unread]: border-l-2 border-primary bg-primary/5
 ├── Title: text-sm font-semibold text-foreground
 ├── Body: text-sm text-muted-foreground (2-line clamp)
-└── Time: text-xs text-muted-foreground mt-1
+└── Time: text-sm text-muted-foreground mt-1
 ```
 
 **Notification type icons (left of title):**
@@ -240,8 +240,8 @@ rounded-xl border border-border bg-card px-4 py-3 mb-2
 ├── Raw input: text-sm font-mono bg-muted rounded px-2 py-1 (truncated, expand on click)
 ├── Violations: red pill badges per violation type
 ├── Severity badge: warn=amber / remove=orange / ban=red
-├── Action taken badge: text-xs text-muted-foreground
-└── Actions: "Conferma" (button variant="destructive" size="sm") | "Annulla penalità" (variant="ghost" size="sm")
+├── Action taken badge: text-sm text-muted-foreground
+└── Actions: "Conferma penalità" (button variant="destructive" size="sm", i18n key: admin.moderation.confirmPenalty) | "Annulla penalità" (variant="ghost" size="sm")
 ```
 
 ---
@@ -269,6 +269,8 @@ All strings must be added to `senso/src/i18n/locales/it.json` and `en.json`. Key
 | **Moderation: timeout notification**   | Title: "Accesso temporaneamente limitato" · Body: "Hai ricevuto una sospensione di {{hours}}h. Potrai tornare ad aggiungere contesto il {{date}}." (`notifications.moderationTimeout`) |
 | **Uncategorized badge on ProfileScreen** | "{{count}} da rivedere" (`profile.uncategorizedBadge`) on amber CTA near insight cards section    |
 | **Processing screen new step**         | "Rilevamento eventi finanziari" (`processing.stepTimeline`)                                          |
+| **Notification bell aria-label**       | "Notifiche — {{count}} non lette" (when count > 0) / "Notifiche" (when count = 0) (`notifications.bellAriaLabel`) |
+| **Admin: confirm penalty button**      | "Conferma penalità" (`admin.moderation.confirmPenalty`)                                              |
 
 ---
 
