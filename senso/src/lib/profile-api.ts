@@ -340,3 +340,90 @@ export async function submitQuestionnaire(
         body: { mode, answers },
     })
 }
+
+// ── Phase 9: Timeline + Uncategorized types ────────────────────────────────
+
+export interface TimelineEventDTO {
+    id: string
+    event_type: string
+    event_date: string // ISO date "YYYY-MM-DD"
+    title: string
+    description: string | null
+    evidence_json: Record<string, unknown> | null
+    user_context_distilled: string | null
+    context_tos_status: string
+    is_user_dismissed: boolean
+    dismissed_reason: string | null
+}
+
+export interface UncategorizedTransactionDTO {
+    id: string
+    description: string | null
+    amount: number | null
+    date: string | null
+    source_filename: string | null
+}
+
+// ── Phase 9: Timeline API functions ───────────────────────────────────────
+
+export async function getTimeline(
+    token: string,
+    includeDismissed = false,
+): Promise<TimelineEventDTO[]> {
+    return apiRequest<TimelineEventDTO[]>(
+        API_BASE,
+        `/profile/timeline?include_dismissed=${includeDismissed}`,
+        { token },
+    )
+}
+
+export async function dismissTimelineEvent(
+    token: string,
+    eventId: string,
+    reason: string,
+    detail?: string,
+): Promise<void> {
+    await apiRequest<void>(API_BASE, `/profile/timeline/${eventId}/dismiss`, {
+        method: "POST",
+        token,
+        body: { reason, detail },
+    })
+}
+
+export async function addTimelineContext(
+    token: string,
+    eventId: string,
+    text: string,
+): Promise<void> {
+    await apiRequest<void>(API_BASE, `/profile/timeline/${eventId}/context`, {
+        method: "POST",
+        token,
+        body: { text },
+    })
+}
+
+// ── Phase 9: Uncategorized API functions ──────────────────────────────────
+
+export async function getUncategorized(
+    token: string,
+): Promise<UncategorizedTransactionDTO[]> {
+    return apiRequest<UncategorizedTransactionDTO[]>(API_BASE, "/profile/uncategorized", {
+        token,
+    })
+}
+
+export async function updateTransactionCategory(
+    token: string,
+    transactionId: string,
+    category: string,
+): Promise<void> {
+    await apiRequest<void>(
+        API_BASE,
+        `/profile/transactions/${transactionId}/category`,
+        {
+            method: "PATCH",
+            token,
+            body: { category },
+        },
+    )
+}

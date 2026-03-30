@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/useAuth"
 import { AuthContext } from "@/features/auth/AuthContext"
 import { AppShell, PublicShell } from "@/components/AppShell"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
+import { UncategorizedScreen } from "@/features/profile/UncategorizedScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
 import { ContentDetailPage } from "@/features/content/ContentDetailPage"
@@ -145,6 +146,7 @@ function AppRoutes() {
           <Route path="/onboarding/*" element={<OnboardingRoutes />} />
           <Route path="/chat/*" element={<ChatRoutes />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
+          <Route path="/profile/uncategorized" element={<UncategorizedScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/learn/*" element={<LearnRoutes />} />
           {user.isAdmin && (
