@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import uuid_utils as uuid
@@ -559,4 +559,100 @@ class ContentItem(Base):
         nullable=False,
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
+    )
+
+
+class MerchantMap(Base):
+    __tablename__ = "merchant_map"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    description_raw: str = Column(Text, nullable=False, index=True)
+    canonical_merchant: str | None = Column(String(255), nullable=True)
+    category: str = Column(String(64), nullable=False, default="uncategorized")
+    confidence: float = Column(Float, nullable=False, default=0.0)
+    learned_method: str = Column(String(48), nullable=False, default="manual")
+    learned_provider_model: str | None = Column(String(128), nullable=True)
+    learned_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    contributing_user_id: str | None = Column(
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    contributing_job_id: str | None = Column(String(36), nullable=True)
+    contributing_upload_id: str | None = Column(String(36), nullable=True)
+    is_blacklisted: bool = Column(Boolean, nullable=False, default=False)
+    blacklisted_at: datetime | None = Column(DateTime(timezone=True), nullable=True)
+    blacklisted_reason: str | None = Column(Text, nullable=True)
+
+
+class FinancialTimeline(Base):
+    __tablename__ = "financial_timeline"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    event_type: str = Column(String(64), nullable=False)
+    event_date: date = Column(Date, nullable=False)
+    title: str = Column(String(255), nullable=False)
+    description: str | None = Column(Text, nullable=True)
+    evidence_json: dict | None = Column(JSON, nullable=True)
+    user_context_raw: str | None = Column(Text, nullable=True)
+    user_context_distilled: str | None = Column(Text, nullable=True)
+    context_tos_status: str = Column(String(16), nullable=False, default="pending")
+    is_user_dismissed: bool = Column(Boolean, nullable=False, default=False)
+    dismissed_reason: str | None = Column(String(32), nullable=True)
+    dismissed_detail: str | None = Column(Text, nullable=True)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    updated_at: datetime = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
+
+
+class ModerationLog(Base):
+    __tablename__ = "moderation_log"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    content_type: str = Column(String(32), nullable=False)
+    content_ref_id: str | None = Column(String(36), nullable=True)
+    raw_input: str = Column(Text, nullable=False)
+    detected_violations: list = Column(JSON, nullable=False, default=list)
+    severity: str = Column(String(16), nullable=False)
+    action_taken: str = Column(String(32), nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    user_id: str = Column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    type: str = Column(String(32), nullable=False)
+    title: str = Column(String(255), nullable=False)
+    body: str = Column(Text, nullable=False)
+    is_read: bool = Column(Boolean, nullable=False, default=False)
+    action_url: str | None = Column(String(512), nullable=True)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )

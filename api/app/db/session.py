@@ -209,6 +209,73 @@ def _add_missing_columns() -> None:
         WHERE reading_time_minutes IS NULL
           AND metadata->>'estimated_read_minutes' IS NOT NULL
         """,
+        # ── Round 11: Phase 9 tables ──────────────────────────────────────────
+        """
+        CREATE TABLE IF NOT EXISTS merchant_map (
+            id VARCHAR(36) PRIMARY KEY,
+            description_raw TEXT NOT NULL,
+            canonical_merchant VARCHAR(255),
+            category VARCHAR(64) NOT NULL DEFAULT 'uncategorized',
+            confidence FLOAT NOT NULL DEFAULT 0.0,
+            learned_method VARCHAR(48) NOT NULL DEFAULT 'manual',
+            learned_provider_model VARCHAR(128),
+            learned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            contributing_user_id VARCHAR(36) REFERENCES users(id) ON DELETE SET NULL,
+            contributing_job_id VARCHAR(36),
+            contributing_upload_id VARCHAR(36),
+            is_blacklisted BOOLEAN NOT NULL DEFAULT FALSE,
+            blacklisted_at TIMESTAMPTZ,
+            blacklisted_reason TEXT
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_merchant_map_description_raw ON merchant_map (description_raw)",
+        """
+        CREATE TABLE IF NOT EXISTS financial_timeline (
+            id VARCHAR(36) PRIMARY KEY,
+            user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            event_type VARCHAR(64) NOT NULL,
+            event_date DATE NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            evidence_json JSON,
+            user_context_raw TEXT,
+            user_context_distilled TEXT,
+            context_tos_status VARCHAR(16) NOT NULL DEFAULT 'pending',
+            is_user_dismissed BOOLEAN NOT NULL DEFAULT FALSE,
+            dismissed_reason VARCHAR(32),
+            dismissed_detail TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_financial_timeline_user_id ON financial_timeline (user_id)",
+        """
+        CREATE TABLE IF NOT EXISTS moderation_log (
+            id VARCHAR(36) PRIMARY KEY,
+            user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content_type VARCHAR(32) NOT NULL,
+            content_ref_id VARCHAR(36),
+            raw_input TEXT NOT NULL,
+            detected_violations JSON NOT NULL DEFAULT '[]',
+            severity VARCHAR(16) NOT NULL,
+            action_taken VARCHAR(32) NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_moderation_log_user_id ON moderation_log (user_id)",
+        """
+        CREATE TABLE IF NOT EXISTS notifications (
+            id VARCHAR(36) PRIMARY KEY,
+            user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            type VARCHAR(32) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            body TEXT NOT NULL,
+            is_read BOOLEAN NOT NULL DEFAULT FALSE,
+            action_url VARCHAR(512),
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_notifications_user_id ON notifications (user_id)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
