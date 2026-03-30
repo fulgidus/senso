@@ -10,6 +10,8 @@ import { SettingsScreen } from "@/features/settings/SettingsScreen"
 import { ContentBrowsePage } from "@/features/content/ContentBrowsePage"
 import { ContentDetailPage } from "@/features/content/ContentDetailPage"
 import { ContentAdminPage } from "@/features/admin/ContentAdminPage"
+import { MerchantMapAdminPage } from "@/features/admin/MerchantMapAdminPage"
+import { ModerationQueuePage } from "@/features/admin/ModerationQueuePage"
 import { readAccessToken } from "@/features/auth/storage"
 import type { User } from "@/features/auth/types"
 
@@ -155,6 +157,26 @@ function AppRoutes() {
               element={
                 <ProtectedRoute adminOnly>
                   <ContentAdminPage />
+                </ProtectedRoute>
+              }
+            />
+          )}
+          {user.isAdmin && (
+            <Route
+              path="/admin/merchant-map"
+              element={
+                <ProtectedRoute adminOnly>
+                  <MerchantMapAdminPage />
+                </ProtectedRoute>
+              }
+            />
+          )}
+          {user.isAdmin && (
+            <Route
+              path="/admin/moderation"
+              element={
+                <ProtectedRoute adminOnly>
+                  <ModerationQueuePage />
                 </ProtectedRoute>
               }
             />
