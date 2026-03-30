@@ -65,8 +65,9 @@ All sizes from existing codebase patterns. Weights: **400 (regular)** and **600 
 
 Notes:
 - Monospace font for `description_raw` merchant strings in admin table: `text-sm font-mono` (14px — Label role, system monospace stack). No bespoke size.
-- Timeline event date chip: `text-sm text-muted-foreground` (14px — Label role). Tailwind `text-xs` (12px) is NOT used; fold into Label role with `text-muted-foreground` for visual de-emphasis.
+- Timeline event date chip: `text-sm text-muted-foreground` (14px — Label role). Tailwind `text-xs` (12px) is NOT used for date chips; fold into Label role with `text-muted-foreground` for visual de-emphasis.
 - Category picker option text: 14px / 400 (matches existing filter/picker patterns)
+- Notification badge numeral: rendered with `text-xs` (12px) as a **density variant of the Label role** — the badge's fixed 16px diameter container constrains the numeral visually. This is NOT a 5th declared size token; `text-xs` is a Tailwind utility alias for the Label role in constrained-space contexts. The size table remains 4 entries.
 
 > Source: `index.css` body { font-size: 16px; line-height: 1.5 }; confirmed against ProfileScreen heading `text-xl font-semibold` (20px/600), label `text-sm` (14px/400), `text-2xl` (24px/600) on CTA. Restricted to 4 sizes max per design contract.
 
@@ -104,13 +105,15 @@ New components introduced in Phase 9, with their visual contracts:
 
 ### 1. ProfileScreen — "Timeline" Tab
 
+> Focal point: The first timeline event card — its icon, date chip, and title anchor the user's attention and establish the chronological narrative.
+
 **Container:** New third tab alongside existing chart sections. Tab bar uses `rounded-full px-4 py-1.5 text-sm font-medium` pill style with `bg-primary text-primary-foreground` for active state.
 
 **Timeline event card:**
 ```
 rounded-2xl border border-border bg-card p-5
 ├── Event type icon (lucide, h-4 w-4, text-primary)
-├── Date chip: rounded-full bg-secondary px-2 py-0.5 text-sm text-muted-foreground
+├── Date chip: rounded-full bg-secondary px-2 py-1 text-sm text-muted-foreground
 ├── Title: text-base font-semibold text-foreground
 ├── Description: text-sm text-muted-foreground
 ├── Evidence summary: text-sm text-muted-foreground (collapsed by default, expand on click)
@@ -132,6 +135,8 @@ rounded-2xl border border-border bg-card p-5
 
 ### 2. Review Uncategorized Screen (`/profile/uncategorized`)
 
+> Focal point: The category picker dropdown on the first transaction row — this is the primary action the user must take to resolve the uncategorized state.
+
 **Route:** New route, accessible from:
 - ProfileScreen: amber warning banner CTA "Rivedi transazioni" when uncategorized > 0
 - App nav: not a primary nav item (accessed only via CTA or notification)
@@ -149,7 +154,7 @@ p text-sm text-muted-foreground: "{{count}} transazioni richiedono la tua attenz
 rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact list)
 ├── Left: description text-sm font-medium text-foreground (truncate at 1 line)
 │         date text-sm text-muted-foreground
-│         source filename badge: rounded-full bg-secondary px-2 py-0.5 text-sm
+│         source filename badge: rounded-full bg-secondary px-2 py-1 text-sm
 ├── Centre: amount text-sm font-semibold text-foreground (right-aligned)
 └── Right: Category picker dropdown (shadcn Select or native <select>)
            Options: full VALID_CATEGORIES list, sorted alphabetically
@@ -161,11 +166,13 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 
 **Empty state:** `CheckCircle` lucide icon (h-10 w-10 text-primary) + "Tutte le transazioni sono categorizzate" + body text.
 
-**Error state:** `AlertTriangle` icon + "Impossibile caricare le transazioni. Controlla la connessione e riprova." + "Riprova" ghost button.
+**Error state:** `AlertTriangle` icon + "Impossibile caricare le transazioni. Controlla la connessione e riprova." + "Ricarica dati" ghost button.
 
 ---
 
 ### 3. Admin Merchant Map Page (`/admin/learned-merchants`)
+
+> Focal point: The Description column (raw transaction text in monospace) paired with the Canonical merchant column — this pairing is the core data the admin is reviewing and acting on.
 
 **Route:** Admin-only. New nav item in admin section. Label: "Merchant map" (or `t("admin.merchantMap.title")`).
 
@@ -181,7 +188,7 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 | -------------------- | ------ | --------------------------------------------------------- |
 | Description          | flex-1 | `text-sm font-mono text-foreground` — raw transaction text (14px, Label role) |
 | Canonical merchant   | 160px  | `text-sm text-foreground`                                 |
-| Category             | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-0.5 text-sm` |
+| Category             | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-1 text-sm` |
 | Confidence           | 80px   | `text-sm text-muted-foreground` — percentage format       |
 | Method               | 100px  | Small badge: manual=primary, sm/md/lg=secondary           |
 | Provider:model       | 140px  | `text-sm text-muted-foreground font-mono` (truncated)     |
@@ -197,7 +204,9 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 
 ### 4. Notification Bell + Panel
 
-**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). The bell button element **must carry** `aria-label={t("notifications.bellAriaLabel")}` with i18n value `"Notifiche — {{count}} non lette"` (when count > 0) or `"Notifiche"` (when count is 0). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center` (max display "9+").
+> Focal point: The unread count badge on the bell icon — it is the sole visual signal that draws the user to open the panel; everything else is secondary until the panel is open.
+
+**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). The bell button element **must carry** `aria-label={t("notifications.bellAriaLabel")}` with i18n value `"Notifiche — {{count}} non lette"` (when count > 0) or `"Notifiche"` (when count is 0). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center` (max display "9+"). `text-xs` is 12px — used here as a density variant of the Label role within the constrained 16px badge container, not a new size token.
 
 **Panel:** Dropdown, `absolute right-0 top-full mt-1 z-50 w-80 max-h-[480px] overflow-y-auto rounded-xl border border-border bg-background shadow-lg` (matches existing dropdown pattern from `AppShell.tsx`).
 
@@ -227,6 +236,8 @@ px-4 py-3 hover:bg-accent transition-colors cursor-pointer
 ---
 
 ### 5. Admin Moderation Queue (`/admin/moderation`)
+
+> Focal point: The severity badge and violations pill row — they convey risk level at a glance and drive which action the admin takes first.
 
 **Route:** Admin-only. New nav item in admin section. Label: "Moderazione".
 
@@ -327,7 +338,7 @@ Skeleton pattern: `animate-pulse rounded bg-muted` (matches existing `SkeletonCa
 - **Expansion:** Inline textarea below description, autofocus
 - **Character limit:** None shown visually (backend enforces; show error only if backend rejects)
 - **Save:** `POST /profile/timeline/{id}/context` — shows spinner in button during save
-- **After save:** Textarea replaced by distilled context (italic muted text) + "Modifica" ghost button
+- **After save:** Textarea replaced by distilled context (italic muted text) + "Modifica contesto" ghost button
 
 ### Blacklist Merchant (Admin)
 - **Trigger:** "Blacklista" button in admin table row
