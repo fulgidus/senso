@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["clean", "violations", "severity"],
+  "properties": {
+    "clean": {"type": "boolean"},
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["prompt_injection", "foul_language", "blasphemy", "threatening", "unicode_attack", "context_spam", "llm_attack"]
+      }
+    },
+    "severity": {"type": "string", "enum": ["clean", "warn", "remove", "ban"]}
+  }
+}

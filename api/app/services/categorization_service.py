@@ -18,16 +18,26 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from app.db.models import CategorizationJob, Transaction, Upload, UserProfile
+from app.db.models import (
+    CategorizationJob,
+    FinancialTimeline,
+    MerchantMap,
+    Transaction,
+    Upload,
+    UserProfile,
+)
 from app.db.repository import (
     get_categorization_job,
     get_confirmed_payslip_documents,
     get_confirmed_transactions_for_user,
     get_confirmed_upload_ids,
     get_user_profile,
+    lookup_merchant_map,
     seed_default_tags,
     upsert_categorization_job,
+    upsert_timeline_event,
     upsert_user_profile,
+    write_merchant_map,
 )
 from app.ingestion.llm import LLMClient, LLMError
 
@@ -313,12 +323,47 @@ class CategorizationService:
 
             self.db.commit()
 
-            # Step 2: LLM fallback for unmatched
+            # Step 1.5: Merchant map pre-check (D-11)
+            still_unmatched: list[Transaction] = []
+            for txn in unmatched:
+                map_entry = lookup_merchant_map(self.db, txn.description or "")
+                if map_entry:
+                    txn.category = map_entry.category
+                    txn.tags = list(set((txn.tags or []) + ["merchant_map"]))
+                    categorised_so_far += 1
+                else:
+                    still_unmatched.append(txn)
+            unmatched = still_unmatched
+            self.db.commit()
+
+            # Step 2: 3-tier LLM escalation for unmatched (D-01, D-05)
             if unmatched:
-                self._llm_classify_batch_with_progress(
-                    unmatched, user_id, file_entries, txn_total, categorised_so_far
+                for txn in unmatched:
+                    category, confidence, route_used = self._classify_with_escalation(
+                        txn
+                    )
+                    txn.category = category
+                    txn.tags = list(set((txn.tags or []) + ["llm_classified"]))
+                    # D-08: Write to merchant_map implicitly
+                    if category != "uncategorized" and route_used != "none":
+                        write_merchant_map(
+                            self.db,
+                            description_raw=txn.description or "",
+                            category=category,
+                            confidence=confidence,
+                            learned_method=route_used,
+                            contributing_job_id=None,
+                            contributing_upload_id=txn.upload_id,
+                        )
+                    categorised_so_far += 1
+                self.db.commit()
+                self._update_progress(
+                    user_id,
+                    file_entries,
+                    txn_total,
+                    categorised_so_far,
+                    f"Classificazione LLM completata ({len(unmatched)} transazioni)",
                 )
-                categorised_so_far += len(unmatched)
             else:
                 self._update_progress(
                     user_id,
@@ -343,6 +388,9 @@ class CategorizationService:
             )
 
             self._finalize_profile(user_id, transactions)
+
+            # Step 4: Timeline inference (D-17)
+            self._run_timeline_inference(user_id, transactions)
 
         except Exception as exc:
             logger.exception("Categorization failed for user %s: %s", user_id, exc)
@@ -613,8 +661,188 @@ class CategorizationService:
                 )
 
     # ────────────────────────────────────────────────────────────────
-    # A: Monthly normalization helpers
+    # Phase 9: 3-tier LLM escalation + timeline inference
     # ────────────────────────────────────────────────────────────────
+
+    def _classify_with_escalation(self, txn: Transaction) -> tuple[str, float, str]:
+        """Try sm→md→lg LLM classification. Returns (category, confidence, route).
+        Returns ("uncategorized", 0.0, "none") if all tiers fail."""
+        TIERS = [
+            ("text:classification:sm", 0.6),
+            ("text:classification:md", 0.5),
+            ("text:classification:lg", 0.4),
+        ]
+        valid_cats = sorted(VALID_CATEGORIES)
+        description = txn.description or ""
+        for route, min_confidence in TIERS:
+            try:
+                raw = self.llm.complete(
+                    prompt=(
+                        f"Classify this financial transaction into exactly one category.\n"
+                        f"Categories: {valid_cats}\n\n"
+                        f"RULES:\n"
+                        f"- 'income': regular recurring salary/freelance\n"
+                        f"- 'extraordinary_income': one-off credits (gifts, crypto, stocks, TFR)\n"
+                        f"- 'internal_transfer': movements between own accounts\n"
+                        f"- 'transfers': P2P payments to other people\n\n"
+                        f"Transaction: {description}\n\n"
+                        f'Return JSON: {{"category": "...", "confidence": 0.0}}'
+                    ),
+                    system="You are a financial transaction classifier. Respond only with valid JSON.",
+                    json_mode=True,
+                    route=route,
+                    timeout=8.0,
+                )
+                parsed = json.loads(raw)
+                category = parsed.get("category", "uncategorized")
+                confidence = float(parsed.get("confidence", 0.0))
+                if category in VALID_CATEGORIES and confidence >= min_confidence:
+                    return category, confidence, route
+            except Exception as e:
+                logger.warning("LLM tier %s failed for txn %s: %s", route, txn.id, e)
+                continue
+        return "uncategorized", 0.0, "none"
+
+    def _run_timeline_inference(
+        self, user_id: str, transactions: list[Transaction]
+    ) -> None:
+        """Detect life events from transaction patterns and upsert into financial_timeline."""
+        import calendar
+        from datetime import date
+
+        if not transactions:
+            return
+
+        # Group transactions by (year, month) for pattern analysis
+        by_month: dict[tuple[int, int], list[Transaction]] = defaultdict(list)
+        for t in transactions:
+            if t.date:
+                by_month[(t.date.year, t.date.month)].append(t)
+
+        months_sorted = sorted(by_month.keys())
+        if len(months_sorted) < 2:
+            return  # Need at least 2 months for pattern detection
+
+        # ── Event: major one-off purchase (D-13) ──
+        # Single transaction > 2x average monthly category spend
+        category_monthly_totals: dict[str, float] = defaultdict(float)
+        skip_cats = {"income", "extraordinary_income", "internal_transfer", "transfers"}
+        for (yr, mo), txns in by_month.items():
+            for t in txns:
+                if t.amount and float(t.amount) < 0 and t.category not in skip_cats:
+                    category_monthly_totals[t.category or "uncategorized"] += abs(
+                        float(t.amount)
+                    )
+        n_months = len(months_sorted)
+        for cat, total in category_monthly_totals.items():
+            avg = total / n_months
+            for t in transactions:
+                if (
+                    t.category == cat
+                    and t.amount
+                    and abs(float(t.amount)) > 2 * avg
+                    and abs(float(t.amount)) > 200
+                    and t.date
+                ):
+                    upsert_timeline_event(
+                        self.db,
+                        user_id,
+                        event_type="major_purchase",
+                        event_date=t.date,
+                        title=f"Grande acquisto: {cat}",
+                        description=(
+                            f"Transazione di €{abs(float(t.amount)):.0f} supera il doppio della "
+                            f"media mensile per {cat} (media: €{avg:.0f}/mese)"
+                        ),
+                        evidence_json={
+                            "transaction_id": t.id,
+                            "amount": float(t.amount),
+                            "category": cat,
+                            "avg_monthly": round(avg, 2),
+                        },
+                    )
+
+        # ── Event: extraordinary_income (already tagged in Phase 3) ──
+        for t in transactions:
+            if t.category == "extraordinary_income" and t.date:
+                upsert_timeline_event(
+                    self.db,
+                    user_id,
+                    event_type="extraordinary_income",
+                    event_date=t.date,
+                    title="Reddito straordinario",
+                    description=f"Entrata straordinaria di €{abs(float(t.amount or 0)):.0f}",
+                    evidence_json={
+                        "transaction_id": t.id,
+                        "amount": float(t.amount or 0),
+                        "description": t.description,
+                    },
+                )
+
+        # ── Event: subscription accumulation (D-13) ──
+        # Net new subscriptions in a calendar month
+        sub_by_month: dict[tuple[int, int], set[str]] = defaultdict(set)
+        for t in transactions:
+            if t.category == "subscriptions" and t.date and t.description:
+                sub_by_month[(t.date.year, t.date.month)].add(
+                    t.description.lower()[:40]
+                )
+        all_known_subs: set[str] = set()
+        SUBSCRIPTION_THRESHOLD = 3
+        for yr, mo in months_sorted:
+            month_subs = sub_by_month.get((yr, mo), set())
+            new_subs = month_subs - all_known_subs
+            if len(new_subs) >= SUBSCRIPTION_THRESHOLD:
+                evt_date = date(yr, mo, 1)
+                upsert_timeline_event(
+                    self.db,
+                    user_id,
+                    event_type="subscription_accumulation",
+                    event_date=evt_date,
+                    title=f"Accumulo abbonamenti: {len(new_subs)} nuovi servizi",
+                    description=f"In {mo}/{yr} hai aggiunto {len(new_subs)} nuovi abbonamenti.",
+                    evidence_json={
+                        "new_subscriptions": list(new_subs),
+                        "month": f"{yr}-{mo:02d}",
+                    },
+                )
+            all_known_subs |= month_subs
+
+        # ── Event: income shift / job change (D-13) ──
+        income_senders_by_month: dict[tuple[int, int], set[str]] = defaultdict(set)
+        for t in transactions:
+            if t.category == "income" and t.date and t.description:
+                income_senders_by_month[(t.date.year, t.date.month)].add(
+                    t.description.lower()[:60]
+                )
+        prev_senders: set[str] = set()
+        for yr, mo in months_sorted:
+            curr_senders = income_senders_by_month.get((yr, mo), set())
+            if prev_senders and curr_senders:
+                disappeared = prev_senders - curr_senders
+                appeared = curr_senders - prev_senders
+                if disappeared and appeared:
+                    evt_date = date(yr, mo, 1)
+                    upsert_timeline_event(
+                        self.db,
+                        user_id,
+                        event_type="income_shift",
+                        event_date=evt_date,
+                        title="Possibile cambio di lavoro",
+                        description=(
+                            f"Un pagamento ricorrente è scomparso e ne è apparso uno nuovo "
+                            f"in {mo}/{yr}."
+                        ),
+                        evidence_json={
+                            "disappeared": list(disappeared)[:3],
+                            "appeared": list(appeared)[:3],
+                            "month": f"{yr}-{mo:02d}",
+                        },
+                    )
+            if curr_senders:
+                prev_senders = curr_senders
+
+        self.db.commit()
 
     def _months_covered(self, transactions: list[Transaction]) -> float:
         """

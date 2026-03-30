@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from app.db.models import (
     CategorizationJob,
     ExtractedDocument,
+    FinancialTimeline,
+    MerchantMap,
     RefreshSession,
     TagVocabulary,
     Transaction,
@@ -174,3 +176,156 @@ def seed_default_tags(db: Session) -> None:
         if tag not in existing:
             db.add(TagVocabulary(tag=tag, description=desc))
     db.commit()
+
+
+# ─── MerchantMap ─────────────────────────────────────────────────────────────
+
+
+def lookup_merchant_map(db: Session, description_raw: str) -> MerchantMap | None:
+    """Exact match first; falls back to startswith prefix match (case-insensitive).
+    Never returns blacklisted entries."""
+    # Exact match
+    row = (
+        db.query(MerchantMap)
+        .filter(
+            MerchantMap.description_raw == description_raw,
+            MerchantMap.is_blacklisted == False,  # noqa: E712
+        )
+        .first()
+    )
+    if row:
+        return row
+    # Prefix match: description_raw starts with stored key (normalised lower)
+    normalised = description_raw.lower()
+    candidates = (
+        db.query(MerchantMap)
+        .filter(MerchantMap.is_blacklisted == False)  # noqa: E712
+        .all()
+    )
+    for candidate in candidates:
+        if normalised.startswith(candidate.description_raw.lower()):
+            return candidate
+    return None
+
+
+def write_merchant_map(
+    db: Session,
+    description_raw: str,
+    category: str,
+    confidence: float,
+    learned_method: str,
+    canonical_merchant: str | None = None,
+    learned_provider_model: str | None = None,
+    contributing_user_id: str | None = None,
+    contributing_job_id: str | None = None,
+    contributing_upload_id: str | None = None,
+) -> MerchantMap:
+    """Upsert: if exact description_raw exists (non-blacklisted), update it. Else insert."""
+    existing = (
+        db.query(MerchantMap)
+        .filter(
+            MerchantMap.description_raw == description_raw,
+            MerchantMap.is_blacklisted == False,  # noqa: E712
+        )
+        .first()
+    )
+    if existing:
+        existing.category = category
+        existing.confidence = confidence
+        existing.learned_method = learned_method
+        existing.learned_provider_model = learned_provider_model
+        existing.learned_at = datetime.now(UTC)
+        if contributing_user_id:
+            existing.contributing_user_id = contributing_user_id
+        db.add(existing)
+        return existing
+    row = MerchantMap(
+        description_raw=description_raw,
+        canonical_merchant=canonical_merchant,
+        category=category,
+        confidence=confidence,
+        learned_method=learned_method,
+        learned_provider_model=learned_provider_model,
+        contributing_user_id=contributing_user_id,
+        contributing_job_id=contributing_job_id,
+        contributing_upload_id=contributing_upload_id,
+    )
+    db.add(row)
+    return row
+
+
+# ─── FinancialTimeline ────────────────────────────────────────────────────────
+
+
+def get_timeline_events(
+    db: Session, user_id: str, include_dismissed: bool = False
+) -> list[FinancialTimeline]:
+    """Return timeline events for a user, newest first."""
+    q = db.query(FinancialTimeline).filter(FinancialTimeline.user_id == user_id)
+    if not include_dismissed:
+        q = q.filter(FinancialTimeline.is_user_dismissed == False)  # noqa: E712
+    return q.order_by(FinancialTimeline.event_date.desc()).all()
+
+
+def upsert_timeline_event(
+    db: Session,
+    user_id: str,
+    event_type: str,
+    event_date,
+    title: str,
+    description: str | None = None,
+    evidence_json: dict | None = None,
+) -> FinancialTimeline:
+    """Insert or update a timeline event (matched on user_id + event_type + event_date)."""
+    existing = (
+        db.query(FinancialTimeline)
+        .filter(
+            FinancialTimeline.user_id == user_id,
+            FinancialTimeline.event_type == event_type,
+            FinancialTimeline.event_date == event_date,
+        )
+        .first()
+    )
+    if existing:
+        existing.title = title
+        existing.description = description
+        existing.evidence_json = evidence_json
+        db.add(existing)
+        return existing
+    row = FinancialTimeline(
+        user_id=user_id,
+        event_type=event_type,
+        event_date=event_date,
+        title=title,
+        description=description,
+        evidence_json=evidence_json,
+    )
+    db.add(row)
+    return row
+
+
+def get_timeline_event(db: Session, event_id: str) -> FinancialTimeline | None:
+    return db.query(FinancialTimeline).filter(FinancialTimeline.id == event_id).first()
+
+
+def dismiss_timeline_event(
+    db: Session, event_id: str, reason: str, detail: str | None = None
+) -> FinancialTimeline | None:
+    row = get_timeline_event(db, event_id)
+    if row:
+        row.is_user_dismissed = True
+        row.dismissed_reason = reason
+        row.dismissed_detail = detail
+        db.add(row)
+    return row
+
+
+def set_timeline_context(
+    db: Session, event_id: str, raw: str
+) -> FinancialTimeline | None:
+    row = get_timeline_event(db, event_id)
+    if row:
+        row.user_context_raw = raw
+        row.context_tos_status = "pending"
+        db.add(row)
+    return row
