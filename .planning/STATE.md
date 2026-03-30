@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete - ready for verification
-stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-03-30T22:45:06.181Z"
+stopped_at: Completed 09-05-PLAN.md
+last_updated: "2026-03-30T22:51:04.974Z"
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 39
-  completed_plans: 35
+  completed_plans: 37
 ---
 
 # Project State
@@ -77,6 +77,8 @@ Plan: 3 of 3 (all done)
 | Phase 09-llm-financial-intelligence P01 | 11min | 2 tasks | 2 files |
 | Phase 09-llm-financial-intelligence P02 | 15 | 2 tasks | 4 files |
 | Phase 09-llm-financial-intelligence P03 | 12 | 2 tasks | 4 files |
+| Phase 09-llm-financial-intelligence P04 | 15 | 2 tasks | 3 files |
+| Phase 09-llm-financial-intelligence P05 | 10 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -140,6 +142,8 @@ Recent decisions affecting current work:
 - [Phase 09]: upsert_timeline_event matches on (user_id, event_type, event_date) to prevent duplicate events on re-runs
 - [Phase 09]: get_schema() lives in app.ingestion.prompts.loader not app.ingestion.schemas.loader — plan had wrong import path
 - [Phase 09]: TOS check defaults to clean=True on LLM error (fail open) — avoids blocking users when LLM unavailable
+- [Phase 09]: BackgroundTasks used for async TOS+distillation in POST /profile/timeline/{id}/context — 202 Accepted returns immediately
+- [Phase 09]: Contributing user in admin merchant map shown as obfuscated email u****@domain.com
 
 ### Pending Todos
 
@@ -157,6 +161,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T22:45:06.178Z
-Stopped at: Completed 09-03-PLAN.md
+Last session: 2026-03-30T22:51:04.972Z
+Stopped at: Completed 09-05-PLAN.md
 Resume file: None
