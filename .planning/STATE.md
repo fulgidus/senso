@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete - ready for verification
-stopped_at: Completed 09-06-PLAN.md — starting 09-07
-last_updated: "2026-03-30T23:00:16.362Z"
+stopped_at: "Completed 09-07-PLAN.md — awaiting checkpoint:human-verify"
+last_updated: "2026-03-30T23:18:26.398Z"
 progress:
   total_phases: 10
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 39
-  completed_plans: 38
+  completed_plans: 39
 ---
 
 # Project State
@@ -80,6 +80,7 @@ Plan: 3 of 3 (all done)
 | Phase 09-llm-financial-intelligence P04 | 15 | 2 tasks | 3 files |
 | Phase 09-llm-financial-intelligence P05 | 10 | 1 tasks | 1 files |
 | Phase 09-llm-financial-intelligence P06 | 420 | 2 tasks | 7 files |
+| Phase 09 P07 | 15 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,8 @@ Recent decisions affecting current work:
 - [Phase 09]: BackgroundTasks used for async TOS+distillation in POST /profile/timeline/{id}/context — 202 Accepted returns immediately
 - [Phase 09]: Contributing user in admin merchant map shown as obfuscated email u****@domain.com
 - [Phase 09-llm-financial-intelligence]: Plan 09-06: API functions added to lib/profile-api.ts (not a new src/api/profileApi.ts) — existing token-based apiRequest pattern followed
+- [Phase 09]: notificationsApi.ts placed in senso/src/api/ (new dir); adminMerchantApi.ts co-located with features/admin/ following adminContentApi.ts pattern
+- [Phase 09]: onUnreadCountChange callback added to NotificationPanel so bell badge updates immediately on mark-read without waiting for next 30s poll
 
 ### Pending Todos
 
@@ -163,6 +166,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T23:00:16.359Z
-Stopped at: Completed 09-06-PLAN.md — starting 09-07
+Last session: 2026-03-30T23:18:26.395Z
+Stopped at: Completed 09-07-PLAN.md — awaiting checkpoint:human-verify
 Resume file: None
