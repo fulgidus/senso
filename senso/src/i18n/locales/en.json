@@ -52,8 +52,8 @@
         "errorSave": "Save failed. Check your connection and try again.",
         "genderHeading": "How do you identify?",
         "genderSubtitle": "Helps personalise the language used in the app.",
-        "genderMasculine": "Man",
-        "genderFeminine": "Woman",
+        "genderMasculine": "Masculine",
+        "genderFeminine": "Feminine",
         "genderNeutral": "Prefer not to say",
         "genderSkip": "Skip"
     },
@@ -474,7 +474,30 @@
             "type_article": "Article",
             "type_video": "Video",
             "type_slide_deck": "Slides",
-            "type_partner_offer": "Partner offer"
+            "type_partner_offer": "Partner offer",
+            "fieldSlug": "Slug (URL)",
+            "fieldSlugPlaceholder": "content-slug",
+            "slugCollision": "This slug is already in use",
+            "slugAutoHint": "Auto-generated from title",
+            "fieldBody": "Content (Markdown)",
+            "fieldBodyPlaceholder": "Write content in Markdown format...",
+            "fieldReadingTime": "Reading time (min)",
+            "fieldDuration": "Duration (seconds)",
+            "colGroup": "Group",
+            "l10nGroup": "Localization group",
+            "l10nSiblings": "Linked translations:",
+            "l10nNoSiblings": "No linked translations in this group.",
+            "l10nUnlink": "Unlink from group",
+            "l10nLinked": "Linked to localization group",
+            "l10nSearchHint": "Search for same-type content in another language to link.",
+            "l10nSearchPlaceholder": "Search by title...",
+            "bulkSelected": "{{count}} selected",
+            "bulkApplyToGroup": "Apply to entire group",
+            "bulkPublish": "Publish",
+            "bulkUnpublish": "Unpublish",
+            "bulkDelete": "Delete",
+            "bulkClear": "Clear selection",
+            "bulkError": "Bulk operation failed."
         }
     }
 }

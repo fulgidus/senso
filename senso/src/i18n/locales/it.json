@@ -52,8 +52,8 @@
         "errorSave": "Salvataggio non riuscito. Controlla la connessione e riprova.",
         "genderHeading": "Come ti identifichi?",
         "genderSubtitle": "Ti aiuta a personalizzare il linguaggio dell'app.",
-        "genderMasculine": "Uomo",
-        "genderFeminine": "Donna",
+        "genderMasculine": "Maschile",
+        "genderFeminine": "Femminile",
         "genderNeutral": "Preferisco non specificare",
         "genderSkip": "Salta"
     },
@@ -474,7 +474,30 @@
             "type_article": "Articolo",
             "type_video": "Video",
             "type_slide_deck": "Slide",
-            "type_partner_offer": "Offerta partner"
+            "type_partner_offer": "Offerta partner",
+            "fieldSlug": "Slug (URL)",
+            "fieldSlugPlaceholder": "slug-del-contenuto",
+            "slugCollision": "Questo slug è già in uso",
+            "slugAutoHint": "Generato automaticamente dal titolo",
+            "fieldBody": "Contenuto (Markdown)",
+            "fieldBodyPlaceholder": "Scrivi il contenuto in formato Markdown...",
+            "fieldReadingTime": "Tempo di lettura (min)",
+            "fieldDuration": "Durata (secondi)",
+            "colGroup": "Gruppo",
+            "l10nGroup": "Gruppo di localizzazione",
+            "l10nSiblings": "Traduzioni collegate:",
+            "l10nNoSiblings": "Nessuna traduzione collegata nel gruppo.",
+            "l10nUnlink": "Scollega dal gruppo",
+            "l10nLinked": "Collegato a gruppo di localizzazione",
+            "l10nSearchHint": "Cerca un contenuto dello stesso tipo in un'altra lingua per collegarlo.",
+            "l10nSearchPlaceholder": "Cerca per titolo...",
+            "bulkSelected": "{{count}} selezionati",
+            "bulkApplyToGroup": "Applica a tutto il gruppo",
+            "bulkPublish": "Pubblica",
+            "bulkUnpublish": "Nascondi",
+            "bulkDelete": "Elimina",
+            "bulkClear": "Deseleziona",
+            "bulkError": "Errore nell'operazione di massa."
         }
     }
 }
