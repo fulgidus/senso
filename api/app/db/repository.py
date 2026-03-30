@@ -7,6 +7,8 @@ from app.db.models import (
     ExtractedDocument,
     FinancialTimeline,
     MerchantMap,
+    ModerationLog,
+    Notification,
     RefreshSession,
     TagVocabulary,
     Transaction,
@@ -329,3 +331,111 @@ def set_timeline_context(
         row.context_tos_status = "pending"
         db.add(row)
     return row
+
+
+# ─── Notifications ───────────────────────────────────────────────────────────
+
+
+def create_notification(
+    db: Session,
+    user_id: str,
+    notif_type: str,
+    title: str,
+    body: str,
+    action_url: str | None = None,
+) -> Notification:
+    row = Notification(
+        user_id=user_id,
+        type=notif_type,
+        title=title,
+        body=body,
+        action_url=action_url,
+    )
+    db.add(row)
+    return row
+
+
+def get_notifications(
+    db: Session, user_id: str, limit: int = 20, offset: int = 0
+) -> list[Notification]:
+    return (
+        db.query(Notification)
+        .filter(Notification.user_id == user_id)
+        .order_by(Notification.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
+def count_unread_notifications(db: Session, user_id: str) -> int:
+    return (
+        db.query(Notification)
+        .filter(Notification.user_id == user_id, Notification.is_read == False)  # noqa: E712
+        .count()
+    )
+
+
+def mark_notification_read(
+    db: Session, notification_id: str, user_id: str
+) -> Notification | None:
+    row = (
+        db.query(Notification)
+        .filter(Notification.id == notification_id, Notification.user_id == user_id)
+        .first()
+    )
+    if row:
+        row.is_read = True
+        db.add(row)
+    return row
+
+
+def mark_all_notifications_read(db: Session, user_id: str) -> int:
+    """Returns count of updated rows."""
+    rows = (
+        db.query(Notification)
+        .filter(Notification.user_id == user_id, Notification.is_read == False)  # noqa: E712
+        .all()
+    )
+    for row in rows:
+        row.is_read = True
+        db.add(row)
+    return len(rows)
+
+
+# ─── ModerationLog ───────────────────────────────────────────────────────────
+
+
+def log_moderation(
+    db: Session,
+    user_id: str,
+    content_type: str,
+    raw_input: str,
+    detected_violations: list,
+    severity: str,
+    action_taken: str,
+    content_ref_id: str | None = None,
+) -> ModerationLog:
+    row = ModerationLog(
+        user_id=user_id,
+        content_type=content_type,
+        content_ref_id=content_ref_id,
+        raw_input=raw_input,
+        detected_violations=detected_violations,
+        severity=severity,
+        action_taken=action_taken,
+    )
+    db.add(row)
+    return row
+
+
+def count_violations_for_user(db: Session, user_id: str) -> int:
+    """Count non-clean moderation events for progressive penalty logic."""
+    return (
+        db.query(ModerationLog)
+        .filter(
+            ModerationLog.user_id == user_id,
+            ModerationLog.severity != "clean",
+        )
+        .count()
+    )

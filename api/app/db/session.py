@@ -276,6 +276,9 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_notifications_user_id ON notifications (user_id)",
+        # ── Round 12: Phase 9 user penalty columns ────────────────────────────
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS violation_count INT NOT NULL DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
