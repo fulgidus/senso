@@ -117,7 +117,10 @@ function IngestionPage({ user }: { user: User }) {
           setPhase("onboarding")
         }
       } else if (data.status === "complete") {
-        void navigate("/chat", { replace: true })
+        // Profile exists but may not be confirmed yet — send to
+        // profile review screen; ProfileScreen handles the redirect
+        // to /chat once the user confirms.
+        void navigate("/profile", { replace: true })
       }
       // failed / other → stay on ingestion
     }).catch(() => { /* stay on ingestion */ })
@@ -168,7 +171,7 @@ function IngestionPage({ user }: { user: User }) {
         user={user}
         token={token}
         onBack={() => setPhase("ingestion")}
-        onComplete={() => void navigate("/chat", { replace: true })}
+        onComplete={() => void navigate("/profile", { replace: true })}
       />
     )
   }
