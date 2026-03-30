@@ -397,6 +397,7 @@
     "content": {
         "browseTitle": "Learn",
         "searchPlaceholder": "Search articles, videos, slides...",
+        "searchSyntaxHint": "Use tag:name, type:article, from:2025-01, to:2025-12 to filter",
         "filterAll": "All",
         "filterArticles": "Articles",
         "filterVideos": "Videos",
@@ -415,7 +416,15 @@
         "clearTags": "Clear filters",
         "notFoundRedirect": "Content not found. Returning to list.",
         "discussWithCoach": "Discuss with coach",
-        "durationMinutes": "{{minutes}} min"
+        "durationMinutes": "{{minutes}} min",
+        "sortLabel": "Sort by",
+        "sortNewest": "Newest",
+        "sortOldest": "Oldest",
+        "sortReadingTime": "Reading time",
+        "sortDuration": "Duration",
+        "sortTitle": "Title",
+        "localeAll": "All languages",
+        "resultCount": "{{count}} results"
     },
     "admin": {
         "content": {

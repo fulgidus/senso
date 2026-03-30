@@ -9,15 +9,24 @@
  *   /learn/q/:query       — search results for :query
  *   /learn/t/:tag1/:tag2  — OR-filter by tags
  *   /learn/t/all/:t1/:t2  — AND-filter by tags
+ *
+ * Group C additions:
+ *   C1: Sort controls (newest, oldest, reading_time, duration, title)
+ *   C2: Locale filter using existing nav.languageFullName keys
+ *   C3: Filter persistence (sessionStorage for unauthed, localStorage for authed)
+ *   C4: Search suggestions (debounced BM25 suggest) + syntax hint tooltip
+ *   C5: Clickable tags (done in Group B)
  */
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import {
   fetchPublicContent,
   searchContent,
+  suggestContent,
   type ContentItemDTO,
+  type ContentSuggestion,
 } from "./contentApi"
 
 // ── Type badge colours ───────────────────────────────────────────────────────
@@ -46,6 +55,47 @@ const FILTER_TABS: { key: FilterType; i18nKey: string }[] = [
   { key: "partner_offer", i18nKey: "content.filterPartners" },
 ]
 
+// ── Sort options ─────────────────────────────────────────────────────────────
+
+type SortOption = { key: string; dir: "asc" | "desc"; i18nKey: string }
+
+const SORT_OPTIONS: SortOption[] = [
+  { key: "created_at", dir: "desc", i18nKey: "content.sortNewest" },
+  { key: "created_at", dir: "asc", i18nKey: "content.sortOldest" },
+  { key: "reading_time_minutes", dir: "asc", i18nKey: "content.sortReadingTime" },
+  { key: "duration_seconds", dir: "asc", i18nKey: "content.sortDuration" },
+  { key: "title", dir: "asc", i18nKey: "content.sortTitle" },
+]
+
+// ── Filter persistence (C3) ─────────────────────────────────────────────────
+
+const FILTER_STORAGE_KEY = "senso:learnFilters"
+
+interface PersistedFilters {
+  type?: FilterType
+  sortIdx?: number
+  locale?: string
+}
+
+function readPersistedFilters(): PersistedFilters {
+  try {
+    // Try localStorage first (authed), then sessionStorage (unauthed)
+    const raw = localStorage.getItem(FILTER_STORAGE_KEY) ?? sessionStorage.getItem(FILTER_STORAGE_KEY)
+    if (raw) return JSON.parse(raw) as PersistedFilters
+  } catch { /* ignore */ }
+  return {}
+}
+
+function writePersistedFilters(filters: PersistedFilters) {
+  const json = JSON.stringify(filters)
+  try {
+    // Write to both — the one that matters depends on auth state
+    localStorage.setItem(FILTER_STORAGE_KEY, json)
+  } catch {
+    try { sessionStorage.setItem(FILTER_STORAGE_KEY, json) } catch { /* ignore */ }
+  }
+}
+
 // ── URL-driven state helpers ─────────────────────────────────────────────────
 
 /** Parse /learn/t/... URL segments into tags array + mode */
@@ -60,7 +110,7 @@ export function parseTagsFromPath(segments: string[]): { tags: string[]; mode: "
 /** Main browse page — used by /learn, /learn/q/:query, /learn/t/:tags */
 export function ContentBrowsePage() {
   const { t, i18n } = useTranslation()
-  const locale = i18n.language.startsWith("en") ? "en" : "it"
+  const uiLocale = i18n.language.startsWith("en") ? "en" : "it"
   const params = useParams()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -72,14 +122,48 @@ export function ContentBrowsePage() {
   const urlTagSegments = urlTagsRaw ? urlTagsRaw.split("/").filter(Boolean) : []
   const { tags: urlTags, mode: urlTagsMode } = parseTagsFromPath(urlTagSegments)
 
+  // C3: Read persisted defaults (only for initial state, URL overrides)
+  const persisted = useMemo(() => readPersistedFilters(), [])
+
   const [items, setItems] = useState<ContentItemDTO[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterType>(
-    (searchParams.get("type") as FilterType) || "all",
+    (searchParams.get("type") as FilterType) || persisted.type || "all",
+  )
+  const [sortIdx, setSortIdx] = useState(
+    persisted.sortIdx != null ? persisted.sortIdx : 0,
+  )
+  const [contentLocale, setContentLocale] = useState<string>(
+    searchParams.get("locale") || persisted.locale || "all",
   )
   const [searchQuery, setSearchQuery] = useState(urlQuery || searchParams.get("q") || "")
   const [isSearching, setIsSearching] = useState(!!urlQuery)
+
+  // C4: Search suggestions
+  const [suggestions, setSuggestions] = useState<ContentSuggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showSyntaxHint, setShowSyntaxHint] = useState(false)
+  const suggestTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
+
+  // C2: Build locale options from loaded i18n resources
+  const localeOptions = useMemo(() => {
+    const codes = Object.keys(i18n.store.data)
+    return codes.map((code) => ({
+      code,
+      label: (i18n.getResourceBundle(code, "translation") as Record<string, Record<string, string>>)?.nav?.languageFullName ?? code,
+    }))
+  }, [i18n.store.data])
+
+  const sort = SORT_OPTIONS[sortIdx] ?? SORT_OPTIONS[0]
+
+  // C3: Persist filter changes
+  useEffect(() => {
+    writePersistedFilters({ type: filter, sortIdx, locale: contentLocale })
+  }, [filter, sortIdx, contentLocale])
 
   // Load content items (browse mode)
   const loadItems = useCallback(async () => {
@@ -87,19 +171,22 @@ export function ContentBrowsePage() {
     setError(null)
     try {
       const data = await fetchPublicContent({
-        locale,
+        locale: contentLocale === "all" ? undefined : contentLocale,
         type: filter === "all" ? undefined : filter,
         pageSize: 50,
+        sortBy: sort.key,
+        sortDir: sort.dir,
         topics: urlTags.length > 0 ? urlTags : undefined,
         topicsMode: urlTags.length > 0 ? urlTagsMode : undefined,
       })
       setItems(data.items)
+      setTotalCount(data.total)
     } catch {
       setError("Failed to load content")
     } finally {
       setLoading(false)
     }
-  }, [locale, filter, urlTags.join(","), urlTagsMode])
+  }, [contentLocale, filter, sort.key, sort.dir, urlTags.join(","), urlTagsMode])
 
   // Perform search
   const doSearch = useCallback(async (q: string) => {
@@ -112,19 +199,67 @@ export function ContentBrowsePage() {
     setLoading(true)
     setError(null)
     try {
+      const searchLocale = contentLocale === "all" ? uiLocale : contentLocale
       const data = await searchContent({
         q,
-        locale,
+        locale: searchLocale,
         topK: 20,
         type: filter === "all" ? undefined : filter,
       })
       setItems(data)
+      setTotalCount(data.length)
     } catch {
       setError("Search failed")
     } finally {
       setLoading(false)
     }
-  }, [locale, filter, loadItems])
+  }, [contentLocale, uiLocale, filter, loadItems])
+
+  // C4: Debounced suggestions
+  const fetchSuggestions = useCallback(async (q: string) => {
+    if (q.trim().length < 2) {
+      setSuggestions([])
+      return
+    }
+    try {
+      const searchLocale = contentLocale === "all" ? uiLocale : contentLocale
+      const results = await suggestContent({ q: q.trim(), locale: searchLocale, limit: 5 })
+      setSuggestions(results)
+    } catch {
+      setSuggestions([])
+    }
+  }, [contentLocale, uiLocale])
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchQuery(value)
+    // Debounce suggestions at 300ms
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    if (value.trim().length >= 2) {
+      suggestTimerRef.current = setTimeout(() => {
+        void fetchSuggestions(value)
+        setShowSuggestions(true)
+      }, 300)
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(e.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
 
   // React to URL-driven search query
   useEffect(() => {
@@ -150,10 +285,11 @@ export function ContentBrowsePage() {
     if (!urlQuery && urlTags.length === 0) {
       const params: Record<string, string> = {}
       if (filter !== "all") params.type = filter
+      if (contentLocale !== "all") params.locale = contentLocale
       if (searchQuery && isSearching) params.q = searchQuery
       setSearchParams(params, { replace: true })
     }
-  }, [filter, searchQuery, isSearching, setSearchParams, urlQuery, urlTags.length])
+  }, [filter, contentLocale, searchQuery, isSearching, setSearchParams, urlQuery, urlTags.length])
 
   const handleFilterChange = (newFilter: FilterType) => {
     setFilter(newFilter)
@@ -162,11 +298,33 @@ export function ContentBrowsePage() {
     }
   }
 
+  const handleSortChange = (idx: number) => {
+    setSortIdx(idx)
+  }
+
+  // Re-fetch when sort changes (browse mode only)
+  useEffect(() => {
+    if (!isSearching && !urlQuery) {
+      void loadItems()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortIdx])
+
+  // Re-fetch when locale filter changes
+  useEffect(() => {
+    if (isSearching && searchQuery) {
+      void doSearch(searchQuery)
+    } else if (!urlQuery) {
+      void loadItems()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentLocale])
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setShowSuggestions(false)
     const trimmed = searchQuery.trim()
     if (trimmed) {
-      // Navigate to /learn/q/:query URL
       navigate(`/learn/q/${encodeURIComponent(trimmed)}`)
     } else {
       navigate("/learn")
@@ -176,11 +334,17 @@ export function ContentBrowsePage() {
   const handleSearchClear = () => {
     setSearchQuery("")
     setIsSearching(false)
+    setSuggestions([])
+    setShowSuggestions(false)
     navigate("/learn")
   }
 
+  const handleSuggestionClick = (suggestion: ContentSuggestion) => {
+    setShowSuggestions(false)
+    navigate(`/learn/${encodeURIComponent(suggestion.slug)}`)
+  }
+
   const handleTagClick = (tag: string) => {
-    // If already filtering by this tag, remove it; otherwise add
     if (urlTags.includes(tag)) {
       const newTags = urlTags.filter((t) => t !== tag)
       if (newTags.length === 0) {
@@ -203,25 +367,63 @@ export function ContentBrowsePage() {
             {t("content.browseTitle")}
           </h1>
 
-          {/* Search bar */}
-          <form onSubmit={handleSearchSubmit} className="mt-4 flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("content.searchPlaceholder")}
-              className="flex-1 rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={handleSearchClear}
-                className="rounded-lg border border-input px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
-              >
-                ✕
-              </button>
-            )}
-          </form>
+          {/* Search bar with suggestions */}
+          <div className="relative mt-4">
+            <form onSubmit={handleSearchSubmit} className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchInputChange(e.target.value)}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true)
+                    setShowSyntaxHint(true)
+                  }}
+                  onBlur={() => {
+                    // Delay hiding so click on suggestion registers
+                    setTimeout(() => setShowSyntaxHint(false), 200)
+                  }}
+                  placeholder={t("content.searchPlaceholder")}
+                  className="w-full rounded-lg border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                {/* C4: Syntax hint tooltip */}
+                {showSyntaxHint && !searchQuery && (
+                  <div className="absolute left-0 top-full z-40 mt-1 w-full rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground shadow-lg">
+                    {t("content.searchSyntaxHint")}
+                  </div>
+                )}
+                {/* C4: Suggestions dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div
+                    ref={suggestionsRef}
+                    className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-border bg-card shadow-lg py-1"
+                  >
+                    {suggestions.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onMouseDown={() => handleSuggestionClick(s)}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-accent transition-colors"
+                      >
+                        <span className="text-xs text-muted-foreground">{TYPE_ICON[s.type] || "📄"}</span>
+                        <span className="truncate text-foreground">{s.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleSearchClear}
+                  className="rounded-lg border border-input px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                >
+                  ✕
+                </button>
+              )}
+            </form>
+          </div>
 
           {/* Active tag filters */}
           {urlTags.length > 0 && (
@@ -248,27 +450,65 @@ export function ContentBrowsePage() {
             </div>
           )}
 
-          {/* Filter tabs */}
-          <div className="mt-4 flex gap-1 overflow-x-auto">
-            {FILTER_TABS.map(({ key, i18nKey }) => (
-              <button
-                key={key}
-                onClick={() => handleFilterChange(key)}
-                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                  filter === key
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {t(i18nKey)}
-              </button>
-            ))}
+          {/* Controls row: type filters + locale filter + sort */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {/* Type filter tabs */}
+            <div className="flex gap-1 overflow-x-auto">
+              {FILTER_TABS.map(({ key, i18nKey }) => (
+                <button
+                  key={key}
+                  onClick={() => handleFilterChange(key)}
+                  className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    filter === key
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {t(i18nKey)}
+                </button>
+              ))}
+            </div>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* C2: Locale filter */}
+            <select
+              value={contentLocale}
+              onChange={(e) => setContentLocale(e.target.value)}
+              className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="all">{t("content.localeAll")}</option>
+              {localeOptions.map((lo) => (
+                <option key={lo.code} value={lo.code}>{lo.label}</option>
+              ))}
+            </select>
+
+            {/* C1: Sort dropdown */}
+            <select
+              value={sortIdx}
+              onChange={(e) => handleSortChange(Number(e.target.value))}
+              className="rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              {SORT_OPTIONS.map((opt, idx) => (
+                <option key={`${opt.key}-${opt.dir}`} value={idx}>
+                  {t(opt.i18nKey)}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </header>
 
       {/* Content grid */}
       <main className="mx-auto max-w-6xl px-4 py-6">
+        {/* Result count */}
+        {!loading && !error && items.length > 0 && (
+          <p className="mb-4 text-sm text-muted-foreground">
+            {t("content.resultCount", { count: totalCount })}
+          </p>
+        )}
+
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -319,6 +559,9 @@ function ContentCard({ item, onTagClick, activeTags }: { item: ContentItemDTO; o
     if (item.type === "article" && item.reading_time_minutes) {
       return t("content.readingMinutes", { minutes: item.reading_time_minutes })
     }
+    if (item.type === "video" && item.duration_seconds) {
+      return t("content.durationMinutes", { minutes: Math.ceil(item.duration_seconds / 60) })
+    }
     if (item.type === "slide_deck") {
       const slideCount = item.metadata?.slide_count as number | undefined
       if (slideCount) return t("content.slides", { count: slideCount })
@@ -332,7 +575,7 @@ function ContentCard({ item, onTagClick, activeTags }: { item: ContentItemDTO; o
 
   return (
     <div className="group flex flex-col rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
-      {/* Header: type badge + meta */}
+      {/* Header: type badge + meta + locale badge */}
       <div className="mb-2 flex items-center gap-2">
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
           <span>{icon}</span>
@@ -341,6 +584,9 @@ function ContentCard({ item, onTagClick, activeTags }: { item: ContentItemDTO; o
         {metaInfo && (
           <span className="text-xs text-muted-foreground">{metaInfo}</span>
         )}
+        <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+          {item.locale}
+        </span>
       </div>
 
       {/* Title — links to slug-based detail page */}
