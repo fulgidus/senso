@@ -3,13 +3,16 @@
  *
  * Features:
  * - Table view with locale/type/published filters
- * - Create new item via inline form
- * - Edit existing items via inline form
- * - Delete with confirmation
- * - Toggle published status
+ * - Create new item with auto-slug generation (D2)
+ * - Edit with unlocked locale field (D1) + slug field
+ * - Debounced slug collision detection (D3)
+ * - Localization group linking/unlinking (D4)
+ * - Group-aware bulk publish/delete (D5)
+ * - Tabbed edit when item is in a localization group (D5)
+ * - Selection checkboxes for bulk operations
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Plus,
@@ -23,6 +26,9 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  Link2,
+  Unlink,
+  AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type {
@@ -35,6 +41,11 @@ import {
   createContentItem,
   updateContentItem,
   deleteContentItem,
+  checkSlugExists,
+  searchLinkableItems,
+  getItemSiblings,
+  bulkPublish,
+  bulkDelete,
 } from "./adminContentApi"
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -44,7 +55,7 @@ const LOCALES = ["it", "en"] as const
 
 type ContentType = (typeof CONTENT_TYPES)[number]
 
-// ── Metadata field hints per type ────────────────────────────────────────────
+// ── Metadata field hints per type ────────────────────────────────────────
 
 const METADATA_HINTS: Record<ContentType, string[]> = {
   article: ["url", "estimated_read_minutes"],
@@ -62,11 +73,24 @@ const METADATA_HINTS: Record<ContentType, string[]> = {
   ],
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Slug helper (basic client-side slugify) ──────────────────────────────
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 200)
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
 
 function emptyCreate(): ContentItemCreatePayload {
   return {
     id: "",
+    slug: "",
     locale: "it",
     type: "article",
     title: "",
@@ -77,17 +101,18 @@ function emptyCreate(): ContentItemCreatePayload {
   }
 }
 
-// ── Item form (shared by create and edit) ────────────────────────────────────
+// ── Item form (shared by create and edit) ────────────────────────────────
 
 type ItemFormProps = {
   initial: ContentItemCreatePayload
   mode: "create" | "edit"
+  itemId?: string // only in edit mode — for slug collision exclude
   saving: boolean
   onSave: (data: ContentItemCreatePayload) => void
   onCancel: () => void
 }
 
-function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
+function ItemForm({ initial, mode, itemId, saving, onSave, onCancel }: ItemFormProps) {
   const { t } = useTranslation()
   const [form, setForm] = useState<ContentItemCreatePayload>(initial)
   const [topicsStr, setTopicsStr] = useState(initial.topics?.join(", ") ?? "")
@@ -96,11 +121,51 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
   )
   const [metaError, setMetaError] = useState(false)
 
+  // D2: Auto-slug from title (create mode only, if slug not manually edited)
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(mode === "edit")
+
+  // D3: Slug collision detection
+  const [slugCollision, setSlugCollision] = useState(false)
+  const [slugChecking, setSlugChecking] = useState(false)
+  const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const currentType = form.type as ContentType
   const hints = METADATA_HINTS[currentType] ?? []
 
+  // D2: Auto-generate slug when title changes (create mode, not manually edited)
+  useEffect(() => {
+    if (mode === "create" && !slugManuallyEdited && form.title) {
+      const newSlug = slugify(form.title)
+      setForm((f) => ({ ...f, slug: newSlug }))
+    }
+  }, [form.title, mode, slugManuallyEdited])
+
+  // D3: Debounced slug collision check
+  useEffect(() => {
+    if (!form.slug || form.slug.length < 2) {
+      setSlugCollision(false)
+      return
+    }
+    if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current)
+    slugCheckTimer.current = setTimeout(async () => {
+      setSlugChecking(true)
+      try {
+        const exists = await checkSlugExists(form.slug, mode === "edit" ? itemId : undefined)
+        setSlugCollision(exists)
+      } catch {
+        // ignore check errors
+      } finally {
+        setSlugChecking(false)
+      }
+    }, 500)
+    return () => {
+      if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current)
+    }
+  }, [form.slug, mode, itemId])
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (slugCollision) return // D3: prevent save on collision
     // Parse topics
     const topics = topicsStr
       .split(",")
@@ -138,14 +203,44 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
           />
         </div>
 
-        {/* Locale */}
+        {/* Slug (D1/D2/D3) */}
+        <div>
+          <label className={labelCls}>{t("admin.content.fieldSlug")}</label>
+          <div className="relative">
+            <input
+              className={`${inputCls} ${slugCollision ? "border-destructive ring-destructive" : ""}`}
+              value={form.slug}
+              onChange={(e) => {
+                setSlugManuallyEdited(true)
+                setForm((f) => ({ ...f, slug: e.target.value }))
+              }}
+              required
+              placeholder={t("admin.content.fieldSlugPlaceholder")}
+            />
+            {slugChecking && (
+              <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+          {slugCollision && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
+              <AlertTriangle className="h-3 w-3" />
+              {t("admin.content.slugCollision")}
+            </p>
+          )}
+          {mode === "create" && !slugManuallyEdited && form.slug && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("admin.content.slugAutoHint")}
+            </p>
+          )}
+        </div>
+
+        {/* D1: Locale — now editable in edit mode */}
         <div>
           <label className={labelCls}>{t("admin.content.fieldLocale")}</label>
           <select
             className={inputCls}
             value={form.locale}
             onChange={(e) => setForm((f) => ({ ...f, locale: e.target.value }))}
-            disabled={mode === "edit"}
           >
             {LOCALES.map((l) => (
               <option key={l} value={l}>
@@ -155,7 +250,7 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
           </select>
         </div>
 
-        {/* Type */}
+        {/* Type — locked on edit */}
         <div>
           <label className={labelCls}>{t("admin.content.fieldType")}</label>
           <select
@@ -173,7 +268,7 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
         </div>
 
         {/* Title */}
-        <div className="sm:col-span-2 lg:col-span-3">
+        <div className="sm:col-span-2 lg:col-span-2">
           <label className={labelCls}>{t("admin.content.fieldTitle")}</label>
           <input
             className={inputCls}
@@ -195,6 +290,17 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
           />
         </div>
 
+        {/* Body */}
+        <div className="sm:col-span-2 lg:col-span-3">
+          <label className={labelCls}>{t("admin.content.fieldBody")}</label>
+          <textarea
+            className={`${inputCls} min-h-[120px] resize-y font-mono text-xs`}
+            value={form.body ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
+            placeholder={t("admin.content.fieldBodyPlaceholder")}
+          />
+        </div>
+
         {/* Topics */}
         <div className="sm:col-span-2 lg:col-span-3">
           <label className={labelCls}>{t("admin.content.fieldTopics")}</label>
@@ -208,6 +314,46 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
             {t("admin.content.fieldTopicsHint")}
           </p>
         </div>
+
+        {/* Reading time (articles) */}
+        {(form.type === "article" || form.type === "slide_deck") && (
+          <div>
+            <label className={labelCls}>{t("admin.content.fieldReadingTime")}</label>
+            <input
+              className={inputCls}
+              type="number"
+              min="0"
+              value={form.reading_time_minutes ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  reading_time_minutes: e.target.value ? Number(e.target.value) : null,
+                }))
+              }
+              placeholder="5"
+            />
+          </div>
+        )}
+
+        {/* Duration (videos) */}
+        {form.type === "video" && (
+          <div>
+            <label className={labelCls}>{t("admin.content.fieldDuration")}</label>
+            <input
+              className={inputCls}
+              type="number"
+              min="0"
+              value={form.duration_seconds ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  duration_seconds: e.target.value ? Number(e.target.value) : null,
+                }))
+              }
+              placeholder="300"
+            />
+          </div>
+        )}
 
         {/* Metadata JSON */}
         <div className="sm:col-span-2 lg:col-span-3">
@@ -253,7 +399,7 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
 
       {/* Actions */}
       <div className="flex gap-2 pt-2">
-        <Button type="submit" disabled={saving}>
+        <Button type="submit" disabled={saving || slugCollision}>
           {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
           {mode === "create"
             ? t("admin.content.createBtn")
@@ -267,6 +413,148 @@ function ItemForm({ initial, mode, saving, onSave, onCancel }: ItemFormProps) {
   )
 }
 
+// ── Localization group panel (D4) ────────────────────────────────────────
+
+type L10nGroupPanelProps = {
+  item: AdminContentItemDTO
+  onLink: (targetId: string) => void
+  onUnlink: () => void
+}
+
+function L10nGroupPanel({ item, onLink, onUnlink }: L10nGroupPanelProps) {
+  const { t } = useTranslation()
+  const [siblings, setSiblings] = useState<AdminContentItemDTO[]>([])
+  const [loadingSiblings, setLoadingSiblings] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<AdminContentItemDTO[]>([])
+  const [searching, setSearching] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Load siblings on mount
+  useEffect(() => {
+    if (item.localization_group) {
+      setLoadingSiblings(true)
+      getItemSiblings(item.id)
+        .then(setSiblings)
+        .catch(() => setSiblings([]))
+        .finally(() => setLoadingSiblings(false))
+    }
+  }, [item.id, item.localization_group])
+
+  // Debounced search for linkable items
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([])
+      return
+    }
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const results = await searchLinkableItems({
+          q: searchQuery,
+          contentType: item.type,
+          excludeLocale: item.locale,
+          limit: 8,
+        })
+        setSearchResults(results)
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 400)
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+    }
+  }, [searchQuery, item.type, item.locale])
+
+  const inputCls =
+    "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-muted/30 p-4">
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+        <Link2 className="h-4 w-4" />
+        {t("admin.content.l10nGroup")}
+      </h4>
+
+      {/* Current group siblings */}
+      {item.localization_group && (
+        <div className="mb-3">
+          {loadingSiblings ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : siblings.length > 0 ? (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground mb-1">{t("admin.content.l10nSiblings")}</p>
+              {siblings.map((sib) => (
+                <div
+                  key={sib.id}
+                  className="flex items-center gap-2 rounded bg-background px-3 py-1.5 text-sm"
+                >
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
+                    {sib.locale}
+                  </span>
+                  <span className="truncate text-foreground">{sib.title}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">{t("admin.content.l10nNoSiblings")}</p>
+          )}
+
+          <button
+            type="button"
+            onClick={onUnlink}
+            className="mt-2 flex items-center gap-1 text-xs text-destructive hover:underline"
+          >
+            <Unlink className="h-3 w-3" />
+            {t("admin.content.l10nUnlink")}
+          </button>
+        </div>
+      )}
+
+      {/* Search to link */}
+      {!item.localization_group && (
+        <div>
+          <p className="mb-2 text-xs text-muted-foreground">
+            {t("admin.content.l10nSearchHint")}
+          </p>
+          <div className="relative">
+            <input
+              className={inputCls}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("admin.content.l10nSearchPlaceholder")}
+            />
+            {searching && (
+              <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+          {searchResults.length > 0 && (
+            <div className="mt-1 space-y-1">
+              {searchResults.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => onLink(r.id)}
+                  className="flex w-full items-center gap-2 rounded bg-background px-3 py-1.5 text-sm text-left hover:bg-accent transition-colors"
+                >
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
+                    {r.locale}
+                  </span>
+                  <span className="truncate text-foreground">{r.title}</span>
+                  <Link2 className="ml-auto h-3 w-3 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export function ContentAdminPage() {
@@ -275,6 +563,7 @@ export function ContentAdminPage() {
 
   // ── State ──
   const [items, setItems] = useState<AdminContentItemDTO[]>([])
+  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -293,6 +582,12 @@ export function ContentAdminPage() {
   const [sortField, setSortField] = useState<"title" | "type" | "locale" | "updated_at">("updated_at")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
 
+  // D5: Selection for bulk operations
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkAction, setBulkAction] = useState<"publish" | "unpublish" | "delete" | null>(null)
+  const [bulkApplyToGroup, setBulkApplyToGroup] = useState(true)
+  const [bulkProcessing, setBulkProcessing] = useState(false)
+
   // ── Load items ──
   const loadItems = useCallback(async () => {
     setLoading(true)
@@ -302,7 +597,8 @@ export function ContentAdminPage() {
         locale: filterLocale || undefined,
         type: filterType || undefined,
       })
-      setItems(data)
+      setItems(data.items)
+      setTotalCount(data.total)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t("admin.content.loadError"),
@@ -325,6 +621,7 @@ export function ContentAdminPage() {
         (it) =>
           it.title.toLowerCase().includes(q) ||
           it.id.toLowerCase().includes(q) ||
+          it.slug.toLowerCase().includes(q) ||
           it.topics.some((tp) => tp.toLowerCase().includes(q)),
       )
     }
@@ -361,11 +658,16 @@ export function ContentAdminPage() {
       setSaving(true)
       try {
         const update: ContentItemUpdatePayload = {
+          slug: data.slug,
+          locale: data.locale,
           title: data.title,
           summary: data.summary,
+          body: data.body,
           topics: data.topics,
           metadata: data.metadata,
           is_published: data.is_published,
+          reading_time_minutes: data.reading_time_minutes,
+          duration_seconds: data.duration_seconds,
         }
         await updateContentItem(id, update)
         setEditingId(null)
@@ -412,6 +714,75 @@ export function ContentAdminPage() {
     [loadItems, t],
   )
 
+  // D4: Link localization group
+  const handleL10nLink = useCallback(
+    async (itemId: string, targetId: string) => {
+      try {
+        // Get the target item to see if it has a group already
+        const target = items.find((i) => i.id === targetId)
+        const currentItem = items.find((i) => i.id === itemId)
+        if (!currentItem) return
+
+        // Use existing group or create new one (UUIDv7 generated server-side)
+        // The backend assigns `localization_group` via update
+        const groupId = target?.localization_group ?? crypto.randomUUID()
+
+        // Set group on both items
+        await updateContentItem(itemId, { localization_group: groupId })
+        if (!target?.localization_group) {
+          await updateContentItem(targetId, { localization_group: groupId })
+        }
+        await loadItems()
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : t("admin.content.updateError"),
+        )
+      }
+    },
+    [items, loadItems, t],
+  )
+
+  // D4: Unlink from localization group
+  const handleL10nUnlink = useCallback(
+    async (itemId: string) => {
+      try {
+        await updateContentItem(itemId, { localization_group: null })
+        await loadItems()
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : t("admin.content.updateError"),
+        )
+      }
+    },
+    [loadItems, t],
+  )
+
+  // D5: Bulk action handlers
+  const handleBulkExecute = useCallback(async (action: "publish" | "unpublish" | "delete") => {
+    if (selected.size === 0) return
+    setBulkAction(action)
+    setBulkProcessing(true)
+    try {
+      const ids = Array.from(selected)
+      if (action === "publish") {
+        await bulkPublish({ itemIds: ids, isPublished: true, applyToGroup: bulkApplyToGroup })
+      } else if (action === "unpublish") {
+        await bulkPublish({ itemIds: ids, isPublished: false, applyToGroup: bulkApplyToGroup })
+      } else if (action === "delete") {
+        await bulkDelete({ itemIds: ids, applyToGroup: bulkApplyToGroup })
+      }
+      setSelected(new Set())
+      setBulkAction(null)
+      await loadItems()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin.content.bulkError"),
+      )
+    } finally {
+      setBulkProcessing(false)
+    }
+  }, [selected, bulkApplyToGroup, loadItems, t])
+
   const toggleSort = (field: typeof sortField) => {
     if (sortField === field) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"))
@@ -419,6 +790,23 @@ export function ContentAdminPage() {
       setSortField(field)
       setSortDir("asc")
     }
+  }
+
+  const toggleSelectAll = () => {
+    if (selected.size === filtered.length) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(filtered.map((i) => i.id)))
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
   const SortIcon = ({ field }: { field: typeof sortField }) =>
@@ -435,6 +823,12 @@ export function ContentAdminPage() {
   const inputCls =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
 
+  // Check if any selected items have localization groups
+  const selectedHaveGroups = useMemo(
+    () => Array.from(selected).some((id) => items.find((i) => i.id === id)?.localization_group),
+    [selected, items],
+  )
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       {/* Header */}
@@ -444,7 +838,7 @@ export function ContentAdminPage() {
             {t("admin.content.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {t("admin.content.subtitle", { count: items.length })}
+            {t("admin.content.subtitle", { count: totalCount })}
           </p>
         </div>
         <Button onClick={() => setShowCreate((v) => !v)}>
@@ -525,6 +919,62 @@ export function ContentAdminPage() {
         </select>
       </div>
 
+      {/* D5: Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <span className="text-sm font-medium text-foreground">
+            {t("admin.content.bulkSelected", { count: selected.size })}
+          </span>
+          <div className="flex-1" />
+          {selectedHaveGroups && (
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={bulkApplyToGroup}
+                onChange={(e) => setBulkApplyToGroup(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border"
+              />
+              {t("admin.content.bulkApplyToGroup")}
+            </label>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void handleBulkExecute("publish")}
+            disabled={bulkProcessing}
+          >
+            <Eye className="mr-1 h-3.5 w-3.5" />
+            {t("admin.content.bulkPublish")}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void handleBulkExecute("unpublish")}
+            disabled={bulkProcessing}
+          >
+            <EyeOff className="mr-1 h-3.5 w-3.5" />
+            {t("admin.content.bulkUnpublish")}
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => void handleBulkExecute("delete")}
+            disabled={bulkProcessing}
+          >
+            <Trash2 className="mr-1 h-3.5 w-3.5" />
+            {t("admin.content.bulkDelete")}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelected(new Set())}
+          >
+            {t("admin.content.bulkClear")}
+          </Button>
+          {bulkProcessing && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        </div>
+      )}
+
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
@@ -539,6 +989,15 @@ export function ContentAdminPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
+                {/* D5: Select all checkbox */}
+                <th className="w-10 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.size === filtered.length && filtered.length > 0}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                </th>
                 <th
                   className="cursor-pointer px-4 py-3 font-medium text-muted-foreground hover:text-foreground"
                   onClick={() => toggleSort("title")}
@@ -558,7 +1017,7 @@ export function ContentAdminPage() {
                   {t("admin.content.colLocale")} <SortIcon field="locale" />
                 </th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">
-                  {t("admin.content.colTopics")}
+                  {t("admin.content.colGroup")}
                 </th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">
                   {t("admin.content.colStatus")}
@@ -578,22 +1037,33 @@ export function ContentAdminPage() {
               {filtered.map((item) =>
                 editingId === item.id ? (
                   <tr key={item.id}>
-                    <td colSpan={7} className="p-4">
+                    <td colSpan={8} className="p-4">
                       <ItemForm
                         initial={{
                           id: item.id,
+                          slug: item.slug,
                           locale: item.locale,
                           type: item.type,
                           title: item.title,
                           summary: item.summary ?? "",
+                          body: item.body ?? "",
                           topics: item.topics,
                           metadata: item.metadata,
                           is_published: item.is_published,
+                          reading_time_minutes: item.reading_time_minutes,
+                          duration_seconds: item.duration_seconds,
                         }}
                         mode="edit"
+                        itemId={item.id}
                         saving={saving}
                         onSave={(data) => void handleUpdate(item.id, data)}
                         onCancel={() => setEditingId(null)}
+                      />
+                      {/* D4: Localization group panel */}
+                      <L10nGroupPanel
+                        item={item}
+                        onLink={(targetId) => void handleL10nLink(item.id, targetId)}
+                        onUnlink={() => void handleL10nUnlink(item.id)}
                       />
                     </td>
                   </tr>
@@ -602,12 +1072,21 @@ export function ContentAdminPage() {
                     key={item.id}
                     className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors"
                   >
+                    {/* D5: Row checkbox */}
+                    <td className="px-3 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground">
                         {item.title}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {item.id}
+                        {item.slug}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -621,21 +1100,11 @@ export function ContentAdminPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {item.topics.slice(0, 3).map((tp) => (
-                          <span
-                            key={tp}
-                            className="inline-flex rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
-                          >
-                            {tp}
-                          </span>
-                        ))}
-                        {item.topics.length > 3 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{item.topics.length - 3}
-                          </span>
-                        )}
-                      </div>
+                      {item.localization_group ? (
+                        <Link2 className="h-3.5 w-3.5 text-primary" title={t("admin.content.l10nLinked")} />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <button
@@ -720,7 +1189,7 @@ export function ContentAdminPage() {
         <div className="mt-4 text-xs text-muted-foreground">
           {t("admin.content.showingCount", {
             shown: filtered.length,
-            total: items.length,
+            total: totalCount,
           })}
         </div>
       )}
