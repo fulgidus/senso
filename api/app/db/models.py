@@ -532,7 +532,7 @@ class ContentItem(Base):
 
     __tablename__ = "content_items"
 
-    id: str = Column(String, primary_key=True)  # e.g. "it-emergenza-fondo"
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
     slug: str = Column(String(300), nullable=False, unique=True, index=True)
     locale: str = Column(String(5), nullable=False, index=True)  # "it" | "en"
     type: str = Column(

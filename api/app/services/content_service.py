@@ -148,13 +148,9 @@ class ContentService:
     # ── CUD ────────────────────────────────────────────────────────────────
 
     def create_item(self, data: ContentItemCreate) -> ContentItem:
-        existing = self.get_item(data.id)
-        if existing:
-            raise ValueError(f"Content item '{data.id}' already exists")
         if self.check_slug_exists(data.slug):
             raise ValueError(f"Slug '{data.slug}' already exists")
         item = ContentItem(
-            id=data.id,
             slug=data.slug,
             locale=data.locale,
             type=data.type,

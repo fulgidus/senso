@@ -1,6 +1,5 @@
 [
   {
-    "id": "it-partner-fineco-conto",
     "locale": "it",
     "type": "partner_offer",
     "partner_name": "Fineco Bank",
@@ -12,10 +11,25 @@
     "cta_url": "https://fineco.it",
     "action_type": "funnel",
     "funnel_id": "fineco-conto-2024",
-    "offer_type": "bank_account"
+    "offer_type": "bank_account",
+    "localization_group": "partner-fineco"
   },
   {
-    "id": "it-partner-hype-premium",
+    "locale": "en",
+    "type": "partner_offer",
+    "partner_name": "Fineco Bank",
+    "partner_logo_initial": "F",
+    "title": "Fineco account: zero fees for 12 months",
+    "description": "Integrated current and investment account. No fees for the first year, cards included, access to ETFs and funds with no entry commissions.",
+    "topics": ["bank account", "investing", "ETF", "savings"],
+    "cta_label": "Learn more",
+    "cta_url": "https://fineco.it",
+    "action_type": "funnel",
+    "funnel_id": "fineco-conto-2024",
+    "offer_type": "bank_account",
+    "localization_group": "partner-fineco"
+  },
+  {
     "locale": "it",
     "type": "partner_offer",
     "partner_name": "Hype",
@@ -27,10 +41,25 @@
     "cta_url": "https://hype.it",
     "action_type": "funnel",
     "funnel_id": "hype-premium-2024",
-    "offer_type": "bank_account"
+    "offer_type": "bank_account",
+    "localization_group": "partner-hype"
   },
   {
-    "id": "it-partner-moneyfarm-pac",
+    "locale": "en",
+    "type": "partner_offer",
+    "partner_name": "Hype",
+    "partner_logo_initial": "H",
+    "title": "Hype Premium: hassle-free digital account",
+    "description": "Digital account with cashback on purchases, travel insurance included, and access to a 3% APY savings account for new customers.",
+    "topics": ["digital account", "cashback", "savings", "young adults"],
+    "cta_label": "Activate now",
+    "cta_url": "https://hype.it",
+    "action_type": "funnel",
+    "funnel_id": "hype-premium-2024",
+    "offer_type": "bank_account",
+    "localization_group": "partner-hype"
+  },
+  {
     "locale": "it",
     "type": "partner_offer",
     "partner_name": "Moneyfarm",
@@ -42,10 +71,25 @@
     "cta_url": "https://moneyfarm.com",
     "action_type": "funnel",
     "funnel_id": "moneyfarm-pac-2024",
-    "offer_type": "investment"
+    "offer_type": "investment",
+    "localization_group": "partner-moneyfarm"
   },
   {
-    "id": "it-partner-ing-prestito",
+    "locale": "en",
+    "type": "partner_offer",
+    "partner_name": "Moneyfarm",
+    "partner_logo_initial": "M",
+    "title": "Moneyfarm: start investing from 50/month",
+    "description": "Managed investment plan on diversified ETFs. Personalized portfolio based on your risk profile, with fees from 0.6% per year.",
+    "topics": ["investment plan", "ETF", "investing", "savings", "wealth management"],
+    "cta_label": "Start your plan",
+    "cta_url": "https://moneyfarm.com",
+    "action_type": "funnel",
+    "funnel_id": "moneyfarm-pac-2024",
+    "offer_type": "investment",
+    "localization_group": "partner-moneyfarm"
+  },
+  {
     "locale": "it",
     "type": "partner_offer",
     "partner_name": "ING Italia",
@@ -65,10 +109,33 @@
       "max_months": 84,
       "tan_from": 5.9,
       "taeg_from": 6.1
-    }
+    },
+    "localization_group": "partner-ing"
   },
   {
-    "id": "it-partner-buddybank-conto",
+    "locale": "en",
+    "type": "partner_offer",
+    "partner_name": "ING",
+    "partner_logo_initial": "I",
+    "title": "ING personal loan: up to 30,000 with instant approval",
+    "description": "Personal loan starting at 5.90% APR, instant online response, no processing fees. Amounts from 1,000 to 30,000.",
+    "topics": ["personal loan", "credit", "financing"],
+    "cta_label": "Simulate your loan",
+    "cta_url": "https://ing.it/prestiti",
+    "action_type": "funnel",
+    "funnel_id": "ing-prestito-2024",
+    "offer_type": "loan",
+    "loan_params": {
+      "min_amount": 1000,
+      "max_amount": 30000,
+      "min_months": 12,
+      "max_months": 84,
+      "tan_from": 5.9,
+      "taeg_from": 6.1
+    },
+    "localization_group": "partner-ing"
+  },
+  {
     "locale": "it",
     "type": "partner_offer",
     "partner_name": "buddybank",
@@ -80,6 +147,22 @@
     "cta_url": "https://buddybank.com",
     "action_type": "funnel",
     "funnel_id": "buddybank-conto-2024",
-    "offer_type": "bank_account"
+    "offer_type": "bank_account",
+    "localization_group": "partner-buddybank"
+  },
+  {
+    "locale": "en",
+    "type": "partner_offer",
+    "partner_name": "buddybank",
+    "partner_logo_initial": "B",
+    "title": "buddybank: the account that cares",
+    "description": "100% digital current account by UniCredit. No fees, Mastercard included, 24/7 chat support and free instant transfers.",
+    "topics": ["digital account", "young adults", "bank account", "zero fees"],
+    "cta_label": "Open account",
+    "cta_url": "https://buddybank.com",
+    "action_type": "funnel",
+    "funnel_id": "buddybank-conto-2024",
+    "offer_type": "bank_account",
+    "localization_group": "partner-buddybank"
   }
 ]

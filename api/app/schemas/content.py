@@ -11,9 +11,11 @@ T = TypeVar("T")
 
 
 class ContentItemCreate(BaseModel):
-    """Schema for creating a new content item."""
+    """Schema for creating a new content item.
 
-    id: str = Field(..., min_length=1, max_length=200)
+    ``id`` is auto-generated (UUIDv7) by the database model if not provided.
+    """
+
     slug: str = Field(..., min_length=1, max_length=300)
     locale: str = Field(..., pattern=r"^(it|en)$")
     type: str = Field(..., pattern=r"^(article|video|slide_deck|partner_offer)$")

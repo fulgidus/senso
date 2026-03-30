@@ -89,7 +89,6 @@ function slugify(text: string): string {
 
 function emptyCreate(): ContentItemCreatePayload {
   return {
-    id: "",
     slug: "",
     locale: "it",
     type: "article",
@@ -190,19 +189,6 @@ function ItemForm({ initial, mode, itemId, saving, onSave, onCancel }: ItemFormP
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* ID (only on create) */}
-        <div>
-          <label className={labelCls}>{t("admin.content.fieldId")}</label>
-          <input
-            className={inputCls}
-            value={form.id}
-            onChange={(e) => setForm((f) => ({ ...f, id: e.target.value }))}
-            required
-            disabled={mode === "edit"}
-            placeholder="it-article-budget-101"
-          />
-        </div>
-
         {/* Slug (D1/D2/D3) */}
         <div>
           <label className={labelCls}>{t("admin.content.fieldSlug")}</label>
@@ -1040,7 +1026,6 @@ export function ContentAdminPage() {
                     <td colSpan={8} className="p-4">
                       <ItemForm
                         initial={{
-                          id: item.id,
                           slug: item.slug,
                           locale: item.locale,
                           type: item.type,

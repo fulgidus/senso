@@ -37,7 +37,6 @@ export interface PaginatedAdminResponse {
 }
 
 export interface ContentItemCreatePayload {
-  id: string
   slug: string
   locale: string
   type: string

@@ -173,12 +173,27 @@ def _tokenize(text: str) -> list[str]:
 
 
 def _load_catalog_from_json() -> list[dict[str, Any]]:
-    """Load content items from static JSON catalog files (original loader)."""
+    """Load content items from static JSON catalog files (original loader).
+
+    Seed JSONs no longer carry ``id`` fields (IDs are generated at DB
+    insertion time).  When the JSON fallback is used (DB empty / tests),
+    we synthesise a stable id from ``slug`` or ``title`` so that
+    downstream code that expects ``item["id"]`` keeps working.
+    """
+    from slugify import slugify as _slugify  # noqa: PLC0415
+
     items: list[dict[str, Any]] = []
     for fname in ("articles.json", "videos.json", "slides.json", "partners.json"):
         path = _CONTENT_DIR / fname
         if path.exists():
             raw = json.loads(path.read_text(encoding="utf-8"))
+            for entry in raw:
+                if "id" not in entry:
+                    entry["id"] = (
+                        entry.get("slug")
+                        or _slugify(entry.get("title", ""), max_length=80)
+                        or f"auto-{len(items)}"
+                    )
             items.extend(raw)
     return items
 

@@ -1,5 +1,6 @@
 """Integration tests for admin content CRUD API endpoints."""
 
+import re
 import pytest
 from fastapi.testclient import TestClient
 
@@ -7,6 +8,10 @@ from app.db.models import ContentItem, User
 from app.db.session import SessionLocal
 from app.core.security import hash_password
 from slugify import slugify
+
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE
+)
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -109,7 +114,6 @@ def test_list_items_filter_by_locale(client):
 def test_create_item(client):
     headers = _admin_headers(client)
     body = {
-        "id": "new-test-item",
         "slug": "nuovo-articolo",
         "locale": "it",
         "type": "article",
@@ -121,7 +125,7 @@ def test_create_item(client):
     resp = client.post("/admin/content/items", headers=headers, json=body)
     assert resp.status_code == 201
     data = resp.json()
-    assert data["id"] == "new-test-item"
+    assert _UUID_RE.match(data["id"]), f"Expected UUID id, got: {data['id']}"
     assert data["slug"] == "nuovo-articolo"
     assert data["locale"] == "it"
     assert data["type"] == "article"
@@ -129,15 +133,14 @@ def test_create_item(client):
     assert data["metadata"]["url"] == "https://example.com/new"
 
 
-def test_create_duplicate_item_409(client):
+def test_create_duplicate_slug_409(client):
     headers = _admin_headers(client)
     _seed_item("existing-item")
     body = {
-        "id": "existing-item",
-        "slug": "existing-item-slug",
+        "slug": "existing-item",  # same slug as seeded item → 409
         "locale": "it",
         "type": "article",
-        "title": "Duplicate",
+        "title": "Duplicate slug",
     }
     resp = client.post("/admin/content/items", headers=headers, json=body)
     assert resp.status_code == 409

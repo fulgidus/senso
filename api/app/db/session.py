@@ -337,11 +337,13 @@ def _seed_content_from_json() -> None:
 
     Skips if the table already contains any rows.
     Merges type-specific fields into the metadata_ JSONB column.
-    Generates slugs from titles via python-slugify.
+    Generates UUIDv7 IDs and slugs from titles via python-slugify.
+    Resolves ``localization_group`` string keys into shared UUIDv7 groups.
     """
     import json  # noqa: PLC0415
     from pathlib import Path  # noqa: PLC0415
 
+    import uuid_utils as uuid  # noqa: PLC0415
     from slugify import slugify  # noqa: PLC0415
     from app.db.models import ContentItem  # noqa: PLC0415
 
@@ -356,7 +358,14 @@ def _seed_content_from_json() -> None:
 
         content_dir = Path(__file__).resolve().parent.parent / "content"
         # Common top-level keys shared by all content types
-        shared_keys = {"id", "locale", "type", "title", "summary", "topics"}
+        shared_keys = {
+            "locale",
+            "type",
+            "title",
+            "summary",
+            "topics",
+            "localization_group",
+        }
 
         catalog_files = {
             "articles.json": "article",
@@ -364,6 +373,9 @@ def _seed_content_from_json() -> None:
             "slides.json": "slide_deck",
             "partners.json": "partner_offer",
         }
+
+        # Map localization_group string keys -> UUIDv7 (resolved lazily)
+        l10n_group_map: dict[str, str] = {}
 
         used_slugs: set[str] = set()
         items_to_add: list[ContentItem] = []
@@ -382,7 +394,7 @@ def _seed_content_from_json() -> None:
                 base_slug = (
                     slugify(title, max_length=280)
                     if title
-                    else slugify(entry["id"], max_length=280)
+                    else f"item-{len(items_to_add)}"
                 )
                 slug = base_slug
                 counter = 2
@@ -393,11 +405,18 @@ def _seed_content_from_json() -> None:
 
                 # Extract reading_time and duration from metadata
                 reading_time = metadata.get("estimated_read_minutes")
-                # slide_count can be used as a rough proxy but is not duration
                 duration = None
 
+                # Resolve localization_group key -> UUIDv7
+                l10n_key = entry.get("localization_group")
+                l10n_group = None
+                if l10n_key:
+                    if l10n_key not in l10n_group_map:
+                        l10n_group_map[l10n_key] = str(uuid.uuid7())
+                    l10n_group = l10n_group_map[l10n_key]
+
                 item = ContentItem(
-                    id=entry["id"],
+                    id=str(uuid.uuid7()),
                     slug=slug,
                     locale=entry.get("locale", "it"),
                     type=entry.get("type", expected_type),
@@ -406,6 +425,7 @@ def _seed_content_from_json() -> None:
                     topics=entry.get("topics", []),
                     metadata_=metadata,
                     is_published=True,
+                    localization_group=l10n_group,
                     reading_time_minutes=int(reading_time) if reading_time else None,
                 )
                 items_to_add.append(item)

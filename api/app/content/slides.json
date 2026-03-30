@@ -1,56 +1,74 @@
 [
   {
-    "id": "it-slide-budget-base",
     "locale": "it",
     "type": "slide_deck",
     "title": "Come costruire un budget",
     "summary": "5 slide per capire entrate, uscite, margine e il primo passo verso il risparmio consapevole.",
     "topics": ["budget", "spese", "risparmio", "principianti"],
-    "slide_count": 5
+    "slide_count": 5,
+    "localization_group": "slide-budget"
   },
   {
-    "id": "it-slide-tan-taeg",
-    "locale": "it",
-    "type": "slide_deck",
-    "title": "TAN e TAEG: capire il costo reale di un prestito",
-    "summary": "6 slide per confrontare prestiti in modo corretto, con esempi numerici su un prestito da 5.000€.",
-    "topics": ["prestito", "TAN", "TAEG", "credito", "tasso"],
-    "slide_count": 6
-  },
-  {
-    "id": "it-slide-fondo-emergenza",
-    "locale": "it",
-    "type": "slide_deck",
-    "title": "Il fondo di emergenza",
-    "summary": "4 slide su perché costruirlo, quanto accantonare e dove tenerlo.",
-    "topics": ["fondo emergenza", "risparmio", "sicurezza finanziaria"],
-    "slide_count": 4
-  },
-  {
-    "id": "it-slide-etf-intro",
-    "locale": "it",
-    "type": "slide_deck",
-    "title": "ETF: investire in modo semplice",
-    "summary": "6 slide su cosa sono gli ETF, come funziona un PAC e perché i costi contano.",
-    "topics": ["ETF", "PAC", "investimento", "borsa"],
-    "slide_count": 6
-  },
-  {
-    "id": "en-slide-budget-basics",
     "locale": "en",
     "type": "slide_deck",
     "title": "How to build a budget",
     "summary": "5 slides covering income, expenses, spending margin, and your first saving target.",
     "topics": ["budget", "spending", "savings", "beginners"],
-    "slide_count": 5
+    "slide_count": 5,
+    "localization_group": "slide-budget"
   },
   {
-    "id": "en-slide-compound-interest",
+    "locale": "it",
+    "type": "slide_deck",
+    "title": "TAN e TAEG: capire il costo reale di un prestito",
+    "summary": "6 slide per confrontare prestiti in modo corretto, con esempi numerici su un prestito da 5.000€.",
+    "topics": ["prestito", "TAN", "TAEG", "credito", "tasso"],
+    "slide_count": 6,
+    "localization_group": "slide-apr"
+  },
+  {
     "locale": "en",
     "type": "slide_deck",
-    "title": "Compound interest: the most powerful force in finance",
-    "summary": "5 slides showing how compound interest works for savers and against borrowers, with charts.",
-    "topics": ["compound interest", "savings", "debt", "investing"],
-    "slide_count": 5
+    "title": "APR demystified: understanding the real cost of a loan",
+    "summary": "6 slides to compare loans correctly, with worked examples on a 5,000 personal loan.",
+    "topics": ["loan", "APR", "credit", "interest rate"],
+    "slide_count": 6,
+    "localization_group": "slide-apr"
+  },
+  {
+    "locale": "it",
+    "type": "slide_deck",
+    "title": "Il fondo di emergenza",
+    "summary": "4 slide su perché costruirlo, quanto accantonare e dove tenerlo.",
+    "topics": ["fondo emergenza", "risparmio", "sicurezza finanziaria"],
+    "slide_count": 4,
+    "localization_group": "slide-emergency-fund"
+  },
+  {
+    "locale": "en",
+    "type": "slide_deck",
+    "title": "The emergency fund",
+    "summary": "4 slides on why you need one, how much to save, and where to keep it.",
+    "topics": ["emergency fund", "savings", "financial security"],
+    "slide_count": 4,
+    "localization_group": "slide-emergency-fund"
+  },
+  {
+    "locale": "it",
+    "type": "slide_deck",
+    "title": "ETF: investire in modo semplice",
+    "summary": "6 slide su cosa sono gli ETF, come funziona un PAC e perché i costi contano.",
+    "topics": ["ETF", "PAC", "investimento", "borsa"],
+    "slide_count": 6,
+    "localization_group": "slide-etf"
+  },
+  {
+    "locale": "en",
+    "type": "slide_deck",
+    "title": "ETFs: simple investing for beginners",
+    "summary": "6 slides on what ETFs are, how a regular investment plan works, and why fees matter.",
+    "topics": ["ETF", "index funds", "investing", "stock market"],
+    "slide_count": 6,
+    "localization_group": "slide-etf"
   }
 ]
