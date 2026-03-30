@@ -16,7 +16,11 @@
 import { useEffect, useState } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { fetchContentItemBySlug, type ContentItemDTO } from "./contentApi"
+import {
+  fetchContentItemBySlug,
+  fetchLocalizationSiblings,
+  type ContentItemDTO,
+} from "./contentApi"
 import { MarpSlideViewer } from "../coaching/MarpSlideViewer"
 
 // ── Type badge colours (same as browse page) ─────────────────────────────────
@@ -51,13 +55,24 @@ export function ContentDetailPage() {
   const [item, setItem] = useState<ContentItemDTO | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // E2: Localization siblings for language switcher
+  const [siblings, setSiblings] = useState<ContentItemDTO[]>([])
 
   useEffect(() => {
     if (!slug) return
     setLoading(true)
     setError(null)
+    setSiblings([])
     fetchContentItemBySlug(slug)
-      .then(setItem)
+      .then((fetchedItem) => {
+        setItem(fetchedItem)
+        // E2: Fetch localization siblings if item is in a group
+        if (fetchedItem.localization_group) {
+          fetchLocalizationSiblings(fetchedItem.id)
+            .then(setSiblings)
+            .catch(() => setSiblings([]))
+        }
+      })
       .catch(() => {
         setError("not_found")
         // B3: Redirect to /learn after a brief delay so the user sees the toast
@@ -129,6 +144,27 @@ export function ContentDetailPage() {
             </span>
           )}
         </div>
+
+        {/* E2: Language switcher for localization siblings */}
+        {siblings.length > 0 && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              {t("content.availableIn")}:
+            </span>
+            <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-bold uppercase text-primary">
+              {item.locale}
+            </span>
+            {siblings.map((sib) => (
+              <Link
+                key={sib.id}
+                to={`/learn/${encodeURIComponent(sib.slug)}`}
+                className="rounded bg-muted px-2 py-0.5 text-xs font-medium uppercase text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                {sib.locale}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Title */}
         <h1 className="mb-4 text-3xl font-bold text-foreground">

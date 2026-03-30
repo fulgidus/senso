@@ -358,6 +358,41 @@ export function ContentBrowsePage() {
     }
   }
 
+  // E1: Dedup items by localization_group — show one card per group,
+  // prefer the card matching the user's preferred locale (contentLocale or uiLocale).
+  // Cards not in a group are shown as-is with only their own locale badge.
+  const dedupedItems = useMemo(() => {
+    const preferredLocale = contentLocale !== "all" ? contentLocale : uiLocale
+    const groups = new Map<string, ContentItemDTO[]>()
+    const standalone: ContentItemDTO[] = []
+
+    for (const item of items) {
+      if (item.localization_group) {
+        const group = groups.get(item.localization_group) || []
+        group.push(item)
+        groups.set(item.localization_group, group)
+      } else {
+        standalone.push(item)
+      }
+    }
+
+    const result: { item: ContentItemDTO; availableLocales: string[] }[] = []
+
+    for (const [, groupItems] of groups) {
+      const locales = groupItems.map((i) => i.locale).sort()
+      // Pick the item matching the preferred locale, or the first one
+      const preferred =
+        groupItems.find((i) => i.locale === preferredLocale) ?? groupItems[0]
+      result.push({ item: preferred, availableLocales: locales })
+    }
+
+    for (const item of standalone) {
+      result.push({ item, availableLocales: [item.locale] })
+    }
+
+    return result
+  }, [items, contentLocale, uiLocale])
+
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-background">
       {/* Header */}
@@ -529,8 +564,14 @@ export function ContentBrowsePage() {
 
         {!loading && !error && items.length > 0 && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <ContentCard key={item.id} item={item} onTagClick={handleTagClick} activeTags={urlTags} />
+            {dedupedItems.map(({ item, availableLocales }) => (
+              <ContentCard
+                key={item.id}
+                item={item}
+                onTagClick={handleTagClick}
+                activeTags={urlTags}
+                availableLocales={availableLocales}
+              />
             ))}
           </div>
         )}
@@ -541,7 +582,12 @@ export function ContentBrowsePage() {
 
 // ── Content card ─────────────────────────────────────────────────────────────
 
-function ContentCard({ item, onTagClick, activeTags }: { item: ContentItemDTO; onTagClick: (tag: string) => void; activeTags: string[] }) {
+function ContentCard({ item, onTagClick, activeTags, availableLocales }: {
+  item: ContentItemDTO;
+  onTagClick: (tag: string) => void;
+  activeTags: string[];
+  availableLocales: string[];
+}) {
   const { t } = useTranslation()
   const badge = TYPE_BADGE[item.type] || TYPE_BADGE.article
   const icon = TYPE_ICON[item.type] || "📄"
@@ -584,9 +630,21 @@ function ContentCard({ item, onTagClick, activeTags }: { item: ContentItemDTO; o
         {metaInfo && (
           <span className="text-xs text-muted-foreground">{metaInfo}</span>
         )}
-        <span className="ml-auto rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
-          {item.locale}
-        </span>
+        {/* E1: Locale badges — show all available locales for the group */}
+        <div className="ml-auto flex gap-1">
+          {availableLocales.map((loc) => (
+            <span
+              key={loc}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase ${
+                loc === item.locale
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {loc}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Title — links to slug-based detail page */}

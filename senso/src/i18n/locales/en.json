@@ -416,6 +416,7 @@
         "clearTags": "Clear filters",
         "notFoundRedirect": "Content not found. Returning to list.",
         "discussWithCoach": "Discuss with coach",
+        "availableIn": "Available in",
         "durationMinutes": "{{minutes}} min",
         "sortLabel": "Sort by",
         "sortNewest": "Newest",
