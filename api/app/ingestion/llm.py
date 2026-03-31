@@ -5,10 +5,10 @@ Model routing is driven by api/app/config.json → llm section.
 API keys are read from env vars per-provider (see LLMConfig.api_key_for).
 
 Public API:
-    LLMClient.complete(prompt, system, json_mode, response_schema, timeout, route)
-    LLMClient.vision(prompt, system, image_bytes, json_mode, response_schema, timeout, route)
+    LLMClient.complete(prompt, system, json_mode, response_schema, timeout, route, strict_mode)
+    LLMClient.vision(prompt, system, image_bytes, json_mode, response_schema, timeout, route, strict_mode)
     LLMClient.complete_with_tools(prompt, system, tools, tool_executor,
-                                  response_schema, timeout, route)
+                                  response_schema, timeout, route, strict_mode)
 
 `route` is a "class:type:size" string e.g. "text:generation:md".
 Defaults:
@@ -19,6 +19,12 @@ Defaults:
 `response_schema`: when provided (a JSON Schema dict), triggers OpenAI structured
 outputs (`response_format={"type":"json_schema",...}`) instead of the loose
 `json_object` mode.  Gemini providers fall back to `json_object` equivalent.
+
+`strict_mode`: when True, enforces LLM no-data-retention:
+    - Excludes OpenAI from the provider chain entirely (no ZDR guarantee)
+    - Injects `openai-beta: no-store` header on direct OpenAI calls (standard mode)
+    - Injects ZDR body `{"provider": {"zdr": True}}` for OpenRouter calls
+    - Gemini needs no extra header (excluded from training by API ToS)
 
 `complete_with_tools`: performs at most ONE tool-call round-trip.
   1. First call with tools registered; if the model requests a tool call,
@@ -82,6 +88,7 @@ class LLMClient:
         response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "text:generation:sm",
+        strict_mode: bool = False,
     ) -> str:
         """
         Text completion. Falls back through providers in priority order.
@@ -89,6 +96,8 @@ class LLMClient:
         `route` selects the model: "class:type:size" e.g. "text:generation:md".
         `response_schema`: when provided, uses OpenAI structured outputs instead of
         json_object mode. `json_mode` is ignored when response_schema is set.
+        `strict_mode`: when True, excludes OpenAI from the provider chain and
+        enables ZDR (zero data retention) on OpenRouter calls.
         """
         cls, typ, size = _parse_route(route)
         model_route = self._cfg.route(cls, typ, size)
@@ -101,6 +110,8 @@ class LLMClient:
         # 1. preferred provider from route config
         # 2. remaining providers in priority order
         ordered = self._provider_chain(model_route.provider)
+        if strict_mode:
+            ordered = [p for p in ordered if p != "openai"]
 
         for pname in ordered:
             api_key = self._cfg.api_key_for(pname)
@@ -135,6 +146,7 @@ class LLMClient:
                     json_mode=json_mode,
                     response_schema=response_schema,
                     timeout=effective_timeout,
+                    strict_mode=strict_mode,
                 )
                 trace.provider_used = pname
                 trace.model_used = model
@@ -162,6 +174,7 @@ class LLMClient:
         response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "vision:ocr:sm",
+        strict_mode: bool = False,
     ) -> str:
         """
         Vision completion. Falls back through providers in priority order.
@@ -169,6 +182,8 @@ class LLMClient:
         `route` selects the model: "class:type:size" e.g. "vision:ocr:md".
         `response_schema`: when provided, uses OpenAI structured outputs instead of
         json_object mode. `json_mode` is ignored when response_schema is set.
+        `strict_mode`: when True, excludes OpenAI from the provider chain and
+        enables ZDR (zero data retention) on OpenRouter calls.
         """
         cls, typ, size = _parse_route(route)
         model_route = self._cfg.route(cls, typ, size)
@@ -178,6 +193,8 @@ class LLMClient:
         t0 = time.monotonic()
 
         ordered = self._provider_chain(model_route.provider)
+        if strict_mode:
+            ordered = [p for p in ordered if p != "openai"]
 
         for pname in ordered:
             api_key = self._cfg.api_key_for(pname)
@@ -204,6 +221,7 @@ class LLMClient:
                     json_mode=json_mode,
                     response_schema=response_schema,
                     timeout=effective_timeout,
+                    strict_mode=strict_mode,
                 )
                 trace.provider_used = pname
                 trace.model_used = model
@@ -228,6 +246,7 @@ class LLMClient:
         response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "text:generation:md",
+        strict_mode: bool = False,
     ) -> str:
         """
         Text completion with at most one tool-call round-trip.
@@ -255,6 +274,8 @@ class LLMClient:
             response_schema: JSON Schema for the final structured output.
             timeout: Per-provider timeout in seconds.
             route: Model routing key.
+            strict_mode: when True, excludes OpenAI from the provider chain and
+                         enables ZDR (zero data retention) on OpenRouter calls.
         """
         cls, typ, size = _parse_route(route)
         model_route = self._cfg.route(cls, typ, size)
@@ -264,6 +285,8 @@ class LLMClient:
         t0 = time.monotonic()
 
         ordered = self._provider_chain(model_route.provider)
+        if strict_mode:
+            ordered = [p for p in ordered if p != "openai"]
 
         for pname in ordered:
             api_key = self._cfg.api_key_for(pname)
@@ -337,6 +360,7 @@ class LLMClient:
                     tool_executor=tool_executor,
                     response_schema=response_schema,
                     timeout=effective_timeout,
+                    strict_mode=strict_mode,
                 )
                 trace.provider_used = pname
                 trace.model_used = model
@@ -392,6 +416,7 @@ class LLMClient:
         json_mode: bool,
         response_schema: dict | None,
         timeout: float,
+        strict_mode: bool = False,
     ) -> tuple[str, dict | None]:
         if provider == "openrouter":
             return self._openai_compat_complete(
@@ -403,6 +428,7 @@ class LLMClient:
                 json_mode=json_mode,
                 response_schema=response_schema,
                 timeout=timeout,
+                strict_mode=strict_mode,
             )
         if provider == "gemini":
             return self._gemini_complete(
@@ -423,6 +449,7 @@ class LLMClient:
                 json_mode=json_mode,
                 response_schema=response_schema,
                 timeout=timeout,
+                strict_mode=strict_mode,
             )
         raise LLMError(f"Unknown provider: {provider!r}")
 
@@ -438,6 +465,7 @@ class LLMClient:
         json_mode: bool,
         response_schema: dict | None,
         timeout: float,
+        strict_mode: bool = False,
     ) -> str:
         if provider == "openrouter":
             return self._openai_compat_vision(
@@ -450,6 +478,7 @@ class LLMClient:
                 json_mode=json_mode,
                 response_schema=response_schema,
                 timeout=timeout,
+                strict_mode=strict_mode,
             )
         if provider == "gemini":
             return self._gemini_vision(
@@ -472,6 +501,7 @@ class LLMClient:
                 json_mode=json_mode,
                 response_schema=response_schema,
                 timeout=timeout,
+                strict_mode=strict_mode,
             )
         raise LLMError(f"Unknown provider for vision: {provider!r}")
 
@@ -487,12 +517,16 @@ class LLMClient:
         json_mode: bool,
         response_schema: dict | None,
         timeout: float,
+        strict_mode: bool = False,
     ) -> tuple[str, dict | None]:
         from openai import OpenAI
 
         kwargs_init: dict[str, Any] = {"api_key": api_key, "timeout": timeout}
         if base_url:
             kwargs_init["base_url"] = base_url
+        # Inject no-retention header for direct OpenAI calls (not OpenRouter)
+        if base_url is None:
+            kwargs_init["default_headers"] = {"openai-beta": "no-store"}
         client = OpenAI(**kwargs_init)
 
         messages: list[dict[str, Any]] = []
@@ -500,6 +534,9 @@ class LLMClient:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         call_kwargs: dict[str, Any] = {"model": model, "messages": messages}
+        # Strict privacy mode: inject ZDR body param for OpenRouter
+        if strict_mode and base_url and "openrouter" in base_url:
+            call_kwargs["extra_body"] = {"provider": {"zdr": True}}
         if response_schema is not None:
             # Structured outputs — schema travels in the API call, not in the prompt
             schema_name = (
@@ -536,6 +573,7 @@ class LLMClient:
         tool_executor: Callable[[str, dict], Any] | None,
         response_schema: dict | None,
         timeout: float,
+        strict_mode: bool = False,
     ) -> tuple[str, dict | None]:
         """
         OpenAI tool-call round-trip (one hop max).
@@ -550,6 +588,9 @@ class LLMClient:
         kwargs_init: dict[str, Any] = {"api_key": api_key, "timeout": timeout}
         if base_url:
             kwargs_init["base_url"] = base_url
+        # Inject no-retention header for direct OpenAI calls (not OpenRouter)
+        if base_url is None:
+            kwargs_init["default_headers"] = {"openai-beta": "no-store"}
         client = OpenAI(**kwargs_init)
 
         messages: list[dict[str, Any]] = []
@@ -562,6 +603,9 @@ class LLMClient:
         if tools:
             call_kwargs_1["tools"] = tools
             call_kwargs_1["tool_choice"] = "auto"
+        # Strict privacy mode: inject ZDR body param for OpenRouter
+        if strict_mode and base_url and "openrouter" in base_url:
+            call_kwargs_1["extra_body"] = {"provider": {"zdr": True}}
 
         resp1 = client.chat.completions.create(**call_kwargs_1)
         choice1 = resp1.choices[0]
@@ -632,6 +676,9 @@ class LLMClient:
                     "strict": True,
                 },
             }
+        # Strict privacy mode: inject ZDR body param for OpenRouter in Step 3 as well
+        if strict_mode and base_url and "openrouter" in base_url:
+            call_kwargs_2["extra_body"] = {"provider": {"zdr": True}}
 
         resp2 = client.chat.completions.create(**call_kwargs_2)
         if resp2.usage:
@@ -661,6 +708,7 @@ class LLMClient:
         json_mode: bool,
         response_schema: dict | None,
         timeout: float,
+        strict_mode: bool = False,
     ) -> str:
         import base64
 
@@ -669,6 +717,9 @@ class LLMClient:
         kwargs_init: dict[str, Any] = {"api_key": api_key, "timeout": timeout}
         if base_url:
             kwargs_init["base_url"] = base_url
+        # Inject no-retention header for direct OpenAI calls (not OpenRouter)
+        if base_url is None:
+            kwargs_init["default_headers"] = {"openai-beta": "no-store"}
         client = OpenAI(**kwargs_init)
 
         b64 = base64.b64encode(image_bytes).decode()
@@ -688,6 +739,9 @@ class LLMClient:
             }
         )
         call_kwargs: dict[str, Any] = {"model": model, "messages": messages}
+        # Strict privacy mode: inject ZDR body param for OpenRouter
+        if strict_mode and base_url and "openrouter" in base_url:
+            call_kwargs["extra_body"] = {"provider": {"zdr": True}}
         if response_schema is not None:
             schema_name = (
                 response_schema.get("$id") or response_schema.get("title") or "response"
