@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 10-03-PLAN.md
-last_updated: "2026-03-31T14:10:31.453Z"
+stopped_at: Completed 10-04 (all Phase 10 plans complete)
+last_updated: "2026-03-31T14:10:42.716Z"
 progress:
   total_phases: 10
   completed_phases: 10
@@ -154,6 +154,9 @@ Recent decisions affecting current work:
 - [Phase 09]: onUnreadCountChange callback added to NotificationPanel so bell badge updates immediately on mark-read without waiting for next 30s poll
 - [Phase 10]: violation_count and banned_until already in Round 12 — Round 13 adds only 3 new Phase 10 columns to avoid duplicate column errors
 - [Phase 10]: server_wrap_user_key() uses lazy import of get_settings() to prevent circular import at module load time
+- [Phase 10]: Privacy section inserted before App info in Settings — keeps transparency/privacy features grouped logically before meta-info
+- [Phase 10]: ttsNoticeDismissed persisted to sessionStorage — resets per browser session so user is reminded after each login
+- [Phase 10]: Public /about uses same PublicShell + State 1b pattern as /learn — no new infrastructure needed
 
 ### Pending Todos
 
@@ -171,6 +174,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T14:10:18.457Z
-Stopped at: Completed 10-03-PLAN.md
+Last session: 2026-03-31T14:10:42.713Z
+Stopped at: Completed 10-04 (all Phase 10 plans complete)
 Resume file: None
