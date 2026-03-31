@@ -18,7 +18,8 @@
         "userMenuLabel": "User menu",
         "languageMenuLabel": "Select language",
         "languageCode": "en",
-        "languageFullName": "English"
+        "languageFullName": "English",
+        "about": "About"
     },
     "avatar": {
         "ariaLabel": "Avatar of {{name}}"
@@ -288,7 +289,9 @@
         "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)",
         "restoreToast": "Restored last conversation",
         "streamInterrupted": "Reply interrupted. Check your connection and try again.",
-        "personaPickerTitle": "Choose your coach"
+        "personaPickerTitle": "Choose your coach",
+        "privacyBadge": "Privacy mode",
+        "ttsDisabledStrict": "Privacy mode active — voice features require AI providers that cannot currently guarantee no data retention. Disable Privacy mode in Settings to re-enable voice."
     },
     "calculator": {
         "amount": "Amount",
@@ -410,7 +413,40 @@
             "masculine": "Are you sure you want to log out?",
             "feminine": "Are you sure you want to log out?",
             "neutral": "Are you sure you want to log out?"
-        }
+        },
+        "privacyTitle": "Privacy",
+        "privacyDescription": "Privacy mode restricts AI to providers with a contractual guarantee of no data use for model training. Voice features (ElevenLabs) are disabled.",
+        "strictPrivacyMode": "Privacy mode",
+        "strictPrivacyModeHint": "Limit AI to verified providers. Disables ElevenLabs voice.",
+        "strictPrivacyModeActive": "Privacy mode active. Voice features are disabled.",
+        "strictPrivacyLoadError": "Unable to load privacy preferences. Please try again.",
+        "aboutTitle": "About & transparency",
+        "aboutHint": "Learn how S.E.N.S.O. works, what we store, and how we use AI.",
+        "aboutCta": "Read how it works"
+    },
+    "about": {
+        "pageTitle": "How S.E.N.S.O. works",
+        "pageSubtitle": "Transparency, data, and artificial intelligence — explained simply.",
+        "whatTitle": "What is S.E.N.S.O.?",
+        "whatBody": "S.E.N.S.O. is an educational assistant to help you make more informed financial decisions. It is not a financial advisor.",
+        "howTitle": "How it works",
+        "howStep1": "Upload your financial documents (bank statements, payslips)",
+        "howStep2": "The system builds your personal financial profile",
+        "howStep3": "Ask a question — including by voice",
+        "howStep4": "Get an answer based on your real numbers",
+        "howStep5": "Explore educational resources and concrete actions",
+        "dataTitle": "What we store",
+        "dataTier1": "Your documents and conversations — encrypted, accessible only to you",
+        "dataTier2": "Aggregated usage data (spending categories, statistics) — used to improve the service",
+        "dataTier3": "Your identifying data (name, email) — stored encrypted",
+        "aiTitle": "How we use artificial intelligence",
+        "aiBody": "We use AI technology to analyse your documents and generate personalised responses. We do not share your data with AI providers for model training. You can enable Privacy mode in Settings to restrict AI to providers with a contractual guarantee.",
+        "aiFootnote": "In future versions, we plan to introduce retrieval-augmented generation (RAG) techniques to ensure even more secure and user-isolated processing.",
+        "safetyTitle": "Safety & limitations",
+        "safetyBody": "The coach does not provide investment advice, does not manage money, and does not know financial markets. It is an educator, not a broker.",
+        "safetyRetention": "We ask AI providers not to use your data to train their models. Some providers guarantee this contractually.",
+        "legalTitle": "Legal notice",
+        "legalBody": "S.E.N.S.O. is an educational tool. It does not provide professional financial, tax, or legal advice. Financial decisions are the sole responsibility of the user."
     },
     "content": {
         "browseTitle": "Learn",

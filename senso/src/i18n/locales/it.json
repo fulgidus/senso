@@ -18,7 +18,8 @@
         "userMenuLabel": "Menu utente",
         "languageMenuLabel": "Seleziona lingua",
         "languageCode": "it",
-        "languageFullName": "Italiano"
+        "languageFullName": "Italiano",
+        "about": "Informazioni"
     },
     "avatar": {
         "ariaLabel": "Avatar di {{name}}"
@@ -288,7 +289,9 @@
         "ttsFallbackActive": "Audio via sintesi vocale del browser (ElevenLabs non disponibile)",
         "restoreToast": "Conversazione precedente ripristinata",
         "streamInterrupted": "Risposta interrotta. Controlla la connessione e riprova.",
-        "personaPickerTitle": "Scegli il tuo coach"
+        "personaPickerTitle": "Scegli il tuo coach",
+        "privacyBadge": "Modalità privacy",
+        "ttsDisabledStrict": "Modalità privacy attiva — le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce."
     },
     "calculator": {
         "amount": "Importo",
@@ -410,7 +413,40 @@
             "masculine": "Sei sicuro di voler uscire?",
             "feminine": "Sei sicura di voler uscire?",
             "neutral": "Sei sicurə di voler uscire?"
-        }
+        },
+        "privacyTitle": "Privacy",
+        "privacyDescription": "La Modalità privacy restringe l'AI ai soli fornitori con garanzia di non utilizzo dei dati per l'addestramento. Le funzionalità vocali (ElevenLabs) vengono disabilitate.",
+        "strictPrivacyMode": "Modalità privacy",
+        "strictPrivacyModeHint": "Limita l'AI ai fornitori verificati. Disabilita la voce ElevenLabs.",
+        "strictPrivacyModeActive": "Modalità privacy attiva. Le funzionalità vocali sono disabilitate.",
+        "strictPrivacyLoadError": "Impossibile caricare le preferenze privacy. Riprova.",
+        "aboutTitle": "Informazioni e trasparenza",
+        "aboutHint": "Scopri come funziona S.E.N.S.O., cosa conserviamo e come usiamo l'AI.",
+        "aboutCta": "Leggi come funziona"
+    },
+    "about": {
+        "pageTitle": "Come funziona S.E.N.S.O.",
+        "pageSubtitle": "Trasparenza, dati e intelligenza artificiale — spiegati semplicemente.",
+        "whatTitle": "Cos'è S.E.N.S.O.?",
+        "whatBody": "S.E.N.S.O. è un assistente educativo per aiutarti a prendere decisioni finanziarie più consapevoli. Non è un consulente finanziario.",
+        "howTitle": "Come funziona",
+        "howStep1": "Carica i tuoi documenti finanziari (estratti conto, buste paga)",
+        "howStep2": "Il sistema costruisce il tuo profilo finanziario personale",
+        "howStep3": "Fai una domanda — anche in voce",
+        "howStep4": "Ricevi una risposta basata sui tuoi numeri reali",
+        "howStep5": "Esplora risorse educative e azioni concrete",
+        "dataTitle": "Cosa conserviamo",
+        "dataTier1": "I tuoi documenti e le tue conversazioni — conservati in modo cifrato, accessibili solo a te",
+        "dataTier2": "I dati di utilizzo aggregati (categorie di spesa, statistiche) — usati per migliorare il servizio",
+        "dataTier3": "I tuoi dati identificativi (nome, email) — conservati in modo cifrato",
+        "aiTitle": "Come usiamo l'intelligenza artificiale",
+        "aiBody": "Usiamo tecnologia AI per analizzare i tuoi documenti e generare risposte personalizzate. Non condividiamo i tuoi dati con i fornitori AI per l'addestramento dei modelli. Puoi attivare la Modalità privacy nelle Impostazioni per limitare l'AI solo ai fornitori con garanzia contrattuale.",
+        "aiFootnote": "Nelle versioni future, prevediamo di introdurre tecniche di recupero intelligente (RAG) per garantire un'elaborazione ancora più sicura e isolata per utente.",
+        "safetyTitle": "Sicurezza e limiti",
+        "safetyBody": "Il coach non fornisce consigli di investimento, non gestisce denaro e non conosce i mercati finanziari. È un educatore, non un broker.",
+        "safetyRetention": "Chiediamo ai fornitori AI di non usare i tuoi dati per addestrare i propri modelli. Alcuni fornitori lo garantiscono contrattualmente.",
+        "legalTitle": "Avviso legale",
+        "legalBody": "S.E.N.S.O. è uno strumento educativo. Non fornisce consulenza finanziaria professionale, fiscale o legale. Le decisioni finanziarie sono di esclusiva responsabilità dell'utente."
     },
     "content": {
         "browseTitle": "Impara",

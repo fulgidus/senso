@@ -29,6 +29,7 @@ type RawUser = {
   voice_gender?: string | null
   voice_auto_listen?: boolean | null
   default_persona_id?: string | null
+  strict_privacy_mode?: boolean | null
 }
 
 function parseUser(raw: RawUser): User {
@@ -41,6 +42,7 @@ function parseUser(raw: RawUser): User {
     voiceGender: (raw.voice_gender as VoiceGender | null) ?? "indifferent",
     voiceAutoListen: raw.voice_auto_listen ?? false,
     defaultPersonaId: raw.default_persona_id ?? "mentore-saggio",
+    strictPrivacyMode: raw.strict_privacy_mode ?? false,
   }
 }
 
@@ -153,6 +155,7 @@ export async function updateMe(
     voiceGender?: VoiceGender | null
     voiceAutoListen?: boolean | null
     defaultPersonaId?: string | null
+    strictPrivacyMode?: boolean | null
   },
 ): Promise<User> {
   const raw = await apiRequest<RawUser>(
@@ -167,6 +170,7 @@ export async function updateMe(
         voice_gender: data.voiceGender,
         voice_auto_listen: data.voiceAutoListen,
         default_persona_id: data.defaultPersonaId,
+        strict_privacy_mode: data.strictPrivacyMode,
       },
     },
   )

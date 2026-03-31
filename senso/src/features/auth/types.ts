@@ -9,6 +9,7 @@ export type User = {
     voiceGender?: VoiceGender
     voiceAutoListen?: boolean
     defaultPersonaId?: string
+    strictPrivacyMode?: boolean
 }
 
 export type AuthPayload = {
