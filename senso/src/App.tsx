@@ -14,6 +14,7 @@ import { MerchantMapAdminPage } from "@/features/admin/MerchantMapAdminPage"
 import { ModerationQueuePage } from "@/features/admin/ModerationQueuePage"
 import { readAccessToken } from "@/features/auth/storage"
 import type { User } from "@/features/auth/types"
+import { AboutPage } from "@/features/about/AboutPage"
 
 // Route modules
 import { LoginPage } from "@/routes/LoginPage"
@@ -105,6 +106,7 @@ function AppRoutes() {
   const location = useLocation()
 
   const isLearnRoute = location.pathname === "/learn" || location.pathname.startsWith("/learn/")
+  const isAboutRoute = location.pathname === "/about"
   const isLoginRoute = location.pathname === "/login"
 
   // ── State 1: Public /learn — no auth needed ──
@@ -115,6 +117,19 @@ function AppRoutes() {
         <Routes>
           <Route path="/learn/*" element={<LearnRoutes />} />
           <Route path="*" element={<Navigate to="/learn" replace />} />
+        </Routes>
+      </PublicShell>
+    )
+  }
+
+  // ── State 1b: Public /about — no auth needed ──
+  if (isAboutRoute && (!auth.initialized || !auth.isAuthenticated || !auth.user)) {
+    return (
+      <PublicShell>
+        <LocationToast />
+        <Routes>
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<Navigate to="/about" replace />} />
         </Routes>
       </PublicShell>
     )
@@ -181,6 +196,7 @@ function AppRoutes() {
               }
             />
           )}
+          <Route path="/about" element={<AboutPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

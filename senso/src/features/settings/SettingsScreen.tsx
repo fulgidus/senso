@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { LogOut, Save } from "lucide-react"
+import { Link } from "react-router-dom"
+import { LogOut, Save, Shield } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { useTheme } from "@/components/theme-provider"
@@ -36,6 +37,8 @@ export function SettingsScreen() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [topbarButtons, setTopbarButtonsState] = useState(readTopbarButtons)
   const [personas, setPersonas] = useState<Persona[]>([])
+  const [strictPrivacyMode, setStrictPrivacyMode] = useState(user.strictPrivacyMode ?? false)
+  const [privacySaving, setPrivacySaving] = useState(false)
 
   useEffect(() => {
     void getPersonas().then(setPersonas).catch(() => setPersonas([]))
@@ -86,6 +89,23 @@ export function SettingsScreen() {
     // Live-update the AppShell without reload via the window bridge
     const bridge = (window as unknown as Record<string, unknown>)["__sensoSetTopbarButtons"]
     if (typeof bridge === "function") (bridge as (v: boolean) => void)(value)
+  }
+
+  const handlePrivacyToggle = async (value: boolean) => {
+    const previous = strictPrivacyMode
+    setStrictPrivacyMode(value)       // optimistic update
+    setPrivacySaving(true)
+    try {
+      const token = readAccessToken()
+      if (!token) throw new Error("Not authenticated")
+      const updated = await updateMe(token, { strictPrivacyMode: value })
+      updateUser(updated)
+    } catch {
+      setStrictPrivacyMode(previous)  // revert on error
+      setSaveError(t("settings.saveError"))
+    } finally {
+      setPrivacySaving(false)
+    }
   }
 
   return (
@@ -298,6 +318,55 @@ export function SettingsScreen() {
               />
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* Privacy section */}
+      <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Shield className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <h2 className="text-base font-semibold text-foreground">{t("settings.privacyTitle")}</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">{t("settings.privacyDescription")}</p>
+
+        <div className={["pt-4 border-t border-border", privacySaving ? "opacity-50 pointer-events-none" : ""].join(" ")}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("settings.strictPrivacyMode")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("settings.strictPrivacyModeHint")}</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={strictPrivacyMode}
+              onClick={() => void handlePrivacyToggle(!strictPrivacyMode)}
+              className={[
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                strictPrivacyMode ? "bg-primary" : "bg-muted",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "inline-block h-4 w-4 rounded-full bg-white shadow transition-transform",
+                  strictPrivacyMode ? "translate-x-6" : "translate-x-1",
+                ].join(" ")}
+              />
+            </button>
+          </div>
+          {strictPrivacyMode && (
+            <p className="mt-2 text-xs text-primary">{t("settings.strictPrivacyModeActive")}</p>
+          )}
+        </div>
+
+        {/* About link */}
+        <div className="pt-4 border-t border-border">
+          <p className="text-sm font-medium text-foreground">{t("settings.aboutTitle")}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("settings.aboutHint")}</p>
+          <Link
+            to="/about"
+            className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+          >
+            {t("settings.aboutCta")} →
+          </Link>
         </div>
       </section>
 

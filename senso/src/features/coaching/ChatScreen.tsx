@@ -28,7 +28,7 @@ import {
   type SessionSummary,
   type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -1560,6 +1560,9 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   onAssistantMessageRef.current = onAssistantMessage
 
   const [sttErrorVisible, setSttErrorVisible] = useState(false)
+  const [ttsNoticeDismissed, setTtsNoticeDismissed] = useState(
+    () => sessionStorage.getItem("senso:ttsNoticeDismissed") === "true"
+  )
   useEffect(() => {
     if (sttError) {
       setSttErrorVisible(true)
@@ -1580,6 +1583,15 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             {sessionName || t("coaching.newConversation")}
           </h2>
           <p className="text-xs text-muted-foreground">{t("coaching.coachTitle")}</p>
+          {user.strictPrivacyMode && (
+            <span
+              aria-label={t("coaching.privacyBadge") + " attiva"}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs font-medium px-2 py-1 mt-0.5"
+            >
+              <ShieldCheck className="h-3 w-3" aria-hidden="true" />
+              {t("coaching.privacyBadge")}
+            </span>
+          )}
         </div>
         {activePersona && (
           <button
@@ -1691,6 +1703,25 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
 
       {/* Input area */}
       <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0">
+        {user.strictPrivacyMode && !ttsNoticeDismissed && (
+          <div
+            role="alert"
+            className="mb-2 flex items-start gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground"
+          >
+            <ShieldOff className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="flex-1">{t("coaching.ttsDisabledStrict")}</span>
+            <button
+              aria-label={t("coaching.modalClose")}
+              onClick={() => {
+                setTtsNoticeDismissed(true)
+                sessionStorage.setItem("senso:ttsNoticeDismissed", "true")
+              }}
+              className="shrink-0 rounded hover:bg-muted-foreground/10 p-0.5"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         {isVoiceMode ? (
           <VoiceModeBar
             isRecording={isRecording}
