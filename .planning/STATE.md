@@ -160,7 +160,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+1. Replace obfuscate_email with envelope-based admin-readable encryption (area: database)
 
 ### Blockers/Concerns
 
@@ -174,6 +174,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T14:10:42.713Z
-Stopped at: Completed 10-04 (all Phase 10 plans complete)
+Last session: 2026-03-31T16:33:00.000Z
+Stopped at: Session resumed; milestone v1.0 complete, awaiting user direction
 Resume file: None
