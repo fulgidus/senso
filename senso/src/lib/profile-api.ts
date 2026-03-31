@@ -362,6 +362,8 @@ export interface UncategorizedTransactionDTO {
     amount: number | null
     date: string | null
     source_filename: string | null
+    type: "income" | "expense" | "transfer" | null
+    counterpart_name: string | null
 }
 
 // ── Phase 9: Timeline API functions ───────────────────────────────────────
@@ -424,6 +426,22 @@ export async function updateTransactionCategory(
             method: "PATCH",
             token,
             body: { category },
+        },
+    )
+}
+
+export async function bulkUpdateCategoryByDescription(
+    token: string,
+    description: string,
+    category: string,
+): Promise<{ updated: number; category: string }> {
+    return apiRequest<{ updated: number; category: string }>(
+        API_BASE,
+        `/profile/transactions/by-description/category`,
+        {
+            method: "PATCH",
+            token,
+            body: { description, category },
         },
     )
 }

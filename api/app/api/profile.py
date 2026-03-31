@@ -54,7 +54,14 @@ class UncategorizedTransactionDTO(BaseModel):
     amount: float | None = None
     date: date_type | None = None
     source_filename: str | None = None
+    type: str | None = None  # "income" | "expense" | "transfer"
+    counterpart_name: str | None = None  # normalized merchant/actor name
     model_config = ConfigDict(from_attributes=True)
+
+
+class BulkCategoryUpdateRequest(BaseModel):
+    description: str
+    category: str
 
 
 class DismissEventRequest(BaseModel):
@@ -223,6 +230,7 @@ def get_uncategorized(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[UncategorizedTransactionDTO]:
+    import re
     from collections import Counter
 
     from app.db.models import Transaction, Upload
@@ -236,6 +244,16 @@ def get_uncategorized(
         )
         .all()
     )
+
+    def _normalize(desc: str | None) -> str | None:
+        if not desc:
+            return None
+        # Strip common noise: card numbers, dates inline, reference codes
+        s = re.sub(r"\b\d{4,}\b", "", desc)  # long numbers
+        s = re.sub(r"\d{2}[/\-\.]\d{2}[/\-\.]\d{2,4}", "", s)  # dates
+        s = re.sub(r"\s{2,}", " ", s).strip(" ,-/*")
+        return s or desc
+
     result = []
     for txn, filename in txns:
         result.append(
@@ -245,12 +263,60 @@ def get_uncategorized(
                 amount=float(txn.amount) if txn.amount else None,
                 date=txn.date,
                 source_filename=filename,
+                type=txn.type,
+                counterpart_name=_normalize(txn.description),
             )
         )
     # Sort: frequency-first (same description grouped), then by abs amount
     freq = Counter(r.description for r in result)
     result.sort(key=lambda r: (-freq[r.description], -(abs(r.amount or 0))))
     return result
+
+
+@router.patch("/transactions/by-description/category", status_code=200)
+def bulk_update_category_by_description(
+    body: BulkCategoryUpdateRequest,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Categorize ALL uncategorized transactions with a given description at once."""
+    from app.db.models import Transaction
+    from app.db.repository import write_merchant_map
+    from app.services.categorization_service import VALID_CATEGORIES
+
+    if body.category not in VALID_CATEGORIES:
+        raise HTTPException(
+            status_code=422, detail=f"Invalid category: {body.category}"
+        )
+
+    txns = (
+        db.query(Transaction)
+        .filter(
+            Transaction.user_id == current_user.id,
+            Transaction.category == "uncategorized",
+            Transaction.description == body.description,
+        )
+        .all()
+    )
+    if not txns:
+        raise HTTPException(status_code=404, detail="No matching transactions found")
+
+    for txn in txns:
+        txn.category = body.category
+
+    if body.description:
+        write_merchant_map(
+            db,
+            description_raw=body.description,
+            category=body.category,
+            confidence=1.0,
+            learned_method="manual",
+            contributing_user_id=current_user.id,
+            contributing_upload_id=txns[0].upload_id,
+        )
+
+    db.commit()
+    return {"updated": len(txns), "category": body.category}
 
 
 @router.patch("/transactions/{transaction_id}/category", status_code=200)

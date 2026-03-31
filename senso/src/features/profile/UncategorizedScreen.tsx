@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react"
-import { AlertTriangle, CheckCircle } from "lucide-react"
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, CheckCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   getUncategorized,
-  updateTransactionCategory,
+  bulkUpdateCategoryByDescription,
   type UncategorizedTransactionDTO,
 } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
@@ -35,14 +35,18 @@ const VALID_CATEGORIES = [
   "utilities",
 ]
 
-// Group transactions by description, sort by frequency desc, then amount desc
-type TransactionGroup = {
+// ── Actor group: all transactions sharing the same description ────────────────
+type ActorGroup = {
   description: string
+  counterpart_name: string | null
   transactions: UncategorizedTransactionDTO[]
   totalAmount: number
+  // net sign: positive = money in, negative = money out
+  netAmount: number
+  dominantType: "income" | "expense" | "transfer" | null
 }
 
-function groupTransactions(transactions: UncategorizedTransactionDTO[]): TransactionGroup[] {
+function groupByActor(transactions: UncategorizedTransactionDTO[]): ActorGroup[] {
   const groups = new Map<string, UncategorizedTransactionDTO[]>()
 
   for (const txn of transactions) {
@@ -53,23 +57,49 @@ function groupTransactions(transactions: UncategorizedTransactionDTO[]): Transac
   }
 
   return Array.from(groups.entries())
-    .map(([description, txns]) => ({
-      description,
-      transactions: txns,
-      totalAmount: txns.reduce((sum, t) => sum + Math.abs(t.amount ?? 0), 0),
-    }))
+    .map(([description, txns]) => {
+      const net = txns.reduce((sum, t) => sum + (t.amount ?? 0), 0)
+      const total = txns.reduce((sum, t) => sum + Math.abs(t.amount ?? 0), 0)
+
+      // dominant type by count
+      const typeCounts: Record<string, number> = {}
+      for (const t of txns) {
+        if (t.type) typeCounts[t.type] = (typeCounts[t.type] ?? 0) + 1
+      }
+      const dominantType = (Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
+        null) as ActorGroup["dominantType"]
+
+      return {
+        description,
+        counterpart_name: txns[0].counterpart_name ?? null,
+        transactions: txns,
+        totalAmount: total,
+        netAmount: net,
+        dominantType,
+      }
+    })
     .sort((a, b) => {
+      // Most frequent first, then highest total volume
       if (b.transactions.length !== a.transactions.length)
         return b.transactions.length - a.transactions.length
       return b.totalAmount - a.totalAmount
     })
 }
 
-type RowState = {
+type GroupState = {
   saving: boolean
   success: boolean
   error: string | null
   category: string
+  updatedCount?: number
+}
+
+function DirectionIcon({ type }: { type: ActorGroup["dominantType"] }) {
+  if (type === "income")
+    return <ArrowDownLeft className="h-4 w-4 text-green-500 shrink-0" />
+  if (type === "expense")
+    return <ArrowUpRight className="h-4 w-4 text-red-400 shrink-0" />
+  return <ArrowLeftRight className="h-4 w-4 text-muted-foreground shrink-0" />
 }
 
 export function UncategorizedScreen() {
@@ -79,19 +109,15 @@ export function UncategorizedScreen() {
   const [transactions, setTransactions] = useState<UncategorizedTransactionDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [rowStates, setRowStates] = useState<Record<string, RowState>>({})
+  const [groupStates, setGroupStates] = useState<Record<string, GroupState>>({})
 
   const loadData = useCallback(() => {
     if (!token) return
     setLoading(true)
     setLoadError(null)
     void getUncategorized(token)
-      .then((data) => {
-        setTransactions(data)
-      })
-      .catch(() => {
-        setLoadError(t("uncategorized.errorLoad"))
-      })
+      .then((data) => setTransactions(data))
+      .catch(() => setLoadError(t("uncategorized.errorLoad")))
       .finally(() => setLoading(false))
   }, [token, t])
 
@@ -99,34 +125,40 @@ export function UncategorizedScreen() {
     loadData()
   }, [loadData])
 
-  const handleCategoryChange = useCallback(
-    async (transactionId: string, category: string) => {
+  const handleBulkCategorize = useCallback(
+    async (description: string, category: string) => {
       if (!token) return
 
-      setRowStates((prev) => ({
+      setGroupStates((prev) => ({
         ...prev,
-        [transactionId]: { saving: true, success: false, error: null, category },
+        [description]: { saving: true, success: false, error: null, category },
       }))
 
       try {
-        await updateTransactionCategory(token, transactionId, category)
-        setRowStates((prev) => ({
+        const result = await bulkUpdateCategoryByDescription(token, description, category)
+        setGroupStates((prev) => ({
           ...prev,
-          [transactionId]: { saving: false, success: true, error: null, category },
+          [description]: {
+            saving: false,
+            success: true,
+            error: null,
+            category,
+            updatedCount: result.updated,
+          },
         }))
-        // Remove from list after success feedback fades
+        // Remove all matching transactions from the list after feedback fades
         setTimeout(() => {
-          setTransactions((prev) => prev.filter((t) => t.id !== transactionId))
-          setRowStates((prev) => {
+          setTransactions((prev) => prev.filter((t) => t.description !== description))
+          setGroupStates((prev) => {
             const next = { ...prev }
-            delete next[transactionId]
+            delete next[description]
             return next
           })
         }, 1500)
       } catch {
-        setRowStates((prev) => ({
+        setGroupStates((prev) => ({
           ...prev,
-          [transactionId]: {
+          [description]: {
             saving: false,
             success: false,
             error: t("uncategorized.errorSave"),
@@ -170,7 +202,7 @@ export function UncategorizedScreen() {
     )
   }
 
-  const groups = groupTransactions(transactions)
+  const groups = groupByActor(transactions)
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
@@ -184,7 +216,10 @@ export function UncategorizedScreen() {
         </h2>
         {transactions.length > 0 && (
           <p className="text-sm text-muted-foreground">
-            {t("uncategorized.pageSubtitle_other", { count: transactions.length })}
+            {t("uncategorized.actorSubtitle", {
+              groups: groups.length,
+              transactions: transactions.length,
+            })}
           </p>
         )}
       </div>
@@ -200,91 +235,117 @@ export function UncategorizedScreen() {
           </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          {groups.map((group) => (
-            <div key={group.description}>
-              {group.transactions.length > 1 && (
-                <p className="mb-2 text-sm text-muted-foreground">
-                  {t("uncategorized.occurrenceSummary", {
-                    count: group.transactions.length,
-                    total: Math.round(group.totalAmount),
-                  })}
-                </p>
-              )}
-              <div className="space-y-2">
-                {group.transactions.map((txn) => {
-                  const state = rowStates[txn.id]
-                  return (
-                    <div
-                      key={txn.id}
-                      className={`rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-4 transition-opacity ${
-                        state?.success ? "opacity-50" : ""
-                      }`}
-                    >
-                      {/* Left: description + date + source */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {txn.description ?? "—"}
-                        </p>
-                        <div className="mt-0.5 flex items-center gap-2 flex-wrap">
-                          {txn.date && (
-                            <span className="text-sm text-muted-foreground">{txn.date}</span>
-                          )}
-                          {txn.source_filename && (
-                            <span className="rounded-full bg-secondary px-2 py-1 text-sm">
-                              {txn.source_filename}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+        <div className="space-y-3">
+          {groups.map((group) => {
+            const state = groupStates[group.description]
+            const isSuccess = state?.success
+            const isSaving = state?.saving
 
-                      {/* Amount */}
-                      {txn.amount !== null && (
-                        <span className="text-sm font-semibold text-foreground shrink-0">
-                          €{Math.abs(txn.amount).toLocaleString("it-IT")}
+            return (
+              <div
+                key={group.description}
+                className={`rounded-xl border border-border bg-card px-4 py-3 transition-opacity ${
+                  isSuccess ? "opacity-40" : ""
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {/* Direction icon */}
+                  <div className="mt-1">
+                    <DirectionIcon type={group.dominantType} />
+                  </div>
+
+                  {/* Actor info */}
+                  <div className="flex-1 min-w-0">
+                    {/* Counterpart name — the "who" */}
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {group.counterpart_name ?? group.description ?? "—"}
+                    </p>
+                    {/* Raw description if different from counterpart */}
+                    {group.counterpart_name &&
+                      group.counterpart_name !== group.description && (
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {group.description}
+                        </p>
+                      )}
+                    {/* Count + date range */}
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {t("uncategorized.txnCount", { count: group.transactions.length })}
+                      </span>
+                      {group.transactions.length > 1 && (
+                        <span>
+                          {group.transactions[group.transactions.length - 1].date} →{" "}
+                          {group.transactions[0].date}
                         </span>
                       )}
+                      {group.transactions.length === 1 && group.transactions[0].date && (
+                        <span>{group.transactions[0].date}</span>
+                      )}
+                      {group.transactions[0].source_filename && (
+                        <span className="rounded-full bg-secondary px-2 py-0.5">
+                          {group.transactions[0].source_filename}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                      {/* Category picker or feedback */}
-                      <div className="shrink-0 w-44">
-                        {state?.success ? (
-                          <div className="flex items-center gap-1 text-green-600">
-                            <CheckCircle className="h-4 w-4" />
-                            <span className="text-sm">{state.category}</span>
-                          </div>
-                        ) : (
-                          <div>
-                            <select
-                              disabled={state?.saving}
-                              value={state?.category ?? ""}
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  void handleCategoryChange(txn.id, e.target.value)
-                                }
-                              }}
-                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
-                            >
-                              <option value="" disabled>
-                                {t("uncategorized.categoryPickerPlaceholder")}
-                              </option>
-                              {VALID_CATEGORIES.map((cat) => (
-                                <option key={cat} value={cat}>
-                                  {cat.replace(/_/g, " ")}
-                                </option>
-                              ))}
-                            </select>
-                            {state?.error && (
-                              <p className="mt-1 text-xs text-destructive">{state.error}</p>
-                            )}
-                          </div>
+                  {/* Amount + category picker */}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {/* Net amount */}
+                    <span
+                      className={`text-sm font-semibold ${
+                        group.netAmount >= 0 ? "text-green-600" : "text-foreground"
+                      }`}
+                    >
+                      {group.netAmount >= 0 ? "+" : ""}
+                      {group.netAmount.toLocaleString("it-IT", {
+                        style: "currency",
+                        currency: "EUR",
+                        maximumFractionDigits: 0,
+                      })}
+                    </span>
+
+                    {/* Category picker or success badge */}
+                    {isSuccess ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-xs">
+                          {t("uncategorized.savedCount", {
+                            count: state.updatedCount ?? group.transactions.length,
+                          })}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="w-44">
+                        <select
+                          disabled={isSaving}
+                          value={state?.category ?? ""}
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              void handleBulkCategorize(group.description, e.target.value)
+                            }
+                          }}
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+                        >
+                          <option value="" disabled>
+                            {t("uncategorized.categoryPickerPlaceholder")}
+                          </option>
+                          {VALID_CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat.replace(/_/g, " ")}
+                            </option>
+                          ))}
+                        </select>
+                        {state?.error && (
+                          <p className="mt-1 text-xs text-destructive">{state.error}</p>
                         )}
                       </div>
-                    </div>
-                  )
-                })}
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </main>
