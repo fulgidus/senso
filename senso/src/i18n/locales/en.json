@@ -700,5 +700,36 @@
             "severityBan": "Ban",
             "confirmRevert": "Revert this penalty?"
         }
+    },
+    "files": {
+        "tabLabel": "Your files",
+        "empty": "No files uploaded.",
+        "confirmDelete": "Delete this file? This action cannot be undone.",
+        "loadError": "Could not load files. Please try again.",
+        "retry": "Retry",
+        "delete": "Delete",
+        "inspect": "Inspect",
+        "statusPending": "Pending",
+        "statusQueued": "Queued",
+        "statusProcessing": "Processing",
+        "statusDone": "Done",
+        "statusFailed": "Failed",
+        "sizeKb": "{{size}} KB",
+        "sizeMb": "{{size}} MB"
+    },
+    "inspector": {
+        "title": "Pipeline inspection",
+        "close": "Close",
+        "copySection": "Copy JSON",
+        "copyAll": "Copy all",
+        "copied": "Copied!",
+        "sectionUpload": "Upload metadata",
+        "sectionExtracted": "Extracted document",
+        "sectionPayload": "Payload JSON",
+        "sectionTransactions": "Transactions",
+        "sectionTrace": "Pipeline trace",
+        "noExtracted": "No extracted document available.",
+        "confidence": "Confidence",
+        "durationMs": "{{ms}} ms"
     }
 }

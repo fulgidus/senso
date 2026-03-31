@@ -700,5 +700,36 @@
             "severityBan": "Sospensione",
             "confirmRevert": "Annullare questa penalità?"
         }
+    },
+    "files": {
+        "tabLabel": "I tuoi file",
+        "empty": "Nessun file caricato.",
+        "confirmDelete": "Eliminare questo file? L'azione è irreversibile.",
+        "loadError": "Impossibile caricare i file. Riprova.",
+        "retry": "Riprova",
+        "delete": "Elimina",
+        "inspect": "Ispeziona",
+        "statusPending": "In attesa",
+        "statusQueued": "In coda",
+        "statusProcessing": "In elaborazione",
+        "statusDone": "Completato",
+        "statusFailed": "Errore",
+        "sizeKb": "{{size}} KB",
+        "sizeMb": "{{size}} MB"
+    },
+    "inspector": {
+        "title": "Ispezione pipeline",
+        "close": "Chiudi",
+        "copySection": "Copia JSON",
+        "copyAll": "Copia tutto",
+        "copied": "Copiato!",
+        "sectionUpload": "Metadati upload",
+        "sectionExtracted": "Documento estratto",
+        "sectionPayload": "Payload JSON",
+        "sectionTransactions": "Transazioni",
+        "sectionTrace": "Trace pipeline",
+        "noExtracted": "Nessun documento estratto disponibile.",
+        "confidence": "Confidenza",
+        "durationMs": "{{ms}} ms"
     }
 }
