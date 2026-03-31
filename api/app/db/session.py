@@ -279,6 +279,10 @@ def _add_missing_columns() -> None:
         # ── Round 12: Phase 9 user penalty columns ────────────────────────────
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS violation_count INT NOT NULL DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ",
+        # ── Round 13: Phase 10 — encryption columns ───────────────────────────
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_user_key TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS pbkdf2_salt VARCHAR(64)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS strict_privacy_mode BOOLEAN NOT NULL DEFAULT FALSE",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

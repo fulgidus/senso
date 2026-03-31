@@ -13,6 +13,7 @@ from app.core.security import (
     verify_password,
 )
 from app.db import repository
+from app.db.crypto import server_wrap_user_key
 from app.db.models import RefreshSession, User
 from app.personas.loader import _load_config
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
@@ -56,6 +57,11 @@ class AuthService:
             is_admin=is_admin,
         )
         repository.create_user(self.db, user)
+        # Generate and store a wrapped data key for the new user (server-held for now)
+        enc_key, salt_b64 = server_wrap_user_key(user.id)
+        user.encrypted_user_key = enc_key
+        user.pbkdf2_salt = salt_b64
+        self.db.commit()
         return self._issue_auth_response(user)
 
     def login(self, *, email: str, password: str) -> AuthResponseDTO:
@@ -112,6 +118,7 @@ class AuthService:
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
             default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
+            strict_privacy_mode=bool(user.strict_privacy_mode),
         )
 
     def logout(self, *, refresh_token: str) -> None:
@@ -167,6 +174,7 @@ class AuthService:
                 voice_gender=user.voice_gender or "indifferent",
                 voice_auto_listen=bool(user.voice_auto_listen),
                 default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
+                strict_privacy_mode=bool(user.strict_privacy_mode),
             ),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
@@ -190,6 +198,8 @@ class AuthService:
             if default_persona_id not in _valid_persona_ids():
                 raise AuthError("invalid_persona", "Unknown persona", status_code=422)
             user.default_persona_id = default_persona_id
+        if payload.strict_privacy_mode is not None:
+            user.strict_privacy_mode = payload.strict_privacy_mode
         self.db.commit()
         self.db.refresh(user)
         return UserDTO(
@@ -201,6 +211,7 @@ class AuthService:
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
             default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
+            strict_privacy_mode=bool(user.strict_privacy_mode),
         )
 
     def _issue_tokens(self, user: User) -> AuthTokensDTO:

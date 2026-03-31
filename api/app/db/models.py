@@ -47,6 +47,13 @@ class User(Base):
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
+    # Phase 9: user penalty tracking
+    violation_count: int = Column(Integer, nullable=False, default=0)
+    banned_until: datetime | None = Column(DateTime(timezone=True), nullable=True)
+    # Phase 10: encryption key management
+    encrypted_user_key: str | None = Column(Text, nullable=True, default=None)
+    pbkdf2_salt: str | None = Column(String(64), nullable=True, default=None)
+    strict_privacy_mode: bool = Column(Boolean, nullable=False, default=False)
 
     # Relationships
     chat_sessions_participated = relationship(
