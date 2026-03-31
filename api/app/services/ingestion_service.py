@@ -97,6 +97,8 @@ class IngestionService:
 
     def run_extraction_background(self, upload_id: str, file_bytes: bytes) -> None:
         """Run extraction pipeline. Called as BackgroundTask."""
+        import time as _time
+
         db = SessionLocal()
         try:
             upload = db.query(Upload).filter(Upload.id == upload_id).first()
@@ -117,11 +119,87 @@ class IngestionService:
                 settings=self.settings,
                 minio_client=self.minio,
             )
+
+            # ── Trace step 1: start ────────────────────────────────────────────
+            background_service._record_trace(
+                db,
+                upload_id,
+                step_order=1,
+                step_name="start",
+                status="success",
+                input_summary=f"file: {upload_id}",
+                output_summary=f"filename: {upload.original_filename}, size: {len(file_bytes)} bytes",
+            )
+
             try:
-                result = background_service._extract(
-                    tmp_path, upload.content_type, llm_client, registry
+                # ── Trace step 2: ocr_extraction ──────────────────────────────
+                _start = _time.time()
+                try:
+                    result = background_service._extract(
+                        tmp_path, upload.content_type, llm_client, registry
+                    )
+                    _duration = int((_time.time() - _start) * 1000)
+                    background_service._record_trace(
+                        db,
+                        upload_id,
+                        step_order=2,
+                        step_name="ocr_extraction",
+                        status="success",
+                        input_summary=f"content_type: {upload.content_type}, file_bytes: {len(file_bytes)}",
+                        output_summary=f"doc_type: {result.document.document_type}, tier: {result.tier_used}, confidence: {result.confidence:.2f}",
+                        duration_ms=_duration,
+                    )
+                except Exception:
+                    _duration = int((_time.time() - _start) * 1000)
+                    background_service._record_trace(
+                        db,
+                        upload_id,
+                        step_order=2,
+                        step_name="ocr_extraction",
+                        status="error",
+                        input_summary=f"content_type: {upload.content_type}, file_bytes: {len(file_bytes)}",
+                        duration_ms=_duration,
+                    )
+                    raise
+
+                # ── Trace step 3: module_match ────────────────────────────────
+                background_service._record_trace(
+                    db,
+                    upload_id,
+                    step_order=3,
+                    step_name="module_match",
+                    status="success",
+                    input_summary=f"document_type: {result.document.document_type}",
+                    output_summary=f"module_name: {result.document.module_name or 'none'}, module_source: {result.document.module_source or 'none'}",
                 )
+
+                # ── Trace step 4: llm_call ────────────────────────────────────
+                raw_text_snippet = (
+                    (result.raw_text or "")[:500] if result.raw_text else None
+                )
+                background_service._record_trace(
+                    db,
+                    upload_id,
+                    step_order=4,
+                    step_name="llm_call",
+                    status="success",
+                    input_summary=raw_text_snippet,
+                    output_summary=f"transactions: {len(result.document.transactions)}, warnings: {len(result.warnings)}",
+                )
+
+                # ── Trace step 5: persistence ─────────────────────────────────
+                _start = _time.time()
                 background_service._persist_extraction(upload, result)
+                _duration = int((_time.time() - _start) * 1000)
+                background_service._record_trace(
+                    db,
+                    upload_id,
+                    step_order=5,
+                    step_name="persistence",
+                    status="success",
+                    output_summary="saved to DB",
+                    duration_ms=_duration,
+                )
             except LLMError:
                 upload.extraction_status = "provider_outage"
                 db.commit()
@@ -133,6 +211,40 @@ class IngestionService:
                 tmp_path.unlink(missing_ok=True)
         finally:
             db.close()
+
+    def _record_trace(
+        self,
+        db,
+        upload_id: str,
+        step_order: int,
+        step_name: str,
+        *,
+        status: str = "success",
+        input_summary: str | None = None,
+        output_summary: str | None = None,
+        raw_input: str | None = None,
+        raw_output: str | None = None,
+        duration_ms: int | None = None,
+    ) -> None:
+        """Write a single trace row. Never raises — failures are logged and swallowed."""
+        from app.db.models import IngestionTrace  # noqa: PLC0415
+
+        try:
+            trace = IngestionTrace(
+                upload_id=upload_id,
+                step_name=step_name,
+                step_order=step_order,
+                input_summary=input_summary,
+                output_summary=output_summary,
+                raw_input=(str(raw_input)[:8000] if raw_input is not None else None),
+                raw_output=(str(raw_output)[:8000] if raw_output is not None else None),
+                duration_ms=duration_ms,
+                status=status,
+            )
+            db.add(trace)
+            db.commit()
+        except Exception as exc:
+            logger.warning("_record_trace failed: %s", exc)
 
     def fail_stale_pending_uploads(self, user_id: str | None = None) -> int:
         cutoff = datetime.now(UTC) - timedelta(

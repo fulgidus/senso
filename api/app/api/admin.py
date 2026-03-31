@@ -254,6 +254,49 @@ def confirm_moderation_action(
     return {"confirmed": True}
 
 
+# ─── Phase 11: Ingestion trace endpoint ───────────────────────────────────────
+
+
+class IngestionTraceDTO(BaseModel):
+    id: str
+    upload_id: str
+    step_order: int
+    step_name: str
+    status: str
+    input_summary: str | None = None
+    output_summary: str | None = None
+    raw_input: str | None = None
+    raw_output: str | None = None
+    duration_ms: int | None = None
+    recorded_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get(
+    "/ingestion/uploads/{upload_id}/trace",
+    response_model=list[IngestionTraceDTO],
+)
+def get_ingestion_trace(
+    upload_id: str,
+    _: UserDTO = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> list[IngestionTraceDTO]:
+    """Return all pipeline trace steps for an upload, ordered by step_order."""
+    from app.db.models import IngestionTrace, Upload
+
+    upload = db.query(Upload).filter(Upload.id == upload_id).first()
+    if not upload:
+        raise HTTPException(status_code=404, detail="Upload not found")
+
+    traces = (
+        db.query(IngestionTrace)
+        .filter(IngestionTrace.upload_id == upload_id)
+        .order_by(IngestionTrace.step_order)
+        .all()
+    )
+    return [IngestionTraceDTO.model_validate(t) for t in traces]
+
+
 @router.post("/moderation/{log_id}/revert", status_code=200)
 def revert_moderation_action(
     log_id: str,
