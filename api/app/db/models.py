@@ -68,10 +68,21 @@ class EncryptedJSON(TypeDecorator):
     def process_result_value(self, value, dialect):
         if value is None:
             return None
-        decrypted = self._enc.process_result_value(value, dialect)
+        try:
+            decrypted = self._enc.process_result_value(value, dialect)
+        except Exception:
+            # Existing plaintext JSON rows (pre-Phase-10 data): decryption fails
+            # because the value is not AES-GCM ciphertext.  Return raw parsed JSON.
+            try:
+                return _json.loads(value)
+            except Exception:
+                return value
         if decrypted is None:
             return None
-        return _json.loads(decrypted)
+        try:
+            return _json.loads(decrypted)
+        except Exception:
+            return decrypted
 
 
 Base = declarative_base()

@@ -283,6 +283,67 @@ def _add_missing_columns() -> None:
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_user_key TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS pbkdf2_salt VARCHAR(64)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS strict_privacy_mode BOOLEAN NOT NULL DEFAULT FALSE",
+        # ── Round 14: Phase 10 — convert T2 JSON/JSONB columns to TEXT ────────
+        # EncryptedJSON TypeDecorator stores AES-GCM ciphertext as TEXT.
+        # Existing columns are JSON or JSONB — PostgreSQL refuses ciphertext writes.
+        # USING clause casts existing JSON values to TEXT (valid JSON strings are
+        # accepted by the TEXT type). Idempotent: already-TEXT columns are no-ops.
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='user_profiles' AND column_name='income_summary') != 'text' THEN
+            ALTER TABLE user_profiles ALTER COLUMN income_summary TYPE TEXT USING income_summary::text;
+          END IF;
+        END$$
+        """,
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='user_profiles' AND column_name='category_totals') != 'text' THEN
+            ALTER TABLE user_profiles ALTER COLUMN category_totals TYPE TEXT USING category_totals::text;
+          END IF;
+        END$$
+        """,
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='user_profiles' AND column_name='insight_cards') != 'text' THEN
+            ALTER TABLE user_profiles ALTER COLUMN insight_cards TYPE TEXT USING insight_cards::text;
+          END IF;
+        END$$
+        """,
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='user_profiles' AND column_name='coaching_insights') != 'text' THEN
+            ALTER TABLE user_profiles ALTER COLUMN coaching_insights TYPE TEXT USING coaching_insights::text;
+          END IF;
+        END$$
+        """,
+        # transactions.description: VARCHAR(1024) → TEXT (EncryptedString stores as TEXT)
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='transactions' AND column_name='description') != 'text' THEN
+            ALTER TABLE transactions ALTER COLUMN description TYPE TEXT USING description::text;
+          END IF;
+        END$$
+        """,
+        # moderation_log.raw_input: already TEXT in creation DDL above, but guard anyway
+        """
+        DO $$
+        BEGIN
+          IF (SELECT data_type FROM information_schema.columns
+              WHERE table_name='moderation_log' AND column_name='raw_input') != 'text' THEN
+            ALTER TABLE moderation_log ALTER COLUMN raw_input TYPE TEXT USING raw_input::text;
+          END IF;
+        END$$
+        """,
     ]
     with engine.connect() as conn:
         for stmt in migrations:
