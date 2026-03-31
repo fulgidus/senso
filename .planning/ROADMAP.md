@@ -142,7 +142,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
 | Phase                               | Plans Complete | Status      | Completed  |
 | ----------------------------------- | -------------- | ----------- | ---------- |
@@ -156,6 +156,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Content Platform & Public Serving | 3/3            | Complete    | 2026-03-30 |
 | 9. LLM Financial Intelligence       | 7/7 | Complete   | 2026-03-30 |
 | 10. Transparency & Security         | 4/4 | Complete    | 2026-03-31 |
+| 11. File Management, Admin Inspector, Connectors UI & Debug Controls | 0/4 | Planned | |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -199,3 +200,16 @@ Plans:
 - [x] 10-02-PLAN.md - LLM no-data-retention: openai-beta no-store header, OpenRouter ZDR strict mode, gemini passthrough, tests.
 - [x] 10-03-PLAN.md - T2 column encryption: StringEncryptedType on 6 ORM columns, encryption roundtrip tests.
 - [x] 10-04-PLAN.md - Frontend: AboutPage, /about route, Settings Privacy section + toggle, ChatScreen privacy badge + TTS notice, i18n strings.
+
+### Phase 11: File Management, Admin Inspector, Connectors UI & Debug Controls
+
+**Goal:** Users can manage their uploaded files (retry/delete) from their profile; admins can inspect the full ingestion pipeline state for any upload; a Connectors tab shows upcoming bank integrations; tester/admin users have a /debug screen with ingestion restart, coaching purge, and full data reset controls.
+**Requirements**: FILE-01, FILE-02, RBAC-01, CONN-01, DEBUG-01
+**Depends on:** Phase 10
+**Plans:** 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md - RBAC role column: add role VARCHAR(16) to users, Round 15 migration, require_tester dep, UserDTO + frontend User type with role.
+- [ ] 11-02-PLAN.md - Pipeline trace infrastructure: IngestionTrace ORM model, Round 16 migration, ingestion_service instrumentation, admin trace endpoint.
+- [ ] 11-03-PLAN.md - "Your Files" tab + Admin Inspector: ingestionFilesApi, FilesTab, AdminInspectorDrawer, wired into ProfileScreen.
+- [ ] 11-04-PLAN.md - Connectors UI tab, debug backend endpoints (require_tester), DebugScreen at /debug, SettingsScreen developer link.
