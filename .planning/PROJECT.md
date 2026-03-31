@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after Phase 7 completion - all v1.0 milestone phases complete. Streaming, persona UX, PII safety cross-check, and demo polish shipped.*
+*Last updated: 2026-03-31 after Phase 10 completion - transparency and security features shipped: public About page, T2 column AES-GCM encryption at rest, LLM no-data-retention enforcement, Privacy mode toggle and UI. UAT pending deployment to production.*
