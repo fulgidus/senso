@@ -19,6 +19,22 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship, Session
 from sqlalchemy import event
+from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesGcmEngine
+from sqlalchemy_utils import JSONType
+
+
+def _server_key() -> str:
+    """Callable used as key for T2 StringEncryptedType columns.
+
+    Loaded lazily at encrypt/decrypt time to avoid circular imports and
+    to ensure settings are fully initialised before the key is read.
+    Settings is a frozen dataclass so this is safe to call repeatedly.
+    """
+    from app.core.config import get_settings  # noqa: PLC0415
+
+    return get_settings().encryption_key
+
 
 Base = declarative_base()
 
@@ -193,7 +209,11 @@ class Transaction(Base):
     date = Column(Date, nullable=False)
     amount: Decimal = Column(Numeric(12, 4), nullable=False)
     currency: str = Column(String(3), nullable=False, default="EUR")
-    description: str = Column(String(1024), nullable=False, default="")
+    description: str = Column(
+        StringEncryptedType(String(1024), _server_key, AesGcmEngine),
+        nullable=False,
+        default="",
+    )
     category: str | None = Column(String(128), nullable=True, default=None)
     tags: list = Column(JSON, nullable=False, default=list)
     type: str = Column(String(16), nullable=False)  # "income" | "expense" | "transfer"
@@ -234,12 +254,28 @@ class UserProfile(Base):
         nullable=False,
         index=True,
     )
-    income_summary: dict = Column(JSON, nullable=False, default=dict)
+    income_summary: dict = Column(
+        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        nullable=False,
+        default=dict,
+    )
     monthly_expenses: float = Column(Float, nullable=True, default=None)
     monthly_margin: float = Column(Float, nullable=True, default=None)
-    category_totals: dict = Column(JSON, nullable=False, default=dict)
-    insight_cards: list = Column(JSON, nullable=False, default=list)
-    coaching_insights: list = Column(JSON, nullable=False, default=list)
+    category_totals: dict = Column(
+        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        nullable=False,
+        default=dict,
+    )
+    insight_cards: list = Column(
+        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        nullable=False,
+        default=list,
+    )
+    coaching_insights: list = Column(
+        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        nullable=False,
+        default=list,
+    )
     questionnaire_answers: dict = Column(JSON, nullable=True, default=None)
     data_sources: list = Column(JSON, nullable=False, default=list)
     extraordinary_income_total: float = Column(Float, nullable=True, default=None)
@@ -636,7 +672,10 @@ class ModerationLog(Base):
     )
     content_type: str = Column(String(32), nullable=False)
     content_ref_id: str | None = Column(String(36), nullable=True)
-    raw_input: str = Column(Text, nullable=False)
+    raw_input: str = Column(
+        StringEncryptedType(Text, _server_key, AesGcmEngine),
+        nullable=False,
+    )
     detected_violations: list = Column(JSON, nullable=False, default=list)
     severity: str = Column(String(16), nullable=False)
     action_taken: str = Column(String(32), nullable=False)
