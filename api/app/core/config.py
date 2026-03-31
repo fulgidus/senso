@@ -31,6 +31,8 @@ class Settings:
     starting_admins: frozenset[str]
     # ElevenLabs TTS settings
     elevenlabs_api_key: str | None
+    # Must be 32 bytes for AES-256. Override with ENCRYPTION_KEY env var in production.
+    encryption_key: str
 
     @property
     def google_enabled(self) -> bool:
@@ -125,4 +127,5 @@ def get_settings() -> Settings:
         ),
         # ElevenLabs TTS settings
         elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
+        encryption_key=os.getenv("ENCRYPTION_KEY", "dev-enc-key-change-me-32bytes!!!"),
     )
