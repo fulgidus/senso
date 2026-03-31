@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-03-31T16:43:39.437Z",
+  "phase": "11",
+  "phase_name": "file-management-admin-inspector-connectors-ui-debug-controls",
+  "phase_dir": ".planning/phases/11-file-management-admin-inspector-connectors-ui-debug-controls",
+  "plan": 3,
+  "task": 2,
+  "total_tasks": 4,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "11-01", "name": "RBAC role column + auth guards", "status": "done", "commit": "e3a7e08"},
+    {"id": "11-02", "name": "Ingestion pipeline tracing + admin trace endpoint", "status": "done", "commit": "391ddcc"},
+    {"id": "11-03-T1", "name": "ingestionFilesApi + FilesTab + i18n keys", "status": "done", "commit": "9bf9d35"},
+    {"id": "11-04-T1-partial", "name": "debug.py created + main.py patched", "status": "in_progress", "progress": "debug.py untracked, main.py unstaged — not committed"}
+  ],
+  "remaining_tasks": [
+    {"id": "11-03-T2", "name": "AdminInspectorDrawer + wire ProfileScreen + SUMMARY", "status": "not_started"},
+    {"id": "11-04-T1-commit", "name": "Commit debug.py and main.py changes", "status": "not_started"},
+    {"id": "11-04-T2", "name": "ConnectorsTab + DebugScreen + SettingsScreen link + App.tsx route + i18n + SUMMARY", "status": "not_started"}
+  ],
+  "blockers": [
+    {
+      "description": "Wave 2 parallel agents were aborted mid-flight (Tool execution aborted)",
+      "type": "technical",
+      "workaround": "Re-run /gsd-execute-phase 11 — orchestrator skips completed plans (has SUMMARY), resumes from 11-03 and 11-04"
+    },
+    {
+      "description": "api/app/api/debug.py untracked, api/app/main.py unstaged — partial 11-04 work not committed",
+      "type": "technical",
+      "workaround": "Commit as part of 11-04 Task 1 when resuming"
+    }
+  ],
+  "human_actions_pending": [],
+  "decisions": [
+    {
+      "decision": "RBAC uses role string enum (user/tester/moderator/admin), not boolean is_admin",
+      "rationale": "More flexible for future roles; require_admin and require_tester deps gate by role value",
+      "phase": "11"
+    },
+    {
+      "decision": "Tracing is fire-and-forget via _record_trace() that never raises",
+      "rationale": "Keeps ingestion pipeline behavior identical; traces are purely observability",
+      "phase": "11"
+    },
+    {
+      "decision": "Debug endpoints gated by require_tester (allows tester and admin roles)",
+      "rationale": "Allows QA testers to use debug controls without full admin; aligns with RBAC plan",
+      "phase": "11"
+    }
+  ],
+  "uncommitted_files": [
+    "api/app/api/debug.py",
+    "api/app/main.py"
+  ],
+  "next_action": "Re-run /gsd-execute-phase 11 to resume Wave 2. Orchestrator will skip 11-01/11-02 (have SUMMARYs) and execute 11-03 Task 2 + full 11-04. Or complete manually: (1) finish AdminInspectorDrawer.tsx + wire ProfileScreen for 11-03, create SUMMARY; (2) commit debug.py + main.py, build ConnectorsTab/DebugScreen/SettingsScreen/App.tsx for 11-04, create SUMMARY.",
+  "context_notes": "Phase 11 Wave 1 fully complete. Wave 2 was executing in parallel when session was aborted. 11-03 has Task 1 committed but Task 2 (AdminInspectorDrawer + ProfileScreen wiring) not done. 11-04 has partial backend work uncommitted. After both plans complete, the orchestrator needs to run regression gate + verify phase goal + update roadmap."
+}
