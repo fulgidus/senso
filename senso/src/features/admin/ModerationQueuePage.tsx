@@ -94,8 +94,6 @@ export function ModerationQueuePage() {
 
   // Inline revert confirmation
   const [revertConfirmId, setRevertConfirmId] = useState<string | null>(null)
-  // Expanded raw input rows
-  const [expandedInputId, setExpandedInputId] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
 
   const load = useCallback(async () => {
