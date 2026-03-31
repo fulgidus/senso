@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts. (completed 2026-03-24)
 - [x] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data. (completed 2026-03-25)
 - [x] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement. (completed 2026-03-28)
-- [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
+- [x] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
 - [x] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable. (completed 2026-03-29)
 - [x] **Phase 7: Streaming & Nice-to-Have Polish** - Streaming responses, persona choice, persistent history, and PII safety cross-check. (completed 2026-03-29)
 
@@ -144,19 +144,19 @@ Plans:
 **Execution Order:**
 Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
-| Phase                               | Plans Complete | Status      | Completed  |
-| ----------------------------------- | -------------- | ----------- | ---------- |
-| 1. Runtime & Account Foundation     | 3/3            | Complete    | 2026-03-23 |
-| 2. Financial Input Ingestion        | 5/5            | Complete    | 2026-03-24 |
-| 3. Financial Profile Clarity        | 4/4            | Complete    | 2026-03-25 |
-| 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
-| 5. Voice Coaching Loop              | 4/5            | In Progress |            |
-| 6. Learn+Act Cards & Demo Hardening | 4/4            | Complete    | 2026-03-29 |
-| 7. Streaming & Nice-to-Have Polish  | 4/4            | Complete    | 2026-03-29 |
-| 8. Content Platform & Public Serving | 3/3            | Complete    | 2026-03-30 |
-| 9. LLM Financial Intelligence       | 7/7 | Complete   | 2026-03-30 |
-| 10. Transparency & Security         | 4/4 | Complete    | 2026-03-31 |
-| 11. File Management, Admin Inspector, Connectors UI & Debug Controls | 0/4 | Planned | |
+| Phase                                                                | Plans Complete | Status      | Completed  |
+| -------------------------------------------------------------------- | -------------- | ----------- | ---------- |
+| 1. Runtime & Account Foundation                                      | 3/3            | Complete    | 2026-03-23 |
+| 2. Financial Input Ingestion                                         | 5/5            | Complete    | 2026-03-24 |
+| 3. Financial Profile Clarity                                         | 4/4            | Complete    | 2026-03-25 |
+| 4. Safe Grounded Text Coaching                                       | 4/4            | Complete    | 2026-03-28 |
+| 5. Voice Coaching Loop                                               | 4/5            | In Progress |            |
+| 6. Learn+Act Cards & Demo Hardening                                  | 4/4            | Complete    | 2026-03-29 |
+| 7. Streaming & Nice-to-Have Polish                                   | 4/4            | Complete    | 2026-03-29 |
+| 8. Content Platform & Public Serving                                 | 3/3            | Complete    | 2026-03-30 |
+| 9. LLM Financial Intelligence                                        | 7/7            | Complete    | 2026-03-30 |
+| 10. Transparency & Security                                          | 4/4            | Complete    | 2026-03-31 |
+| 11. File Management, Admin Inspector, Connectors UI & Debug Controls | 1/4 | In Progress|  |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -206,10 +206,10 @@ Plans:
 **Goal:** Users can manage their uploaded files (retry/delete) from their profile; admins can inspect the full ingestion pipeline state for any upload; a Connectors tab shows upcoming bank integrations; tester/admin users have a /debug screen with ingestion restart, coaching purge, and full data reset controls.
 **Requirements**: FILE-01, FILE-02, RBAC-01, CONN-01, DEBUG-01
 **Depends on:** Phase 10
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 11-01-PLAN.md - RBAC role column: add role VARCHAR(16) to users, Round 15 migration, require_tester dep, UserDTO + frontend User type with role.
+- [x] 11-01-PLAN.md - RBAC role column: add role VARCHAR(16) to users, Round 15 migration, require_tester dep, UserDTO + frontend User type with role.
 - [ ] 11-02-PLAN.md - Pipeline trace infrastructure: IngestionTrace ORM model, Round 16 migration, ingestion_service instrumentation, admin trace endpoint.
 - [ ] 11-03-PLAN.md - "Your Files" tab + Admin Inspector: ingestionFilesApi, FilesTab, AdminInspectorDrawer, wired into ProfileScreen.
 - [ ] 11-04-PLAN.md - Connectors UI tab, debug backend endpoints (require_tester), DebugScreen at /debug, SettingsScreen developer link.

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Milestone complete
-stopped_at: Completed 10-04 (all Phase 10 plans complete)
-last_updated: "2026-03-31T14:33:23.654Z"
+status: Ready to execute
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-31T16:34:52.759Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 10
-  total_plans: 43
-  completed_plans: 43
+  total_plans: 47
+  completed_plans: 44
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 10 - transparency-and-security-with-about-page-encryption-at-rest-and-llm-no-data-retention
+**Current focus:** Phase 11 - file-management-admin-inspector-connectors-ui-debug-controls
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
+Phase: 11 (file-management-admin-inspector-connectors-ui-debug-controls) - EXECUTING
+Plan: 2 of 4
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Plan: Not started
 | Phase 10 P01 | 9 | 3 tasks | 8 files |
 | Phase 10-transparency-and-security-with-about-page-encryption-at-rest-and-llm-no-data-retention P03 | 8min | 2 tasks | 2 files |
 | Phase 10 P04 | 6min | 2 tasks | 8 files |
+| Phase 11-file-management-admin-inspector-connectors-ui-debug-controls P01 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,9 @@ Recent decisions affecting current work:
 - [Phase 10]: Privacy section inserted before App info in Settings — keeps transparency/privacy features grouped logically before meta-info
 - [Phase 10]: ttsNoticeDismissed persisted to sessionStorage — resets per browser session so user is reminded after each login
 - [Phase 10]: Public /about uses same PublicShell + State 1b pattern as /learn — no new infrastructure needed
+- [Phase 11]: role column added alongside is_admin Boolean (not replacing it) for backward compat — existing code using is_admin=True continues to work
+- [Phase 11]: require_admin uses role=='admin' OR is_admin check — both signals count until full migration
+- [Phase 11]: require_tester: role in (tester, admin) OR is_admin — admins can access tester features
 
 ### Pending Todos
 
@@ -174,6 +178,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T14:10:42.713Z
-Stopped at: Completed 10-04 (all Phase 10 plans complete)
+Last session: 2026-03-31T16:34:52.756Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
