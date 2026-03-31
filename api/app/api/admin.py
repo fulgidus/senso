@@ -27,13 +27,30 @@ def require_admin(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> UserDTO:
-    """Dependency that verifies the current user has is_admin=True."""
+    """Dependency that verifies the current user has role='admin' (or is_admin for compat)."""
     from app.db.models import User
 
     user_row = db.query(User).filter(User.id == current_user.id).first()
-    if not user_row or not user_row.is_admin:
+    if not user_row or (user_row.role != "admin" and not user_row.is_admin):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
+        )
+    return current_user
+
+
+def require_tester(
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserDTO:
+    """Dependency that verifies the current user has role in ('tester', 'admin') or is_admin."""
+    from app.db.models import User
+
+    user_row = db.query(User).filter(User.id == current_user.id).first()
+    if not user_row or (
+        user_row.role not in ("tester", "admin") and not user_row.is_admin
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Tester access required"
         )
     return current_user
 

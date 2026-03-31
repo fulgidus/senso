@@ -55,6 +55,7 @@ class AuthService:
             email=email_lower,
             password_hash=hash_password(password),
             is_admin=is_admin,
+            role="admin" if is_admin else "user",
         )
         repository.create_user(self.db, user)
         # Generate and store a wrapped data key for the new user (server-held for now)
@@ -115,6 +116,7 @@ class AuthService:
             first_name=user.first_name,
             last_name=user.last_name,
             is_admin=user.is_admin,
+            role=user.role or "user",
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
             default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
@@ -171,6 +173,7 @@ class AuthService:
                 first_name=user.first_name,
                 last_name=user.last_name,
                 is_admin=user.is_admin,
+                role=user.role or "user",
                 voice_gender=user.voice_gender or "indifferent",
                 voice_auto_listen=bool(user.voice_auto_listen),
                 default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,
@@ -208,6 +211,7 @@ class AuthService:
             first_name=user.first_name,
             last_name=user.last_name,
             is_admin=user.is_admin,
+            role=user.role or "user",
             voice_gender=user.voice_gender or "indifferent",
             voice_auto_listen=bool(user.voice_auto_listen),
             default_persona_id=user.default_persona_id or _DEFAULT_PERSONA_ID,

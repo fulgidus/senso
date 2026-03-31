@@ -11,6 +11,7 @@ class UserDTO(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     is_admin: bool = False
+    role: str = "user"
     voice_gender: VoiceGender = "indifferent"
     voice_auto_listen: bool = False
     default_persona_id: str = "mentore-saggio"

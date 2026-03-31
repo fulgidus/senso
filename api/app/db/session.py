@@ -481,6 +481,7 @@ def _seed_default_users() -> None:
                 password_hash=hash_password(password),
                 first_name=first_name,
                 is_admin=is_admin,
+                role="admin" if is_admin else "user",
             )
             repository.create_user(db, user)
             logger.info("Seeded default user: %s (admin=%s)", email_lower, is_admin)

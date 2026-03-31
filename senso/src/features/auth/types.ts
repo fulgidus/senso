@@ -6,6 +6,7 @@ export type User = {
     firstName: string | null
     lastName?: string | null
     isAdmin?: boolean
+    role?: string
     voiceGender?: VoiceGender
     voiceAutoListen?: boolean
     defaultPersonaId?: string
