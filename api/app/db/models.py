@@ -119,6 +119,8 @@ class User(Base):
     encrypted_user_key: str | None = Column(Text, nullable=True, default=None)
     pbkdf2_salt: str | None = Column(String(64), nullable=True, default=None)
     strict_privacy_mode: bool = Column(Boolean, nullable=False, default=False)
+    # Phase 11: RBAC role column — "user" | "tester" | "moderator" | "admin"
+    role: str = Column(String(16), nullable=False, default="user")
 
     # Relationships
     chat_sessions_participated = relationship(
@@ -210,6 +212,11 @@ class Upload(Base):
     )
     extraction_reports = relationship(
         "ExtractionReport",
+        back_populates="upload",
+        cascade="all, delete-orphan",
+    )
+    traces = relationship(
+        "IngestionTrace",
         back_populates="upload",
         cascade="all, delete-orphan",
     )
@@ -751,3 +758,30 @@ class Notification(Base):
     created_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
+
+
+class IngestionTrace(Base):
+    """Records each major step of the ingestion pipeline for admin debugging."""
+
+    __tablename__ = "ingestion_traces"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    upload_id: str = Column(
+        String(36),
+        ForeignKey("uploads.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    step_name: str = Column(String(128), nullable=False)
+    step_order: int = Column(Integer, nullable=False)
+    input_summary: str | None = Column(Text, nullable=True)
+    output_summary: str | None = Column(Text, nullable=True)
+    raw_input: str | None = Column(Text, nullable=True)
+    raw_output: str | None = Column(Text, nullable=True)
+    duration_ms: int | None = Column(Integer, nullable=True)
+    status: str = Column(String(16), nullable=False, default="success")
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+    upload = relationship("Upload", back_populates="traces")

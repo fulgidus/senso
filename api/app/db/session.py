@@ -344,6 +344,27 @@ def _add_missing_columns() -> None:
           END IF;
         END$$
         """,
+        # ── Round 15: Phase 11 — RBAC role column ─────────────────────────────────
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(16) NOT NULL DEFAULT 'user'",
+        # Backfill: existing admins (is_admin=TRUE) get role='admin'
+        "UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND (role = 'user' OR role IS NULL)",
+        # ── Round 16: Phase 11 — ingestion pipeline traces ────────────────────────
+        """
+        CREATE TABLE IF NOT EXISTS ingestion_traces (
+            id VARCHAR(36) PRIMARY KEY,
+            upload_id VARCHAR(36) NOT NULL REFERENCES uploads(id) ON DELETE CASCADE,
+            step_name VARCHAR(128) NOT NULL,
+            step_order INTEGER NOT NULL,
+            input_summary TEXT,
+            output_summary TEXT,
+            raw_input TEXT,
+            raw_output TEXT,
+            duration_ms INTEGER,
+            status VARCHAR(16) NOT NULL DEFAULT 'success',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_ingestion_traces_upload_id ON ingestion_traces (upload_id)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
