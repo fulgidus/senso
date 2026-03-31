@@ -44,7 +44,7 @@ Declared values (must be multiples of 4):
 
 **Exceptions:**
 - Toggle switches (privacy mode, voice auto-listen): `h-6 w-11` (24×44px) — touch target exception for switch thumb; matches the existing auto-listen toggle pattern from SettingsScreen.
-- Privacy badge in chat header: `px-2 py-0.5` (8×4px) — intentionally compact inline badge.
+- Privacy badge in chat header: `px-2 py-1` (8×4px) — intentionally compact inline badge.
 - Settings page max-width container: `max-w-2xl` (672px) — inherits from `SettingsScreen` pattern.
 
 > Source: `SettingsScreen.tsx` + `index.css` analyzed patterns.
@@ -58,14 +58,13 @@ Declared values (must be multiples of 4):
 | Body    | 16px  | 400 (regular)   | 1.5         |
 | Label   | 14px  | 400 (regular)   | 1.5         |
 | Heading | 20px  | 600 (semibold)  | 1.2         |
-| Display | 24px  | 700 (bold)      | 1.2         |
+| Display | 24px  | 600 (semibold)  | 1.2         |
 
 **Notes:**
 - Body 16px / 400 / 1.5 is set globally in `index.css` (`body { font-size: 16px; line-height: 1.5 }`). Do not override.
-- Page title (About page `<h1>` and Settings section `<h1>`) uses Display: `text-2xl font-bold` — matching `SettingsScreen` pattern.
-- Section headings (`<h2>` inside cards) use Heading: `text-base font-semibold` — exact match to SettingsScreen card headers.
-- Sub-body descriptions use Label: `text-sm text-muted-foreground` — matches the `settings.subtitle` + card body patterns.
-- Supplemental fine-print (legal disclaimers, hint text): 12px / 400 / 1.5 (`text-xs text-muted-foreground`) — already used by `settings.themeShortcutHint`.
+- Page title (About page `<h1>` and Settings section `<h1>`) uses Display: `text-2xl font-semibold` — size difference (24px vs 20px) provides hierarchy without a third weight tier.
+- Section headings (`<h2>` inside cards) use Heading: `text-xl font-semibold` — exact match to SettingsScreen card headers.
+- Sub-body descriptions and legal disclaimers use Label: `text-sm text-muted-foreground` — matches the `settings.subtitle` + card body patterns; muted color provides sufficient visual de-emphasis without a 5th size tier.
 
 > Source: `SettingsScreen.tsx` line 94–95, `index.css` lines 128–131.
 
@@ -127,7 +126,7 @@ Light mode palette extracted from `senso/src/index.css`:
 
 #### 3. Privacy Badge in `ChatScreen`
 - Appears in chat header area when `strict_privacy_mode = true`
-- Inline badge: `inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs font-medium px-2 py-0.5`
+- Inline badge: `inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs font-medium px-2 py-1`
 - Uses `ShieldCheck` icon from lucide-react (h-3 w-3) — already imported in `AppShell.tsx`
 - Copy: "Modalità privacy" (it) / "Privacy mode" (en) — short label only in header; tooltip/popover with full explanation on hover/click (optional, implementation agent's discretion)
 
