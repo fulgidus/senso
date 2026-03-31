@@ -12,6 +12,7 @@ from app.api.auth import router as auth_router
 from app.api.coaching import router as coaching_router
 from app.api.content_admin import router as content_admin_router
 from app.api.content_public import router as content_public_router
+from app.api.debug import router as debug_router
 from app.api.ingestion import router as ingestion_router
 from app.api.notifications import router as notifications_router
 from app.api.profile import router as profile_router
@@ -106,6 +107,7 @@ def create_app() -> FastAPI:
     app.include_router(
         notifications_router, prefix="/notifications", tags=["notifications"]
     )
+    app.include_router(debug_router)
 
     @app.get("/health")
     def healthcheck() -> dict[str, str]:
