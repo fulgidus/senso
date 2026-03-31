@@ -1,3 +1,4 @@
+import json as _json
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
@@ -19,9 +20,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship, Session
 from sqlalchemy import event
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesGcmEngine
-from sqlalchemy_utils import JSONType
 
 
 def _server_key() -> str:
@@ -34,6 +35,43 @@ def _server_key() -> str:
     from app.core.config import get_settings  # noqa: PLC0415
 
     return get_settings().encryption_key
+
+
+class EncryptedJSON(TypeDecorator):
+    """Encrypt a JSON-serialisable value (dict or list) using AES-GCM.
+
+    Workaround for ``StringEncryptedType(JSONType, ...)`` + PostgreSQL:
+    ``JSONType.process_result_value`` is a no-op on the Postgres dialect
+    because psycopg2 pre-parses JSON columns into Python objects.  When
+    ``StringEncryptedType`` decrypts the ciphertext and passes the plain
+    JSON *string* to ``JSONType.process_result_value`` on Postgres, the
+    string is returned as-is instead of being parsed — causing downstream
+    ``dict()`` / ``list`` operations to crash.
+
+    This decorator stores values as AES-GCM-encrypted TEXT and handles
+    ``json.dumps`` / ``json.loads`` itself, bypassing the dialect-specific
+    shortcut in ``JSONType``.
+    """
+
+    impl = Text
+    cache_ok = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._enc = StringEncryptedType(Text, _server_key, AesGcmEngine)
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return self._enc.process_bind_param(_json.dumps(value), dialect)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        decrypted = self._enc.process_result_value(value, dialect)
+        if decrypted is None:
+            return None
+        return _json.loads(decrypted)
 
 
 Base = declarative_base()
@@ -255,24 +293,24 @@ class UserProfile(Base):
         index=True,
     )
     income_summary: dict = Column(
-        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        EncryptedJSON(),
         nullable=False,
         default=dict,
     )
     monthly_expenses: float = Column(Float, nullable=True, default=None)
     monthly_margin: float = Column(Float, nullable=True, default=None)
     category_totals: dict = Column(
-        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        EncryptedJSON(),
         nullable=False,
         default=dict,
     )
     insight_cards: list = Column(
-        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        EncryptedJSON(),
         nullable=False,
         default=list,
     )
     coaching_insights: list = Column(
-        StringEncryptedType(JSONType, _server_key, AesGcmEngine),
+        EncryptedJSON(),
         nullable=False,
         default=list,
     )
