@@ -155,7 +155,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Streaming & Nice-to-Have Polish  | 4/4            | Complete    | 2026-03-29 |
 | 8. Content Platform & Public Serving | 3/3            | Complete    | 2026-03-30 |
 | 9. LLM Financial Intelligence       | 7/7 | Complete   | 2026-03-30 |
-| 10. Transparency & Security         | 0/4            | In Progress |            |
+| 10. Transparency & Security         | 2/4 | In Progress|  |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -192,10 +192,10 @@ Plans:
 **Goal:** Users see a clear About page explaining inner workings and disclaimers, sensitive financial data is encrypted at rest, and LLM calls enforce no-data-retention policies for user privacy.
 **Requirements**: TBD
 **Depends on:** Phase 9
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Plans:
-- [ ] 10-01-PLAN.md - Crypto foundations: sqlalchemy-utils/cryptography deps, Settings.encryption_key, PBKDF2 helpers, DB columns, schema updates.
-- [ ] 10-02-PLAN.md - LLM no-data-retention: openai-beta no-store header, OpenRouter ZDR strict mode, gemini passthrough, tests.
+- [x] 10-01-PLAN.md - Crypto foundations: sqlalchemy-utils/cryptography deps, Settings.encryption_key, PBKDF2 helpers, DB columns, schema updates.
+- [x] 10-02-PLAN.md - LLM no-data-retention: openai-beta no-store header, OpenRouter ZDR strict mode, gemini passthrough, tests.
 - [ ] 10-03-PLAN.md - T2 column encryption: StringEncryptedType on 6 ORM columns, encryption roundtrip tests.
 - [ ] 10-04-PLAN.md - Frontend: AboutPage, /about route, Settings Privacy section + toggle, ChatScreen privacy badge + TTS notice, i18n strings.
