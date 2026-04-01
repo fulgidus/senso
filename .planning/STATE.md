@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 12-ux-accessibility-mobile-polish-01-PLAN.md
-last_updated: "2026-04-01T13:51:56.728Z"
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-04-01T13:56:38.903Z"
 progress:
   total_phases: 12
   completed_phases: 11
   total_plans: 52
-  completed_plans: 49
+  completed_plans: 50
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 12 (ux-accessibility-mobile-polish) - EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -90,6 +90,7 @@ Plan: 3 of 5
 | Phase 11 P04 | 30min | 2 tasks | 10 files |
 | Phase 12 P03 | 5min | 3 tasks | 6 files |
 | Phase 12-ux-accessibility-mobile-polish P01 | 30 | 3 tasks | 13 files |
+| Phase 12-ux-accessibility-mobile-polish P02 | 15 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -174,6 +175,8 @@ Recent decisions affecting current work:
 - [Phase 12]: Used fmt.currency() from useLocaleFormat for BalanceMask values, consistent with plan 12-02 migration
 - [Phase 12-ux-accessibility-mobile-polish]: Used useSyncExternalStore (React 19 native) for matchMedia hooks to guarantee tear-free concurrent-mode reads
 - [Phase 12-ux-accessibility-mobile-polish]: useLocaleFormat reads i18n.language from react-i18next (not hardcoded) to stay locale-reactive at runtime
+- [Phase 12-ux-accessibility-mobile-polish]: Used import.meta.glob for regression test instead of Node fs/path (jsdom environment requires Vite-native file scanning)
+- [Phase 12-ux-accessibility-mobile-polish]: Extended it-IT fix scope to AdminInspectorDrawer and FilesTab (auto-fix) so regression test passes cleanly
 
 ### Pending Todos
 
@@ -202,5 +205,5 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T13:51:56.725Z
-Stopped at: Completed 12-ux-accessibility-mobile-polish-01-PLAN.md
+Last session: 2026-04-01T13:56:38.900Z
+Stopped at: Completed 12-02-PLAN.md
