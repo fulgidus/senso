@@ -231,13 +231,15 @@ Plans:
 
 ### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 
-**Goal:** [To be planned]
+**Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13 to break down)
+- [ ] 13-01-PLAN.md - PyNaCl dependency + nacl_crypto.py helpers + username_generator service + Round 17 DB migration (username, public_key_b64, signing_key_b64 columns)
+- [ ] 13-02-PLAN.md - Wire signup() to generate username and key pairs; update UserDTO with 3 new fields; add _to_user_dto() helper; repository.get_user_by_username; integration tests
+- [ ] 13-03-PLAN.md - Replace obfuscated email with username in admin merchant map API; extend frontend User type; update user-avatar display utilities; AppShell username display
 
 ### Phase 14: E2E Messaging Backend — undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
 
