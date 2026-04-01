@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { AlertTriangle, Lightbulb, Plus } from "lucide-react"
+import { AlertTriangle, Eye, EyeOff, Lightbulb, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { FilesTab } from "@/features/profile/FilesTab"
 import { AdminInspectorDrawer } from "@/features/profile/AdminInspectorDrawer"
+import { BalanceMask } from "@/components/BalanceMask"
 import {
   Bar,
   BarChart,
@@ -117,6 +118,17 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline" | "files" | "connectors">("summary")
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [inspectUploadId, setInspectUploadId] = useState<string | null>(null)
+  const [balanceMasked, setBalanceMasked] = useState(
+    () => localStorage.getItem("senso:balanceMask") === "true"
+  )
+
+  const toggleBalanceMask = () => {
+    setBalanceMasked((prev) => {
+      const next = !prev
+      localStorage.setItem("senso:balanceMask", String(next))
+      return next
+    })
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -211,14 +223,23 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
-      <div className="mb-2">
-        <h2 className="text-xl font-semibold text-foreground">{t("profile.heading")}</h2>
-        {confirmedDate && (
-          <p className="text-sm text-muted-foreground">
-            {t("profile.updatedOn", { date: confirmedDate })}
-            {dataSourcesLabel && <> · {t("profile.sources", { sources: dataSourcesLabel })}</>}
-          </p>
-        )}
+      <div className="mb-2 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">{t("profile.heading")}</h2>
+          {confirmedDate && (
+            <p className="text-sm text-muted-foreground">
+              {t("profile.updatedOn", { date: confirmedDate })}
+              {dataSourcesLabel && <> · {t("profile.sources", { sources: dataSourcesLabel })}</>}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={toggleBalanceMask}
+          aria-label={t("accessibility.toggleBalanceVisibility")}
+          className="rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors"
+        >
+          {balanceMasked ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
       </div>
 
       {/* Stale profile banner */}
@@ -350,10 +371,13 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">{t("profile.incomeMonthly")}</p>
                   <p className="text-xl font-semibold text-foreground">
-                    {formatCurrency(
-                      profile.incomeSummary?.amount ?? null,
-                      profile.incomeSummary?.currency,
-                    )}
+                    <BalanceMask
+                      value={formatCurrency(
+                        profile.incomeSummary?.amount ?? null,
+                        profile.incomeSummary?.currency,
+                      )}
+                      masked={balanceMasked}
+                    />
                   </p>
                   {profile.incomeSummary?.source && (
                     <span className="mt-1 inline-block rounded-full border border-primary px-2 py-0.5 text-xs text-muted-foreground">
@@ -370,7 +394,10 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     <span className="text-xs">{t("profile.expensesRecurring")}</span>
                   </p>
                   <p className="text-xl font-semibold text-foreground">
-                    {formatCurrency(profile.monthlyExpenses)}
+                    <BalanceMask
+                      value={formatCurrency(profile.monthlyExpenses)}
+                      masked={balanceMasked}
+                    />
                   </p>
                 </div>
 
@@ -388,7 +415,10 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                         : "text-destructive"
                     }`}
                   >
-                    {formatCurrency(profile.monthlyMargin)}
+                    <BalanceMask
+                      value={formatCurrency(profile.monthlyMargin)}
+                      masked={balanceMasked}
+                    />
                   </p>
                 </div>
               </div>
