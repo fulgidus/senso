@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
 import { NotificationPanel } from "@/features/notifications/NotificationPanel"
 import { getNotifications } from "@/api/notificationsApi"
+import { OfflineBanner } from "@/components/OfflineBanner"
 
 // ── Topbar-buttons preference (localStorage, no backend needed) ───────────────
 
@@ -78,7 +79,7 @@ function NavItemLink({ item, onClick }: { item: NavItem; onClick?: () => void })
       onClick={onClick}
       className={({ isActive }) =>
         [
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          "ripple-target flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
           isActive
             ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -99,7 +100,7 @@ function TopBarNavLink({ item }: { item: NavItem }) {
       end={item.to === "/"}
       className={({ isActive }) =>
         [
-          "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
+          "ripple-target flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
           isActive
             ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -420,6 +421,8 @@ export function AppShell({ children }: AppShellProps) {
           <UserMenu showEmail={topbarButtons} />
         </div>
       </header>
+
+      <OfflineBanner />
 
       {/* Sidebar overlay */}
       {drawerOpen && (
