@@ -54,11 +54,11 @@ Non è un'app di budgeting. Non ti dà grafici. Ti **parla**, ti **guida**, ti *
 
 ## Tono
 
-- Da mentore: diretto, anche duro, ma **sempre dalla tua parte**
-- Le cose te le dice per il tuo bene, non per farsi una risata
-- Non giudica, non prende in giro: ti mostra i fatti e ti dà una strada
+- Da mentore: diretto, anche duro, ma **sempre dalla tua parte** (configurabile via personas)
+- Le cose te le dice per il tuo bene, non per giudicarti
+- Non prende in giro: ti mostra i fatti e ti dà una strada
 - Esempi:
-    - "900€ di telefono con 300€ di margine mensile. Puoi farlo, ma ti blocchi per 3 mesi. Ti spiego un'alternativa che forse non hai considerato."
+    - "900€ di telefono con 300€ di margine mensile. Puoi farlo, ma ti blocchi per 3 mesi. Ti spiego un'alternativa che forse non hai considerato ..."
     - "Stai spendendo 280€/mese in delivery. Non è un giudizio - è che con quei soldi in 6 mesi ti paghi una vacanza vera. Vuoi che ti faccia vedere come?"
     - "Mettere via anche solo 30€ al mese cambia tutto. Sembra niente, ma tra un anno sono 360€ che oggi non hai. Ti mostro come automatizzarlo se vuoi."
 
@@ -72,7 +72,7 @@ La "coscienza" di SENSO è definita da una gerarchia di file in `personas/`:
 - **`personas/config.json`** - elenco delle personas disponibili (id, nome, descrizione, icona, file)
 - **`personas/soul/{persona}.md`** - file comportamentale di ogni persona: tono, stile, esempi
 
-Le personas selezionabili sono:
+Le personas selezionabili (per ora) sono:
 
 | ID                 | Nome                | Vibe                                   |
 | ------------------ | ------------------- | -------------------------------------- |
