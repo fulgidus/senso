@@ -223,7 +223,7 @@ Plans:
 **Plans:** 1/5 plans executed
 
 Plans:
-- [ ] 12-01-PLAN.md - Foundation hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat) + CSS accessibility rules + i18n keys.
+- [x] 12-01-PLAN.md - Foundation hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat) + CSS accessibility rules + i18n keys.
 - [ ] 12-02-PLAN.md - i18n hardcoded locale fix: replace all 14 "it-IT" instances + 3 hardcoded Italian strings with useLocaleFormat hook and i18n keys.
 - [x] 12-03-PLAN.md - OfflineBanner, BalanceMask components + AppShell integration + ripple feedback on nav buttons.
 - [ ] 12-04-PLAN.md - PageTransition component, enhanced drawer animation, usePullToRefresh hook + integration into ChatScreen and ProfileScreen.
