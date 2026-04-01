@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
+import { useHapticFeedback } from "@/hooks/useHapticFeedback"
 import { Button } from "@/components/ui/button"
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config"
 import { A2UISurface } from "@/components/A2UISurface"
@@ -937,12 +938,22 @@ function findLastStreamingAssistantIndex(messages: DisplayMessage[]): number {
   return -1
 }
 
+// ── Time-of-day greeting ──────────────────────────────────────────────────────
+
+function getGreetingKey(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return "coaching.greetingMorning"
+  if (hour < 18) return "coaching.greetingAfternoon"
+  return "coaching.greetingEvening"
+}
+
 // ── ChatScreen ────────────────────────────────────────────────────────────────
 
 export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessionId: propSessionId, onSessionCreated }: ChatScreenProps) {
   const { user } = useAuthContext()
   const { t } = useTranslation()
   const { theme } = useTheme()
+  const haptic = useHapticFeedback()
 
   // Resolve which gender key to use for translated strings:
   // user preference wins unless "indifferent", then fall back to persona default.
@@ -1125,10 +1136,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             const msg = await getWelcomeMessage(locale)
             setMessages([{ role: "assistant", content: msg, isWelcome: true }])
           } catch {
-            const fallback =
-              locale === "en"
-                ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
-                : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+            const fallback = t(getGreetingKey())
             setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
           } finally {
             setWelcomeLoading(false)
@@ -1148,10 +1156,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
           const msg = await getWelcomeMessage(locale)
           setMessages([{ role: "assistant", content: msg, isWelcome: true }])
         } catch {
-          const fallback =
-            locale === "en"
-              ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
-              : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+          const fallback = t(getGreetingKey())
           setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
         } finally {
           setWelcomeLoading(false)
@@ -1194,10 +1199,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
       const msg = await getWelcomeMessage(locale)
       setMessages([{ role: "assistant", content: msg, isWelcome: true }])
     } catch {
-      const fallback =
-        locale === "en"
-          ? t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
-          : t(`coaching.fallbackWelcome.${effectiveGender}`, { name: personaName })
+      const fallback = t(getGreetingKey())
       setMessages([{ role: "assistant", content: fallback, isWelcome: true }])
     } finally {
       setWelcomeLoading(false)
@@ -1244,6 +1246,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   // ── Send message ───────────────────────────────────────────────────────────
 
   const handleSend = useCallback(async (text?: string) => {
+    haptic.tap()
     const trimmed = (text ?? inputText).trim()
     if (!trimmed || isLoading) return
 
@@ -1380,6 +1383,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
       // In voice mode, auto-play TTS for the reply
       onAssistantMessageRef.current(finalResponse.message)
     } catch (err) {
+      haptic.error()
       clearTimeout(timeoutId)
       const errorCode = err instanceof CoachingApiError ? err.code : "network_error"
       const isRetryable = errorCode === "llm_error" || errorCode === "network_error"
@@ -1784,7 +1788,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                   variant="ghost"
                   size="icon"
                   className={isVoiceMode ? "text-primary" : "text-muted-foreground"}
-                  onClick={() => void toggleVoiceMode()}
+                  onClick={() => { haptic.tap(); void toggleVoiceMode() }}
                   disabled={isLoading}
                   aria-label={t("coaching.voiceModeActivate")}
                   title={t("coaching.voiceModeActivate")}
