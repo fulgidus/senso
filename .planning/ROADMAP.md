@@ -228,3 +228,33 @@ Plans:
 - [x] 12-03-PLAN.md - OfflineBanner, BalanceMask components + AppShell integration + ripple feedback on nav buttons.
 - [x] 12-04-PLAN.md - PageTransition component, enhanced drawer animation, usePullToRefresh hook + integration into ChatScreen and ProfileScreen.
 - [x] 12-05-PLAN.md - Dynamic micro-copy (time-of-day greetings), haptic feedback on actions, optimistic UI consistency audit, full test suite validation.
+
+### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 12
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 13 to break down)
+
+### Phase 14: E2E Messaging Backend — undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 13
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 14 to break down)
+
+### Phase 15: E2E Messaging Frontend — client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 14
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 15 to break down)

@@ -204,6 +204,9 @@ Recent decisions affecting current work:
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping
 - Phase 10 added: Transparency & security with about page, encryption at rest & LLM no-data-retention
 - Phase 12 added: UX, Accessibility & Mobile Polish (phase 11 reserved for unpushed work on other machine)
+- Phase 13 added: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
+- Phase 14 added: E2E Messaging Backend — undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
+- Phase 15 added: E2E Messaging Frontend — client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
 
 ### Design Decisions (2026-04-01 session)
 
