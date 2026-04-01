@@ -1,0 +1,35 @@
+---
+date: "2026-04-01 19:31"
+promoted: false
+---
+
+- pwa not working well (can add to home screen, but still opens a browser, and the address bar is a problem)
+- drag to update not working well
+- "profile/my-files" page breaking on entering (there are no error boundaries, this means you cannot do shit, just refresh)
+  - refreshing resets the page to the first section of the page; hash nav needed ("profile#files", "profile#connectors", "profile#timeline", etc)
+- i can see a nugget  with "estimated_from_transactions" written in it (missing trans?), said tag is not true, since i did the questionnaire as well
+- final figures in the bottom of my main financial profile are never ranges, although i specifically introduced ranges in both my income and expences
+  - also, they can be "saved" but the button never changes, no visual confirmation that now those values are considered "confirmed" by the system, no button to edit them or reset them to the auto-calculated value (which should always be visible anyway to give an idea of the margin of error between user opinion and system evaluation)
+  - also, "save profile" is not the correct phrasing: it should be more like express/specify/override/annotate/idk total-balance/main-figures-idk
+- button to categorize manually transactions disappeared
+  - when it was available it didn't ask the user if the counterpart was a merchant/shop/company or a private individual: ¡we don't save in the common knowledge private individuals pii from transaction recipients!
+- category names are not localized
+- the first graph should be a pie, not a fucking hystogram
+- can't find my special buttons to force the account to reset, redigest, or any other admin action
+  - found them, why the fuck would they be buried in the settings? make a submenu and slam in there all non-standard tools/pages
+  - the weird commands like restart ingestion pipeline should also bring me to the correct section to monitor the situation
+  - total reset button is broken
+- merchant map page on mobile is unusable: table rows must mutate into cards on mobile, ¡this is valid for all tables!, we cannot hope to translate very complex and wide rows to mobile without at least making them multi-line rows where needed
+- in content management the content items must remain together in the table, and not by virtue of ordering
+  - ordering is applied to the localized field: if i order by title and the component titles start by it:a en:b (we are in en locale) the group will have content:en at the "helm", will be ordered by title:en, so "b".
+  - missing translations everywhere
+  - "admin.content.colLocale" and "admin.content.colLocale", and "admin.content.colActions" need to be icons to save horizontal space
+  - the option to order a column should be signled to the user; right now it's not obvious you can do that unless you hover with the mouse and get suspictious of the link: on mobile is a virtually invisible feature
+  - no pagination present, we need it
+- tts is broken
+- we need to reationalize the kind of content the mentor can render apart from text: we still support different and weird surfaces that are misused by it
+- settings coach picker has a loght background in the dark theme: unreadable
+- coach picker breaks coach chat: only default coach works
+- token renewal is apparently broken
+- internal navigation with expired tokens doesn't kick to login. token not valid + inability to renew = hard redirect to /
+- stop using alert(), it diminishes the ux: make a shadcn-based ui component so we can have the backgroun blurred, animations, all the bells and whistles
