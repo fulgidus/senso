@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. LLM Financial Intelligence                                        | 7/7            | Complete    | 2026-03-30 |
 | 10. Transparency & Security                                          | 4/4            | Complete    | 2026-03-31 |
 | 11. File Management, Admin Inspector, Connectors UI & Debug Controls | 4/4 | Complete    | 2026-04-01 |
-| 12. UX, Accessibility & Mobile Polish                                | 0/5            | Not started | -          |
+| 12. UX, Accessibility & Mobile Polish                                | 1/5 | In Progress|  |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -220,11 +220,11 @@ Plans:
 **Goal:** Improve user experience, accessibility compliance, and mobile interaction quality with prioritized low-cost/high-impact features: ripple feedback, pull-to-refresh, dynamic micro-copy, offline detection, menu animation, haptic feedback, privacy toggle for balances, prefers-reduced-motion/contrast/color-scheme support, page transition animations, i18n centralization, and optimistic UI patterns.
 **Requirements**: TBD
 **Depends on:** Phase 10
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md - Foundation hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat) + CSS accessibility rules + i18n keys.
 - [ ] 12-02-PLAN.md - i18n hardcoded locale fix: replace all 14 "it-IT" instances + 3 hardcoded Italian strings with useLocaleFormat hook and i18n keys.
-- [ ] 12-03-PLAN.md - OfflineBanner, BalanceMask components + AppShell integration + ripple feedback on nav buttons.
+- [x] 12-03-PLAN.md - OfflineBanner, BalanceMask components + AppShell integration + ripple feedback on nav buttons.
 - [ ] 12-04-PLAN.md - PageTransition component, enhanced drawer animation, usePullToRefresh hook + integration into ChatScreen and ProfileScreen.
 - [ ] 12-05-PLAN.md - Dynamic micro-copy (time-of-day greetings), haptic feedback on actions, optimistic UI consistency audit, full test suite validation.
