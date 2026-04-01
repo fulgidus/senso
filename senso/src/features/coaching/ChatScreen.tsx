@@ -1596,6 +1596,14 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   // Keep ref in sync so handleSend can call it without a circular hook dep
   onAssistantMessageRef.current = onAssistantMessage
 
+  // canPlay mirrors the useTTS logic: show voice controls when TTS is possible.
+  // Gating the voice mode toggle on isSttAvailable (STT) would hide it on Firefox/Safari
+  // where SpeechRecognition is absent but speechSynthesis still works. VoiceModeBar
+  // already handles !isSttAvailable gracefully (disabled mic + "unavailable" hint).
+  const canPlay =
+    typeof window !== "undefined" &&
+    (ttsConfig.browserFallbackEnabled ? "speechSynthesis" in window : true)
+
   const [sttErrorVisible, setSttErrorVisible] = useState(false)
   const [ttsNoticeDismissed, setTtsNoticeDismissed] = useState(
     () => sessionStorage.getItem("senso:ttsNoticeDismissed") === "true"
@@ -1782,7 +1790,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         ) : (
           <>
             <div className="flex gap-2 items-end">
-              {isSttAvailable && (
+              {canPlay && (
                 <Button
                   type="button"
                   variant="ghost"
