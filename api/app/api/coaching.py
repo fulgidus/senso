@@ -62,7 +62,9 @@ class TTSRequest(BaseModel):
     locale: Literal["it", "en"] = "it"
     persona_id: str | None = None
     gender: str | None = None
-    message_id: str  # FK to chat_messages.id — required for AudioCache tracking
+    message_id: str | None = (
+        None  # FK to chat_messages.id — optional for AudioCache tracking
+    )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -465,7 +467,7 @@ def tts_speak(
             req.locale,
             normalization=el_settings.get("normalization", "elevenlabs"),
             voice_settings=vs,
-            db=db,
+            db=db if req.message_id else None,
             message_id=req.message_id,
         )
     except TTSUnavailableError as exc:
