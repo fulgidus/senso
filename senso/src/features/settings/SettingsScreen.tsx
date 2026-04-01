@@ -12,6 +12,7 @@ import { getDisplayName } from "@/lib/user-avatar"
 import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
 import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
+import { useHapticFeedback } from "@/hooks/useHapticFeedback"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -26,6 +27,7 @@ export function SettingsScreen() {
   const { user, signOut, updateUser } = useAuthContext()
   const { theme, setTheme } = useTheme()
   const { t } = useTranslation()
+  const haptic = useHapticFeedback()
 
   const [firstName, setFirstName] = useState(user.firstName ?? "")
   const [lastName, setLastName] = useState(user.lastName ?? "")
@@ -84,6 +86,7 @@ export function SettingsScreen() {
   ]
 
   const handleTopbarToggle = (value: boolean) => {
+    haptic.tap()
     writeTopbarButtons(value)
     setTopbarButtonsState(value)
     // Live-update the AppShell without reload via the window bridge
@@ -92,6 +95,7 @@ export function SettingsScreen() {
   }
 
   const handlePrivacyToggle = async (value: boolean) => {
+    haptic.tap()
     const previous = strictPrivacyMode
     setStrictPrivacyMode(value)       // optimistic update
     setPrivacySaving(true)
@@ -229,7 +233,7 @@ export function SettingsScreen() {
           {VOICE_GENDER_OPTIONS.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => setVoiceGender(opt.value)}
+              onClick={() => { haptic.tap(); setVoiceGender(opt.value) }}
               className={[
                 "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
                 voiceGender === opt.value
@@ -252,7 +256,7 @@ export function SettingsScreen() {
             <button
               role="switch"
               aria-checked={voiceAutoListen}
-              onClick={() => setVoiceAutoListen((v) => !v)}
+              onClick={() => { haptic.tap(); setVoiceAutoListen((v) => !v) }}
               className={[
                 "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
                 voiceAutoListen ? "bg-primary" : "bg-muted",
