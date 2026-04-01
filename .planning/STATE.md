@@ -166,7 +166,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+1. E2E Encrypted Messaging, Identity & Crypto Architecture (area: architecture) — supersedes original symmetric envelope scheme. Full design captured in todo file.
 
 ### Blockers/Concerns
 
@@ -177,9 +177,19 @@ None yet.
 - Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping
 - Phase 10 added: Transparency & security with about page, encryption at rest & LLM no-data-retention
+- Phase 12 added: UX, Accessibility & Mobile Polish (phase 11 reserved for unpushed work on other machine)
+
+### Design Decisions (2026-04-01 session)
+
+- Username format: `$adjective-noun-digits` (e.g. `$witty-otter-42`), `$` prefix
+- Admin username format: `!admin` (renamable), `!` prefix, separate key pair for signing official messages
+- Crypto stack: NaCl/libsodium — X25519 + XChaCha20-Poly1305 + Ed25519 + Argon2id
+- Message routing: `undelivered_messages` table with `recipient_hashes: string[]`, pull-on-login, per-recipient hash removal, 30-day TTL purge
+- Chatrooms: same mechanism with room IDs
+- Attachments: S3 refs in frontmatter `internal:` block (not inline base64)
+- Zero-knowledge routing: poll+probe for v1, tag-based for v2
 
 ## Session Continuity
 
 Last session: 2026-03-31T16:38:08.084Z
 Stopped at: Completed 11-02-PLAN.md
-Resume file: None
