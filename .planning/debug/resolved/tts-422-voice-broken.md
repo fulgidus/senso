@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "TTS voice output is broken. POST /coaching/tts returns HTTP 422."
 created: 2026-04-01T00:00:00Z
 updated: 2026-04-01T00:30:00Z
