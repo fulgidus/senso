@@ -1,7 +1,16 @@
 {
     "app": {
         "loading": "Caricamento sessione...",
-        "profileRequired": "Completa il tuo profilo prima di accedere al coach."
+        "profileRequired": "Completa il tuo profilo prima di accedere al coach.",
+        "offlineBanner": "Sei offline. Alcune funzionalità potrebbero non essere disponibili.",
+        "offlineRetry": "Riconnessione in corso..."
+    },
+    "accessibility": {
+        "balanceHidden": "Saldo nascosto",
+        "balanceVisible": "Saldo visibile",
+        "toggleBalanceVisibility": "Mostra/nascondi saldi",
+        "reducedMotionActive": "Animazioni ridotte",
+        "highContrastActive": "Contrasto elevato attivo"
     },
     "nav": {
         "home": "Home",
@@ -137,7 +146,10 @@
             "update": "Aggiorna",
             "later": "Dopo"
         },
-        "uncategorizedBadge": "{{count}} da rivedere"
+        "uncategorizedBadge": "{{count}} da rivedere",
+        "pullToRefresh": "Trascina per aggiornare",
+        "refreshing": "Aggiornamento...",
+        "perYear": "/anno"
     },
     "questionnaire": {
         "heading": "S.E.N.S.O.",
@@ -291,7 +303,10 @@
         "streamInterrupted": "Risposta interrotta. Controlla la connessione e riprova.",
         "personaPickerTitle": "Scegli il tuo coach",
         "privacyBadge": "Modalità privacy",
-        "ttsDisabledStrict": "Modalità privacy attiva — le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce."
+        "ttsDisabledStrict": "Modalità privacy attiva — le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce.",
+        "greetingMorning": "Buongiorno! Come posso aiutarti oggi?",
+        "greetingAfternoon": "Buon pomeriggio! Come posso aiutarti?",
+        "greetingEvening": "Buonasera! Come posso aiutarti stasera?"
     },
     "calculator": {
         "amount": "Importo",

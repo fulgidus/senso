@@ -257,3 +257,65 @@
 .marp-viewer.senso-dark .marp-slide h1,
 .marp-viewer.senso-dark .marp-slide h2 { color: #5B9BD5; }
 .marp-viewer.senso-dark .marp-nav { background: #112D4E; border-color: #1e4472; }
+
+/* ── Phase 12: Accessibility media query overrides ── */
+
+/* Global reduced-motion override — disables all animations and transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode — increase border and ring visibility */
+@media (prefers-contrast: more) {
+  :root {
+    --border: oklch(0.5 0 0);
+    --ring: oklch(0.3 0 0);
+  }
+  .dark {
+    --border: oklch(0.7 0 0);
+    --ring: oklch(0.8 0 0);
+  }
+}
+
+/* Ripple effect base styles */
+.ripple-target {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-target::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+    currentColor 0%, transparent 60%);
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  pointer-events: none;
+}
+
+.ripple-target:active::after {
+  opacity: 0.12;
+  transform: scale(2.5);
+  transition: transform 0s, opacity 0s;
+}
+
+/* Disable ripple animation when reduced-motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  .ripple-target::after {
+    transition: none;
+    transform: none;
+  }
+  .ripple-target:active::after {
+    opacity: 0.12;
+    transform: none;
+  }
+}
