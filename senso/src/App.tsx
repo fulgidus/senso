@@ -15,6 +15,7 @@ import { ModerationQueuePage } from "@/features/admin/ModerationQueuePage"
 import { readAccessToken } from "@/features/auth/storage"
 import type { User } from "@/features/auth/types"
 import { AboutPage } from "@/features/about/AboutPage"
+import { DebugScreen } from "@/features/debug/DebugScreen"
 
 // Route modules
 import { LoginPage } from "@/routes/LoginPage"
@@ -197,6 +198,9 @@ function AppRoutes() {
             />
           )}
           <Route path="/about" element={<AboutPage />} />
+          {(user.isAdmin || user.role === "tester" || user.role === "admin") && (
+            <Route path="/debug" element={<DebugScreen />} />
+          )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

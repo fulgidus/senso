@@ -27,6 +27,7 @@ import {
 } from "@/lib/profile-api"
 import { ApiClientError } from "@/lib/api-client"
 import { TimelineTab } from "@/features/profile/TimelineTab"
+import { ConnectorsTab } from "@/features/profile/ConnectorsTab"
 
 const CHART_COLORS = [
   "var(--chart-1)",
@@ -113,7 +114,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const [expensesEdit, setExpensesEdit] = useState<string>("")
   const [isStale, setIsStale] = useState(false)
   const [retriggerLoading, setRetriggerLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline" | "files">("summary")
+  const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline" | "files" | "connectors">("summary")
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [inspectUploadId, setInspectUploadId] = useState<string | null>(null)
 
@@ -307,6 +308,16 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         >
           {t("files.tabLabel")}
         </button>
+        <button
+          onClick={() => setActiveTab("connectors")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+            activeTab === "connectors"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("connectors.tabLabel")}
+        </button>
       </div>
 
       {/* Timeline tab */}
@@ -323,8 +334,13 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         />
       )}
 
+      {/* Connectors tab */}
+      {activeTab === "connectors" && (
+        <ConnectorsTab />
+      )}
+
       {/* Summary + Charts tabs */}
-      {activeTab !== "timeline" && activeTab !== "files" && (
+      {activeTab !== "timeline" && activeTab !== "files" && activeTab !== "connectors" && (
         <div className="space-y-8">
           {/* Summary Card */}
           {activeTab === "summary" && (

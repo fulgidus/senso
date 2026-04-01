@@ -368,6 +368,20 @@ export function SettingsScreen() {
             {t("settings.aboutCta")} →
           </Link>
         </div>
+
+        {/* Developer tools link — visible only for testers and admins */}
+        {(user.role === "tester" || user.role === "admin" || user.isAdmin) && (
+          <div className="pt-4 border-t border-border">
+            <p className="text-sm font-medium text-foreground">{t("settings.devToolsTitle")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("settings.devToolsHint")}</p>
+            <Link
+              to="/debug"
+              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              {t("settings.devToolsCta")} →
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* App info */}

@@ -422,7 +422,10 @@
         "strictPrivacyLoadError": "Unable to load privacy preferences. Please try again.",
         "aboutTitle": "About & transparency",
         "aboutHint": "Learn how S.E.N.S.O. works, what we store, and how we use AI.",
-        "aboutCta": "Read how it works"
+        "aboutCta": "Read how it works",
+        "devToolsTitle": "Developer tools",
+        "devToolsHint": "Controls for testers and administrators.",
+        "devToolsCta": "Open developer tools"
     },
     "about": {
         "pageTitle": "How S.E.N.S.O. works",
@@ -731,5 +734,28 @@
         "noExtracted": "No extracted document available.",
         "confidence": "Confidence",
         "durationMs": "{{ms}} ms"
+    },
+    "connectors": {
+        "tabLabel": "Connections",
+        "title": "Connect your account",
+        "subtitle": "Automatically import your transactions.",
+        "comingSoon": "Coming soon",
+        "hint": "Bank integrations are coming soon."
+    },
+    "debug": {
+        "title": "Developer tools",
+        "warning": "Warning: these actions are irreversible and act on your data.",
+        "error": "An error occurred.",
+        "loading": "Running\u2026",
+        "restartTitle": "Restart extraction pipeline",
+        "restartDesc": "Resets all failed or stuck files back to pending. Useful to retry extraction after changes.",
+        "restartCta": "Restart pipeline",
+        "purgeTitle": "Clear coaching history",
+        "purgeDesc": "Deletes all chat messages with the coach. The session starts fresh.",
+        "purgeCta": "Clear history",
+        "nukeTitle": "Full data reset",
+        "nukeDesc": "Deletes all uploaded files, extracted documents, and chat history. Useful for a clean demo.",
+        "nukeCta": "Full reset",
+        "nukeConfirm": "Are you sure? This will delete ALL your uploaded data and history. It cannot be undone."
     }
 }

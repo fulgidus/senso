@@ -422,7 +422,10 @@
         "strictPrivacyLoadError": "Impossibile caricare le preferenze privacy. Riprova.",
         "aboutTitle": "Informazioni e trasparenza",
         "aboutHint": "Scopri come funziona S.E.N.S.O., cosa conserviamo e come usiamo l'AI.",
-        "aboutCta": "Leggi come funziona"
+        "aboutCta": "Leggi come funziona",
+        "devToolsTitle": "Strumenti sviluppatore",
+        "devToolsHint": "Controlli per tester e amministratori.",
+        "devToolsCta": "Apri strumenti sviluppatore"
     },
     "about": {
         "pageTitle": "Come funziona S.E.N.S.O.",
@@ -731,5 +734,28 @@
         "noExtracted": "Nessun documento estratto disponibile.",
         "confidence": "Confidenza",
         "durationMs": "{{ms}} ms"
+    },
+    "connectors": {
+        "tabLabel": "Connessioni",
+        "title": "Collega il tuo conto",
+        "subtitle": "Importa automaticamente le tue transazioni.",
+        "comingSoon": "Prossimamente",
+        "hint": "Le integrazioni bancarie saranno disponibili prossimamente."
+    },
+    "debug": {
+        "title": "Strumenti sviluppatore",
+        "warning": "Attenzione: queste azioni sono irreversibili e agiscono sui tuoi dati.",
+        "error": "Errore durante l'operazione.",
+        "loading": "In corso\u2026",
+        "restartTitle": "Riavvia pipeline di estrazione",
+        "restartDesc": "Rimette in stato 'pending' tutti i file in errore o bloccati. Utile per riprovare l'estrazione dopo modifiche.",
+        "restartCta": "Riavvia pipeline",
+        "purgeTitle": "Cancella cronologia coach",
+        "purgeDesc": "Elimina tutti i messaggi della chat con il coach. La sessione riparte da zero.",
+        "purgeCta": "Cancella cronologia",
+        "nukeTitle": "Reset totale dati",
+        "nukeDesc": "Elimina tutti i file caricati, i documenti estratti e la cronologia della chat. Utile per un demo pulito.",
+        "nukeCta": "Reset totale",
+        "nukeConfirm": "Sei sicuro? Questa azione eliminer\u00e0 TUTTI i tuoi dati caricati e la cronologia. Non \u00e8 reversibile."
     }
 }
