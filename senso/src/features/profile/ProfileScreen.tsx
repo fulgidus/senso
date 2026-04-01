@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { AlertTriangle, Eye, EyeOff, Lightbulb, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 import { Link } from "react-router-dom"
 import { FilesTab } from "@/features/profile/FilesTab"
 import { AdminInspectorDrawer } from "@/features/profile/AdminInspectorDrawer"
@@ -37,15 +38,6 @@ const CHART_COLORS = [
   "var(--chart-4)",
   "var(--chart-5)",
 ]
-
-function formatCurrency(amount: number | null, currency = "EUR"): string {
-  if (amount === null) return "-"
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 function getCategoryChartData(
   categoryTotals: Record<string, number>,
@@ -91,6 +83,7 @@ type Props = {
 
 export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile, onRetrigger }: Props) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
 
   const DATA_SOURCE_LABELS: Record<string, string> = {
     bank_statement: t("profile.sourceBank"),
@@ -217,7 +210,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const chartData = getCategoryChartData(profile.categoryTotals, t("profile.otherCategory"))
   const incomeAvailable = !!profile.incomeSummary?.amount
   const confirmedDate = profile.profileGeneratedAt
-    ? new Date(profile.profileGeneratedAt).toLocaleDateString("it-IT")
+    ? fmt.date(new Date(profile.profileGeneratedAt))
     : ""
   const dataSourcesLabel = formatDataSources(profile.dataSources)
 
@@ -372,10 +365,9 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                   <p className="text-sm text-muted-foreground mb-1">{t("profile.incomeMonthly")}</p>
                   <p className="text-xl font-semibold text-foreground">
                     <BalanceMask
-                      value={formatCurrency(
-                        profile.incomeSummary?.amount ?? null,
-                        profile.incomeSummary?.currency,
-                      )}
+                      value={profile.incomeSummary?.amount != null
+                        ? fmt.currency(profile.incomeSummary.amount, profile.incomeSummary.currency ? { currency: profile.incomeSummary.currency } : undefined)
+                        : "-"}
                       masked={balanceMasked}
                     />
                   </p>
@@ -395,7 +387,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                   </p>
                   <p className="text-xl font-semibold text-foreground">
                     <BalanceMask
-                      value={formatCurrency(profile.monthlyExpenses)}
+                      value={profile.monthlyExpenses != null ? fmt.currency(profile.monthlyExpenses) : "-"}
                       masked={balanceMasked}
                     />
                   </p>
@@ -416,7 +408,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     }`}
                   >
                     <BalanceMask
-                      value={formatCurrency(profile.monthlyMargin)}
+                      value={profile.monthlyMargin != null ? fmt.currency(profile.monthlyMargin) : "-"}
                       masked={balanceMasked}
                     />
                   </p>
