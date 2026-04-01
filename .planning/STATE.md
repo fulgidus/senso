@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-03-31T16:38:08.087Z"
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-04-01T11:07:17.308Z"
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 10
-  total_plans: 47
-  completed_plans: 45
+  total_plans: 52
+  completed_plans: 46
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 11 (file-management-admin-inspector-connectors-ui-debug-controls) - EXECUTING
-Plan: 3 of 4
+Plan: 2 of 4
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Plan: 3 of 4
 | Phase 10 P04 | 6min | 2 tasks | 8 files |
 | Phase 11-file-management-admin-inspector-connectors-ui-debug-controls P01 | 3min | 2 tasks | 7 files |
 | Phase 11 P02 | 45 | 2 tasks | 2 files |
+| Phase 11-file-management-admin-inspector-connectors-ui-debug-controls P03 | 1103 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,8 @@ Recent decisions affecting current work:
 - [Phase 11]: require_admin uses role=='admin' OR is_admin check — both signals count until full migration
 - [Phase 11]: require_tester: role in (tester, admin) OR is_admin — admins can access tester features
 - [Phase 11]: IngestionTrace model/migration completed by parallel 11-01 agent; 11-02 instrumented service + exposed admin trace endpoint
+- [Phase 11-file-management-admin-inspector-connectors-ui-debug-controls]: document_type shows '-' in FilesTab list (loaded on-demand in inspector only, avoids N+1 fetches)
+- [Phase 11-file-management-admin-inspector-connectors-ui-debug-controls]: getTrace returns [] on 403/404 so non-admins get graceful empty trace instead of error
 
 ### Pending Todos
 
@@ -191,5 +194,5 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-31T16:38:08.084Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-04-01T11:07:17.305Z
+Stopped at: Completed 11-03-PLAN.md
