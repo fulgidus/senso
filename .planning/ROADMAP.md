@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. LLM Financial Intelligence                                        | 7/7            | Complete    | 2026-03-30 |
 | 10. Transparency & Security                                          | 4/4            | Complete    | 2026-03-31 |
 | 11. File Management, Admin Inspector, Connectors UI & Debug Controls | 4/4 | Complete    | 2026-04-01 |
-| 12. UX, Accessibility & Mobile Polish                                | 4/5 | In Progress|  |
+| 12. UX, Accessibility & Mobile Polish                                | 4/5 | Complete    | 2026-04-01 |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -220,7 +220,7 @@ Plans:
 **Goal:** Improve user experience, accessibility compliance, and mobile interaction quality with prioritized low-cost/high-impact features: ripple feedback, pull-to-refresh, dynamic micro-copy, offline detection, menu animation, haptic feedback, privacy toggle for balances, prefers-reduced-motion/contrast/color-scheme support, page transition animations, i18n centralization, and optimistic UI patterns.
 **Requirements**: TBD
 **Depends on:** Phase 10
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 12-01-PLAN.md - Foundation hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat) + CSS accessibility rules + i18n keys.
