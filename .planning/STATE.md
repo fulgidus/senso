@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-04-01T13:56:38.903Z"
+stopped_at: Completed 12-ux-accessibility-mobile-polish-04-PLAN.md
+last_updated: "2026-04-01T14:05:31.246Z"
 progress:
   total_phases: 12
   completed_phases: 11
   total_plans: 52
-  completed_plans: 50
+  completed_plans: 51
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 12 (ux-accessibility-mobile-polish) - EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -91,6 +91,7 @@ Plan: 4 of 5
 | Phase 12 P03 | 5min | 3 tasks | 6 files |
 | Phase 12-ux-accessibility-mobile-polish P01 | 30 | 3 tasks | 13 files |
 | Phase 12-ux-accessibility-mobile-polish P02 | 15 | 2 tasks | 7 files |
+| Phase 12-ux-accessibility-mobile-polish P04 | 30 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -177,6 +178,8 @@ Recent decisions affecting current work:
 - [Phase 12-ux-accessibility-mobile-polish]: useLocaleFormat reads i18n.language from react-i18next (not hardcoded) to stay locale-reactive at runtime
 - [Phase 12-ux-accessibility-mobile-polish]: Used import.meta.glob for regression test instead of Node fs/path (jsdom environment requires Vite-native file scanning)
 - [Phase 12-ux-accessibility-mobile-polish]: Extended it-IT fix scope to AdminInspectorDrawer and FilesTab (auto-fix) so regression test passes cleanly
+- [Phase 12-ux-accessibility-mobile-polish]: PageTransition swaps displayChildren at 80ms mid-fade to prevent content flash; overlay changed to always-rendered with opacity classes for CSS transition support
+- [Phase 12-ux-accessibility-mobile-polish]: ChatScreen pull-to-refresh uses merged callback ref pattern (listRef.current = el + pullToRefresh.containerRef(el)) to attach both scroll-tracking and touch events to the same element
 
 ### Pending Todos
 
@@ -205,5 +208,5 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T13:56:38.900Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-04-01T14:05:31.243Z
+Stopped at: Completed 12-ux-accessibility-mobile-polish-04-PLAN.md
