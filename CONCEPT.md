@@ -33,7 +33,7 @@ Non è un'app di budgeting. Non ti dà grafici. Ti **parla**, ti **guida**, ti *
 | Desiderabile   | Utile sul momento - non "educativo" nel senso noioso     |
 | AI centrale    | LLM + profilo utente + voice + personas - non decorativa |
 
-**Claim finale per il pitch:** *"Non insegniamo finanza. Aiutiamo le persone a prendere decisioni migliori. E così imparano davvero."*
+**Claim finale per il pitch:** *"Non insegniamo finanza. Aiutiamo le persone a prendere decisioni migliori. È così che imparano davvero."*
 
 ## Come funziona
 
@@ -45,10 +45,10 @@ Non è un'app di budgeting. Non ti dà grafici. Ti **parla**, ti **guida**, ti *
 
 ### Fase 2 - Conversazione ("Parla")
 1. Bottone "Parla" → dici cosa vuoi comprare o che scelta stai valutando
-2. L'AI incrocia la richiesta con i TUOI dati reali (RAG retrieval)
-3. Ti risponde a voce con tono da mentore: diretto, con numeri precisi, e ti spiega il ragionamento
+2. L'AI incrocia la richiesta con i TUOI dati reali (RAG + profilo finanziario) e con la filosofia configurata (principi finanziari, tono, confini)
+3. Ti risponde a voce con tono da mentore (o altra persona selezionata): diretto, con numeri precisi, e ti spiega il ragionamento
 4. Insieme alla risposta vocale, l'app mostra **card azionabili**:
-    - 📚 **Approfondisci**: articoli/video dal knowledge base (es. "Come funzionano le rate", "Il vero costo di un abbonamento")
+    - 📚 **Approfondisci**: articoli/video/presentazioni dalla knowledge base curata (es. "Come funzionano le rate", "Il vero costo di un abbonamento")
     - 🏦 **Agisci**: link a servizi della banca o partner convenzionati (es. conto deposito, piano di risparmio automatico, consulenza gratuita)
 5. Puoi continuare: "e se aspetto?", "spiegami meglio le rate", "quali alternative ho?"
 
