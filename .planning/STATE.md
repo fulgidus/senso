@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 12-ux-accessibility-mobile-polish-04-PLAN.md
-last_updated: "2026-04-01T14:05:31.246Z"
+status: Phase complete - ready for verification
+stopped_at: Completed 12-ux-accessibility-mobile-polish-05-PLAN.md
+last_updated: "2026-04-01T14:14:10.306Z"
 progress:
   total_phases: 12
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 52
-  completed_plans: 51
+  completed_plans: 52
 ---
 
 # Project State
@@ -92,6 +92,7 @@ Plan: 5 of 5
 | Phase 12-ux-accessibility-mobile-polish P01 | 30 | 3 tasks | 13 files |
 | Phase 12-ux-accessibility-mobile-polish P02 | 15 | 2 tasks | 7 files |
 | Phase 12-ux-accessibility-mobile-polish P04 | 30 | 2 tasks | 5 files |
+| Phase 12-ux-accessibility-mobile-polish P05 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,8 @@ Recent decisions affecting current work:
 - [Phase 12-ux-accessibility-mobile-polish]: Extended it-IT fix scope to AdminInspectorDrawer and FilesTab (auto-fix) so regression test passes cleanly
 - [Phase 12-ux-accessibility-mobile-polish]: PageTransition swaps displayChildren at 80ms mid-fade to prevent content flash; overlay changed to always-rendered with opacity classes for CSS transition support
 - [Phase 12-ux-accessibility-mobile-polish]: ChatScreen pull-to-refresh uses merged callback ref pattern (listRef.current = el + pullToRefresh.containerRef(el)) to attach both scroll-tracking and touch events to the same element
+- [Phase 12-ux-accessibility-mobile-polish]: voiceAutoListen/voiceGender use local state + batch save intentionally; only strictPrivacyMode needs individual optimistic API call
+- [Phase 12-ux-accessibility-mobile-polish]: getGreetingKey() replaces fallbackWelcome pattern in ChatScreen — time-of-day greeting is locale-agnostic and needs no gender/persona name interpolation
 
 ### Pending Todos
 
@@ -208,5 +211,5 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T14:05:31.243Z
-Stopped at: Completed 12-ux-accessibility-mobile-polish-04-PLAN.md
+Last session: 2026-04-01T14:14:10.303Z
+Stopped at: Completed 12-ux-accessibility-mobile-polish-05-PLAN.md
