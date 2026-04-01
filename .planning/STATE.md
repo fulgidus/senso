@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-04-01T11:07:17.308Z"
+stopped_at: Completed 11-04-PLAN.md
+last_updated: "2026-04-01T11:16:58.596Z"
 progress:
   total_phases: 12
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 52
-  completed_plans: 46
+  completed_plans: 47
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 11 (file-management-admin-inspector-connectors-ui-debug-controls) - EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -87,6 +87,7 @@ Plan: 2 of 4
 | Phase 11-file-management-admin-inspector-connectors-ui-debug-controls P01 | 3min | 2 tasks | 7 files |
 | Phase 11 P02 | 45 | 2 tasks | 2 files |
 | Phase 11-file-management-admin-inspector-connectors-ui-debug-controls P03 | 1103 | 2 tasks | 6 files |
+| Phase 11 P04 | 30min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -166,6 +167,8 @@ Recent decisions affecting current work:
 - [Phase 11]: IngestionTrace model/migration completed by parallel 11-01 agent; 11-02 instrumented service + exposed admin trace endpoint
 - [Phase 11-file-management-admin-inspector-connectors-ui-debug-controls]: document_type shows '-' in FilesTab list (loaded on-demand in inspector only, avoids N+1 fetches)
 - [Phase 11-file-management-admin-inspector-connectors-ui-debug-controls]: getTrace returns [] on 403/404 so non-admins get graceful empty trace instead of error
+- [Phase 11]: ConnectorsTab uses 6 static placeholder bank cards (Prossimamente badge) — no live bank API yet
+- [Phase 11]: /debug route and Settings dev-tools link gated by isAdmin OR role===tester OR role===admin
 
 ### Pending Todos
 
@@ -194,5 +197,5 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-01T11:07:17.305Z
-Stopped at: Completed 11-03-PLAN.md
+Last session: 2026-04-01T11:16:58.593Z
+Stopped at: Completed 11-04-PLAN.md
