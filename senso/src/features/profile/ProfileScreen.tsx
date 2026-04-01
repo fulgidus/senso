@@ -449,7 +449,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     <Tooltip
                       formatter={(value) => [
                         typeof value === "number"
-                          ? `€${value.toLocaleString("it-IT")}`
+                          ? fmt.currency(value)
                           : String(value ?? ""),
                         t("profile.chartTotal"),
                       ]}
@@ -480,7 +480,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
                     style={{ borderLeft: `3px solid ${CHART_COLORS[idx % CHART_COLORS.length]}` }}
                   >
-                    {entry.name} · €{entry.value.toLocaleString("it-IT")}
+                    {entry.name} · {fmt.currency(entry.value)}
                   </span>
                 ))}
               </div>
@@ -521,7 +521,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     <Tooltip
                       formatter={(value, name) => [
                         typeof value === "number"
-                          ? `€${value.toLocaleString("it-IT")}`
+                          ? fmt.currency(value)
                           : String(value ?? ""),
                         name === "income" ? t("profile.incomeBar") : t("profile.expensesBar"),
                       ]}

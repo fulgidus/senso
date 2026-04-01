@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 import { Button } from "@/components/ui/button"
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config"
 import { A2UISurface } from "@/components/A2UISurface"
@@ -102,6 +103,7 @@ function ReasoningCard({ steps }: { steps: ReasoningStep[] }) {
 
 function LoanCalculatorCard({ card }: { card: ActionCard }) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
   const payload = card.payload ?? {}
   const defaultAmount = Number(payload.amount ?? 5000)
   const defaultMonths = Number(payload.months ?? 24)
@@ -127,7 +129,7 @@ function LoanCalculatorCard({ card }: { card: ActionCard }) {
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>{t("calculator.amount")}</span>
-            <span className="font-semibold text-foreground">€{amount.toLocaleString("it-IT")}</span>
+            <span className="font-semibold text-foreground">€{fmt.number(amount)}</span>
           </div>
           <input
             type="range"
