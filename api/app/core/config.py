@@ -31,6 +31,8 @@ class Settings:
     starting_admins: frozenset[str]
     # ElevenLabs TTS settings
     elevenlabs_api_key: str | None
+    # STT provider: "elevenlabs" (default, uses Scribe) or "openai" (Whisper fallback)
+    stt_provider: str
     # Must be 32 bytes for AES-256. Override with ENCRYPTION_KEY env var in production.
     encryption_key: str
 
@@ -127,5 +129,7 @@ def get_settings() -> Settings:
         ),
         # ElevenLabs TTS settings
         elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
+        # STT provider selection
+        stt_provider=os.getenv("STT_PROVIDER", "elevenlabs"),
         encryption_key=os.getenv("ENCRYPTION_KEY", "dev-enc-key-change-me-32bytes!!!"),
     )

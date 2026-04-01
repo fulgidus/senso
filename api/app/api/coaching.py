@@ -19,7 +19,7 @@ from uuid import uuid4
 
 import uuid_utils as uuid_utils_lib
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -480,3 +480,111 @@ def tts_speak(
         media_type="audio/mpeg",
         headers={"Content-Disposition": "inline; filename=response.mp3"},
     )
+
+
+class STTResponse(BaseModel):
+    text: str
+
+
+@router.post("/stt", response_model=STTResponse)
+async def stt_transcribe(
+    audio: UploadFile = File(...),
+    locale: str = "it",
+    current_user: UserDTO = Depends(get_current_user),
+    settings=Depends(get_settings),
+):
+    """Transcribe uploaded audio to text using a configurable STT provider.
+
+    Accepts multipart/form-data with an audio file (webm, wav, mp4, etc.).
+    Falls back to server-side transcription when the browser's Web Speech API
+    is unavailable (e.g. LibreWolf blocks it for privacy).
+
+    Provider selection via STT_PROVIDER env var (default: "elevenlabs"):
+      - "elevenlabs": ElevenLabs Scribe v1 — requires ELEVENLABS_API_KEY
+      - "openai":     OpenAI Whisper v1    — requires LLM_OPENAI_API_KEY
+
+    Returns JSON: { "text": "<transcript>" }
+
+    Raises:
+        503 stt_unavailable  — required API key not configured for the active provider
+        400 stt_empty_audio  — Empty file uploaded
+        502 stt_failed       — STT API call failed
+    """
+    import io
+
+    audio_bytes = await audio.read()
+    if not audio_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": "stt_empty_audio", "message": "Empty audio file"},
+        )
+
+    language = "it" if locale == "it" else "en"
+    provider = settings.stt_provider
+
+    # ── ElevenLabs Scribe (default) ───────────────────────────────────────────
+    if provider == "elevenlabs":
+        if not settings.elevenlabs_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "code": "stt_unavailable",
+                    "message": "STT service not configured (missing ELEVENLABS_API_KEY)",
+                },
+            )
+        try:
+            from elevenlabs import ElevenLabs
+
+            client = ElevenLabs(api_key=settings.elevenlabs_api_key)
+            filename = audio.filename or "audio.webm"
+            content_type = audio.content_type or "audio/webm"
+            result = client.speech_to_text.convert(
+                audio=(filename, io.BytesIO(audio_bytes), content_type),
+                model_id="scribe_v1",
+                language_code=language,
+            )
+            return STTResponse(text=result.text.strip())
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": "stt_failed",
+                    "message": f"Transcription failed: {exc}",
+                },
+            )
+
+    # ── OpenAI Whisper (fallback via STT_PROVIDER=openai) ────────────────────
+    from app.core.llm_config import get_llm_config
+
+    llm_config = get_llm_config()
+    api_key = llm_config.api_key_for("openai")
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "code": "stt_unavailable",
+                "message": "STT service not configured (missing LLM_OPENAI_API_KEY)",
+            },
+        )
+
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=api_key)
+        filename = audio.filename or "audio.webm"
+        content_type = audio.content_type or "audio/webm"
+        transcript = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=(filename, io.BytesIO(audio_bytes), content_type),
+            language=language,
+        )
+        return STTResponse(text=transcript.text.strip())
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"code": "stt_failed", "message": f"Transcription failed: {exc}"},
+        )
