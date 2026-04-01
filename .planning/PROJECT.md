@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 after Phase 11 completion - file management and admin tooling shipped: RBAC role column, pipeline step tracing, Your Files tab with AdminInspectorDrawer, Connectors UI tab, backend debug endpoints, /debug control screen, and Settings developer link.*
+*Last updated: 2026-04-01 after Phase 12 completion - UX/accessibility/mobile polish shipped: 6 accessibility hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat), i18n centralization (zero hardcoded it-IT), OfflineBanner, BalanceMask, ripple feedback, PageTransition, pull-to-refresh, time-of-day greetings, haptic feedback on all key actions. Full test suite 29/29 passing.*
