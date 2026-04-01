@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { AlertTriangle, Lightbulb, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
+import { FilesTab } from "@/features/profile/FilesTab"
+import { AdminInspectorDrawer } from "@/features/profile/AdminInspectorDrawer"
 import {
   Bar,
   BarChart,
@@ -111,8 +113,9 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const [expensesEdit, setExpensesEdit] = useState<string>("")
   const [isStale, setIsStale] = useState(false)
   const [retriggerLoading, setRetriggerLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline">("summary")
+  const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline" | "files">("summary")
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
+  const [inspectUploadId, setInspectUploadId] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -294,6 +297,16 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         >
           {t("timeline.tabLabel")}
         </button>
+        <button
+          onClick={() => setActiveTab("files")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+            activeTab === "files"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("files.tabLabel")}
+        </button>
       </div>
 
       {/* Timeline tab */}
@@ -301,8 +314,17 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         <TimelineTab token={token} />
       )}
 
+      {/* Files tab */}
+      {activeTab === "files" && (
+        <FilesTab
+          token={token}
+          isAdmin={!!_user.isAdmin || _user.role === "admin"}
+          onInspect={setInspectUploadId}
+        />
+      )}
+
       {/* Summary + Charts tabs */}
-      {activeTab !== "timeline" && (
+      {activeTab !== "timeline" && activeTab !== "files" && (
         <div className="space-y-8">
           {/* Summary Card */}
           {activeTab === "summary" && (
@@ -599,6 +621,13 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             </section>
           )}
         </div>
+      )}
+      {inspectUploadId && (
+        <AdminInspectorDrawer
+          uploadId={inspectUploadId}
+          token={token}
+          onClose={() => setInspectUploadId(null)}
+        />
       )}
     </main>
   )
