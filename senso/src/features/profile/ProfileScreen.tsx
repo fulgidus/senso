@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { AlertTriangle, Eye, EyeOff, Lightbulb, Plus } from "lucide-react"
+import { useEffect, useState, useCallback } from "react"
+import { AlertTriangle, Eye, EyeOff, Lightbulb, Loader2, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 import { Link } from "react-router-dom"
@@ -30,6 +30,7 @@ import {
 import { ApiClientError } from "@/lib/api-client"
 import { TimelineTab } from "@/features/profile/TimelineTab"
 import { ConnectorsTab } from "@/features/profile/ConnectorsTab"
+import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 
 const CHART_COLORS = [
   "var(--chart-1)",
@@ -123,6 +124,32 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     })
   }
 
+  // Pull-to-refresh: reload profile and status
+  const handlePullRefresh = useCallback(async () => {
+    try {
+      const [p, statusData] = await Promise.all([
+        getProfile(token),
+        getProfileStatus(token),
+      ])
+      setProfile(p)
+      setIncomeEdit(String(p.incomeSummary?.amount ?? ""))
+      setExpensesEdit(String(p.monthlyExpenses ?? ""))
+      if (
+        statusData.currentUploadsFingerprint &&
+        statusData.currentUploadsFingerprint !== statusData.uploadsFingerprint
+      ) {
+        setIsStale(true)
+      } else {
+        setIsStale(false)
+      }
+    } catch { /* non-fatal */ }
+  }, [token])
+
+  const pullToRefresh = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    disabled: loading,
+  })
+
   useEffect(() => {
     setLoading(true)
     void Promise.all([
@@ -215,7 +242,16 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
   const dataSourcesLabel = formatDataSources(profile.dataSources)
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-6">
+    <main
+      ref={pullToRefresh.containerRef as React.RefCallback<HTMLElement>}
+      className="mx-auto w-full max-w-4xl px-6 py-6 overscroll-y-contain"
+    >
+      {/* Pull-to-refresh indicator */}
+      {(pullToRefresh.isPulling || pullToRefresh.isRefreshing) && (
+        <div className="flex justify-center pb-4">
+          <Loader2 className={["h-5 w-5 text-muted-foreground", pullToRefresh.isRefreshing ? "animate-spin" : ""].join(" ")} />
+        </div>
+      )}
       <div className="mb-2 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground">{t("profile.heading")}</h2>

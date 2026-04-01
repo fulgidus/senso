@@ -34,6 +34,7 @@ import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
 import { MarpSlideViewer } from "./MarpSlideViewer"
+import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -992,6 +993,36 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const shouldStickToBottomRef = useRef(true)
 
+  // Pull-to-refresh: reload session messages (or session list if no session)
+  const handlePullRefresh = useCallback(async () => {
+    if (sessionId) {
+      setLoadingHistory(true)
+      setMessages([])
+      try {
+        const msgs = await getSessionMessages(sessionId)
+        setMessages(msgs.map(parseStoredMessage))
+      } catch { /* non-fatal */ } finally {
+        setLoadingHistory(false)
+      }
+    } else {
+      await fetchSessions().catch(() => {})
+    }
+  }, [sessionId])
+
+  const pullToRefresh = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    disabled: isLoading || loadingHistory,
+  })
+
+  // Merged ref: combines listRef (for scroll tracking) with pullToRefresh.containerRef
+  const mergedListRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      listRef.current = el
+      pullToRefresh.containerRef(el)
+    },
+    [pullToRefresh.containerRef],
+  )
+
   // Wrapper that auto-dismisses transient errors after 8 seconds.
   // profile_required errors are kept persistent (they have a navigation CTA).
   const setErrorWithAutoDismiss = useCallback((err: { code: string; message: string } | null) => {
@@ -1631,10 +1662,16 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
 
       {/* Message list */}
       <div
-        ref={listRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        ref={mergedListRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-y-contain"
         onScroll={updateStickiness}
       >
+        {/* Pull-to-refresh indicator */}
+        {(pullToRefresh.isPulling || pullToRefresh.isRefreshing) && (
+          <div className="flex justify-center pb-2">
+            <Loader2 className={["h-5 w-5 text-muted-foreground", pullToRefresh.isRefreshing ? "animate-spin" : ""].join(" ")} />
+          </div>
+        )}
         {(loadingHistory || welcomeLoading) && (
           <div className="flex items-start gap-2">
             <SensoAvatar />
