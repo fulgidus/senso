@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 after Phase 10 completion - transparency and security features shipped: public About page, T2 column AES-GCM encryption at rest, LLM no-data-retention enforcement, Privacy mode toggle and UI. UAT pending deployment to production.*
+*Last updated: 2026-04-01 after Phase 11 completion - file management and admin tooling shipped: RBAC role column, pipeline step tracing, Your Files tab with AdminInspectorDrawer, Connectors UI tab, backend debug endpoints, /debug control screen, and Settings developer link.*
