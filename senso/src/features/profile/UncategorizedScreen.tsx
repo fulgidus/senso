@@ -9,6 +9,7 @@ import {
   type UncategorizedTransactionDTO,
 } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 const VALID_CATEGORIES = [
   "dining",
@@ -104,6 +105,7 @@ function DirectionIcon({ type }: { type: ActorGroup["dominantType"] }) {
 
 export function UncategorizedScreen() {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
   const token = readAccessToken()
 
   const [transactions, setTransactions] = useState<UncategorizedTransactionDTO[]>([])
@@ -298,11 +300,7 @@ export function UncategorizedScreen() {
                       }`}
                     >
                       {group.netAmount >= 0 ? "+" : ""}
-                      {group.netAmount.toLocaleString("it-IT", {
-                        style: "currency",
-                        currency: "EUR",
-                        maximumFractionDigits: 0,
-                      })}
+                      {fmt.currency(group.netAmount)}
                     </span>
 
                     {/* Category picker or success badge */}

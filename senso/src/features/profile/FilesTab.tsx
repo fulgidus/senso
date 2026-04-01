@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { RefreshCw, Search, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { listUploads, deleteUpload, retryUpload, type UploadFile } from "@/api/ingestionFilesApi"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 type Props = {
   token: string
@@ -45,6 +46,7 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
 
 export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
   const [files, setFiles] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -124,7 +126,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
         const busy = actionLoading[file.id] ?? false
         const canRetry =
           file.extraction_status === "failed" || file.extraction_status === "pending"
-        const uploadDate = new Date(file.uploaded_at).toLocaleDateString("it-IT")
+        const uploadDate = fmt.date(new Date(file.uploaded_at))
 
         return (
           <li

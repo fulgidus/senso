@@ -7,6 +7,7 @@ import {
   type ExtractedDocumentDetail,
   type TraceStep,
 } from "@/api/ingestionFilesApi"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 // ─── JSON Tree ─────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,7 @@ type Props = {
 
 export function AdminInspectorDrawer({ uploadId, token, onClose }: Props) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
 
   const [extracted, setExtracted] = useState<ExtractedDocumentDetail | null | undefined>(
     undefined,
@@ -236,15 +238,15 @@ export function AdminInspectorDrawer({ uploadId, token, onClose }: Props) {
                     <div>
                       <dt className="text-xs text-muted-foreground">extracted_at</dt>
                       <dd className="text-foreground">
-                        {new Date(extracted.extracted_at).toLocaleString("it-IT")}
-                      </dd>
-                    </div>
-                  </>
-                )}
-              </dl>
-            </Section>
+                        {fmt.date(new Date(extracted.extracted_at), { dateStyle: "medium", timeStyle: "short" })}
+                       </dd>
+                   </div>
+                 </>
+               )}
+             </dl>
+           </Section>
 
-            {/* Section 2: Extracted document */}
+           {/* Section 2: Extracted document */}
             <Section
               title={t("inspector.sectionExtracted")}
               copyData={extracted ?? undefined}
@@ -272,7 +274,7 @@ export function AdminInspectorDrawer({ uploadId, token, onClose }: Props) {
                   <div>
                     <dt className="text-xs text-muted-foreground">extracted_at</dt>
                     <dd className="text-foreground">
-                      {new Date(extracted.extracted_at).toLocaleString("it-IT")}
+                      {fmt.date(new Date(extracted.extracted_at), { dateStyle: "medium", timeStyle: "short" })}
                     </dd>
                   </div>
                   {extracted.raw_text && (

@@ -12,6 +12,7 @@ import {
   type IncomeSource,
   type IncomeSourceType,
 } from "@/lib/profile-api"
+import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 type Props = {
   user: User
@@ -244,6 +245,7 @@ function IncomeSourceEditor({
   onRemove: () => void
 }) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
 
   const INCOME_TYPE_OPTIONS: { label: string; value: IncomeSourceType; emoji: string }[] = [
     { label: t("questionnaire.incomeTypeEmploymentNet"), value: "employment_net", emoji: "💼" },
@@ -599,7 +601,7 @@ function IncomeSourceEditor({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t("questionnaire.incomeNetBase")}</span>
                 <span className="font-medium text-foreground">
-                  {currencySymbol}{net.netMonthly.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
+                  {currencySymbol}{fmt.number(net.netMonthly, { maximumFractionDigits: 0 })}
                 </span>
               </div>
               {net.mealVoucherMonthlyEstimate > 0 && (
@@ -609,21 +611,21 @@ function IncomeSourceEditor({
                     <span className="text-amber-500">{t("questionnaire.incomeMealVoucherDaysHint")}</span>
                   </span>
                   <span className="font-medium text-foreground">
-                    +{currencySymbol}{net.mealVoucherMonthlyEstimate.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
+                    +{currencySymbol}{fmt.number(net.mealVoucherMonthlyEstimate, { maximumFractionDigits: 0 })}
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-xs text-muted-foreground border-t border-border pt-1 mt-1">
                 <span>{t("questionnaire.incomeInps")}</span>
-                <span>-{currencySymbol}{net.inpsAnnual.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
+                <span>-{currencySymbol}{fmt.number(net.inpsAnnual, { maximumFractionDigits: 0 })}{t("profile.perYear")}</span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{t("questionnaire.incomeIrpef")}</span>
-                <span>-{currencySymbol}{net.irpefNet.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
+                <span>-{currencySymbol}{fmt.number(net.irpefNet, { maximumFractionDigits: 0 })}{t("profile.perYear")}</span>
               </div>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{t("questionnaire.incomeAddizionali")}</span>
-                <span>-{currencySymbol}{net.addizionali.toLocaleString("it-IT", { maximumFractionDigits: 0 })}/anno</span>
+                <span>-{currencySymbol}{fmt.number(net.addizionali, { maximumFractionDigits: 0 })}{t("profile.perYear")}</span>
               </div>
             </div>
           )}
@@ -733,6 +735,7 @@ function IncomeSourceEditor({
 
 export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBack }: Props) {
   const { t } = useTranslation()
+  const fmt = useLocaleFormat()
   const effectiveGender: "masculine" | "feminine" | "neutral" =
     _user.voiceGender && _user.voiceGender !== "indifferent"
       ? (_user.voiceGender as "masculine" | "feminine" | "neutral")
@@ -959,7 +962,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
                 </span>
                 <span className="text-sm font-semibold text-foreground">
                   {currency === "EUR" ? "€" : currency}
-                  {derivedMonthlyNet.toLocaleString("it-IT", { maximumFractionDigits: 0 })}
+                  {fmt.number(derivedMonthlyNet, { maximumFractionDigits: 0 })}
                 </span>
               </div>
             )}
@@ -1019,7 +1022,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
             {total > 0 && (
               <p className="mt-4 text-right text-sm font-medium text-foreground">
                 {t("questionnaire.step3Total")}{" "}
-                <span className="text-primary">{currency} {total.toLocaleString("it-IT")}</span>
+                <span className="text-primary">{currency} {fmt.number(total)}</span>
               </p>
             )}
           </div>
