@@ -8,6 +8,7 @@ import { getDisplayName } from "@/lib/user-avatar"
 import { NotificationPanel } from "@/features/notifications/NotificationPanel"
 import { getNotifications } from "@/api/notificationsApi"
 import { OfflineBanner } from "@/components/OfflineBanner"
+import { PageTransition } from "@/components/PageTransition"
 
 // ── Topbar-buttons preference (localStorage, no backend needed) ───────────────
 
@@ -425,18 +426,19 @@ export function AppShell({ children }: AppShellProps) {
       <OfflineBanner />
 
       {/* Sidebar overlay */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={[
+          "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200",
+          drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+        ].join(" ")}
+        aria-hidden="true"
+      />
 
       {/* Sidebar drawer */}
       <div
         ref={sidebarRef}
         className={[
-          "fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-background border-r border-border shadow-xl transition-transform duration-200",
+          "fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-background border-r border-border shadow-xl transition-transform duration-200 ease-out",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
         {...(drawerOpen ? { role: "dialog", "aria-modal": "true", "aria-label": t("nav.menuLabel") } : {})}
@@ -487,7 +489,9 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Page content */}
       <div className="flex-1 overflow-y-auto">
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
       </div>
     </div>
   )
