@@ -12,3 +12,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** api/app/db/models.py
 ---
 
+## voice-mode-button-missing - Voice mode toggle button hidden on browsers without STT (Firefox/Safari)
+- **Date:** 2026-04-01
+- **Error patterns:** voice mode, toggle button, missing, hidden, isSttAvailable, SpeechRecognition, canPlay, speechSynthesis, Firefox, Safari, mic button, VoiceModeBar, TTS, ChatScreen
+- **Root cause:** Voice mode toggle button in ChatScreen.tsx was gated on `isSttAvailable` (Web Speech API / SpeechRecognition detection). On browsers without SpeechRecognition (Firefox, Safari), `isSttAvailable=false` hid the button entirely even though ElevenLabs TTS and browser speechSynthesis fallback work fine. VoiceModeBar already handles `isSttAvailable=false` gracefully with a disabled mic button and "unavailable" hint text.
+- **Fix:** Added `canPlay` computation in ChatScreen (mirrors useTTS logic: `typeof window !== "undefined" && (ttsConfig.browserFallbackEnabled ? "speechSynthesis" in window : true)`) and changed the voice mode toggle button condition from `{isSttAvailable && ...}` to `{canPlay && ...}` at ChatScreen.tsx line 1793.
+- **Files changed:** senso/src/features/coaching/ChatScreen.tsx
+---
+
