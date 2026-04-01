@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Financial Input Ingestion** - Users upload core files and confirm extracted facts. (completed 2026-03-24)
 - [x] **Phase 3: Financial Profile Clarity** - Users see understandable affordability baseline from their data. (completed 2026-03-25)
 - [x] **Phase 4: Safe Grounded Text Coaching** - Users get personalized, transparent coaching with safety enforcement. (completed 2026-03-28)
-- [ ] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety.
+- [x] **Phase 5: Voice Coaching Loop** - Users can ask by voice and hear spoken recommendations with fallback safety. (completed 2026-03-29)
 - [x] **Phase 6: Learn+Act Cards & Demo Hardening** - Full 75-90s demo flow is complete, fast, and repeatable. (completed 2026-03-29)
 - [x] **Phase 7: Streaming & Nice-to-Have Polish** - Streaming responses, persona choice, persistent history, and PII safety cross-check. (completed 2026-03-29)
 
@@ -142,7 +142,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 12
 
 | Phase                               | Plans Complete | Status      | Completed  |
 | ----------------------------------- | -------------- | ----------- | ---------- |
@@ -150,12 +150,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Financial Input Ingestion        | 5/5            | Complete    | 2026-03-24 |
 | 3. Financial Profile Clarity        | 4/4            | Complete    | 2026-03-25 |
 | 4. Safe Grounded Text Coaching      | 4/4            | Complete    | 2026-03-28 |
-| 5. Voice Coaching Loop              | 4/5            | In Progress |            |
+| 5. Voice Coaching Loop              | 5/5            | Complete    | 2026-03-29 |
 | 6. Learn+Act Cards & Demo Hardening | 4/4            | Complete    | 2026-03-29 |
 | 7. Streaming & Nice-to-Have Polish  | 4/4            | Complete    | 2026-03-29 |
 | 8. Content Platform & Public Serving | 3/3            | Complete    | 2026-03-30 |
 | 9. LLM Financial Intelligence       | 7/7 | Complete   | 2026-03-30 |
 | 10. Transparency & Security         | 4/4 | Complete    | 2026-03-31 |
+| 12. UX, Accessibility & Mobile Polish | 0/0 | Not started | -          |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -199,3 +200,13 @@ Plans:
 - [x] 10-02-PLAN.md - LLM no-data-retention: openai-beta no-store header, OpenRouter ZDR strict mode, gemini passthrough, tests.
 - [x] 10-03-PLAN.md - T2 column encryption: StringEncryptedType on 6 ORM columns, encryption roundtrip tests.
 - [x] 10-04-PLAN.md - Frontend: AboutPage, /about route, Settings Privacy section + toggle, ChatScreen privacy badge + TTS notice, i18n strings.
+
+### Phase 12: UX, Accessibility & Mobile Polish
+
+**Goal:** Improve user experience, accessibility compliance, and mobile interaction quality with prioritized low-cost/high-impact features: ripple feedback, pull-to-refresh, dynamic micro-copy, offline detection, menu animation, haptic feedback, privacy toggle for balances, prefers-reduced-motion/contrast/color-scheme support, page transition animations, i18n centralization, and optimistic UI patterns.
+**Requirements**: TBD
+**Depends on:** Phase 10
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
