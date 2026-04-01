@@ -1,6 +1,6 @@
 ---
 date: "2026-04-01 19:31"
-promoted: false
+promoted: true
 ---
 
 - pwa not working well (can add to home screen, but still opens a browser, and the address bar is a problem)

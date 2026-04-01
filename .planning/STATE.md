@@ -187,6 +187,33 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 1. E2E Encrypted Messaging, Identity & Crypto Architecture (area: architecture) — supersedes original symmetric envelope scheme. Full design captured in todo file.
+2. Fix PWA manifest so app opens standalone not in browser (area: ui)
+3. Fix pull-to-refresh drag gesture not working (area: ui)
+4. Add error boundaries to profile pages (area: ui)
+5. Add hash navigation to profile sections (area: ui)
+6. Fix estimated_from_transactions nugget label missing i18n (area: ui)
+7. Fix financial profile figures never show ranges (area: ui)
+8. Add visual confirmation for profile save and edit/reset controls (area: ui)
+9. Fix missing manual categorization button for transactions (area: ui)
+10. Add merchant vs private individual check in manual categorization (area: ui) — privacy-critical
+11. Localize category names (area: ui)
+12. Change spending graph from histogram to pie chart (area: ui)
+13. Move admin and debug tools to dedicated submenu (area: ui)
+14. Fix restart ingestion should navigate to monitoring section (area: ui)
+15. Fix total reset button broken (area: ui)
+16. Make tables responsive with card layout on mobile (area: ui) — systemic, all tables
+17. Group content items by locale in admin content table (area: ui)
+18. Fix missing translations in content management (area: ui)
+19. Replace locale and actions column headers with icons (area: ui)
+20. Add visible sort affordance to table column headers (area: ui)
+21. Add pagination to content management table (area: ui)
+22. Fix TTS voice output broken (area: ui) — hackathon-critical
+23. Rationalize coach renderable content surfaces (area: ui)
+24. Fix coach picker dark theme unreadable light background (area: ui)
+25. Fix coach picker breaks chat — only default coach works (area: ui)
+26. Fix token renewal broken (area: auth) — session-critical
+27. Fix expired token navigation should redirect to login (area: auth)
+28. Replace alert() calls with shadcn dialog component (area: ui)
 
 ### Quick Tasks Completed
 
