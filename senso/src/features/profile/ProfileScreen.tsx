@@ -152,6 +152,14 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     disabled: loading,
   })
 
+  // Scroll to hash anchor on mount (e.g. /profile#income, /profile#spending)
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash)
+      if (el) el.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [])
+
   useEffect(() => {
     setLoading(true)
     void Promise.all([
@@ -401,7 +409,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         <div className="space-y-8">
           {/* Summary Card */}
           {activeTab === "summary" && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="income" className="rounded-2xl border border-border bg-card p-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {/* Income */}
                 <div>
@@ -462,7 +470,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* Spending Breakdown */}
           {activeTab === "charts" && chartData.length > 0 && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="spending" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.spendingBreakdown")}
               </h3>
@@ -532,7 +540,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* Income vs Expenses (only if income available, charts tab) */}
           {activeTab === "charts" && incomeAvailable && profile.monthlyExpenses !== null && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="income-vs-expenses" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.incomeVsExpenses")}
               </h3>
@@ -585,7 +593,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* AI Insight Cards (summary tab) */}
           {activeTab === "summary" && (
-            <section>
+            <section id="insights">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.insightsHeading")}
               </h3>
@@ -641,7 +649,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* Confirm / Correct Section (summary tab) */}
           {activeTab === "summary" && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="confirm" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.confirmHeading")}
               </h3>
