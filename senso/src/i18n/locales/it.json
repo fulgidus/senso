@@ -338,6 +338,8 @@
         "readMore": "Leggi l'articolo",
         "retryLastMessage": "Riprova",
         "ttsFallbackActive": "Audio via sintesi vocale del browser (ElevenLabs non disponibile)",
+        "ttsFallbackBadge": "Voce browser",
+        "ttsFallbackHint": "ElevenLabs non disponibile — utilizzo la sintesi vocale del browser",
         "restoreToast": "Conversazione precedente ripristinata",
         "streamInterrupted": "Risposta interrotta. Controlla la connessione e riprova.",
         "personaPickerTitle": "Scegli il tuo coach",

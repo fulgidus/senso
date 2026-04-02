@@ -11,6 +11,9 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -474,29 +477,25 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.spendingBreakdown")}
               </h3>
-              <div className="min-h-[220px]">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart
-                    data={chartData}
-                    layout="vertical"
-                    margin={{ left: 8, right: 16 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      horizontal={false}
-                      stroke="var(--border)"
-                    />
-                    <XAxis
-                      type="number"
-                      tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                      tickFormatter={(v: number) => `€${v}`}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={110}
-                      tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                    />
+              <div className="min-h-[260px]">
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="55%"
+                      outerRadius="75%"
+                      dataKey="value"
+                      paddingAngle={2}
+                    >
+                      {chartData.map((_, idx) => (
+                        <Cell
+                          key={idx}
+                          fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
                     <Tooltip
                       formatter={(value) => [
                         typeof value === "number"
@@ -511,29 +510,13 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                         fontSize: "12px",
                       }}
                     />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {chartData.map((_, idx) => (
-                        <Cell
-                          key={idx}
-                          fill={CHART_COLORS[idx % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <Legend
+                      formatter={(value) => (
+                        <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{value}</span>
+                      )}
+                    />
+                  </PieChart>
                 </ResponsiveContainer>
-              </div>
-
-              {/* Category pills */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                {chartData.map((entry, idx) => (
-                  <span
-                    key={entry.name}
-                    className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
-                    style={{ borderLeft: `3px solid ${CHART_COLORS[idx % CHART_COLORS.length]}` }}
-                  >
-                    {entry.name} · {fmt.currency(entry.value)}
-                  </span>
-                ))}
               </div>
             </section>
           )}

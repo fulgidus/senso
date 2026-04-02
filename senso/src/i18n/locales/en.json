@@ -338,6 +338,8 @@
         "readMore": "Read article",
         "retryLastMessage": "Retry",
         "ttsFallbackActive": "Audio via browser speech synthesis (ElevenLabs unavailable)",
+        "ttsFallbackBadge": "Browser TTS",
+        "ttsFallbackHint": "ElevenLabs unavailable — using browser speech synthesis",
         "restoreToast": "Restored last conversation",
         "streamInterrupted": "Reply interrupted. Check your connection and try again.",
         "personaPickerTitle": "Choose your coach",

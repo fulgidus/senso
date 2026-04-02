@@ -335,11 +335,11 @@ function ResourceCardRouter({ card }: { card: ResourceCard }) {
 function LearnCardStub({ card }: { card: LearnCard }) {
   const { t } = useTranslation()
   return (
-    <div className="border border-blue-200 rounded-md px-3 py-2 bg-blue-50 text-sm">
-      <div className="font-semibold text-blue-800">{card.concept}</div>
-      <div className="text-blue-700 mt-0.5">{card.plain_explanation}</div>
+    <div className="border border-primary/30 rounded-md px-3 py-2 bg-primary/5 text-sm">
+      <div className="font-semibold text-primary">{card.concept}</div>
+      <div className="text-foreground mt-0.5">{card.plain_explanation}</div>
       {card.example && (
-        <div className="text-blue-600 text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
+        <div className="text-muted-foreground text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
       )}
     </div>
   )
