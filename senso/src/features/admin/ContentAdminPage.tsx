@@ -25,6 +25,9 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  ChevronsUpDown,
+  Globe,
+  Settings2,
   Loader2,
   Link2,
   Unlink,
@@ -568,6 +571,10 @@ export function ContentAdminPage() {
   const [sortField, setSortField] = useState<"title" | "type" | "locale" | "updated_at">("updated_at")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
 
+  // Pagination
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 25
+
   // D5: Selection for bulk operations
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [_bulkAction, setBulkAction] = useState<"publish" | "unpublish" | "delete" | null>(null)
@@ -598,6 +605,9 @@ export function ContentAdminPage() {
     void loadItems()
   }, [loadItems])
 
+  // Reset page when filters or sort change
+  useEffect(() => { setPage(1) }, [filterLocale, filterType, filterSearch, sortField, sortDir])
+
   // ── Filtered + sorted items ──
   const filtered = useMemo(() => {
     let list = items
@@ -619,6 +629,13 @@ export function ContentAdminPage() {
     })
     return list
   }, [items, filterSearch, sortField, sortDir])
+
+  // ── Paginated items ──
+  const paginated = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
+  )
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
 
   // ── Handlers ──
   const handleCreate = useCallback(
@@ -798,11 +815,13 @@ export function ContentAdminPage() {
   const SortIcon = ({ field }: { field: typeof sortField }) =>
     sortField === field ? (
       sortDir === "asc" ? (
-        <ChevronUp className="inline h-3 w-3" />
+        <ChevronUp className="inline h-3 w-3 ml-1" />
       ) : (
-        <ChevronDown className="inline h-3 w-3" />
+        <ChevronDown className="inline h-3 w-3 ml-1" />
       )
-    ) : null
+    ) : (
+      <ChevronsUpDown className="inline h-3 w-3 ml-1 opacity-40" />
+    )
 
   const selectCls =
     "rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -999,8 +1018,11 @@ export function ContentAdminPage() {
                 <th
                   className="cursor-pointer px-4 py-3 font-medium text-muted-foreground hover:text-foreground"
                   onClick={() => toggleSort("locale")}
+                  title={t("admin.content.colLocale")}
                 >
-                  {t("admin.content.colLocale")} <SortIcon field="locale" />
+                  <Globe className="h-4 w-4 inline" aria-hidden="true" />
+                  <span className="sr-only">{t("admin.content.colLocale")}</span>
+                  <SortIcon field="locale" />
                 </th>
                 <th className="px-4 py-3 font-medium text-muted-foreground">
                   {t("admin.content.colGroup")}
@@ -1015,12 +1037,13 @@ export function ContentAdminPage() {
                   {t("admin.content.colUpdated")} <SortIcon field="updated_at" />
                 </th>
                 <th className="px-4 py-3 font-medium text-muted-foreground text-right">
-                  {t("admin.content.colActions")}
+                  <Settings2 className="h-4 w-4 ml-auto inline" aria-hidden="true" />
+                  <span className="sr-only">{t("admin.content.colActions")}</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((item) =>
+              {paginated.map((item) =>
                 editingId === item.id ? (
                   <tr key={item.id}>
                     <td colSpan={8} className="p-4">
@@ -1166,6 +1189,31 @@ export function ContentAdminPage() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-3 mt-3 px-1">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                {t("admin.content.paginationPrev")}
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {t("admin.content.paginationInfo", { page, totalPages })}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                {t("admin.content.paginationNext")}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
