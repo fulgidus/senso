@@ -117,41 +117,40 @@ export function useVoiceMode({
 
     // ── Voice mode toggle ─────────────────────────────────────────────────────
 
-    // Keep the MediaStream alive for the entire voice mode session.
-    // Chrome's Web Speech API runs recognition in a separate process and issues
-    // its own getUserMedia call — it only skips the permission dialog if the
-    // audio device is already in use by an active track on the page.
-    // Holding the stream open satisfies that condition for every subsequent
-    // recognition.start() call until voice mode is deactivated.
-    const micStreamRef = useRef<MediaStream | null>(null)
-
-    const releaseMicStream = useCallback(() => {
-        micStreamRef.current?.getTracks().forEach((t) => t.stop())
-        micStreamRef.current = null
-    }, [])
+    // Track whether mic permission has been primed this session.
+    // We call getUserMedia once on first voice mode activation (user gesture) so
+    // the browser's permission dialog appears at a deliberate moment rather than
+    // buried inside recognition.start() on the first hold-to-talk press.
+    // The stream is released immediately — we only need the permission grant, NOT
+    // a live track. Chromium stores the grant persistently in its permission store
+    // so recognition.start() never re-prompts regardless of whether a MediaStream
+    // is currently open. Holding a stream alive while SpeechRecognition is active
+    // causes audio device contention that silently starves the recogniser of audio.
+    const micPermissionGranted = useRef(false)
 
     const toggleVoiceMode = useCallback(async () => {
         if (isVoiceMode) {
-            // Deactivating: stop STT/TTS then release the mic device.
+            // Deactivating: stop STT/TTS.
             stopRecording()
             stopTTS()
             setIsAutoListening(false)
-            releaseMicStream()
             setIsVoiceMode(false)
             return
         }
-        // Activating: open the mic device now (user gesture) and keep it alive.
-        // This surfaces the permission dialog here rather than on the first
-        // hold-to-talk press, and keeps the device locked so recognition.start()
-        // won't re-prompt.
-        try {
-            micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true })
-        } catch {
-            // Permission denied or not supported — don't enter voice mode.
-            return
+        // Activating: prime mic permission on first use (user gesture required).
+        if (!micPermissionGranted.current) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+                // Release immediately — we only needed the permission grant.
+                stream.getTracks().forEach((t) => t.stop())
+                micPermissionGranted.current = true
+            } catch {
+                // Permission denied or not supported — don't enter voice mode.
+                return
+            }
         }
         setIsVoiceMode(true)
-    }, [isVoiceMode, stopRecording, stopTTS, releaseMicStream])
+    }, [isVoiceMode, stopRecording, stopTTS])
 
     // Stop everything when voice mode is turned off externally or on unmount
     useEffect(() => {
@@ -159,15 +158,13 @@ export function useVoiceMode({
             stopRecording()
             stopTTS()
             setIsAutoListening(false)
-            releaseMicStream()
         }
-    }, [isVoiceMode, stopRecording, stopTTS, releaseMicStream])
+    }, [isVoiceMode, stopRecording, stopTTS])
 
     useEffect(() => {
         return () => {
             stopRecording()
             stopTTS()
-            releaseMicStream()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
