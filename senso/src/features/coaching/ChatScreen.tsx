@@ -1195,7 +1195,6 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     setSessionName("")
     setMessages([])
     setError(null)
-    setActivePersonaId(user.defaultPersonaId ?? "mentore-saggio")
     setWelcomeLoading(true)
     try {
       const msg = await getWelcomeMessage(locale)
@@ -1206,7 +1205,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     } finally {
       setWelcomeLoading(false)
     }
-  }, [locale, user.defaultPersonaId])
+  }, [locale])
 
   // ── Open a previous conversation ───────────────────────────────────────────
 
