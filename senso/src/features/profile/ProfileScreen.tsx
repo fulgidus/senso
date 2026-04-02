@@ -43,11 +43,12 @@ const CHART_COLORS = [
 function getCategoryChartData(
   categoryTotals: Record<string, number>,
   otherLabel: string,
+  categoryLabel: (slug: string) => string,
 ): { name: string; value: number }[] {
   const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])
   if (entries.length <= 5) {
     return entries.map(([name, value]) => ({
-      name: name.replace(/_/g, " "),
+      name: categoryLabel(name),
       value: Math.round(value),
     }))
   }
@@ -55,7 +56,7 @@ function getCategoryChartData(
   const otherTotal = entries.slice(5).reduce((acc, [, v]) => acc + v, 0)
   return [
     ...top5.map(([name, value]) => ({
-      name: name.replace(/_/g, " "),
+      name: categoryLabel(name),
       value: Math.round(value),
     })),
     { name: otherLabel, value: Math.round(otherTotal) },
@@ -90,6 +91,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     bank_statement: t("profile.sourceBank"),
     payslip: t("profile.sourcePayslip"),
     questionnaire: t("profile.sourceQuestionnaire"),
+    estimated_from_transactions: t("profile.sourceEstimated"),
   }
 
   function formatDataSources(sources: string[]): string {
@@ -234,7 +236,11 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     )
   }
 
-  const chartData = getCategoryChartData(profile.categoryTotals, t("profile.otherCategory"))
+  const chartData = getCategoryChartData(
+    profile.categoryTotals,
+    t("profile.otherCategory"),
+    (slug) => t(`profile.categories.${slug}`, { defaultValue: slug.replace(/_/g, " ") }),
+  )
   const incomeAvailable = !!profile.incomeSummary?.amount
   const confirmedDate = profile.profileGeneratedAt
     ? fmt.date(new Date(profile.profileGeneratedAt))
