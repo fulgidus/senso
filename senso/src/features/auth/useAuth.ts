@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
 import {
   bootstrapSession,
   login,
   logout,
+  makeOnUnauthorized,
   signup,
   startGoogle,
 } from "@/features/auth/session"
@@ -54,6 +56,12 @@ function signupErrorKey(err: unknown): string {
 export function useAuth() {
   const [state, setState] = useState<AuthState>(initialState)
   const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  const onUnauthorized = useMemo(
+    () => makeOnUnauthorized((to) => navigate(to)),
+    [navigate],
+  )
 
   useEffect(() => {
     let isMounted = true
@@ -145,8 +153,9 @@ export function useAuth() {
       beginGoogle,
       signOut,
       updateUser,
+      onUnauthorized,
       isAuthenticated: Boolean(state.user),
     }),
-    [beginGoogle, setMode, signOut, updateUser, state, submit],
+    [beginGoogle, onUnauthorized, setMode, signOut, updateUser, state, submit],
   )
 }

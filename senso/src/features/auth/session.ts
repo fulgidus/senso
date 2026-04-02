@@ -183,9 +183,38 @@ async function refresh(refreshToken: string): Promise<RefreshPayload> {
   const payload = await apiRequest<RefreshPayload>(backendBaseUrl, "/auth/refresh", {
     method: "POST",
     body: { refreshToken },
+    // NOTE: No onUnauthorized here — prevents infinite refresh loops.
   })
   writeTokens(payload)
   return payload
+}
+
+/**
+ * Factory that returns an `onUnauthorized` callback suitable for passing to
+ * `apiRequest`. On a 401 the callback will:
+ *  1. Read the stored refresh token.
+ *  2. Call `refresh()` to obtain a new access token.
+ *  3. Return the new token string so `apiRequest` can retry.
+ *  4. On any failure (no refresh token, or refresh 401): clear local tokens,
+ *     navigate to `/auth`, and return `null`.
+ */
+export function makeOnUnauthorized(navigate?: (to: string) => void): () => Promise<string | null> {
+  return async () => {
+    const storedRefreshToken = readRefreshToken()
+    if (!storedRefreshToken) {
+      clearTokens()
+      navigate?.("/auth")
+      return null
+    }
+    try {
+      const payload = await refresh(storedRefreshToken)
+      return payload.accessToken
+    } catch {
+      clearTokens()
+      navigate?.("/auth")
+      return null
+    }
+  }
 }
 
 async function getMe(accessToken: string): Promise<MePayload> {
