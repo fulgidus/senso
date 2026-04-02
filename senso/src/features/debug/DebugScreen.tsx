@@ -1,13 +1,19 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { apiRequest } from "@/lib/api-client"
 import { getBackendBaseUrl } from "@/lib/config"
 import { readAccessToken } from "@/features/auth/storage"
+import { useAuth } from "@/features/auth/useAuth"
+import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 export function DebugScreen() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { onUnauthorized } = useAuth()
   const [results, setResults] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
+  const [showNukeConfirm, setShowNukeConfirm] = useState(false)
 
   const callDebug = async (
     action: string,
@@ -19,9 +25,14 @@ export function DebugScreen() {
       const data = await apiRequest<Record<string, unknown>>(
         getBackendBaseUrl(),
         path,
-        { method, token: readAccessToken() ?? "" },
+        { method, token: readAccessToken() ?? "", onUnauthorized },
       )
       setResults((prev) => ({ ...prev, [action]: JSON.stringify(data) }))
+      // After restart-ingestion succeeds, navigate to /profile after 1s so user
+      // can see ingestion progress in the profile monitoring section.
+      if (action === "restart") {
+        setTimeout(() => void navigate("/profile"), 1000)
+      }
     } catch {
       setResults((prev) => ({ ...prev, [action]: t("debug.error") }))
     } finally {
@@ -87,9 +98,7 @@ export function DebugScreen() {
         <button
           disabled={loading["nuke"]}
           onClick={() => {
-            if (window.confirm(t("debug.nukeConfirm"))) {
-              void callDebug("nuke", "DELETE", "/debug/nuke")
-            }
+            setShowNukeConfirm(true)
           }}
           className="rounded-lg border border-destructive bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -101,6 +110,16 @@ export function DebugScreen() {
           </p>
         )}
       </section>
+
+      <ConfirmDialog
+        open={showNukeConfirm}
+        title={t("debug.nukeTitle")}
+        description={t("debug.nukeConfirm")}
+        confirmVariant="destructive"
+        confirmLabel={t("debug.nukeCta")}
+        onConfirm={() => { setShowNukeConfirm(false); void callDebug("nuke", "DELETE", "/debug/nuke") }}
+        onCancel={() => setShowNukeConfirm(false)}
+      />
     </div>
   )
 }

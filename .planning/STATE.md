@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Milestone complete
-stopped_at: Completed 12-ux-accessibility-mobile-polish-05-PLAN.md
-last_updated: "2026-04-01T15:59:20.724Z"
+status: Phase complete - ready for verification
+last_updated: "2026-04-02T10:37:30.078Z"
+last_activity: 2026-04-02
 progress:
-  total_phases: 12
-  completed_phases: 12
-  total_plans: 52
-  completed_plans: 52
+  total_phases: 16
+  completed_phases: 13
+  total_plans: 63
+  completed_plans: 60
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 12 - ux-accessibility-mobile-polish
+**Current focus:** Phase 12.1 - add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 12.1 (add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability) - EXECUTING
+Plan: 8 of 8
 
 ## Performance Metrics
 
@@ -93,6 +93,14 @@ Plan: Not started
 | Phase 12-ux-accessibility-mobile-polish P02 | 15 | 2 tasks | 7 files |
 | Phase 12-ux-accessibility-mobile-polish P04 | 30 | 2 tasks | 5 files |
 | Phase 12-ux-accessibility-mobile-polish P05 | 5 | 2 tasks | 2 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P01 | 1min | 2 tasks | 3 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P02 | 1min | 2 tasks | 1 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P03 | 5min | 2 tasks | 6 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P05 | 3min | 2 tasks | 6 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P04 | 3min | 2 tasks | 5 files |
+| Phase 12.1 P06 | 5min | 2 tasks | 4 files |
+| Phase 12.1 P07 | 30 | 2 tasks | 4 files |
+| Phase 12.1 P08 | 16 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -183,6 +191,17 @@ Recent decisions affecting current work:
 - [Phase 12-ux-accessibility-mobile-polish]: ChatScreen pull-to-refresh uses merged callback ref pattern (listRef.current = el + pullToRefresh.containerRef(el)) to attach both scroll-tracking and touch events to the same element
 - [Phase 12-ux-accessibility-mobile-polish]: voiceAutoListen/voiceGender use local state + batch save intentionally; only strictPrivacyMode needs individual optimistic API call
 - [Phase 12-ux-accessibility-mobile-polish]: getGreetingKey() replaces fallbackWelcome pattern in ChatScreen — time-of-day greeting is locale-agnostic and needs no gender/persona name interpolation
+- [Phase 12.1]: onUnauthorized callback injection in apiRequest avoids circular dependency between api-client.ts and session.ts
+- [Phase 12.1]: PersonaSwitcher uses getPersonaTheme(persona, resolvedTheme) not persona.theme?.light — resolvedTheme prop in scope, no new imports needed
+- [Phase 12.1]: handleNewConversation does not reset persona — session-load useEffect (lines 1171-1176) handles saved-session persona restore separately
+- [Phase 12.1]: ConfirmDialog uses boolean state (showXxxConfirm) per call-site rather than a single shared modal — avoids race conditions when multiple confirmable actions exist on the same screen
+- [Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability]: theme_color set to #3F72AF (actual primary from index.css) not #7c3aed from plan - Actual app color from index.css --primary variable
+- [Phase 12.1]: getCategoryChartData receives categoryLabel as callback — pure function stays outside component, locale lookup stays inside
+- [Phase 12.1]: looksLikePrivateIndividual requires 2+ title-cased words to avoid false-positives on single-word business names like Amazon
+- [Phase 12.1]: Reset button + unsaved indicator shown only when isDirty — avoids visual noise
+- [Phase 12.1]: Pagination Prev/Next only rendered when totalPages > 1 — no dead controls for small catalogs
+- [Phase 12.1]: Merged hidden sm:block + overflow-x-auto into one div for flatter DOM on responsive table wrapping
+- [Phase 12.1]: PieChart donut replaces BarChart in spending breakdown; Legend replaces category pills
 
 ### Pending Todos
 
@@ -227,6 +246,7 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
+- Phase 12.1 inserted after Phase 12: Add a phase for all the todos, we need to prioritize them because they impact current usability (URGENT)
 - Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping
 - Phase 10 added: Transparency & security with about page, encryption at rest & LLM no-data-retention
@@ -247,4 +267,4 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last activity: 2026-04-01 - Completed quick task 260401-pf0: check why we have a HANDOFF.md file in .planning and if we still need it
+Last activity: 2026-04-02

@@ -95,6 +95,15 @@ type GroupState = {
   updatedCount?: number
 }
 
+function looksLikePrivateIndividual(name: string): boolean {
+  if (!name) return false
+  const businessIndicators = /\b(srl|spa|sas|snc|banca|bank|poste|amazon|google|apple|netflix|spotify|telecom|vodafone|tim|enel|eni|fineco|unicredit|intesa|sanpaolo|bnl|bnp|paypal|stripe|klarna)\b/i
+  if (businessIndicators.test(name)) return false
+  // If all words are title-cased and no business indicators, likely a person
+  const words = name.trim().split(/\s+/)
+  return words.length >= 2 && words.every(w => /^[A-ZÁÀÈÉÌÍÒÓÙÚ][a-záàèéìíòóùú]+$/.test(w))
+}
+
 function DirectionIcon({ type }: { type: ActorGroup["dominantType"] }) {
   if (type === "income")
     return <ArrowDownLeft className="h-4 w-4 text-green-500 shrink-0" />
@@ -262,6 +271,12 @@ export function UncategorizedScreen() {
                     <p className="text-sm font-semibold text-foreground truncate">
                       {group.counterpart_name ?? group.description ?? "—"}
                     </p>
+                    {/* Privacy notice for likely-private individuals */}
+                    {looksLikePrivateIndividual(group.counterpart_name ?? group.description ?? "") && (
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                        {t("profile.privateIndividualNotice")}
+                      </p>
+                    )}
                     {/* Raw description if different from counterpart */}
                     {group.counterpart_name &&
                       group.counterpart_name !== group.description && (
@@ -330,7 +345,7 @@ export function UncategorizedScreen() {
                           </option>
                           {VALID_CATEGORIES.map((cat) => (
                             <option key={cat} value={cat}>
-                              {cat.replace(/_/g, " ")}
+                              {t(`profile.categories.${cat}`, { defaultValue: cat.replace(/_/g, " ") })}
                             </option>
                           ))}
                         </select>

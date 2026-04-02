@@ -99,7 +99,49 @@ export function FileList({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-lg border border-border">
+      {/* Mobile card list */}
+      <div className="sm:hidden space-y-2">
+        {uploads.map((upload) => (
+          <div key={upload.id} className="rounded-lg border border-border bg-card p-3 space-y-2">
+            <div className="flex items-start gap-2">
+              {upload.confirmed && (
+                <span className="text-green-600 font-bold shrink-0" title={t("ingestion.confirmedTitle")}>✓</span>
+              )}
+              <span className="font-medium text-foreground text-sm truncate" title={upload.originalFilename}>
+                {upload.originalFilename}
+              </span>
+            </div>
+            <div className="text-xs text-muted-foreground">{upload.contentType}</div>
+            <ExtractionMethodCell upload={upload} />
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => onInspect(upload.id)} disabled={upload.extractionStatus !== "success"}>
+                {t("ingestion.actionInspect")}
+              </Button>
+              {canRetry(upload) && (
+                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => onRetry(upload.id)}>
+                  {t("ingestion.actionRetry")}
+                </Button>
+              )}
+              {upload.extractionStatus === "success" && !upload.confirmed && (
+                <Button size="sm" className="h-7 text-xs" onClick={() => onConfirmOne(upload.id)}>
+                  {t("ingestion.actionConfirm")}
+                </Button>
+              )}
+              {upload.extractionStatus === "success" && (
+                <Button variant="outline" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => onReport(upload.id)}>
+                  {t("ingestion.actionReport")}
+                </Button>
+              )}
+              <Button variant="outline" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => onRemove(upload.id)}>
+                {t("ingestion.actionRemove")}
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden sm:block overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/50">

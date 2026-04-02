@@ -13,6 +13,11 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE"
   token?: string
   body?: unknown
+  /** Callback invoked on 401 to refresh the access token. Return the new token
+   * string, or `null` if refresh failed (signals to clear session and redirect). */
+  onUnauthorized?: () => Promise<string | null>
+  /** Internal flag — prevents infinite retry loops. Do NOT set from call sites. */
+  _isRetry?: boolean
 }
 
 export async function apiRequest<T>(
@@ -20,19 +25,33 @@ export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
+  const { onUnauthorized, _isRetry, ...fetchOptions } = options
+
   const response = await fetch(`${baseUrl}${path}`, {
-    method: options.method ?? "GET",
+    method: fetchOptions.method ?? "GET",
     headers: {
       "content-type": "application/json",
-      ...(options.token ? { authorization: `Bearer ${options.token}` } : {}),
+      ...(fetchOptions.token ? { authorization: `Bearer ${fetchOptions.token}` } : {}),
     },
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    body: fetchOptions.body ? JSON.stringify(fetchOptions.body) : undefined,
   })
 
   const hasBody = response.status !== 204
   const data = hasBody ? ((await response.json()) as unknown) : undefined
 
   if (!response.ok) {
+    // 401-intercept: attempt token refresh and retry once
+    if (response.status === 401 && onUnauthorized && !_isRetry) {
+      const newToken = await onUnauthorized()
+      if (newToken) {
+        return apiRequest<T>(baseUrl, path, {
+          ...fetchOptions,
+          token: newToken,
+          onUnauthorized,
+          _isRetry: true,
+        })
+      }
+    }
     throw new ApiClientError("Request failed", response.status, data)
   }
 

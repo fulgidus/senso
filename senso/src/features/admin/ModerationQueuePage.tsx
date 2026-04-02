@@ -189,7 +189,54 @@ export function ModerationQueuePage() {
           {t("admin.moderation.noItems")}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+        <>
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {items.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-border bg-card p-3 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-medium text-foreground">{obfuscateUser(item.user_id)}</div>
+                    <div className="text-xs text-muted-foreground">{relativeDate(item.created_at)}</div>
+                  </div>
+                  <ContentTypeBadge type={item.content_type} />
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {item.detected_violations.map((v) => (
+                    <span key={v} className="inline-flex rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 text-xs">{v}</span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <SeverityBadge severity={item.severity} />
+                  <span className="text-xs text-muted-foreground">{item.action_taken}</span>
+                </div>
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => void handleConfirm(item.id)}
+                    disabled={processing === item.id}
+                    className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  >
+                    {processing === item.id ? <Loader2 className="h-3 w-3 animate-spin" /> : t("admin.moderation.confirmPenalty")}
+                  </button>
+                  {revertConfirmId === item.id ? (
+                    <>
+                      <button onClick={() => void handleRevert(item.id)} disabled={processing === item.id} className="rounded-md bg-destructive px-2.5 py-1.5 text-xs font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 transition-colors">
+                        {t("admin.moderation.confirmRevert")}
+                      </button>
+                      <button onClick={() => setRevertConfirmId(null)} className="rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors">✕</button>
+                    </>
+                  ) : (
+                    <button onClick={() => setRevertConfirmId(item.id)} className="rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent transition-colors">
+                      {t("admin.moderation.revertPenalty")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
@@ -292,6 +339,7 @@ export function ModerationQueuePage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   )

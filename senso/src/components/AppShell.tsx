@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { NavLink, useNavigate, Link } from "react-router-dom"
-import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen, Bell } from "lucide-react"
+import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen, Bell, FileText, MapPin, Flag, Bug } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { UserAvatar } from "@/components/UserAvatar"
@@ -276,6 +276,7 @@ export function AppShell({ children }: AppShellProps) {
   const { t } = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons)
+  const [adminOpen, setAdminOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
   // ── Notification bell state ──
@@ -305,25 +306,6 @@ export function AppShell({ children }: AppShellProps) {
     { to: "/chat", label: t("nav.coach"), icon: <MessageCircle className="h-5 w-5" /> },
     { to: "/learn", label: t("nav.learn"), icon: <BookOpen className="h-5 w-5" /> },
   ]
-
-  // Admin-only nav items
-  if (user.isAdmin) {
-    NAV_ITEMS.push({
-      to: "/admin/content",
-      label: t("nav.adminContent"),
-      icon: <ShieldCheck className="h-5 w-5" />,
-    })
-    NAV_ITEMS.push({
-      to: "/admin/merchant-map",
-      label: t("admin.merchantMap.title"),
-      icon: <ShieldCheck className="h-5 w-5" />,
-    })
-    NAV_ITEMS.push({
-      to: "/admin/moderation",
-      label: t("admin.moderation.title"),
-      icon: <ShieldCheck className="h-5 w-5" />,
-    })
-  }
 
   // Close drawer on outside click
   useEffect(() => {
@@ -473,6 +455,30 @@ export function AppShell({ children }: AppShellProps) {
           {[...NAV_ITEMS, { to: "/settings", label: t("nav.settings"), icon: <Settings className="h-5 w-5" /> }].map((item) => (
             <NavItemLink key={item.to} item={item} onClick={() => setDrawerOpen(false)} />
           ))}
+
+          {/* Admin submenu — collapsible, admin-only */}
+          {user.isAdmin && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setAdminOpen((o) => !o)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                aria-expanded={adminOpen}
+              >
+                <ShieldCheck className="h-5 w-5 shrink-0" />
+                <span className="flex-1 text-left">{t("nav.adminSection")}</span>
+                <ChevronDown className={["h-4 w-4 transition-transform", adminOpen ? "rotate-180" : ""].join(" ")} />
+              </button>
+              {adminOpen && (
+                <div className="pl-4 mt-1 space-y-1">
+                  <NavItemLink item={{ to: "/admin/content", label: t("nav.adminContent"), icon: <FileText className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
+                  <NavItemLink item={{ to: "/admin/merchant-map", label: t("admin.merchantMap.title"), icon: <MapPin className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
+                  <NavItemLink item={{ to: "/admin/moderation", label: t("admin.moderation.title"), icon: <Flag className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
+                  <NavItemLink item={{ to: "/debug", label: t("nav.debug"), icon: <Bug className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         {/* Footer - Logout */}

@@ -3,6 +3,7 @@ import { RefreshCw, Search, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { listUploads, deleteUpload, retryUpload, type UploadFile } from "@/api/ingestionFilesApi"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
+import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 type Props = {
   token: string
@@ -51,6 +52,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({})
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   const loadFiles = () => {
     setLoading(true)
@@ -79,14 +81,13 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
     }
   }
 
-  const handleDelete = async (file: UploadFile) => {
-    if (!window.confirm(t("files.confirmDelete"))) return
-    setItemLoading(file.id, true)
+  const handleDelete = async (fileId: string) => {
+    setItemLoading(fileId, true)
     try {
-      await deleteUpload(token, file.id)
-      setFiles((prev) => prev.filter((f) => f.id !== file.id))
+      await deleteUpload(token, fileId)
+      setFiles((prev) => prev.filter((f) => f.id !== fileId))
     } finally {
-      setItemLoading(file.id, false)
+      setItemLoading(fileId, false)
     }
   }
 
@@ -121,72 +122,86 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
   }
 
   return (
-    <ul className="space-y-2">
-      {files.map((file) => {
-        const busy = actionLoading[file.id] ?? false
-        const canRetry =
-          file.extraction_status === "failed" || file.extraction_status === "pending"
-        const uploadDate = fmt.date(new Date(file.uploaded_at))
+    <>
+      <ul className="space-y-2">
+        {files.map((file) => {
+          const busy = actionLoading[file.id] ?? false
+          const canRetry =
+            file.extraction_status === "failed" || file.extraction_status === "pending"
+          const uploadDate = fmt.date(new Date(file.uploaded_at))
 
-        return (
-          <li
-            key={file.id}
-            className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-          >
-            {/* File info */}
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <span
-                className="truncate text-sm font-medium text-foreground"
-                title={file.original_filename}
-              >
-                {file.original_filename.length > 40
-                  ? `${file.original_filename.slice(0, 40)}…`
-                  : file.original_filename}
-              </span>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <StatusBadge status={file.extraction_status} t={t} />
-                <span>{uploadDate}</span>
-                <span>{formatFileSize(file.size_bytes)}</span>
+          return (
+            <li
+              key={file.id}
+              className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              {/* File info */}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span
+                  className="truncate text-sm font-medium text-foreground"
+                  title={file.original_filename}
+                >
+                  {file.original_filename.length > 40
+                    ? `${file.original_filename.slice(0, 40)}…`
+                    : file.original_filename}
+                </span>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <StatusBadge status={file.extraction_status} t={t} />
+                  <span>{uploadDate}</span>
+                  <span>{formatFileSize(file.size_bytes)}</span>
+                </div>
               </div>
-            </div>
 
-            {/* Action buttons */}
-            <div className="flex shrink-0 items-center gap-1">
-              {canRetry && (
+              {/* Action buttons */}
+              <div className="flex shrink-0 items-center gap-1">
+                {canRetry && (
+                  <button
+                    disabled={busy}
+                    onClick={() => void handleRetry(file)}
+                    aria-label={t("files.retry")}
+                    title={t("files.retry")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </button>
+                )}
                 <button
                   disabled={busy}
-                  onClick={() => void handleRetry(file)}
-                  aria-label={t("files.retry")}
-                  title={t("files.retry")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                  onClick={() => setDeleteTargetId(file.id)}
+                  aria-label={t("files.delete")}
+                  title={t("files.delete")}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
-              )}
-              <button
-                disabled={busy}
-                onClick={() => void handleDelete(file)}
-                aria-label={t("files.delete")}
-                title={t("files.delete")}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-              {isAdmin && (
-                <button
-                  disabled={busy}
-                  onClick={() => onInspect?.(file.id)}
-                  aria-label={t("files.inspect")}
-                  title={t("files.inspect")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </li>
-        )
-      })}
-    </ul>
+                {isAdmin && (
+                  <button
+                    disabled={busy}
+                    onClick={() => onInspect?.(file.id)}
+                    aria-label={t("files.inspect")}
+                    title={t("files.inspect")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        title={t("files.deleteTitle")}
+        description={t("files.confirmDelete")}
+        confirmVariant="destructive"
+        confirmLabel={t("common.delete")}
+        onConfirm={() => {
+          if (deleteTargetId) { void handleDelete(deleteTargetId); setDeleteTargetId(null) }
+        }}
+        onCancel={() => setDeleteTargetId(null)}
+      />
+    </>
   )
 }

@@ -229,6 +229,23 @@ Plans:
 - [x] 12-04-PLAN.md - PageTransition component, enhanced drawer animation, usePullToRefresh hook + integration into ChatScreen and ProfileScreen.
 - [x] 12-05-PLAN.md - Dynamic micro-copy (time-of-day greetings), haptic feedback on actions, optimistic UI consistency audit, full test suite validation.
 
+### Phase 12.1: Add a phase for all the todos, we need to prioritize them because they impact current usability (INSERTED)
+
+**Goal:** Fix all 27 actionable TODOs that impact current usability — covering auth reliability, UX polish, i18n completeness, admin tooling, responsive layout, and voice output degradation handling.
+**Requirements**: TODO-2 through TODO-28 (27 items; TODO-1 deferred to phases 13-15)
+**Depends on:** Phase 12
+**Plans:** 8/8 plans complete
+
+Plans:
+- [x] 12.1-01-PLAN.md - Auth fixes: 401-intercept in api-client + token renewal + redirect to login on expiry (#26, #27)
+- [x] 12.1-02-PLAN.md - Coach picker fixes: dark theme rendering + persona persistence across new conversation (#24, #25)
+- [x] 12.1-03-PLAN.md - shadcn Dialog component + replace all window.confirm() / window.alert() calls (#28)
+- [x] 12.1-04-PLAN.md - ErrorBoundary on profile pages + pull-to-refresh touchAction fix + nuke button auth fix (#3, #4, #15)
+- [x] 12.1-05-PLAN.md - Admin/debug submenu in AppShell + restart-ingestion navigation fix + PWA manifest (#2, #13, #14)
+- [x] 12.1-06-PLAN.md - Profile i18n: estimated source label + category localization + hash navigation + merchant check (#5, #6, #10, #11)
+- [x] 12.1-07-PLAN.md - Admin table UX: sort affordance + icon headers + pagination + localized category picker + settings save confirmation (#8, #9, #17, #18, #19, #20, #21)
+- [x] 12.1-08-PLAN.md - UI polish: pie chart, responsive table card layouts, TTS fallback indicator, dark-mode coaching cards (#12, #16, #22, #23)
+
 ### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 
 **Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.

@@ -202,7 +202,59 @@ export function MerchantMapAdminPage() {
           {t("admin.merchantMap.noItems")}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+        <>
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className={[
+                  "rounded-2xl border border-border bg-card p-3 space-y-1.5",
+                  item.is_blacklisted ? "opacity-50 border-l-2 border-destructive" : "",
+                ].join(" ")}
+              >
+                <div className="font-mono text-xs font-medium text-foreground truncate">{item.description_raw}</div>
+                <div className="text-xs text-muted-foreground">{item.canonical_merchant ?? "—"}</div>
+                <div className="flex flex-wrap gap-1.5 items-center">
+                  <MethodBadge method={item.learned_method} />
+                  <ConfidenceBadge value={item.confidence} />
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{item.category}</span>
+                </div>
+                <div className="flex justify-end">
+                  {item.is_blacklisted ? (
+                    <button onClick={() => void handleUnblacklist(item.id)} disabled={saving} className="text-xs text-muted-foreground hover:text-foreground underline">
+                      {t("admin.merchantMap.unblacklistBtn")}
+                    </button>
+                  ) : (
+                    <button onClick={() => { setExpandedId((prev) => (prev === item.id ? null : item.id)); setReasonText("") }} className="text-xs text-destructive hover:underline">
+                      {t("admin.merchantMap.blacklistBtn")}
+                    </button>
+                  )}
+                </div>
+                {expandedId === item.id && !item.is_blacklisted && (
+                  <div className="flex items-start gap-2 pt-1">
+                    <textarea
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-destructive resize-none"
+                      rows={2}
+                      value={reasonText}
+                      onChange={(e) => setReasonText(e.target.value)}
+                      placeholder={t("admin.merchantMap.reasonPlaceholder")}
+                    />
+                    <button
+                      onClick={() => void handleBlacklist(item.id)}
+                      disabled={saving || reasonText.trim().length < 5}
+                      className="shrink-0 rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : t("admin.merchantMap.confirmBlacklist")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
@@ -331,6 +383,7 @@ export function MerchantMapAdminPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
     </div>
   )

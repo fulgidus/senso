@@ -335,11 +335,11 @@ function ResourceCardRouter({ card }: { card: ResourceCard }) {
 function LearnCardStub({ card }: { card: LearnCard }) {
   const { t } = useTranslation()
   return (
-    <div className="border border-blue-200 rounded-md px-3 py-2 bg-blue-50 text-sm">
-      <div className="font-semibold text-blue-800">{card.concept}</div>
-      <div className="text-blue-700 mt-0.5">{card.plain_explanation}</div>
+    <div className="border border-primary/30 rounded-md px-3 py-2 bg-primary/5 text-sm">
+      <div className="font-semibold text-primary">{card.concept}</div>
+      <div className="text-foreground mt-0.5">{card.plain_explanation}</div>
       {card.example && (
-        <div className="text-blue-600 text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
+        <div className="text-muted-foreground text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
       )}
     </div>
   )
@@ -494,11 +494,13 @@ function PersonaSwitcher({
   activePersonaId,
   onSelect,
   onClose,
+  resolvedTheme,
 }: {
   personas: Persona[]
   activePersonaId: string
   onSelect: (personaId: string) => void
   onClose: () => void
+  resolvedTheme: "light" | "dark"
 }) {
   const { t } = useTranslation()
 
@@ -519,7 +521,7 @@ function PersonaSwitcher({
         <div className="p-4 space-y-2">
           {personas.filter((persona) => persona.available).map((persona) => {
             const selected = persona.id === activePersonaId
-            const theme = persona.theme?.light
+            const theme = getPersonaTheme(persona, resolvedTheme)
             return (
               <button
                 key={persona.id}
@@ -572,29 +574,34 @@ function VoicePlayButton({
   if (!canPlay) return null
   const busy = isGenerating || isPlaying
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className="h-6 w-6 text-muted-foreground hover:text-foreground"
-      onClick={() => (busy ? stop() : void play(text, locale))}
-      disabled={isGenerating && !isPlaying}
-      aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
-      title={
-        usingFallback ? t("coaching.ttsFallbackActive") :
-        isGenerating ? t("coaching.ttsGeneratingShort") :
-        isPlaying ? t("coaching.ttsPlayingShort") :
-        t("coaching.ttsPlayShort")
-      }
-    >
-      {isGenerating ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
-      ) : isPlaying ? (
-        <Square className="h-3 w-3" />
-      ) : (
-        <Volume2 className="h-3 w-3" />
+    <div className="relative inline-flex items-center">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+        onClick={() => (busy ? stop() : void play(text, locale))}
+        disabled={isGenerating && !isPlaying}
+        aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
+        title={
+          usingFallback ? t("coaching.ttsFallbackHint") :
+          isGenerating ? t("coaching.ttsGeneratingShort") :
+          isPlaying ? t("coaching.ttsPlayingShort") :
+          t("coaching.ttsPlayShort")
+        }
+      >
+        {isGenerating ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : isPlaying ? (
+          <Square className="h-3 w-3" />
+        ) : (
+          <Volume2 className="h-3 w-3" />
+        )}
+      </Button>
+      {usingFallback && (
+        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
       )}
-    </Button>
+    </div>
   )
 }
 
@@ -1193,7 +1200,6 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     setSessionName("")
     setMessages([])
     setError(null)
-    setActivePersonaId(user.defaultPersonaId ?? "mentore-saggio")
     setWelcomeLoading(true)
     try {
       const msg = await getWelcomeMessage(locale)
@@ -1204,7 +1210,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     } finally {
       setWelcomeLoading(false)
     }
-  }, [locale, user.defaultPersonaId])
+  }, [locale])
 
   // ── Open a previous conversation ───────────────────────────────────────────
 
@@ -1676,6 +1682,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
       <div
         ref={mergedListRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-y-contain"
+        style={{ touchAction: "pan-x" }}
         onScroll={updateStickiness}
       >
         {/* Pull-to-refresh indicator */}
@@ -1849,6 +1856,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         <PersonaSwitcher
           personas={personas}
           activePersonaId={activePersonaId}
+          resolvedTheme={resolvedTheme}
           onSelect={(personaId) => {
             setActivePersonaId(personaId)
             const selected = personas.find((persona) => persona.id === personaId)

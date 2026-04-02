@@ -11,6 +11,9 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -43,11 +46,12 @@ const CHART_COLORS = [
 function getCategoryChartData(
   categoryTotals: Record<string, number>,
   otherLabel: string,
+  categoryLabel: (slug: string) => string,
 ): { name: string; value: number }[] {
   const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])
   if (entries.length <= 5) {
     return entries.map(([name, value]) => ({
-      name: name.replace(/_/g, " "),
+      name: categoryLabel(name),
       value: Math.round(value),
     }))
   }
@@ -55,7 +59,7 @@ function getCategoryChartData(
   const otherTotal = entries.slice(5).reduce((acc, [, v]) => acc + v, 0)
   return [
     ...top5.map(([name, value]) => ({
-      name: name.replace(/_/g, " "),
+      name: categoryLabel(name),
       value: Math.round(value),
     })),
     { name: otherLabel, value: Math.round(otherTotal) },
@@ -90,6 +94,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     bank_statement: t("profile.sourceBank"),
     payslip: t("profile.sourcePayslip"),
     questionnaire: t("profile.sourceQuestionnaire"),
+    estimated_from_transactions: t("profile.sourceEstimated"),
   }
 
   function formatDataSources(sources: string[]): string {
@@ -149,6 +154,14 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     onRefresh: handlePullRefresh,
     disabled: loading,
   })
+
+  // Scroll to hash anchor on mount (e.g. /profile#income, /profile#spending)
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash)
+      if (el) el.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -234,7 +247,11 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     )
   }
 
-  const chartData = getCategoryChartData(profile.categoryTotals, t("profile.otherCategory"))
+  const chartData = getCategoryChartData(
+    profile.categoryTotals,
+    t("profile.otherCategory"),
+    (slug) => t(`profile.categories.${slug}`, { defaultValue: slug.replace(/_/g, " ") }),
+  )
   const incomeAvailable = !!profile.incomeSummary?.amount
   const confirmedDate = profile.profileGeneratedAt
     ? fmt.date(new Date(profile.profileGeneratedAt))
@@ -245,6 +262,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     <main
       ref={pullToRefresh.containerRef as React.RefCallback<HTMLElement>}
       className="mx-auto w-full max-w-4xl px-6 py-6 overscroll-y-contain"
+      style={{ touchAction: "pan-x" }}
     >
       {/* Pull-to-refresh indicator */}
       {(pullToRefresh.isPulling || pullToRefresh.isRefreshing) && (
@@ -394,7 +412,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         <div className="space-y-8">
           {/* Summary Card */}
           {activeTab === "summary" && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="income" className="rounded-2xl border border-border bg-card p-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {/* Income */}
                 <div>
@@ -455,33 +473,29 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* Spending Breakdown */}
           {activeTab === "charts" && chartData.length > 0 && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="spending" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.spendingBreakdown")}
               </h3>
-              <div className="min-h-[220px]">
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart
-                    data={chartData}
-                    layout="vertical"
-                    margin={{ left: 8, right: 16 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      horizontal={false}
-                      stroke="var(--border)"
-                    />
-                    <XAxis
-                      type="number"
-                      tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                      tickFormatter={(v: number) => `€${v}`}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={110}
-                      tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-                    />
+              <div className="min-h-[260px]">
+                <ResponsiveContainer width="100%" height={260}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="55%"
+                      outerRadius="75%"
+                      dataKey="value"
+                      paddingAngle={2}
+                    >
+                      {chartData.map((_, idx) => (
+                        <Cell
+                          key={idx}
+                          fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
                     <Tooltip
                       formatter={(value) => [
                         typeof value === "number"
@@ -496,36 +510,20 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                         fontSize: "12px",
                       }}
                     />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {chartData.map((_, idx) => (
-                        <Cell
-                          key={idx}
-                          fill={CHART_COLORS[idx % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <Legend
+                      formatter={(value) => (
+                        <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{value}</span>
+                      )}
+                    />
+                  </PieChart>
                 </ResponsiveContainer>
-              </div>
-
-              {/* Category pills */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                {chartData.map((entry, idx) => (
-                  <span
-                    key={entry.name}
-                    className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
-                    style={{ borderLeft: `3px solid ${CHART_COLORS[idx % CHART_COLORS.length]}` }}
-                  >
-                    {entry.name} · {fmt.currency(entry.value)}
-                  </span>
-                ))}
               </div>
             </section>
           )}
 
           {/* Income vs Expenses (only if income available, charts tab) */}
           {activeTab === "charts" && incomeAvailable && profile.monthlyExpenses !== null && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="income-vs-expenses" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.incomeVsExpenses")}
               </h3>
@@ -578,7 +576,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* AI Insight Cards (summary tab) */}
           {activeTab === "summary" && (
-            <section>
+            <section id="insights">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.insightsHeading")}
               </h3>
@@ -634,7 +632,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
 
           {/* Confirm / Correct Section (summary tab) */}
           {activeTab === "summary" && (
-            <section className="rounded-2xl border border-border bg-card p-6">
+            <section id="confirm" className="rounded-2xl border border-border bg-card p-6">
               <h3 className="mb-4 text-xl font-semibold text-foreground">
                 {t("profile.confirmHeading")}
               </h3>

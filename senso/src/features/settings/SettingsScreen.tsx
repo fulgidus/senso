@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+
 import { Link } from "react-router-dom"
 import { LogOut, Save, Shield } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -13,6 +14,7 @@ import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
 import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
 import { useHapticFeedback } from "@/hooks/useHapticFeedback"
+import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -41,6 +43,7 @@ export function SettingsScreen() {
   const [personas, setPersonas] = useState<Persona[]>([])
   const [strictPrivacyMode, setStrictPrivacyMode] = useState(user.strictPrivacyMode ?? false)
   const [privacySaving, setPrivacySaving] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   useEffect(() => {
     void getPersonas().then(setPersonas).catch(() => setPersonas([]))
@@ -52,6 +55,14 @@ export function SettingsScreen() {
     voiceGender !== (user.voiceGender ?? "indifferent") ||
     voiceAutoListen !== (user.voiceAutoListen ?? false) ||
     defaultPersonaId !== (user.defaultPersonaId ?? "mentore-saggio")
+
+  const handleReset = useCallback(() => {
+    setFirstName(user.firstName ?? "")
+    setLastName(user.lastName ?? "")
+    setVoiceGender(user.voiceGender ?? "indifferent")
+    setVoiceAutoListen(user.voiceAutoListen ?? false)
+    setDefaultPersonaId(user.defaultPersonaId ?? "mentore-saggio")
+  }, [user])
 
   const handleSave = async () => {
     if (!firstName.trim()) return
@@ -162,15 +173,31 @@ export function SettingsScreen() {
           <p className="text-sm text-green-600 dark:text-green-400">{t("settings.saveSuccess")}</p>
         )}
 
-        <Button
-          variant="default"
-          disabled={!firstName.trim() || !isDirty || saving}
-          onClick={() => void handleSave()}
-          className="w-full sm:w-auto"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? t("settings.saving") : t("settings.save")}
-        </Button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {isDirty && (
+            <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+              {t("settings.unsavedChanges")}
+            </span>
+          )}
+          {isDirty && (
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              className="w-full sm:w-auto"
+            >
+              {t("settings.reset")}
+            </Button>
+          )}
+          <Button
+            variant="default"
+            disabled={!firstName.trim() || !isDirty || saving}
+            onClick={() => void handleSave()}
+            className="w-full sm:w-auto"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? t("settings.saving") : t("settings.save")}
+          </Button>
+        </div>
 
         {/* Read-only email */}
         <div className="space-y-1 pt-2 border-t border-border">
@@ -408,9 +435,7 @@ export function SettingsScreen() {
         <Button
           variant="destructive"
           onClick={() => {
-            const gender: "masculine" | "feminine" | "neutral" =
-              voiceGender !== "indifferent" ? (voiceGender as "masculine" | "feminine" | "neutral") : "neutral"
-            if (window.confirm(t(`settings.logoutConfirm.${gender}`))) void signOut()
+            setShowLogoutConfirm(true)
           }}
           className="w-full sm:w-auto"
         >
@@ -418,6 +443,17 @@ export function SettingsScreen() {
           {t("settings.logout")}
         </Button>
       </section>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title={t("auth.signOutTitle")}
+        description={t(`settings.logoutConfirm.${
+          voiceGender !== "indifferent" ? (voiceGender as "masculine" | "feminine" | "neutral") : "neutral"
+        }`)}
+        confirmVariant="destructive"
+        onConfirm={() => { setShowLogoutConfirm(false); void signOut() }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   )
 }
