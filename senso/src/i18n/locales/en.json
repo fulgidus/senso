@@ -1,4 +1,9 @@
 {
+    "common": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "delete": "Delete"
+    },
     "app": {
         "loading": "Loading session...",
         "profileRequired": "Complete your profile before accessing the coach.",
@@ -57,7 +62,8 @@
         "errorSignupFailed": "Sign-up failed. Check your connection and try again.",
         "errorGoogleUnavailable": "Google login is not available. Use email and password.",
         "errorGoogleFailed": "Google login failed. Use email and password.",
-        "confirmSignOut": "Are you sure you want to sign out from this device?"
+        "confirmSignOut": "Are you sure you want to sign out from this device?",
+        "signOutTitle": "Sign out"
     },
     "profileSetup": {
         "heading": "S.E.N.S.O.",
@@ -728,6 +734,7 @@
         "tabLabel": "Your files",
         "empty": "No files uploaded.",
         "confirmDelete": "Delete this file? This action cannot be undone.",
+        "deleteTitle": "Delete file",
         "loadError": "Could not load files. Please try again.",
         "retry": "Retry",
         "delete": "Delete",

@@ -1,4 +1,9 @@
 {
+    "common": {
+        "cancel": "Annulla",
+        "confirm": "Conferma",
+        "delete": "Elimina"
+    },
     "app": {
         "loading": "Caricamento sessione...",
         "profileRequired": "Completa il tuo profilo prima di accedere al coach.",
@@ -57,7 +62,8 @@
         "errorSignupFailed": "Registrazione non riuscita. Controlla la connessione e riprova.",
         "errorGoogleUnavailable": "Accesso con Google non disponibile. Usa email e password.",
         "errorGoogleFailed": "Accesso con Google non riuscito. Usa email e password.",
-        "confirmSignOut": "Vuoi davvero uscire dal tuo account su questo dispositivo?"
+        "confirmSignOut": "Vuoi davvero uscire dal tuo account su questo dispositivo?",
+        "signOutTitle": "Esci dall'account"
     },
     "profileSetup": {
         "heading": "S.E.N.S.O.",
@@ -728,6 +734,7 @@
         "tabLabel": "I tuoi file",
         "empty": "Nessun file caricato.",
         "confirmDelete": "Eliminare questo file? L'azione è irreversibile.",
+        "deleteTitle": "Elimina file",
         "loadError": "Impossibile caricare i file. Riprova.",
         "retry": "Riprova",
         "delete": "Elimina",
