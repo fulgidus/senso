@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { useAuth } from "@/features/auth/useAuth"
 import { AuthContext } from "@/features/auth/AuthContext"
 import { AppShell, PublicShell } from "@/components/AppShell"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { ProfileScreen } from "@/features/profile/ProfileScreen"
 import { UncategorizedScreen } from "@/features/profile/UncategorizedScreen"
 import { SettingsScreen } from "@/features/settings/SettingsScreen"
@@ -162,9 +163,9 @@ function AppRoutes() {
           <Route path="/" element={<RootResolver />} />
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/onboarding/*" element={<OnboardingRoutes />} />
-          <Route path="/chat/*" element={<ChatRoutes />} />
-          <Route path="/profile" element={<ProfilePage user={user} />} />
-          <Route path="/profile/uncategorized" element={<UncategorizedScreen />} />
+          <Route path="/chat/*" element={<ErrorBoundary><ChatRoutes /></ErrorBoundary>} />
+          <Route path="/profile" element={<ErrorBoundary><ProfilePage user={user} /></ErrorBoundary>} />
+          <Route path="/profile/uncategorized" element={<ErrorBoundary><UncategorizedScreen /></ErrorBoundary>} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/learn/*" element={<LearnRoutes />} />
           {user.isAdmin && (
