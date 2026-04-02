@@ -1,0 +1,18 @@
+{
+  "name": "S.E.N.S.O.",
+  "short_name": "SENSO",
+  "description": "Il tuo assistente finanziario personale",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3F72AF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
