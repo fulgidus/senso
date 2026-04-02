@@ -494,11 +494,13 @@ function PersonaSwitcher({
   activePersonaId,
   onSelect,
   onClose,
+  resolvedTheme,
 }: {
   personas: Persona[]
   activePersonaId: string
   onSelect: (personaId: string) => void
   onClose: () => void
+  resolvedTheme: "light" | "dark"
 }) {
   const { t } = useTranslation()
 
@@ -519,7 +521,7 @@ function PersonaSwitcher({
         <div className="p-4 space-y-2">
           {personas.filter((persona) => persona.available).map((persona) => {
             const selected = persona.id === activePersonaId
-            const theme = persona.theme?.light
+            const theme = getPersonaTheme(persona, resolvedTheme)
             return (
               <button
                 key={persona.id}
@@ -1849,6 +1851,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         <PersonaSwitcher
           personas={personas}
           activePersonaId={activePersonaId}
+          resolvedTheme={resolvedTheme}
           onSelect={(personaId) => {
             setActivePersonaId(personaId)
             const selected = personas.find((persona) => persona.id === personaId)
