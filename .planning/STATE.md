@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: In Progress
-stopped_at: Planning complete for Phase 12.1 (8 plans written, execution pending)
-last_updated: "2026-04-02T00:00:00.000Z"
+status: Ready to execute
+last_updated: "2026-04-02T09:53:37.932Z"
+last_activity: 2026-04-02
 progress:
-  total_phases: 13
+  total_phases: 16
   completed_phases: 12
-  total_plans: 60
-  completed_plans: 52
+  total_plans: 63
+  completed_plans: 54
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 12 - ux-accessibility-mobile-polish
+**Current focus:** Phase 12.1 - add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 12.1 (add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability) - EXECUTING
+Plan: 3 of 8
 
 ## Performance Metrics
 
@@ -93,6 +93,8 @@ Plan: Not started
 | Phase 12-ux-accessibility-mobile-polish P02 | 15 | 2 tasks | 7 files |
 | Phase 12-ux-accessibility-mobile-polish P04 | 30 | 2 tasks | 5 files |
 | Phase 12-ux-accessibility-mobile-polish P05 | 5 | 2 tasks | 2 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P01 | 1min | 2 tasks | 3 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P02 | 1min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -183,6 +185,9 @@ Recent decisions affecting current work:
 - [Phase 12-ux-accessibility-mobile-polish]: ChatScreen pull-to-refresh uses merged callback ref pattern (listRef.current = el + pullToRefresh.containerRef(el)) to attach both scroll-tracking and touch events to the same element
 - [Phase 12-ux-accessibility-mobile-polish]: voiceAutoListen/voiceGender use local state + batch save intentionally; only strictPrivacyMode needs individual optimistic API call
 - [Phase 12-ux-accessibility-mobile-polish]: getGreetingKey() replaces fallbackWelcome pattern in ChatScreen — time-of-day greeting is locale-agnostic and needs no gender/persona name interpolation
+- [Phase 12.1]: onUnauthorized callback injection in apiRequest avoids circular dependency between api-client.ts and session.ts
+- [Phase 12.1]: PersonaSwitcher uses getPersonaTheme(persona, resolvedTheme) not persona.theme?.light — resolvedTheme prop in scope, no new imports needed
+- [Phase 12.1]: handleNewConversation does not reset persona — session-load useEffect (lines 1171-1176) handles saved-session persona restore separately
 
 ### Pending Todos
 
@@ -248,4 +253,4 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last activity: 2026-04-01 - Completed quick task 260401-pf0: check why we have a HANDOFF.md file in .planning and if we still need it
+Last activity: 2026-04-02
