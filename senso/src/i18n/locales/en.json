@@ -24,6 +24,8 @@
         "learn": "Learn",
         "settings": "Settings",
         "adminContent": "Content management",
+        "adminSection": "Administration",
+        "debug": "Debug",
         "loginCta": "Log in",
         "openMenu": "Open menu",
         "closeMenu": "Close menu",

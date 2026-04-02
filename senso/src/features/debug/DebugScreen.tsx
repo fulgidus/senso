@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { apiRequest } from "@/lib/api-client"
 import { getBackendBaseUrl } from "@/lib/config"
 import { readAccessToken } from "@/features/auth/storage"
@@ -7,6 +8,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 export function DebugScreen() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [results, setResults] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [showNukeConfirm, setShowNukeConfirm] = useState(false)
@@ -24,6 +26,11 @@ export function DebugScreen() {
         { method, token: readAccessToken() ?? "" },
       )
       setResults((prev) => ({ ...prev, [action]: JSON.stringify(data) }))
+      // After restart-ingestion succeeds, navigate to /profile after 1s so user
+      // can see ingestion progress in the profile monitoring section.
+      if (action === "restart") {
+        setTimeout(() => void navigate("/profile"), 1000)
+      }
     } catch {
       setResults((prev) => ({ ...prev, [action]: t("debug.error") }))
     } finally {
