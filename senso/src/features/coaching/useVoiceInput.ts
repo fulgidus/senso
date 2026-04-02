@@ -95,7 +95,7 @@ type VoiceBackend = "web-speech" | "media-recorder" | "none"
 function detectBackend(): VoiceBackend {
     if (typeof window === "undefined") return "none"
     if (window.SpeechRecognition || window.webkitSpeechRecognition) return "web-speech"
-    if (typeof MediaRecorder !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+    if (typeof MediaRecorder !== "undefined" && typeof navigator.mediaDevices?.getUserMedia === "function") {
         return "media-recorder"
     }
     return "none"
