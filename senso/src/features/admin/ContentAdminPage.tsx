@@ -31,7 +31,6 @@ import {
   Loader2,
   Link2,
   Unlink,
-  AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type {
@@ -208,10 +207,8 @@ function ItemForm({ initial, mode, itemId, saving, onSave, onCancel }: ItemFormP
             />
             {slugChecking && (
               <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground" />
-          )}
-        </div>
-        </>
-      )}
+            )}
+          </div>
           {mode === "create" && !slugManuallyEdited && form.slug && (
             <p className="mt-1 text-xs text-muted-foreground">
               {t("admin.content.slugAutoHint")}
