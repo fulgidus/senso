@@ -1608,7 +1608,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full min-h-[calc(100vh-3.5rem)] bg-background">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)] overflow-hidden bg-background">
       {/* Sub-header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-background shrink-0">
         <SensoAvatar />
@@ -1664,7 +1664,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
       {/* Message list */}
       <div
         ref={mergedListRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-y-contain"
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-none"
         onScroll={updateStickiness}
       >
         {(loadingHistory || welcomeLoading) && (
