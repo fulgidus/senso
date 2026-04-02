@@ -299,7 +299,6 @@ def _remove_message_profile_phrase(text: str, candidate: dict[str, str]) -> str:
     updated = text
     for pattern in patterns:
         updated = re.sub(pattern, "", updated, flags=re.IGNORECASE)
-    updated = re.sub(rf"{token}(?:\s*EUR)?", "", updated, flags=re.IGNORECASE)
     return updated
 
 
