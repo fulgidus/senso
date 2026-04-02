@@ -234,7 +234,7 @@ Plans:
 **Goal:** Fix all 27 actionable TODOs that impact current usability — covering auth reliability, UX polish, i18n completeness, admin tooling, responsive layout, and voice output degradation handling.
 **Requirements**: TODO-2 through TODO-28 (27 items; TODO-1 deferred to phases 13-15)
 **Depends on:** Phase 12
-**Plans:** 7/8 plans executed
+**Plans:** 8/8 plans complete
 
 Plans:
 - [x] 12.1-01-PLAN.md - Auth fixes: 401-intercept in api-client + token renewal + redirect to login on expiry (#26, #27)
@@ -244,7 +244,7 @@ Plans:
 - [x] 12.1-05-PLAN.md - Admin/debug submenu in AppShell + restart-ingestion navigation fix + PWA manifest (#2, #13, #14)
 - [x] 12.1-06-PLAN.md - Profile i18n: estimated source label + category localization + hash navigation + merchant check (#5, #6, #10, #11)
 - [x] 12.1-07-PLAN.md - Admin table UX: sort affordance + icon headers + pagination + localized category picker + settings save confirmation (#8, #9, #17, #18, #19, #20, #21)
-- [ ] 12.1-08-PLAN.md - UI polish: pie chart, responsive table card layouts, TTS fallback indicator, dark-mode coaching cards (#12, #16, #22, #23)
+- [x] 12.1-08-PLAN.md - UI polish: pie chart, responsive table card layouts, TTS fallback indicator, dark-mode coaching cards (#12, #16, #22, #23)
 
 ### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 

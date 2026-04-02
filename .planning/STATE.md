@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-last_updated: "2026-04-02T10:32:53.236Z"
+status: Phase complete - ready for verification
+last_updated: "2026-04-02T10:37:30.078Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 16
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 63
-  completed_plans: 59
+  completed_plans: 60
 ---
 
 # Project State
@@ -100,6 +100,7 @@ Plan: 8 of 8
 | Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P04 | 3min | 2 tasks | 5 files |
 | Phase 12.1 P06 | 5min | 2 tasks | 4 files |
 | Phase 12.1 P07 | 30 | 2 tasks | 4 files |
+| Phase 12.1 P08 | 16 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -199,6 +200,8 @@ Recent decisions affecting current work:
 - [Phase 12.1]: looksLikePrivateIndividual requires 2+ title-cased words to avoid false-positives on single-word business names like Amazon
 - [Phase 12.1]: Reset button + unsaved indicator shown only when isDirty — avoids visual noise
 - [Phase 12.1]: Pagination Prev/Next only rendered when totalPages > 1 — no dead controls for small catalogs
+- [Phase 12.1]: Merged hidden sm:block + overflow-x-auto into one div for flatter DOM on responsive table wrapping
+- [Phase 12.1]: PieChart donut replaces BarChart in spending breakdown; Legend replaces category pills
 
 ### Pending Todos
 
