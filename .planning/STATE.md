@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-last_updated: "2026-04-02T10:23:26.992Z"
+last_updated: "2026-04-02T10:32:53.236Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 16
   completed_phases: 12
   total_plans: 63
-  completed_plans: 58
+  completed_plans: 59
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 12.1 (add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability) - EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ Plan: 7 of 8
 | Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P05 | 3min | 2 tasks | 6 files |
 | Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P04 | 3min | 2 tasks | 5 files |
 | Phase 12.1 P06 | 5min | 2 tasks | 4 files |
+| Phase 12.1 P07 | 30 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -196,6 +197,8 @@ Recent decisions affecting current work:
 - [Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability]: theme_color set to #3F72AF (actual primary from index.css) not #7c3aed from plan - Actual app color from index.css --primary variable
 - [Phase 12.1]: getCategoryChartData receives categoryLabel as callback — pure function stays outside component, locale lookup stays inside
 - [Phase 12.1]: looksLikePrivateIndividual requires 2+ title-cased words to avoid false-positives on single-word business names like Amazon
+- [Phase 12.1]: Reset button + unsaved indicator shown only when isDirty — avoids visual noise
+- [Phase 12.1]: Pagination Prev/Next only rendered when totalPages > 1 — no dead controls for small catalogs
 
 ### Pending Todos
 
