@@ -134,8 +134,6 @@ export function useAuth() {
   }, [])
 
   const signOut = useCallback(async () => {
-    const confirmed = window.confirm(t("auth.confirmSignOut"))
-    if (!confirmed) return
     await logout()
     setState((current) => ({
       ...current,
@@ -143,7 +141,7 @@ export function useAuth() {
       error: null,
       googleFallback: null,
     }))
-  }, [t])
+  }, [])
 
   return useMemo(
     () => ({

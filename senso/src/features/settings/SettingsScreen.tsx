@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+
 import { Link } from "react-router-dom"
 import { LogOut, Save, Shield } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -13,6 +14,7 @@ import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
 import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
 import { useHapticFeedback } from "@/hooks/useHapticFeedback"
+import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -41,6 +43,7 @@ export function SettingsScreen() {
   const [personas, setPersonas] = useState<Persona[]>([])
   const [strictPrivacyMode, setStrictPrivacyMode] = useState(user.strictPrivacyMode ?? false)
   const [privacySaving, setPrivacySaving] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   useEffect(() => {
     void getPersonas().then(setPersonas).catch(() => setPersonas([]))
@@ -408,9 +411,7 @@ export function SettingsScreen() {
         <Button
           variant="destructive"
           onClick={() => {
-            const gender: "masculine" | "feminine" | "neutral" =
-              voiceGender !== "indifferent" ? (voiceGender as "masculine" | "feminine" | "neutral") : "neutral"
-            if (window.confirm(t(`settings.logoutConfirm.${gender}`))) void signOut()
+            setShowLogoutConfirm(true)
           }}
           className="w-full sm:w-auto"
         >
@@ -418,6 +419,17 @@ export function SettingsScreen() {
           {t("settings.logout")}
         </Button>
       </section>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title={t("auth.signOutTitle")}
+        description={t(`settings.logoutConfirm.${
+          voiceGender !== "indifferent" ? (voiceGender as "masculine" | "feminine" | "neutral") : "neutral"
+        }`)}
+        confirmVariant="destructive"
+        onConfirm={() => { setShowLogoutConfirm(false); void signOut() }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   )
 }

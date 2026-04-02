@@ -3,11 +3,13 @@ import { useTranslation } from "react-i18next"
 import { apiRequest } from "@/lib/api-client"
 import { getBackendBaseUrl } from "@/lib/config"
 import { readAccessToken } from "@/features/auth/storage"
+import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 export function DebugScreen() {
   const { t } = useTranslation()
   const [results, setResults] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
+  const [showNukeConfirm, setShowNukeConfirm] = useState(false)
 
   const callDebug = async (
     action: string,
@@ -87,9 +89,7 @@ export function DebugScreen() {
         <button
           disabled={loading["nuke"]}
           onClick={() => {
-            if (window.confirm(t("debug.nukeConfirm"))) {
-              void callDebug("nuke", "DELETE", "/debug/nuke")
-            }
+            setShowNukeConfirm(true)
           }}
           className="rounded-lg border border-destructive bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -101,6 +101,16 @@ export function DebugScreen() {
           </p>
         )}
       </section>
+
+      <ConfirmDialog
+        open={showNukeConfirm}
+        title={t("debug.nukeTitle")}
+        description={t("debug.nukeConfirm")}
+        confirmVariant="destructive"
+        confirmLabel={t("debug.nukeCta")}
+        onConfirm={() => { setShowNukeConfirm(false); void callDebug("nuke", "DELETE", "/debug/nuke") }}
+        onCancel={() => setShowNukeConfirm(false)}
+      />
     </div>
   )
 }
