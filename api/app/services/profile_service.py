@@ -132,6 +132,9 @@ class ProfileService:
                     fixed_monthly_costs
                 )
 
+        # Questionnaire completion confirms the profile — user can now access the coach.
+        updates["confirmed"] = True
+        updates["updated_at"] = datetime.now(UTC)
         upsert_user_profile(self.db, user_id, **updates)
         return {"status": "saved"}
 

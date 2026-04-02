@@ -2,16 +2,17 @@ import { useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
-import { getProfileStatus } from "@/lib/profile-api"
+import { getProfileStatus, getProfile } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
 
 /**
  * "/" resolver — redirect-only, no UI of its own.
  *
  * Logic gates, evaluated in order:
- *   1. !user.firstName         → /setup
- *   2. profileStatus !== "complete" → /onboarding
- *   3. otherwise               → /chat
+ *   1. !user.firstName                              → /setup
+ *   2. profile.confirmed === true                   → /chat  (questionnaire path)
+ *   3. profileStatus === "complete"                 → /chat  (document upload path)
+ *   4. otherwise                                    → /onboarding
  *
  * Auth check is already handled at the AppRoutes level (unauthenticated
  * users never reach this component).
@@ -29,15 +30,21 @@ export function RootResolver() {
       return
     }
 
-    // Gate 2: check profile status
+    // Gate 2+3: check both confirmed flag and categorization status
     if (!token) {
       setTarget("/onboarding")
       return
     }
 
-    void getProfileStatus(token)
-      .then((data) => {
-        if (data.status === "complete") {
+    void Promise.all([getProfileStatus(token), getProfile(token).catch(() => null)])
+      .then(([statusData, profile]) => {
+        // Questionnaire path: profile confirmed → go to chat directly
+        if (profile?.confirmed) {
+          setTarget("/chat")
+          return
+        }
+        // Document upload path: categorization complete → go to chat
+        if (statusData.status === "complete") {
           setTarget("/chat")
         } else {
           setTarget("/onboarding")
