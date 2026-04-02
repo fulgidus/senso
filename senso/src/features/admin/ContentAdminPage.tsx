@@ -208,14 +208,10 @@ function ItemForm({ initial, mode, itemId, saving, onSave, onCancel }: ItemFormP
             />
             {slugChecking && (
               <Loader2 className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-muted-foreground" />
-            )}
-          </div>
-          {slugCollision && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
-              <AlertTriangle className="h-3 w-3" />
-              {t("admin.content.slugCollision")}
-            </p>
           )}
+        </div>
+        </>
+      )}
           {mode === "create" && !slugManuallyEdited && form.slug && (
             <p className="mt-1 text-xs text-muted-foreground">
               {t("admin.content.slugAutoHint")}
@@ -990,7 +986,64 @@ export function ContentAdminPage() {
           {t("admin.content.noItems")}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+        <>
+          {/* Mobile card list */}
+          <div className="sm:hidden space-y-2">
+            {filtered.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-border bg-card p-3 space-y-1.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-medium text-foreground text-sm truncate">{item.title}</div>
+                    <div className="text-xs text-muted-foreground truncate">{item.slug}</div>
+                  </div>
+                  <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary shrink-0">
+                    {t(`admin.content.type_${item.type}`)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium uppercase">{item.locale}</span>
+                  <button
+                    onClick={() => void handleTogglePublished(item)}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
+                      item.is_published
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                    }`}
+                  >
+                    {item.is_published ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                    {item.is_published ? t("admin.content.published") : t("admin.content.draft")}
+                  </button>
+                  {item.updated_at && (
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(item.updated_at).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-end gap-1">
+                  <Button variant="ghost" size="icon-xs" onClick={() => setEditingId(item.id)} title={t("admin.content.editBtn")}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  {deleteConfirm === item.id ? (
+                    <>
+                      <Button variant="destructive" size="icon-xs" onClick={() => void handleDelete(item.id)} title={t("admin.content.confirmDelete")}>
+                        <Check className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon-xs" onClick={() => setDeleteConfirm(null)} title={t("admin.content.cancelBtn")}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="ghost" size="icon-xs" onClick={() => setDeleteConfirm(item.id)} title={t("admin.content.deleteBtn")}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
@@ -1215,6 +1268,7 @@ export function ContentAdminPage() {
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* Summary footer */}

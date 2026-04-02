@@ -574,29 +574,34 @@ function VoicePlayButton({
   if (!canPlay) return null
   const busy = isGenerating || isPlaying
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className="h-6 w-6 text-muted-foreground hover:text-foreground"
-      onClick={() => (busy ? stop() : void play(text, locale))}
-      disabled={isGenerating && !isPlaying}
-      aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
-      title={
-        usingFallback ? t("coaching.ttsFallbackActive") :
-        isGenerating ? t("coaching.ttsGeneratingShort") :
-        isPlaying ? t("coaching.ttsPlayingShort") :
-        t("coaching.ttsPlayShort")
-      }
-    >
-      {isGenerating ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
-      ) : isPlaying ? (
-        <Square className="h-3 w-3" />
-      ) : (
-        <Volume2 className="h-3 w-3" />
+    <div className="relative inline-flex items-center">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+        onClick={() => (busy ? stop() : void play(text, locale))}
+        disabled={isGenerating && !isPlaying}
+        aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
+        title={
+          usingFallback ? t("coaching.ttsFallbackHint") :
+          isGenerating ? t("coaching.ttsGeneratingShort") :
+          isPlaying ? t("coaching.ttsPlayingShort") :
+          t("coaching.ttsPlayShort")
+        }
+      >
+        {isGenerating ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : isPlaying ? (
+          <Square className="h-3 w-3" />
+        ) : (
+          <Volume2 className="h-3 w-3" />
+        )}
+      </Button>
+      {usingFallback && (
+        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
       )}
-    </Button>
+    </div>
   )
 }
 
