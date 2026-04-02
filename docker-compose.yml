@@ -90,6 +90,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:8000}
+        CACHEBUST: ${CACHEBUST:-dev}
     depends_on:
       api:
         condition: service_healthy

@@ -12,6 +12,12 @@ RUN pnpm install --frozen-lockfile
 ARG VITE_BACKEND_URL=http://localhost:8000
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
+# CACHEBUST invalidates the layer cache when passed at build time.
+# Dokploy / CI should pass --build-arg CACHEBUST=$(date +%s) or similar.
+# Defaults to a fixed string so local dev still benefits from caching.
+ARG CACHEBUST=dev
+RUN echo "$CACHEBUST" > /dev/null
+
 COPY . .
 
 RUN pnpm build
