@@ -262,7 +262,6 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     <main
       ref={pullToRefresh.containerRef as React.RefCallback<HTMLElement>}
       className="mx-auto w-full max-w-4xl px-6 py-6 overscroll-y-contain"
-      style={{ touchAction: "pan-x" }}
     >
       {/* Pull-to-refresh indicator */}
       {(pullToRefresh.isPulling || pullToRefresh.isRefreshing) && (

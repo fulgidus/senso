@@ -3,6 +3,9 @@ import { useReducedMotion } from "./useReducedMotion"
 import { useHapticFeedback } from "./useHapticFeedback"
 
 const PULL_THRESHOLD = 80 // px to trigger refresh
+/** Touch must start in the top 30% of the viewport to count as pull-to-refresh.
+ *  This prevents bottom-edge system gestures from accidentally triggering a refresh. */
+const MAX_START_Y_RATIO = 0.30
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void
@@ -48,7 +51,11 @@ export function usePullToRefresh({
       if (!el) return
       // Only start pull if the container is scrolled to the top
       if (el.scrollTop > 0) return
-      touchStartYRef.current = e.touches[0].clientY
+      // Only start pull if touch begins in the top 30% of the viewport
+      // (prevents bottom-edge system gestures from accidentally triggering a refresh)
+      const startY = e.touches[0].clientY
+      if (startY > window.innerHeight * MAX_START_Y_RATIO) return
+      touchStartYRef.current = startY
       pullingRef.current = false
       triggeredRef.current = false
     },

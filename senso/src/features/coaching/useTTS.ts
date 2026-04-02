@@ -25,7 +25,12 @@ interface UseTTSResult {
     isPlaying: boolean
     isGenerating: boolean
     ttsError: string | null
+    /** True only during an active fallback-speech session */
     usingFallback: boolean
+    /** Persistent: true once ElevenLabs has failed at least once, OR pre-set
+     *  on browsers without SpeechRecognition (Firefox/Librewolf). Used to keep
+     *  the amber "browser TTS" badge visible between plays. */
+    hasFallenBack: boolean
     play: (text: string, locale: "it" | "en") => Promise<void>
     stop: () => void
 }
@@ -35,6 +40,16 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
     const [isGenerating, setIsGenerating] = useState(false)
     const [ttsError, setTtsError] = useState<string | null>(null)
     const [usingFallback, setUsingFallback] = useState(false)
+    // hasFallenBack persists once ElevenLabs fails, so the badge remains visible
+    // between plays and is also pre-set on browsers without SpeechRecognition
+    // (Firefox/Librewolf), which signals browser-only TTS environment.
+    const [hasFallenBack, setHasFallenBack] = useState(() => {
+        if (typeof window === "undefined") return false
+        // Firefox/Librewolf: no SpeechRecognition means full ElevenLabs-TTS dep
+        // is needed; show the amber badge proactively so users aren't surprised.
+        const noStt = !("SpeechRecognition" in window) && !("webkitSpeechRecognition" in window)
+        return config.browserFallbackEnabled && noStt
+    })
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const objectUrlRef = useRef<string | null>(null)
 
@@ -116,6 +131,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
                 typeof window !== "undefined" &&
                 "speechSynthesis" in window
             ) {
+                setHasFallenBack(true)
                 setUsingFallback(true)
                 setIsPlaying(true)
                 _fallbackSpeak(text, locale, () => {
@@ -138,7 +154,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
         }
     }, [])
 
-    return { canPlay, isPlaying, isGenerating, ttsError, usingFallback, play, stop }
+    return { canPlay, isPlaying, isGenerating, ttsError, usingFallback, hasFallenBack, play, stop }
 }
 
 function _fallbackSpeak(text: string, locale: "it" | "en", onEnd: () => void): void {

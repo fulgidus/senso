@@ -35,7 +35,7 @@ import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
 import { MarpSlideViewer } from "./MarpSlideViewer"
-import { usePullToRefresh } from "@/hooks/usePullToRefresh"
+
 
 interface ChatScreenProps {
   onNavigateBack: () => void
@@ -570,9 +570,14 @@ function VoicePlayButton({
   ttsConfig: TTSConfig
 }) {
   const { t } = useTranslation()
-  const { canPlay, isPlaying, isGenerating, usingFallback, play, stop } = useTTS(ttsConfig)
+  const { canPlay, isPlaying, isGenerating, hasFallenBack, play, stop } = useTTS(ttsConfig)
   if (!canPlay) return null
   const busy = isGenerating || isPlaying
+  // hasFallenBack persists once ElevenLabs has failed at least once, or is
+  // pre-set on browsers without SpeechRecognition (Firefox/Librewolf).
+  // Use it for the badge so it stays visible between plays (usingFallback is
+  // only true during active fallback playback).
+  const showFallbackBadge = hasFallenBack
   return (
     <div className="relative inline-flex items-center">
       <Button
@@ -584,7 +589,7 @@ function VoicePlayButton({
         disabled={isGenerating && !isPlaying}
         aria-label={isGenerating ? t("coaching.ttsGenerating") : isPlaying ? t("coaching.ttsPlaying") : t("coaching.ttsPlay")}
         title={
-          usingFallback ? t("coaching.ttsFallbackHint") :
+          showFallbackBadge ? t("coaching.ttsFallbackHint") :
           isGenerating ? t("coaching.ttsGeneratingShort") :
           isPlaying ? t("coaching.ttsPlayingShort") :
           t("coaching.ttsPlayShort")
@@ -598,7 +603,7 @@ function VoicePlayButton({
           <Volume2 className="h-3 w-3" />
         )}
       </Button>
-      {usingFallback && (
+      {showFallbackBadge && (
         <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
       )}
     </div>
@@ -1011,34 +1016,12 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
   const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const shouldStickToBottomRef = useRef(true)
 
-  // Pull-to-refresh: reload session messages (or session list if no session)
-  const handlePullRefresh = useCallback(async () => {
-    if (sessionId) {
-      setLoadingHistory(true)
-      setMessages([])
-      try {
-        const msgs = await getSessionMessages(sessionId)
-        setMessages(msgs.map(parseStoredMessage))
-      } catch { /* non-fatal */ } finally {
-        setLoadingHistory(false)
-      }
-    } else {
-      await fetchSessions().catch(() => {})
-    }
-  }, [sessionId])
-
-  const pullToRefresh = usePullToRefresh({
-    onRefresh: handlePullRefresh,
-    disabled: isLoading || loadingHistory,
-  })
-
-  // Merged ref: combines listRef (for scroll tracking) with pullToRefresh.containerRef
+  // Simple ref for the message list (scroll tracking only — no pull-to-refresh on chat)
   const mergedListRef = useCallback(
     (el: HTMLDivElement | null) => {
       listRef.current = el
-      pullToRefresh.containerRef(el)
     },
-    [pullToRefresh.containerRef],
+    [],
   )
 
   // Wrapper that auto-dismisses transient errors after 8 seconds.
@@ -1682,15 +1665,8 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
       <div
         ref={mergedListRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-y-contain"
-        style={{ touchAction: "pan-x" }}
         onScroll={updateStickiness}
       >
-        {/* Pull-to-refresh indicator */}
-        {(pullToRefresh.isPulling || pullToRefresh.isRefreshing) && (
-          <div className="flex justify-center pb-2">
-            <Loader2 className={["h-5 w-5 text-muted-foreground", pullToRefresh.isRefreshing ? "animate-spin" : ""].join(" ")} />
-          </div>
-        )}
         {(loadingHistory || welcomeLoading) && (
           <div className="flex items-start gap-2">
             <SensoAvatar />

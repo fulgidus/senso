@@ -1,9 +1,12 @@
 {
+  "id": "/",
   "name": "S.E.N.S.O.",
   "short_name": "SENSO",
   "description": "Il tuo assistente finanziario personale",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui", "browser"],
   "background_color": "#ffffff",
   "theme_color": "#3F72AF",
   "orientation": "portrait-primary",
