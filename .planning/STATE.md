@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Milestone complete
-stopped_at: Completed 12-ux-accessibility-mobile-polish-05-PLAN.md
-last_updated: "2026-04-01T15:59:20.724Z"
+status: In Progress
+stopped_at: Planning complete for Phase 12.1 (8 plans written, execution pending)
+last_updated: "2026-04-02T00:00:00.000Z"
 progress:
-  total_phases: 12
+  total_phases: 13
   completed_phases: 12
-  total_plans: 52
+  total_plans: 60
   completed_plans: 52
 ---
 
@@ -227,6 +227,7 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
+- Phase 12.1 inserted after Phase 12: Add a phase for all the todos, we need to prioritize them because they impact current usability (URGENT)
 - Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping
 - Phase 10 added: Transparency & security with about page, encryption at rest & LLM no-data-retention
