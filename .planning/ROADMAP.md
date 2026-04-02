@@ -234,12 +234,12 @@ Plans:
 **Goal:** Fix all 27 actionable TODOs that impact current usability — covering auth reliability, UX polish, i18n completeness, admin tooling, responsive layout, and voice output degradation handling.
 **Requirements**: TODO-2 through TODO-28 (27 items; TODO-1 deferred to phases 13-15)
 **Depends on:** Phase 12
-**Plans:** 2/8 plans executed
+**Plans:** 3/8 plans executed
 
 Plans:
 - [x] 12.1-01-PLAN.md - Auth fixes: 401-intercept in api-client + token renewal + redirect to login on expiry (#26, #27)
 - [x] 12.1-02-PLAN.md - Coach picker fixes: dark theme rendering + persona persistence across new conversation (#24, #25)
-- [ ] 12.1-03-PLAN.md - shadcn Dialog component + replace all window.confirm() / window.alert() calls (#28)
+- [x] 12.1-03-PLAN.md - shadcn Dialog component + replace all window.confirm() / window.alert() calls (#28)
 - [ ] 12.1-04-PLAN.md - ErrorBoundary on profile pages + pull-to-refresh touchAction fix + nuke button auth fix (#3, #4, #15)
 - [ ] 12.1-05-PLAN.md - Admin/debug submenu in AppShell + restart-ingestion navigation fix + PWA manifest (#2, #13, #14)
 - [ ] 12.1-06-PLAN.md - Profile i18n: estimated source label + category localization + hash navigation + merchant check (#5, #6, #10, #11)

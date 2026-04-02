@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-last_updated: "2026-04-02T09:53:37.932Z"
+last_updated: "2026-04-02T10:10:07.461Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 16
   completed_phases: 12
   total_plans: 63
-  completed_plans: 54
+  completed_plans: 55
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 12.1 (add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability) - EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 
 ## Performance Metrics
 
@@ -95,6 +95,7 @@ Plan: 3 of 8
 | Phase 12-ux-accessibility-mobile-polish P05 | 5 | 2 tasks | 2 files |
 | Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P01 | 1min | 2 tasks | 3 files |
 | Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P02 | 1min | 2 tasks | 1 files |
+| Phase 12.1-add-a-phase-for-all-the-todos-we-need-to-prioritize-them-because-they-impact-current-usability P03 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -188,6 +189,7 @@ Recent decisions affecting current work:
 - [Phase 12.1]: onUnauthorized callback injection in apiRequest avoids circular dependency between api-client.ts and session.ts
 - [Phase 12.1]: PersonaSwitcher uses getPersonaTheme(persona, resolvedTheme) not persona.theme?.light — resolvedTheme prop in scope, no new imports needed
 - [Phase 12.1]: handleNewConversation does not reset persona — session-load useEffect (lines 1171-1176) handles saved-session persona restore separately
+- [Phase 12.1]: ConfirmDialog uses boolean state (showXxxConfirm) per call-site rather than a single shared modal — avoids race conditions when multiple confirmable actions exist on the same screen
 
 ### Pending Todos
 
