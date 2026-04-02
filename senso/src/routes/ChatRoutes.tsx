@@ -89,6 +89,7 @@ function NewChatPage() {
 
   return (
     <ChatScreen
+      forceNew
       onNavigateBack={() => history.back()}
       locale={locale}
       onSessionCreated={(id) => navigate(`/chat/${id}`, { replace: true })}

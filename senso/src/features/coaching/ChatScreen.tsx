@@ -47,6 +47,9 @@ interface ChatScreenProps {
   /** Called when a new session is created (first message sent from /chat/new).
    *  The route wrapper uses this to replace the URL to /chat/{id}. */
   onSessionCreated?: (id: string) => void
+  /** When true, always start a fresh conversation even if prior sessions exist.
+   *  Used by the /chat/new route to prevent auto-restore. */
+  forceNew?: boolean
 }
 
 interface DisplayMessage {
@@ -961,7 +964,7 @@ function getGreetingKey(): string {
 
 // ── ChatScreen ────────────────────────────────────────────────────────────────
 
-export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessionId: propSessionId, onSessionCreated }: ChatScreenProps) {
+export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessionId: propSessionId, onSessionCreated, forceNew = false }: ChatScreenProps) {
   const { user } = useAuthContext()
   const { t } = useTranslation()
   const { theme } = useTheme()
@@ -1132,7 +1135,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             setWelcomeLoading(false)
           }
         }
-      } else if (list.length > 0) {
+      } else if (list.length > 0 && !forceNew) {
         const last = list[0] // newest = index 0 (sorted by updated_at desc)
         setSessionId(last.id)
         setSessionName(last.name)
