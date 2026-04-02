@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { Link } from "react-router-dom"
 import { LogOut, Save, Shield } from "lucide-react"
@@ -55,6 +55,14 @@ export function SettingsScreen() {
     voiceGender !== (user.voiceGender ?? "indifferent") ||
     voiceAutoListen !== (user.voiceAutoListen ?? false) ||
     defaultPersonaId !== (user.defaultPersonaId ?? "mentore-saggio")
+
+  const handleReset = useCallback(() => {
+    setFirstName(user.firstName ?? "")
+    setLastName(user.lastName ?? "")
+    setVoiceGender(user.voiceGender ?? "indifferent")
+    setVoiceAutoListen(user.voiceAutoListen ?? false)
+    setDefaultPersonaId(user.defaultPersonaId ?? "mentore-saggio")
+  }, [user])
 
   const handleSave = async () => {
     if (!firstName.trim()) return
@@ -165,15 +173,31 @@ export function SettingsScreen() {
           <p className="text-sm text-green-600 dark:text-green-400">{t("settings.saveSuccess")}</p>
         )}
 
-        <Button
-          variant="default"
-          disabled={!firstName.trim() || !isDirty || saving}
-          onClick={() => void handleSave()}
-          className="w-full sm:w-auto"
-        >
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? t("settings.saving") : t("settings.save")}
-        </Button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {isDirty && (
+            <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+              {t("settings.unsavedChanges")}
+            </span>
+          )}
+          {isDirty && (
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              className="w-full sm:w-auto"
+            >
+              {t("settings.reset")}
+            </Button>
+          )}
+          <Button
+            variant="default"
+            disabled={!firstName.trim() || !isDirty || saving}
+            onClick={() => void handleSave()}
+            className="w-full sm:w-auto"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? t("settings.saving") : t("settings.save")}
+          </Button>
+        </div>
 
         {/* Read-only email */}
         <div className="space-y-1 pt-2 border-t border-border">
