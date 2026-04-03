@@ -100,7 +100,7 @@ class MerchantMapAdminDTO(BaseModel):
     learned_method: str
     learned_provider_model: str | None = None
     learned_at: datetime
-    contributing_user_obfuscated: str | None = None
+    contributing_user_username: str | None = None
     is_blacklisted: bool
     blacklisted_reason: str | None = None
     model_config = ConfigDict(from_attributes=False)
@@ -122,12 +122,6 @@ class ModerationLogAdminDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-def _obfuscate_email(email: str) -> str:
-    """u****@domain.com obfuscation for admin privacy."""
-    if "@" not in email:
-        return "u****"
-    local, domain = email.split("@", 1)
-    return f"u****@{domain}"
 
 
 # ─── Phase 9: Merchant map admin endpoints ────────────────────────────────────
@@ -156,11 +150,11 @@ def list_merchant_map(
 
     result = []
     for row in rows:
-        obfuscated = None
+        contributing_user_username = None
         if row.contributing_user_id:
             user = db.query(User).filter(User.id == row.contributing_user_id).first()
             if user:
-                obfuscated = _obfuscate_email(user.email)
+                contributing_user_username = user.username
         result.append(
             MerchantMapAdminDTO(
                 id=row.id,
@@ -171,7 +165,7 @@ def list_merchant_map(
                 learned_method=row.learned_method,
                 learned_provider_model=row.learned_provider_model,
                 learned_at=row.learned_at,
-                contributing_user_obfuscated=obfuscated,
+                contributing_user_username=contributing_user_username,
                 is_blacklisted=row.is_blacklisted,
                 blacklisted_reason=row.blacklisted_reason,
             )
