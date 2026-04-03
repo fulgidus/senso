@@ -25,6 +25,7 @@ dependencies = [
   "rank-bm25>=0.2.2",
   "sqlalchemy-utils>=0.41.2",
   "cryptography>=42.0.0",
+  "PyNaCl>=1.5.0",
   "python-slugify>=8.0.0",
   "python-dateutil>=2.9.0",
 ]

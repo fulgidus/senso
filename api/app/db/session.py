@@ -365,6 +365,15 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_ingestion_traces_upload_id ON ingestion_traces (upload_id)",
+        # ── Round 17: Phase 13 — crypto identity (username + NaCl key columns) ──
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(64) UNIQUE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS public_key_b64 TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS signing_key_b64 TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS nacl_pbkdf2_salt TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS nacl_key_login_envelope_b64 TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_x25519_private_b64 TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_ed25519_signing_b64 TEXT",
+        "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username) WHERE username IS NOT NULL",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

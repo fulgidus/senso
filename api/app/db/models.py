@@ -121,6 +121,14 @@ class User(Base):
     strict_privacy_mode: bool = Column(Boolean, nullable=False, default=False)
     # Phase 11: RBAC role column — "user" | "tester" | "moderator" | "admin"
     role: str = Column(String(16), nullable=False, default="user")
+    # Phase 13: crypto identity — username + NaCl key columns
+    username: str | None = Column(String(64), unique=True, nullable=True, default=None)
+    public_key_b64: str | None = Column(Text, nullable=True, default=None)       # X25519 public key
+    signing_key_b64: str | None = Column(Text, nullable=True, default=None)      # Ed25519 verify key
+    nacl_pbkdf2_salt: str | None = Column(Text, nullable=True, default=None)            # base64 salt for NaCl PBKDF2
+    nacl_key_login_envelope_b64: str | None = Column(Text, nullable=True, default=None) # PBKDF2(pw)-wrapped nacl_master_key
+    encrypted_x25519_private_b64: str | None = Column(Text, nullable=True, default=None)  # AES-GCM(master, x25519_sk)
+    encrypted_ed25519_signing_b64: str | None = Column(Text, nullable=True, default=None) # AES-GCM(master, ed25519_sk)
 
     # Relationships
     chat_sessions_participated = relationship(
