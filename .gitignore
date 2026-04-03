@@ -19,3 +19,9 @@ dist-ssr/
 senso/node_modules/
 senso/dist/
 senso/dist-ssr/
+
+# Playwright E2E
+e2e/report/
+e2e/artifacts/
+playwright-report/
+test-results/

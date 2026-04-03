@@ -1,17 +1,17 @@
 ---
-status: awaiting_human_verify
-trigger: "Hold-to-speak button animates correctly on Chromium but nothing is captured — microphone recording starts and stops without producing any transcript. No console errors, no network errors."
+status: open
+trigger: "Hold-to-speak button animates correctly on Chromium but nothing is captured — microphone recording starts and stops without producing any transcript. No console errors, no visible errors in UI."
 created: 2026-04-02T00:00:00Z
-updated: 2026-04-02T00:06:00Z
+updated: 2026-04-02T14:30:00Z
 ---
 
 ## Current Focus
 <!-- OVERWRITE on each update - reflects NOW -->
 
-hypothesis: CONFIRMED — `useVoiceMode.toggleVoiceMode` calls `getUserMedia({ audio: true })` and holds the resulting MediaStream alive in `micStreamRef` for the entire voice mode session. On Chromium, the Web Speech API's SpeechRecognition internally uses the same audio device — but when the mic device is already exclusively held by the active MediaStream, the SpeechRecognition starts (no error) but receives zero audio. `onend` fires with an empty `finalTranscriptRef`, so nothing is dispatched.
-test: Remove `micStreamRef` and the "keep stream alive" pattern. Instead, restore simple approach: call `getUserMedia` + immediately stop tracks (just to prime the permission grant) and rely on the fact that permission is already in the browser's grant store for subsequent `recognition.start()` calls.
-expecting: SpeechRecognition receives real audio, `onresult` fires, transcript is produced
-next_action: Apply fix to useVoiceMode.ts
+status: REVERTED — The sttError/VoiceModeBar observability patch and useVoiceInput console.log instrumentation were applied (commit 9719ef1), then reverted by the ant colony (commit db6e06a) which classified the console.logs as debug pollution and the sttError prop as "unused". The audio device contention fix (micStreamRef removal) was the more important change and remains applied.
+
+The underlying STT problem (no transcript captured) is still unconfirmed fixed without human verification in Chromium.
+next_action: Human must verify: open the app in Chromium, enter voice mode, hold mic, speak — does transcript appear? If yes, close this as resolved. If no, re-apply the sttError display patch for error visibility and check DevTools for `webkitSpeechRecognition` events.
 
 ## Symptoms
 <!-- Written during gathering, then IMMUTABLE -->
@@ -53,10 +53,16 @@ started: Unknown; currently observed on Chromium
   found: Chromium does NOT need an existing live MediaStream to skip the permission dialog. Permission is stored in the browser's permission store after the first `getUserMedia` grant. Once the user grants mic permission, `recognition.start()` never re-prompts — the permission grant is persistent. Holding a MediaStream alive is unnecessary AND harmful (causes audio device contention on many Chromium versions).
   implication: The `micStreamRef` approach was based on a false premise and should be removed entirely. A one-time `getUserMedia` + immediate `stop()` (or even just relying on existing permission state after the first grant) is sufficient.
 
+- timestamp: 2026-04-02T13:00:00Z
+  checked: ChatScreen.tsx lines 1762–1815
+  found: sttError display (line 1812) is inside the `else` branch of `{isVoiceMode ? <VoiceModeBar> : <>...</>}`. When voice mode is active, the VoiceModeBar renders and the error paragraph is unreachable. VoiceModeBar had no sttError prop at all.
+  implication: CONFIRMED ROOT CAUSE (second layer). Prior fix removed audio contention. This is the observability gap — errors were silently swallowed. Fix: added sttError prop to VoiceModeBar + render it; pass from ChatScreen; added onstart/onresult/onend/onerror console.log instrumentation to useVoiceInput.
+
 ## Resolution
 <!-- OVERWRITE as understanding evolves -->
 
-root_cause: useVoiceMode.toggleVoiceMode acquired a MediaStream via getUserMedia and held it alive in micStreamRef for the entire voice mode session (commit ae77dcf). On Chromium, the SpeechRecognition API runs in a separate renderer process and issues its own internal getUserMedia. When the mic device is already exclusively held by the live MediaStream in micStreamRef, SpeechRecognition's audio capture receives zero audio. Recognition starts without error, onend fires with an empty finalTranscriptRef, and nothing is sent. The developer's assumption ("Chrome only skips permission re-prompt if a live track exists") is factually incorrect — Chromium stores the mic permission grant persistently in the permission store; recognition.start() never re-prompts after the first grant.
-fix: Removed micStreamRef, releaseMicStream callback, and all stream-alive logic from useVoiceMode.ts. Replaced with a micPermissionGranted ref that gates a one-time getUserMedia+immediate-stop call on first voice mode activation. The browser's persistent permission grant ensures recognition.start() never re-prompts on subsequent hold-to-talk presses.
-verification: Build passes (tsc -b + vite build, zero errors). All 8 useVoiceInput tests pass. Human verification in Chromium required.
-files_changed: [senso/src/features/coaching/useVoiceMode.ts]
+root_cause: Two compounding issues: (1) useVoiceMode held a live MediaStream in micStreamRef, causing audio device contention that silently starved SpeechRecognition of audio (fixed in commit 9719ef1, still applied). (2) sttError was only rendered inside the !isVoiceMode branch in ChatScreen — while VoiceModeBar was active, any onerror from webkitSpeechRecognition was completely invisible to the user.
+fix_applied: micStreamRef removal (commit 9719ef1) — this is the core audio contention fix and is still in place.
+fix_reverted: sttError display in VoiceModeBar + console.log instrumentation — reverted by ant colony (commit db6e06a) as "debug pollution". This removes the observability layer that would make future debugging possible.
+verification: NOT completed. Human must verify in Chromium whether hold-to-speak now works after the micStreamRef removal.
+files_changed: [senso/src/features/coaching/useVoiceInput.ts, senso/src/features/coaching/VoiceModeBar.tsx, senso/src/features/coaching/ChatScreen.tsx]

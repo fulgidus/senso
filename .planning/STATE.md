@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete - ready for verification
-last_updated: "2026-04-02T10:37:30.078Z"
+last_updated: "2026-04-02T14:30:00.000Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 16
@@ -211,28 +211,34 @@ Recent decisions affecting current work:
 4. Add error boundaries to profile pages (area: ui)
 5. Add hash navigation to profile sections (area: ui)
 6. Fix estimated_from_transactions nugget label missing i18n (area: ui)
-7. Fix financial profile figures never show ranges (area: ui)
-8. Add visual confirmation for profile save and edit/reset controls (area: ui)
-9. Fix missing manual categorization button for transactions (area: ui)
-10. Add merchant vs private individual check in manual categorization (area: ui) — privacy-critical
-11. Localize category names (area: ui)
-12. Change spending graph from histogram to pie chart (area: ui)
-13. Move admin and debug tools to dedicated submenu (area: ui)
-14. Fix restart ingestion should navigate to monitoring section (area: ui)
-15. Fix total reset button broken (area: ui)
-16. Make tables responsive with card layout on mobile (area: ui) — systemic, all tables
-17. Group content items by locale in admin content table (area: ui)
-18. Fix missing translations in content management (area: ui)
-19. Replace locale and actions column headers with icons (area: ui)
-20. Add visible sort affordance to table column headers (area: ui)
-21. Add pagination to content management table (area: ui)
-22. Fix TTS voice output broken (area: ui) — hackathon-critical
-23. Rationalize coach renderable content surfaces (area: ui)
-24. Fix coach picker dark theme unreadable light background (area: ui)
-25. Fix coach picker breaks chat — only default coach works (area: ui)
-26. Fix token renewal broken (area: auth) — session-critical
-27. Fix expired token navigation should redirect to login (area: auth)
-28. Replace alert() calls with shadcn dialog component (area: ui)
+7. Add visual confirmation for profile save and edit/reset controls (area: ui) — save button confirmation + edit/override UX still pending (range display fixed separately)
+8. Fix missing manual categorization button for transactions (area: ui)
+9. Add merchant vs private individual check in manual categorization (area: ui) — privacy-critical
+10. Localize category names (area: ui)
+11. Change spending graph from histogram to pie chart (area: ui)
+12. Move admin and debug tools to dedicated submenu (area: ui)
+13. Fix restart ingestion should navigate to monitoring section (area: ui)
+14. Fix total reset button broken (area: ui)
+15. Make tables responsive with card layout on mobile (area: ui) — systemic, all tables
+16. Group content items by locale in admin content table (area: ui)
+17. Fix missing translations in content management (area: ui) — partially fixed (duplicate JSON keys removed); colLocale/colActions icon replacement still pending
+18. Replace locale and actions column headers with icons (area: ui)
+19. Add visible sort affordance to table column headers (area: ui)
+20. Add pagination to content management table (area: ui)
+21. Fix TTS voice output broken (area: ui) — hackathon-critical
+22. Rationalize coach renderable content surfaces (area: ui)
+23. Fix coach picker dark theme unreadable light background (area: ui)
+24. Fix coach picker breaks chat — only default coach works (area: ui)
+25. Fix expired token navigation should redirect to login (area: auth)
+26. Replace alert() calls with shadcn dialog component (area: ui)
+27. STT hold-to-speak no audio in Chromium (area: voice) — micStreamRef contention fix applied; human verify still needed
+
+### Recently Resolved Todos (2026-04-02)
+
+| Todo | Commit | Notes |
+|------|--------|-------|
+| Fix token renewal broken | db6e06a | Auth auto-refresh logic verified; 15 unit tests added covering all 401 refresh scenarios |
+| Fix financial profile figures never show ranges | db6e06a | `incomeMin/Max` + `expenseMin/Max` fields added to profile-api.ts; ProfileScreen renders range when both bounds non-null |
 
 ### Quick Tasks Completed
 
