@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-DEMO_EMAIL="${DEMO_EMAIL:-demo@senso.app}"
+DEMO_EMAIL="${DEMO_EMAIL:-demo@sen.so}"
 POSTGRES_USER="${POSTGRES_USER:-senso}"
 POSTGRES_DB="${POSTGRES_DB:-senso}"
 

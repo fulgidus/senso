@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# seed-demo.sh — Create demo user + upload sample financial files via API
-# Usage: bash scripts/seed-demo.sh
-# Requirements: curl, python3, Docker Compose stack running (docker compose up -d)
+# seed-demo.sh — Create demo user + seed profile via questionnaire (fast path)
+# Optional: also upload the Revolut CSV for transaction-based tests.
 #
-# Auth response shape: flat — response.access_token (not response.tokens.access_token)
-# Source: api/app/schemas/auth.py AuthResponseDTO
+# Usage:
+#   bash scripts/seed-demo.sh           # questionnaire only (fast, no LLM)
+#   bash scripts/seed-demo.sh --with-csv # questionnaire + Revolut CSV upload
 
 set -euo pipefail
 
@@ -12,8 +12,12 @@ API_URL="${API_URL:-http://localhost:8000}"
 DEMO_EMAIL="${DEMO_EMAIL:-demo@sen.so}"
 DEMO_PASSWORD="${DEMO_PASSWORD:-demodemo!}"
 SAMPLES_DIR="$(dirname "$0")/../api/app/ingestion/samples"
+WITH_CSV=false
 
-# ── Colors ───────────────────────────────────────────────────────────────────
+for arg in "$@"; do
+  [[ "$arg" == "--with-csv" ]] && WITH_CSV=true
+done
+
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 ok()   { echo -e "${GREEN}✓${NC} $*"; }
 warn() { echo -e "${YELLOW}⚠${NC}  $*"; }
@@ -42,135 +46,110 @@ done
 echo ""
 echo "Creating demo user: $DEMO_EMAIL ..."
 
-# AuthResponseDTO shape (api/app/schemas/auth.py):
-#   { "user": {...}, "access_token": "...", "refresh_token": "...", "expires_in": N }
-# Tokens are FLAT on the response — NOT nested under "tokens".
-
-SIGNUP_RESP=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$API_URL/auth/signup" \
+SIGNUP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$API_URL/auth/signup" \
   -H "Content-Type: application/json" \
-  -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}" 2>&1) || true
+  -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}") || true
 
-if [ "$SIGNUP_RESP" = "201" ]; then
-  # Successful signup — re-run to get the body this time
-  SIGNUP_BODY=$(curl -sf -X POST "$API_URL/auth/signup" \
-    -H "Content-Type: application/json" \
-    -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}" 2>/dev/null) || true
-
-  # Check if we got a body (user may have just been created by the status check above)
-  # Fall through to login if body is empty
-  if [ -n "$SIGNUP_BODY" ] && echo "$SIGNUP_BODY" | grep -q "access_token"; then
-    ok "Demo user created"
-    ACCESS_TOKEN=$(echo "$SIGNUP_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
-  else
-    warn "User created but token not retrieved — falling back to login..."
-    LOGIN_RESP=$(curl -sf -X POST "$API_URL/auth/login" \
-      -H "Content-Type: application/json" \
-      -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}" 2>&1) \
-      || fail "Login failed. Run reset-demo.sh first if the account state is inconsistent."
-    ACCESS_TOKEN=$(echo "$LOGIN_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
-    ok "Logged in as demo user"
-  fi
-else
-  warn "Signup returned HTTP $SIGNUP_RESP (user may already exist) — trying login..."
-  LOGIN_RESP=$(curl -sf -X POST "$API_URL/auth/login" \
-    -H "Content-Type: application/json" \
-    -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}" 2>&1) \
-    || fail "Login failed. Run reset-demo.sh first if the account state is inconsistent."
-  ACCESS_TOKEN=$(echo "$LOGIN_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
-  ok "Logged in as existing demo user"
+if [ "$SIGNUP_STATUS" = "201" ]; then
+  ok "Demo user created — logging in..."
 fi
+
+LOGIN_RESP=$(curl -sf -X POST "$API_URL/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}") \
+  || fail "Login failed. Run reset-demo.sh first if the account is in a bad state."
+
+ACCESS_TOKEN=$(echo "$LOGIN_RESP" | python3 -c \
+  "import sys,json; d=json.load(sys.stdin); print(d.get('accessToken') or d.get('access_token'))")
+
+[ -z "$ACCESS_TOKEN" ] && fail "No access token in login response: $LOGIN_RESP"
+ok "Logged in as demo user"
 
 AUTH_HEADER="Authorization: Bearer $ACCESS_TOKEN"
 
-# ── Step 3: Upload sample files ────────────────────────────────────────────
+# ── Step 2b: Set firstName so the app skips /setup ───────────────────────────
 echo ""
-echo "Uploading sample files from $SAMPLES_DIR ..."
+echo "Setting demo user name ..."
+curl -sf -X PATCH "$API_URL/auth/me" \
+  -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
+  -d '{"first_name": "Demo", "last_name": "User"}' > /dev/null \
+  && ok "Name set: Demo User" \
+  || warn "Could not set name (non-fatal)"
 
-UPLOAD_IDS=()
+# ── Step 3: Submit questionnaire (fast path — no LLM, sets confirmed=true) ──
+echo ""
+echo "Submitting financial questionnaire ..."
 
-upload_file() {
-  local filepath="$1"
-  local filename
-  filename=$(basename "$filepath")
-  if [ ! -f "$filepath" ]; then
-    warn "Sample file not found, skipping: $filepath"
-    return
-  fi
-  echo -n "  Uploading $filename ... "
-  RESP=$(curl -sf -X POST "$API_URL/ingestion/upload" \
-    -H "$AUTH_HEADER" \
-    -F "file=@${filepath}" 2>&1) || { echo "FAILED"; warn "Upload failed for $filename"; return; }
-  UPLOAD_ID=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('upload_id',''))" 2>/dev/null || echo "")
-  if [ -n "$UPLOAD_ID" ]; then
-    UPLOAD_IDS+=("$UPLOAD_ID")
-    echo "OK (id: $UPLOAD_ID)"
+QUIZ_PAYLOAD='{
+  "mode": "quick",
+  "answers": {
+    "employmentType": "employed",
+    "monthlyNetIncome": 1800,
+    "currency": "EUR",
+    "incomeSources": [
+      {
+        "id": "src-1",
+        "label": "Stipendio",
+        "type": "employment_net",
+        "valueMin": 1800,
+        "valueMax": 1800,
+        "currency": "EUR",
+        "hideFromAssistant": false
+      }
+    ],
+    "expenseCategories": {
+      "Affitto": 600,
+      "Cibo": 350,
+      "Trasporti": 120,
+      "Svago": 150,
+      "Utilities": 80
+    },
+    "fixedMonthlyCosts": 1300,
+    "householdSize": 1,
+    "savingsBehavior": "occasional",
+    "financialGoal": "save_more"
+  }
+}'
+
+QUIZ_RESP=$(curl -sf -X POST "$API_URL/profile/questionnaire" \
+  -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
+  -d "$QUIZ_PAYLOAD") \
+  || fail "Questionnaire submission failed. Check API logs: docker compose logs api"
+
+QUIZ_STATUS=$(echo "$QUIZ_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','?'))" 2>/dev/null || echo "?")
+ok "Questionnaire submitted (status: $QUIZ_STATUS) — profile is now confirmed"
+
+# ── Step 4 (optional): Upload Revolut CSV ────────────────────────────────────
+if [ "$WITH_CSV" = true ]; then
+  echo ""
+  echo "Uploading Revolut CSV (--with-csv flag set) ..."
+
+  REVOLUT_CSV="$SAMPLES_DIR/revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_4700b8.csv"
+
+  if [ ! -f "$REVOLUT_CSV" ]; then
+    warn "Revolut CSV not found at $REVOLUT_CSV — skipping"
   else
-    echo "FAILED"
-    warn "No upload_id in response: $RESP"
+    echo -n "  Uploading $(basename "$REVOLUT_CSV") ... "
+    UPLOAD_RESP=$(curl -sf -X POST "$API_URL/ingestion/upload" \
+      -H "$AUTH_HEADER" \
+      -F "file=@${REVOLUT_CSV}" 2>&1) || { echo "FAILED"; warn "Upload failed"; UPLOAD_RESP=""; }
+
+    if [ -n "$UPLOAD_RESP" ]; then
+      UPLOAD_ID=$(echo "$UPLOAD_RESP" | python3 -c \
+        "import sys,json; print(json.load(sys.stdin).get('upload_id',''))" 2>/dev/null || echo "")
+      [ -n "$UPLOAD_ID" ] && echo "OK (id: $UPLOAD_ID)" || echo "FAILED (no id)"
+    fi
+
+    # Confirm uploads (triggers profile enrichment in background — non-blocking)
+    echo "  Confirming uploads ..."
+    curl -sf -X POST "$API_URL/ingestion/confirm-all" \
+      -H "$AUTH_HEADER" > /dev/null \
+      && ok "CSV confirmed — transaction data enrichment queued (background)" \
+      || warn "confirm-all failed (non-fatal for quiz-seeded profile)"
   fi
-}
-
-# Upload the core demo files — Revolut CSV is the primary data source
-upload_file "$SAMPLES_DIR/revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_4700b8.csv"
-upload_file "$SAMPLES_DIR/fineco_it/FinecoIT_movements_20260324.xlsx"
-upload_file "$SAMPLES_DIR/satispay_it/SatispayIT_Export_Report.xlsx"
-
-if [ ${#UPLOAD_IDS[@]} -eq 0 ]; then
-  fail "No files were uploaded. Check that sample files exist at $SAMPLES_DIR"
 fi
-
-ok "Uploaded ${#UPLOAD_IDS[@]} file(s)"
-
-# ── Step 4: Wait for extraction to complete ───────────────────────────────────
-echo ""
-echo "Waiting for extraction to complete (up to 60s per file) ..."
-for UPLOAD_ID in "${UPLOAD_IDS[@]}"; do
-  echo -n "  Waiting for upload $UPLOAD_ID ... "
-  for i in $(seq 1 30); do
-    STATUS_RESP=$(curl -sf "$API_URL/ingestion/uploads/$UPLOAD_ID" \
-      -H "$AUTH_HEADER" 2>&1) || { echo "POLL_ERROR"; break; }
-    STATUS=$(echo "$STATUS_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))" 2>/dev/null || echo "unknown")
-    if [ "$STATUS" = "done" ] || [ "$STATUS" = "confirmed" ]; then
-      echo "done"
-      break
-    elif [ "$STATUS" = "error" ]; then
-      echo "error (continuing)"
-      break
-    fi
-    if [ "$i" -eq 30 ]; then
-      echo "timeout (status=$STATUS, continuing)"
-    else
-      sleep 2
-    fi
-  done
-done
-
-# ── Step 5: Confirm all + trigger categorization ──────────────────────────────
-echo ""
-echo "Confirming all uploads and triggering profile categorization ..."
-CONFIRM_RESP=$(curl -sf -X POST "$API_URL/ingestion/confirm-all" \
-  -H "$AUTH_HEADER" 2>&1) \
-  || fail "confirm-all failed. Check API logs: docker compose logs api"
-ok "Uploads confirmed. Categorization queued."
-echo "  Response: $CONFIRM_RESP"
-
-# ── Step 6: Wait for categorization ──────────────────────────────────────────
-echo ""
-echo "Waiting for profile categorization (up to 90s) ..."
-for i in $(seq 1 45); do
-  PROF_RESP=$(curl -sf "$API_URL/profile/status" \
-    -H "$AUTH_HEADER" 2>&1) || { warn "Profile status poll failed"; break; }
-  PROF_STATUS=$(echo "$PROF_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))" 2>/dev/null || echo "unknown")
-  if [ "$PROF_STATUS" = "done" ]; then
-    ok "Profile categorization complete"
-    break
-  fi
-  if [ "$i" -eq 45 ]; then
-    warn "Profile categorization timed out — demo may still work if partial profile is available"
-  else
-    sleep 2
-  fi
-done
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
@@ -180,5 +159,9 @@ echo "╠═══════════════════════�
 printf "║  Email:    %-44s ║\n" "$DEMO_EMAIL"
 printf "║  Password: %-44s ║\n" "$DEMO_PASSWORD"
 echo "║  URL:      http://localhost:3000                       ║"
+echo "║  Profile:  confirmed via questionnaire (goes to /chat) ║"
+if [ "$WITH_CSV" = true ]; then
+  echo "║  CSV:      Revolut uploaded + confirmed                ║"
+fi
 echo "╚════════════════════════════════════════════════════════╝"
 echo ""

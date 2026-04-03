@@ -424,6 +424,18 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       masked={balanceMasked}
                     />
                   </p>
+                  {/* TODO-7: show range when min ≠ max */}
+                  {profile.incomeMin != null && profile.incomeMax != null && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      <BalanceMask
+                        value={t("profile.incomeRange", {
+                          min: fmt.currency(profile.incomeMin, profile.incomeSummary?.currency ? { currency: profile.incomeSummary.currency } : undefined),
+                          max: fmt.currency(profile.incomeMax, profile.incomeSummary?.currency ? { currency: profile.incomeSummary.currency } : undefined),
+                        })}
+                        masked={balanceMasked}
+                      />
+                    </p>
+                  )}
                   {profile.incomeSummary?.source && (
                     <span className="mt-1 inline-block rounded-full border border-primary px-2 py-0.5 text-xs text-muted-foreground">
                       {DATA_SOURCE_LABELS[profile.incomeSummary.source] ??
@@ -444,6 +456,18 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                       masked={balanceMasked}
                     />
                   </p>
+                  {/* TODO-7: show expense range when min ≠ max */}
+                  {profile.expenseMin != null && profile.expenseMax != null && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      <BalanceMask
+                        value={t("profile.expenseRange", {
+                          min: fmt.currency(profile.expenseMin),
+                          max: fmt.currency(profile.expenseMax),
+                        })}
+                        masked={balanceMasked}
+                      />
+                    </p>
+                  )}
                 </div>
 
                 {/* Margin */}

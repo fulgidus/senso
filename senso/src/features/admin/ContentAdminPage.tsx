@@ -923,7 +923,7 @@ export function ContentAdminPage() {
           <span className="text-sm font-medium text-foreground">
             {t("admin.content.bulkSelected", { count: selected.size })}
           </span>
-          <div className="flex-1" />
+          <div className="flex-1"></div>
           {selectedHaveGroups && (
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input

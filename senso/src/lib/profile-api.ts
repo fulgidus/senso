@@ -40,6 +40,10 @@ export type CategorizationStatusResponse = {
 
 export type IncomeSummary = {
     amount: number
+    /** Lower bound of the monthly income range (e.g. base net without variable parts). */
+    amountMin?: number | null
+    /** Upper bound of the monthly income range (e.g. base net + meal vouchers + bonuses). */
+    amountMax?: number | null
     currency: string
     source: "payslip" | "questionnaire" | "estimated_from_transactions"
 }
@@ -272,6 +276,14 @@ export type UserProfile = {
     confirmed: boolean
     profileGeneratedAt: string | null
     updatedAt: string
+    /** TODO-7: income range fields — null when income is fixed (min == max) */
+    incomeMin?: number | null
+    /** Upper bound of the monthly income range (e.g. base + variable parts). */
+    incomeMax?: number | null
+    /** Minimum monthly expenses (sum of per-category lower bounds). */
+    expenseMin?: number | null
+    /** Maximum monthly expenses (sum of per-category upper bounds). */
+    expenseMax?: number | null
 }
 
 export type QuestionnaireAnswers = {
