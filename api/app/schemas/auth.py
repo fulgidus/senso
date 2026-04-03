@@ -16,6 +16,9 @@ class UserDTO(BaseModel):
     voice_auto_listen: bool = False
     default_persona_id: str = "mentore-saggio"
     strict_privacy_mode: bool = False
+    username: str | None = None
+    public_key_b64: str | None = None    # X25519 public key (safe to expose)
+    signing_key_b64: str | None = None   # Ed25519 verify key (safe to expose)
 
 
 class UpdateMeRequest(BaseModel):
