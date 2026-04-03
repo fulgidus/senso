@@ -251,7 +251,7 @@ Plans:
 **Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 13-01-PLAN.md - PyNaCl dependency + nacl_crypto.py helpers + username_generator service + Round 17 DB migration (username, public_key_b64, signing_key_b64 columns)
