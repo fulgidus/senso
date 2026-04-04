@@ -6,7 +6,7 @@ All endpoints require is_admin=True (D-19/D-22).
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.api.ingestion import get_current_user
@@ -336,3 +336,48 @@ def revert_moderation_action(
     db.add(row)
     db.commit()
     return {"reverted": True}
+
+
+# ── Phase 14: Admin handle claim ─────────────────────────────────────────────
+
+class ClaimHandleRequest(BaseModel):
+    handle: str = Field(min_length=2, description="Admin handle, must start with !")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ClaimHandleResponse(BaseModel):
+    admin_handle: str = Field(alias="adminHandle")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+@router.post("/claim-handle", response_model=ClaimHandleResponse)
+def claim_admin_handle(
+    body: ClaimHandleRequest,
+    current_user: UserDTO = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> ClaimHandleResponse:
+    """Claim a !handle for the authenticated admin user.
+
+    D-25: Admin-only. Validates uniqueness. Stores !-prefixed handle on user.admin_handle.
+    D-26: admin_handle exposed in UserDTO (wired in Plan 14-02).
+    D-27: No settings UI in Phase 14 — Phase 15 adds the UI.
+    """
+    if not body.handle.startswith("!"):
+        raise HTTPException(status_code=422, detail="Handle must start with '!'.")
+
+    # Check uniqueness
+    existing = db.query(User).filter(User.admin_handle == body.handle).first()
+    if existing is not None:
+        raise HTTPException(
+            status_code=409, detail=f"Handle '{body.handle}' is already taken."
+        )
+
+    user_row = db.query(User).filter(User.id == current_user.id).first()
+    if user_row is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    user_row.admin_handle = body.handle
+    db.commit()
+    db.refresh(user_row)
+
+    return ClaimHandleResponse(admin_handle=user_row.admin_handle)

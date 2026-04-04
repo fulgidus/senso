@@ -800,12 +800,16 @@ class IngestionTrace(Base):
 
 # ── Phase 14: E2E Messaging ────────────────────────────────────────────────
 
+# In tests, DATABASE_URL is sqlite — ARRAY is Postgres-only.
+# Use JSON as fallback so create_all() doesn't explode in SQLite test env.
+import os as _os
+_IS_SQLITE = _os.getenv("DATABASE_URL", "sqlite").startswith("sqlite")
+
 try:
     from sqlalchemy.dialects.postgresql import ARRAY as _PG_ARRAY
-
-    _RecipientHashesType = _PG_ARRAY(Text)
+    _RecipientHashesType = Text if _IS_SQLITE else _PG_ARRAY(Text)  # type: ignore[assignment]
 except ImportError:
-    _RecipientHashesType = Text  # SQLite test fallback (unused at runtime)
+    _RecipientHashesType = Text  # SQLite test fallback
 
 
 class UndeliveredMessage(Base):
