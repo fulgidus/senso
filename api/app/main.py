@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.api.admin import router as admin_router
+from app.api.attachments import attachments_router
 from app.api.auth import router as auth_router
 from app.api.coaching import router as coaching_router
 from app.api.content_admin import router as content_admin_router
@@ -144,6 +145,7 @@ def create_app() -> FastAPI:
         notifications_router, prefix="/notifications", tags=["notifications"]
     )
     app.include_router(messages_router, prefix="/messages", tags=["messages"])
+    app.include_router(attachments_router, prefix="/attachments", tags=["attachments"])
     app.include_router(debug_router)
 
     @app.get("/health")

@@ -23,7 +23,9 @@ def get_user_by_email(db: Session, email: str) -> User | None:
 
 
 def get_user_by_username(db: Session, username: str) -> User | None:
-    """Look up a user by their pseudonymous username."""
+    """Look up a user by $username or !admin_handle."""
+    if username.startswith("!"):
+        return db.query(User).filter(User.admin_handle == username).first()
     return db.query(User).filter(User.username == username).first()
 
 

@@ -38,6 +38,11 @@ messages_router = APIRouter(tags=["messages"])
 
 # ── Request / Response schemas ─────────────────────────────────────────────
 
+class PublicKeysResponse(BaseModel):
+    username: str
+    public_key_b64: str   # X25519 public key (base64, 32 bytes)
+    signing_key_b64: str  # Ed25519 verify key (base64, 32 bytes)
+
 class SendMessageRequest(BaseModel):
     recipient_hashes: list[str] = Field(
         min_length=1, description="sha256($username) hex digests or !admin_handles"
@@ -65,6 +70,39 @@ class PolledMessage(BaseModel):
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────
+
+@messages_router.get("/users/{username}/public-keys", response_model=PublicKeysResponse)
+def get_user_public_keys(
+    username: str,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> PublicKeysResponse:
+    """Return the X25519 and Ed25519 public keys for a given $username or !handle.
+
+    Used by the compose flow to fetch recipient public keys before encryption.
+    Requires authentication (prevents unauthenticated key harvesting).
+
+    Args:
+        username: Must start with $ or !. URL-encoded if it contains $.
+
+    Returns 404 if user not found or has no keys (pre-Phase-13 account).
+    """
+    from app.db.repository import get_user_by_username  # noqa: PLC0415
+
+    user = get_user_by_username(db, username)
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User '{username}' not found.")
+    if not user.public_key_b64 or not user.signing_key_b64:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User '{username}' has no public keys (pre-Phase-13 account).",
+        )
+    return PublicKeysResponse(
+        username=username,
+        public_key_b64=user.public_key_b64,
+        signing_key_b64=user.signing_key_b64,
+    )
+
 
 @messages_router.post("/send", response_model=SendMessageResponse)
 def send_message(
