@@ -247,3 +247,66 @@ def decrypt_nacl_private_key(encrypted_b64: str, master_key: bytes) -> bytes:
         cryptography.exceptions.InvalidTag: If master_key is wrong or data is tampered.
     """
     return _aesgcm_decrypt(master_key, encrypted_b64)
+
+
+# ── BIP-39 recovery envelope ─────────────────────────────────────────────────
+
+
+def generate_bip39_recovery_phrase() -> str:
+    """Generate a 24-word BIP-39 mnemonic phrase (256 bits entropy).
+
+    The phrase is returned ONCE at signup and NEVER stored in plaintext.
+    The client is responsible for saving it.
+
+    Returns:
+        Space-separated string of 24 English words from the BIP-39 wordlist.
+    """
+    from mnemonic import Mnemonic  # noqa: PLC0415
+
+    mnemo = Mnemonic("english")
+    return mnemo.generate(strength=256)  # 256 bits → 24 words
+
+
+def wrap_nacl_master_key_with_phrase(
+    master_key: bytes,
+    phrase: str,
+    nacl_pbkdf2_salt: bytes,
+) -> str:
+    """Wrap the nacl_master_key using a BIP-39 recovery phrase as the wrap key.
+
+    Uses the same PBKDF2 + AES-GCM pattern as wrap_nacl_master_key() (login envelope),
+    but the wrap key is derived from the BIP-39 phrase instead of the user's password.
+    The same nacl_pbkdf2_salt is reused (per-user identity salt, not per-envelope).
+
+    Args:
+        master_key: 32-byte nacl_master_key to protect.
+        phrase: 24-word BIP-39 phrase (space-separated string).
+        nacl_pbkdf2_salt: 32-byte salt (decoded from user.nacl_pbkdf2_salt).
+
+    Returns:
+        Base64 envelope string (nonce + ciphertext) for nacl_key_recovery_envelope_b64.
+    """
+    recovery_wrap_key = derive_nacl_login_wrap_key(phrase, nacl_pbkdf2_salt)
+    return wrap_nacl_master_key(master_key, recovery_wrap_key)
+
+
+def unwrap_nacl_master_key_with_phrase(
+    envelope_b64: str,
+    phrase: str,
+    nacl_pbkdf2_salt: bytes,
+) -> bytes:
+    """Unwrap the nacl_master_key using a BIP-39 recovery phrase.
+
+    Args:
+        envelope_b64: Value from user.nacl_key_recovery_envelope_b64.
+        phrase: 24-word BIP-39 phrase (space-separated).
+        nacl_pbkdf2_salt: 32-byte salt (decoded from user.nacl_pbkdf2_salt).
+
+    Returns:
+        32-byte nacl_master_key.
+
+    Raises:
+        cryptography.exceptions.InvalidTag: If phrase/salt is wrong or data tampered.
+    """
+    recovery_wrap_key = derive_nacl_login_wrap_key(phrase, nacl_pbkdf2_salt)
+    return unwrap_nacl_master_key(envelope_b64, recovery_wrap_key)

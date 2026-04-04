@@ -26,6 +26,8 @@ from app.db.nacl_crypto import (
     encrypt_nacl_private_key,
     public_key_b64 as _x25519_pub_b64,
     verify_key_b64 as _ed25519_vk_b64,
+    generate_bip39_recovery_phrase,
+    wrap_nacl_master_key_with_phrase,
 )
 from app.personas.loader import _load_config
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
@@ -51,6 +53,7 @@ def _to_user_dto(user: User) -> UserDTO:
         username=user.username,
         public_key_b64=user.public_key_b64,
         signing_key_b64=user.signing_key_b64,
+        admin_handle=user.admin_handle,
     )
 
 
@@ -109,9 +112,15 @@ class AuthService:
         ed25519_sk, ed25519_vk = generate_ed25519_keypair()
         user.signing_key_b64 = _ed25519_vk_b64(ed25519_vk)
         user.encrypted_ed25519_signing_b64 = encrypt_nacl_private_key(bytes(ed25519_sk), nacl_master_key)
+        # ── Phase 14: BIP-39 recovery envelope ───────────────────────────────
+        recovery_phrase = generate_bip39_recovery_phrase()
+        user.nacl_key_recovery_envelope_b64 = wrap_nacl_master_key_with_phrase(
+            nacl_master_key, recovery_phrase, nacl_salt
+        )
+        # ──────────────────────────────────────────────────────────────────
         # ──────────────────────────────────────────────────────────────────
         self.db.commit()
-        return self._issue_auth_response(user)
+        return self._issue_auth_response(user, recovery_phrase=recovery_phrase)
 
     def login(self, *, email: str, password: str) -> AuthResponseDTO:
         user = repository.get_user_by_email(self.db, email)
@@ -201,13 +210,14 @@ class AuthService:
             "google_unavailable", "Google OAuth exchange failed", status_code=503
         )
 
-    def _issue_auth_response(self, user: User) -> AuthResponseDTO:
+    def _issue_auth_response(self, user: User, *, recovery_phrase: str | None = None) -> AuthResponseDTO:
         tokens = self._issue_tokens(user)
         return AuthResponseDTO(
             user=_to_user_dto(user),
             accessToken=tokens.access_token,
             refreshToken=tokens.refresh_token,
             expiresIn=tokens.expires_in,
+            recoveryPhrase=recovery_phrase,
         )
 
     def update_me(self, *, user_id: str, payload: UpdateMeRequest) -> UserDTO:
