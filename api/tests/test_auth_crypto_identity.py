@@ -38,14 +38,17 @@ def test_signup_returns_public_keys(client):
     assert sk is not None and len(sk) > 0, "Ed25519 verify key missing"
 
 
-def test_private_key_blobs_not_in_dto(client):
-    """Encrypted private key blobs must NEVER appear in UserDTO responses."""
+def test_private_key_blobs_in_dto(client):
+    """Phase 15: Encrypted private key blobs ARE returned in UserDTO so the
+    client can perform client-side decryption. The blobs are only decryptable
+    by the user with their password — safe to return to the authenticated user."""
     resp = _signup(client, "p13_user3@example.com")
     assert resp.status_code in (200, 201)
-    body = str(resp.json())
-    assert "encrypted_x25519" not in body
-    assert "encrypted_ed25519" not in body
-    assert "nacl_key_login" not in body
+    user = resp.json()["user"]
+    # These fields must now be present (Phase 15 client-side crypto requirement)
+    assert user.get("nacl_key_login_envelope_b64") is not None
+    assert user.get("encrypted_x25519_private_b64") is not None
+    assert user.get("encrypted_ed25519_signing_b64") is not None
 
 
 def test_login_returns_identity_fields(client):

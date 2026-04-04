@@ -1,8 +1,11 @@
 from datetime import UTC, datetime
 import base64
+import logging
 import os
 from urllib.parse import urlencode
 from uuid import uuid4
+
+logger = logging.getLogger(__name__)
 
 from sqlalchemy.orm import Session
 
@@ -28,6 +31,9 @@ from app.db.nacl_crypto import (
     verify_key_b64 as _ed25519_vk_b64,
     generate_bip39_recovery_phrase,
     wrap_nacl_master_key_with_phrase,
+    detect_envelope_version,
+    rewrap_all_envelopes,
+    b64_decode,
 )
 from app.personas.loader import _load_config
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
@@ -54,6 +60,10 @@ def _to_user_dto(user: User) -> UserDTO:
         public_key_b64=user.public_key_b64,
         signing_key_b64=user.signing_key_b64,
         admin_handle=user.admin_handle,
+        nacl_pbkdf2_salt=user.nacl_pbkdf2_salt,
+        nacl_key_login_envelope_b64=user.nacl_key_login_envelope_b64,
+        encrypted_x25519_private_b64=user.encrypted_x25519_private_b64,
+        encrypted_ed25519_signing_b64=user.encrypted_ed25519_signing_b64,
     )
 
 
@@ -128,6 +138,35 @@ class AuthService:
             raise AuthError(
                 "invalid_credentials", "Invalid email or password", status_code=401
             )
+        # ── Phase 15: Transparent v1→v2 envelope migration ────────────────────
+        if (
+            user.nacl_key_login_envelope_b64
+            and detect_envelope_version(user.nacl_key_login_envelope_b64) == "v1"
+        ):
+            try:
+                salt_bytes = b64_decode(user.nacl_pbkdf2_salt)
+                new_blobs = rewrap_all_envelopes(
+                    password=password,
+                    nacl_pbkdf2_salt=salt_bytes,
+                    nacl_key_login_envelope_b64=user.nacl_key_login_envelope_b64,
+                    encrypted_x25519_private_b64=user.encrypted_x25519_private_b64,
+                    encrypted_ed25519_signing_b64=user.encrypted_ed25519_signing_b64,
+                    nacl_key_recovery_envelope_b64=getattr(user, "nacl_key_recovery_envelope_b64", None),
+                    recovery_phrase=None,  # Re-wrap recovery only when phrase is available
+                )
+                for col, val in new_blobs.items():
+                    setattr(user, col, val)
+                self.db.commit()
+                self.db.refresh(user)
+                logger.info(
+                    "Migrated envelopes v1→v2 for user %s", user.username
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Envelope migration failed for %s: %s", user.username, exc
+                )
+                self.db.rollback()
+        # ── End Phase 15 migration ────────────────────────────────────────────
         return self._issue_auth_response(user)
 
     def refresh(self, *, refresh_token: str) -> AuthTokensDTO:
