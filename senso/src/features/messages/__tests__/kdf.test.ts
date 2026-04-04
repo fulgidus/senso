@@ -72,7 +72,7 @@ describe("Argon2id KDF — cross-platform parameters", () => {
 
     expect(result.hash).toHaveLength(32); // 32-byte output
     // Lock expected hex after running Python interop test (task 15-01-04):
-    // const EXPECTED_HEX = "LOCK_ME" // TODO: fill in from test_kdf_interop.py
+    // const EXPECTED_HEX = "00b1eed9bee6dc0641a507717db76b6520ec876ece6cd10925e43875b543575e" // locked from Python interop test (task 15-01-04)
     // expect(result.hashHex).toBe(EXPECTED_HEX)
   });
 
