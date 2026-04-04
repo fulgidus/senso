@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-last_updated: "2026-04-03T23:44:29.558Z"
-last_activity: 2026-04-03
+last_updated: "2026-04-04T18:52:33.641Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 16
-  completed_phases: 14
-  total_plans: 63
-  completed_plans: 63
+  completed_phases: 15
+  total_plans: 66
+  completed_plans: 66
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Phase 13 - crypto-identity-foundation
+**Current focus:** Phase 14 - e2e-messaging-backend-undelivered-messages-routing-table-pull-on-login-delivery-ttl-purge-and-zero-knowledge-recipient-hashing
 
 ## Current Position
 
-Phase: 14
+Phase: 15
 Plan: Not started
 
 ## Performance Metrics
@@ -118,7 +118,7 @@ Recent decisions affecting current work:
 - [Phase 02-financial-input-ingestion]: SQLite for tests + repository-as-functions pattern for DB layer - File-based SQLite allows cross-request session reuse in tests; functional repository avoids over-engineering
 - [Phase 02-financial-input-ingestion]: LLMClient uses lazy provider imports inside methods to avoid import-time failures when SDKs are not installed - Enables clean test environments without requiring google-genai/openai packages installed at module load time
 - [Phase 02-financial-input-ingestion]: Used FastAPI dependency_overrides (not patch()) to mock get_minio_client in tests - only correct approach for Depends()-injected deps
-- [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup - avoids __import__ hack in plan sample
+- [Phase 02-financial-input-ingestion]: require_admin written as clean Depends() function with DB is_admin lookup - avoids **import** hack in plan sample
 - [Phase 02-financial-input-ingestion]: IngestionError mirrors AuthError pattern (code, message, status_code) for consistent HTTP error shape across all services
 - [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case field names to match FastAPI model_dump output - API get_extracted returns raw payload_json dict with snake_case keys; using camelCase causes runtime failures
 - [Phase 02-financial-input-ingestion]: ExtractedDocument TypeScript interface uses snake_case - API model_dump returns snake_case keys, not camelCase
@@ -138,9 +138,9 @@ Recent decisions affecting current work:
 - [Phase 05-voice-coaching-loop]: fetchTTSAudio uses native fetch (not apiRequest) because response is binary audio/mpeg, not JSON - Enables binary Blob response handling; apiRequest<T> is JSON-typed
 - [Phase 05-voice-coaching-loop]: canPlay tied to speechSynthesis availability - ElevenLabs backend is optional; play button shown when browser synthesis exists - Demo-resilient per D-V6: voice output works even without ElevenLabs key via browser speechSynthesis fallback
 - [Phase 06-learn-act-cards-demo-hardening]: Fallback injection trigger uses affordability_verdict is None — skip for conversational responses, inject for financial decisions regardless of message length
-- [Phase 06-learn-act-cards-demo-hardening]: _repair_response() made unconditional in CoachingService.chat() — ensures arrays always exist before fallback injection runs
+- [Phase 06-learn-act-cards-demo-hardening]: \_repair_response() made unconditional in CoachingService.chat() — ensures arrays always exist before fallback injection runs
 - [Phase 06-learn-act-cards-demo-hardening]: Docker test setup: uv sync without --no-dev + COPY tests enables pytest inside container — required for CI and all Phase 6 test verification
-- [Phase 06-learn-act-cards-demo-hardening]: MARP slide separator regex uses /\n[ \t]*---[ \t]*\n/ to handle actual \n\n---\n\n pattern in .md files
+- [Phase 06-learn-act-cards-demo-hardening]: MARP slide separator regex uses /\n[ \t]_---[ \t]_\n/ to handle actual \n\n---\n\n pattern in .md files
 - [Phase 06-learn-act-cards-demo-hardening]: STT mute implemented via isPlaying rising-edge useEffect (wasPlayingRef pattern) - cleaner than inside onAssistantMessage
 - [Phase 06-learn-act-cards-demo-hardening]: AuthResponseDTO flat token shape: access_token is top-level key, not nested under tokens — plan template assumption was wrong
 - [Phase 06-learn-act-cards-demo-hardening]: FK CASCADE delete from users is sufficient for full reset — all 12 child tables cascade automatically per models.py
@@ -160,12 +160,12 @@ Recent decisions affecting current work:
 - [Phase 09]: date imported from datetime for FinancialTimeline.event_date (was missing from models.py imports)
 - [Phase 09]: LLMType already included classification in llm_config.py — no change needed to llm.py for classification routing
 - [Phase 09]: 3-tier escalation uses per-tier confidence thresholds: sm≥0.6, md≥0.5, lg≥0.4 — lower threshold for stronger models
-- [Phase 09]: _run_timeline_inference() implements 4 of 6 D-13 event types — relocation and debt_change deferred (insufficient transaction fields for reliable detection)
+- [Phase 09]: \_run_timeline_inference() implements 4 of 6 D-13 event types — relocation and debt_change deferred (insufficient transaction fields for reliable detection)
 - [Phase 09]: upsert_timeline_event matches on (user_id, event_type, event_date) to prevent duplicate events on re-runs
 - [Phase 09]: get_schema() lives in app.ingestion.prompts.loader not app.ingestion.schemas.loader — plan had wrong import path
 - [Phase 09]: TOS check defaults to clean=True on LLM error (fail open) — avoids blocking users when LLM unavailable
 - [Phase 09]: BackgroundTasks used for async TOS+distillation in POST /profile/timeline/{id}/context — 202 Accepted returns immediately
-- [Phase 09]: Contributing user in admin merchant map shown as obfuscated email u****@domain.com
+- [Phase 09]: Contributing user in admin merchant map shown as obfuscated email u\*\*\*\*@domain.com
 - [Phase 09-llm-financial-intelligence]: Plan 09-06: API functions added to lib/profile-api.ts (not a new src/api/profileApi.ts) — existing token-based apiRequest pattern followed
 - [Phase 09]: notificationsApi.ts placed in senso/src/api/ (new dir); adminMerchantApi.ts co-located with features/admin/ following adminContentApi.ts pattern
 - [Phase 09]: onUnreadCountChange callback added to NotificationPanel so bell badge updates immediately on mark-read without waiting for next 30s poll
@@ -235,15 +235,15 @@ Recent decisions affecting current work:
 
 ### Recently Resolved Todos (2026-04-02)
 
-| Todo | Commit | Notes |
-|------|--------|-------|
-| Fix token renewal broken | db6e06a | Auth auto-refresh logic verified; 15 unit tests added covering all 401 refresh scenarios |
+| Todo                                            | Commit  | Notes                                                                                                                    |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Fix token renewal broken                        | db6e06a | Auth auto-refresh logic verified; 15 unit tests added covering all 401 refresh scenarios                                 |
 | Fix financial profile figures never show ranges | db6e06a | `incomeMin/Max` + `expenseMin/Max` fields added to profile-api.ts; ProfileScreen renders range when both bounds non-null |
 
 ### Quick Tasks Completed
 
-| #   | Description | Date | Commit | Directory |
-| --- | ----------- | ---- | ------ | --------- |
+| #          | Description                                                              | Date       | Commit  | Directory                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------ | ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
 | 260401-pf0 | check why we have a HANDOFF.md file in .planning and if we still need it | 2026-04-01 | 498ddaa | [260401-pf0-check-why-we-have-a-handoff-md-file-in-p](.planning/quick/260401-pf0-check-why-we-have-a-handoff-md-file-in-p/) |
 
 ### Blockers/Concerns
@@ -273,4 +273,4 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last activity: 2026-04-03
+Last activity: 2026-04-04
