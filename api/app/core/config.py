@@ -35,6 +35,8 @@ class Settings:
     stt_provider: str
     # Must be 32 bytes for AES-256. Override with ENCRYPTION_KEY env var in production.
     encryption_key: str
+    # Phase 14: TTL for undelivered messages (days). Override with MESSAGE_TTL_DAYS env var.
+    message_ttl_days: int
 
     @property
     def google_enabled(self) -> bool:
@@ -132,4 +134,5 @@ def get_settings() -> Settings:
         # STT provider selection
         stt_provider=os.getenv("STT_PROVIDER", "elevenlabs"),
         encryption_key=os.getenv("ENCRYPTION_KEY", "dev-enc-key-change-me-32bytes!!!"),
+        message_ttl_days=int(os.getenv("MESSAGE_TTL_DAYS", "30")),
     )

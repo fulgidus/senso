@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
 import json as _json
 import logging
+from datetime import UTC, datetime, timedelta
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -75,7 +77,40 @@ class CatchAllExceptionMiddleware:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
-    yield
+
+    settings = get_settings()
+    scheduler = BackgroundScheduler()
+
+    def _purge_expired_messages() -> None:
+        """Delete undelivered_messages older than MESSAGE_TTL_DAYS. Idempotent."""
+        from app.db.session import SessionLocal  # noqa: PLC0415
+        from app.db.models import UndeliveredMessage  # noqa: PLC0415
+
+        db = SessionLocal()
+        try:
+            cutoff = datetime.now(UTC) - timedelta(days=settings.message_ttl_days)
+            deleted = (
+                db.query(UndeliveredMessage)
+                .filter(UndeliveredMessage.created_at < cutoff)
+                .delete(synchronize_session=False)
+            )
+            db.commit()
+            if deleted:
+                logging.getLogger(__name__).info(
+                    "TTL purge: deleted %d expired undelivered messages", deleted
+                )
+        except Exception as exc:  # noqa: BLE001
+            db.rollback()
+            logging.getLogger(__name__).error("TTL purge failed: %s", exc)
+        finally:
+            db.close()
+
+    scheduler.add_job(_purge_expired_messages, "interval", hours=1)
+    scheduler.start()
+    try:
+        yield
+    finally:
+        scheduler.shutdown(wait=False)
 
 
 def create_app() -> FastAPI:

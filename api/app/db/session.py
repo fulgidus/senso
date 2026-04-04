@@ -374,6 +374,34 @@ def _add_missing_columns() -> None:
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_x25519_private_b64 TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_ed25519_signing_b64 TEXT",
         "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username) WHERE username IS NOT NULL",
+        # ── Round 18: Phase 14 — E2E messaging schema ──────────────────────────────
+        # New user columns
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_handle VARCHAR(64) UNIQUE",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS nacl_key_recovery_envelope_b64 TEXT",
+        # undelivered_messages routing table
+        """
+        CREATE TABLE IF NOT EXISTS undelivered_messages (
+            id                 VARCHAR(36) PRIMARY KEY,
+            recipient_hashes   TEXT[]      NOT NULL,
+            encrypted_payload  TEXT        NOT NULL,
+            payload_size_bytes INTEGER     NOT NULL,
+            created_at         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_undelivered_messages_recipient_hashes ON undelivered_messages USING GIN (recipient_hashes)",
+        # delivered_messages inbox log table
+        """
+        CREATE TABLE IF NOT EXISTS delivered_messages (
+            id                 VARCHAR(36) PRIMARY KEY,
+            recipient_hashes   TEXT[]      NOT NULL,
+            encrypted_payload  TEXT        NOT NULL,
+            payload_size_bytes INTEGER     NOT NULL,
+            created_at         TIMESTAMP WITH TIME ZONE NOT NULL,
+            delivered_at       JSONB       NOT NULL DEFAULT '[]'::JSONB,
+            source_message_id  VARCHAR(36)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_delivered_messages_recipient_hashes ON delivered_messages USING GIN (recipient_hashes)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
