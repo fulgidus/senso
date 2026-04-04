@@ -1,27 +1,27 @@
-import { beforeEach } from "vitest"
+import { beforeEach } from "vite-plus/test";
 
 function createStorageMock() {
-  const store = new Map<string, string>()
+  const store = new Map<string, string>();
 
   return {
     getItem: (key: string) => store.get(key) ?? null,
     setItem: (key: string, value: string) => {
-      store.set(key, value)
+      store.set(key, value);
     },
     removeItem: (key: string) => {
-      store.delete(key)
+      store.delete(key);
     },
     clear: () => {
-      store.clear()
+      store.clear();
     },
-  }
+  };
 }
 
 Object.defineProperty(window, "localStorage", {
   value: createStorageMock(),
   configurable: true,
-})
+});
 
 beforeEach(() => {
-  window.localStorage.clear()
-})
+  window.localStorage.clear();
+});

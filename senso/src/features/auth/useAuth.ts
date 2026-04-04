@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import {
   bootstrapSession,
@@ -9,20 +9,26 @@ import {
   makeOnUnauthorized,
   signup,
   startGoogle,
-} from "@/features/auth/session"
-import { ApiClientError } from "@/lib/api-client"
-import type { User } from "@/features/auth/types"
+} from "@/features/auth/session";
+import { ApiClientError } from "@/lib/api-client";
+import type { User, CryptoKeyMaterial } from "@/features/auth/types";
+import {
+  deriveArgon2idWrapKey,
+  unwrapLoginEnvelope,
+  decryptPrivateKey,
+  expandEd25519Seed,
+} from "@/features/messages/crypto";
 
-type AuthMode = "signup" | "login"
+type AuthMode = "signup" | "login";
 
 type AuthState = {
-  initialized: boolean
-  loading: boolean
-  mode: AuthMode
-  user: User | null
-  error: string | null
-  googleFallback: string | null
-}
+  initialized: boolean;
+  loading: boolean;
+  mode: AuthMode;
+  user: User | null;
+  error: string | null;
+  googleFallback: string | null;
+};
 
 const initialState: AuthState = {
   initialized: false,
@@ -31,117 +37,150 @@ const initialState: AuthState = {
   user: null,
   error: null,
   googleFallback: null,
-}
+};
 
 function loginErrorKey(err: unknown): string {
   if (err instanceof ApiClientError) {
-    const code = (err.data as { code?: string } | null)?.code
-    if (err.status === 401 || code === "invalid_credentials") return "auth.errorInvalidCredentials"
-    if (err.status === 429) return "auth.errorTooManyAttempts"
-    if (err.status >= 500) return "auth.errorServerDown"
+    const code = (err.data as { code?: string } | null)?.code;
+    if (err.status === 401 || code === "invalid_credentials") return "auth.errorInvalidCredentials";
+    if (err.status === 429) return "auth.errorTooManyAttempts";
+    if (err.status >= 500) return "auth.errorServerDown";
   }
-  return "auth.errorLoginFailed"
+  return "auth.errorLoginFailed";
 }
 
 function signupErrorKey(err: unknown): string {
   if (err instanceof ApiClientError) {
-    const code = (err.data as { code?: string } | null)?.code
-    if (err.status === 409 || code === "email_in_use") return "auth.errorEmailInUse"
-    if (err.status === 422) return "auth.errorInvalidData"
-    if (err.status >= 500) return "auth.errorServerDown"
+    const code = (err.data as { code?: string } | null)?.code;
+    if (err.status === 409 || code === "email_in_use") return "auth.errorEmailInUse";
+    if (err.status === 422) return "auth.errorInvalidData";
+    if (err.status >= 500) return "auth.errorServerDown";
   }
-  return "auth.errorSignupFailed"
+  return "auth.errorSignupFailed";
+}
+
+/**
+ * Derive crypto key material from the user's password and login envelope fields.
+ * Returns null if the user account is pre-Phase-13 (missing envelope fields).
+ * Fails silently — session continues without crypto keys if derivation fails.
+ */
+async function deriveCryptoKeys(password: string, user: User): Promise<CryptoKeyMaterial | null> {
+  if (
+    !user.naclPbkdf2Salt ||
+    !user.naclKeyLoginEnvelopeB64 ||
+    !user.encryptedX25519PrivateB64 ||
+    !user.encryptedEd25519SigningB64
+  ) {
+    // Pre-Phase-13 account or missing envelope — skip silently
+    return null;
+  }
+  try {
+    const wrapKey = await deriveArgon2idWrapKey(password, user.naclPbkdf2Salt);
+    const naclMasterKey = await unwrapLoginEnvelope(user.naclKeyLoginEnvelopeB64, wrapKey);
+    const x25519PrivateKey = await decryptPrivateKey(user.encryptedX25519PrivateB64, naclMasterKey);
+    const ed25519Seed32 = await decryptPrivateKey(user.encryptedEd25519SigningB64, naclMasterKey);
+    const { privateKey: ed25519SigningKey, publicKey: ed25519PublicKey } =
+      expandEd25519Seed(ed25519Seed32);
+    return { naclMasterKey, x25519PrivateKey, ed25519SigningKey, ed25519PublicKey };
+  } catch (err) {
+    console.error("Key derivation failed — session continues without crypto keys:", err);
+    return null;
+  }
 }
 
 export function useAuth() {
-  const [state, setState] = useState<AuthState>(initialState)
-  const { t } = useTranslation()
-  const navigate = useNavigate()
+  const [state, setState] = useState<AuthState>(initialState);
+  const [cryptoKeys, setCryptoKeys] = useState<CryptoKeyMaterial | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const onUnauthorized = useMemo(
-    () => makeOnUnauthorized((to) => navigate(to)),
-    [navigate],
-  )
+  const onUnauthorized = useMemo(() => makeOnUnauthorized((to) => navigate(to)), [navigate]);
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
     const run = async () => {
-      const result = await bootstrapSession()
-      if (!isMounted) return
+      const result = await bootstrapSession();
+      if (!isMounted) return;
       setState((current) => ({
         ...current,
         initialized: true,
         user: result.status === "authenticated" ? result.user : null,
-      }))
-    }
-    void run()
-    return () => { isMounted = false }
-  }, [])
+      }));
+    };
+    void run();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const setMode = useCallback((mode: AuthMode) => {
-    setState((current) => ({ ...current, mode, error: null, googleFallback: null }))
-  }, [])
+    setState((current) => ({ ...current, mode, error: null, googleFallback: null }));
+  }, []);
 
   const submit = useCallback(
     async (email: string, password: string) => {
-      setState((current) => ({ ...current, loading: true, error: null }))
+      setState((current) => ({ ...current, loading: true, error: null }));
       try {
         const result =
-          state.mode === "signup"
-            ? await signup(email, password)
-            : await login(email, password)
+          state.mode === "signup" ? await signup(email, password) : await login(email, password);
         setState((current) => ({
           ...current,
           loading: false,
           user: result.user,
           googleFallback: null,
-        }))
+        }));
+        // Derive crypto keys after successful auth (fail silently if envelope missing)
+        const keys = await deriveCryptoKeys(password, result.user);
+        setCryptoKeys(keys);
       } catch (err) {
-        const key = state.mode === "signup" ? signupErrorKey(err) : loginErrorKey(err)
-        setState((current) => ({ ...current, loading: false, error: t(key) }))
+        const key = state.mode === "signup" ? signupErrorKey(err) : loginErrorKey(err);
+        setState((current) => ({ ...current, loading: false, error: t(key) }));
       }
     },
     [state.mode, t],
-  )
+  );
 
   const beginGoogle = useCallback(async () => {
-    setState((current) => ({ ...current, loading: true, error: null }))
+    setState((current) => ({ ...current, loading: true, error: null }));
     try {
-      const result = await startGoogle()
+      const result = await startGoogle();
       if (result.kind === "redirect") {
-        window.location.assign(result.authUrl)
-        return
+        window.location.assign(result.authUrl);
+        return;
       }
       setState((current) => ({
         ...current,
         loading: false,
         googleFallback: t("auth.errorGoogleUnavailable"),
-      }))
+      }));
     } catch {
       setState((current) => ({
         ...current,
         loading: false,
         error: t("auth.errorGoogleFailed"),
-      }))
+      }));
     }
-  }, [t])
+  }, [t]);
 
   const updateUser = useCallback((updated: Partial<User>) => {
     setState((current) => ({
       ...current,
       user: current.user ? { ...current.user, ...updated } : current.user,
-    }))
-  }, [])
+    }));
+  }, []);
 
   const signOut = useCallback(async () => {
-    await logout()
+    await logout();
+    setCryptoKeys(null);
+    setIsPolling(false);
     setState((current) => ({
       ...current,
       user: null,
       error: null,
       googleFallback: null,
-    }))
-  }, [])
+    }));
+  }, []);
 
   return useMemo(
     () => ({
@@ -153,7 +192,21 @@ export function useAuth() {
       updateUser,
       onUnauthorized,
       isAuthenticated: Boolean(state.user),
+      cryptoKeys,
+      setCryptoKeys,
+      isPolling,
+      setIsPolling,
     }),
-    [beginGoogle, onUnauthorized, setMode, signOut, updateUser, state, submit],
-  )
+    [
+      beginGoogle,
+      onUnauthorized,
+      setMode,
+      signOut,
+      updateUser,
+      state,
+      submit,
+      cryptoKeys,
+      isPolling,
+    ],
+  );
 }

@@ -20,6 +20,10 @@ class UserDTO(BaseModel):
     public_key_b64: str | None = None    # X25519 public key (safe to expose)
     signing_key_b64: str | None = None   # Ed25519 verify key (safe to expose)
     admin_handle: str | None = None      # Phase 14: !-prefixed admin handle
+    nacl_pbkdf2_salt: str | None = None             # Phase 13: base64 salt for Argon2id KDF
+    nacl_key_login_envelope_b64: str | None = None  # Phase 13: wrapped nacl_master_key
+    encrypted_x25519_private_b64: str | None = None # Phase 13: AES-GCM encrypted X25519 private key
+    encrypted_ed25519_signing_b64: str | None = None # Phase 13: AES-GCM encrypted Ed25519 signing seed
 
 
 class UpdateMeRequest(BaseModel):

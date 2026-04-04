@@ -157,7 +157,17 @@ function AppRoutes() {
   // ── State 5: Authenticated — route table using new route modules ──
   const user = auth.user;
   return (
-    <AuthContext.Provider value={{ user, signOut: auth.signOut, updateUser: auth.updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        signOut: auth.signOut,
+        updateUser: auth.updateUser,
+        cryptoKeys: auth.cryptoKeys,
+        setCryptoKeys: auth.setCryptoKeys,
+        isPolling: auth.isPolling,
+        setIsPolling: auth.setIsPolling,
+      }}
+    >
       <AppShell>
         <LocationToast />
         <Routes>
