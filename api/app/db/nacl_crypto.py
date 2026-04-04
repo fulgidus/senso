@@ -290,6 +290,191 @@ def wrap_nacl_master_key_with_phrase(
     return wrap_nacl_master_key(master_key, recovery_wrap_key)
 
 
+# ── Argon2id KDF (Phase 15 migration) ─────────────────────────────────────────
+
+
+def derive_argon2id_wrap_key(password: str, salt_bytes: bytes) -> bytes:
+    """Derive a 32-byte wrap key using Argon2id (RFC 9106 Low Memory).
+
+    Replaces derive_nacl_login_wrap_key (PBKDF2) for v2 envelopes.
+
+    Parameters (MUST match browser argon2-browser and test_kdf_interop.py):
+        time_cost    = 3
+        memory_cost  = 65536  KiB (64 MiB)
+        parallelism  = 4
+        hash_len     = 32     bytes
+        type         = Argon2id
+
+    Args:
+        password:   Raw plaintext password string.
+        salt_bytes: 32 random bytes (decoded from nacl_pbkdf2_salt column).
+
+    Returns:
+        32-byte wrap key for use with wrap_nacl_master_key_v2 / unwrap_nacl_master_key_v2.
+    """
+    import argon2.low_level  # noqa: PLC0415
+
+    return argon2.low_level.hash_secret_raw(
+        secret=password.encode(),
+        salt=salt_bytes,
+        time_cost=3,
+        memory_cost=65536,
+        parallelism=4,
+        hash_len=32,
+        type=argon2.low_level.Type.ID,
+    )
+
+
+# ── libsodium-compatible secretbox envelope (v2 format) ───────────────────────
+# Format: "v2:" + base64(nonce_24bytes + ciphertext_with_mac)
+# nonce: 24 bytes (crypto_secretbox_NONCEBYTES)
+# The "v2:" prefix allows format detection without a separate DB column.
+# Compatible with frontend secretbox_open_easy call in crypto.ts.
+
+V2_PREFIX = "v2:"
+
+
+def _secretbox_encrypt(key_32: bytes, plaintext: bytes) -> str:
+    """XSalsa20-Poly1305 secretbox encrypt using PyNaCl.
+
+    Returns "v2:" + base64(nonce_24bytes + ciphertext_with_mac).
+    Compatible with libsodium-wrappers crypto_secretbox_open_easy on the frontend.
+    """
+    import nacl.secret  # noqa: PLC0415
+    import nacl.utils   # noqa: PLC0415
+
+    box = nacl.secret.SecretBox(key_32)
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)  # 24 bytes
+    encrypted = box.encrypt(plaintext, nonce=nonce)
+    # encrypted.ciphertext includes the Poly1305 MAC (16 bytes) at the end
+    raw = nonce + encrypted.ciphertext
+    return V2_PREFIX + b64_encode(raw)
+
+
+def _secretbox_decrypt(key_32: bytes, blob: str) -> bytes:
+    """XSalsa20-Poly1305 secretbox decrypt.
+
+    Args:
+        blob: "v2:" + base64(nonce_24bytes + ciphertext_with_mac)
+
+    Raises:
+        nacl.exceptions.CryptoError: If key is wrong or data is tampered.
+    """
+    import nacl.secret  # noqa: PLC0415
+
+    assert blob.startswith(V2_PREFIX), f"Expected v2: prefix, got: {blob[:10]}"
+    raw = b64_decode(blob[len(V2_PREFIX):])
+    box = nacl.secret.SecretBox(key_32)
+    nonce, ct = raw[:24], raw[24:]
+    return bytes(box.decrypt(ct, nonce=nonce))
+
+
+def detect_envelope_version(envelope_b64: str) -> str:
+    """Return 'v2' if envelope uses new secretbox format, 'v1' if legacy AES-GCM."""
+    return "v2" if envelope_b64.startswith(V2_PREFIX) else "v1"
+
+
+def wrap_nacl_master_key_v2(master_key: bytes, wrap_key: bytes) -> str:
+    """Secretbox-encrypt the nacl_master_key with an Argon2id-derived wrap key.
+
+    Stored in users.nacl_key_login_envelope_b64 after v1->v2 migration.
+    Format: "v2:" + base64(nonce_24bytes + ciphertext_with_mac).
+    """
+    return _secretbox_encrypt(wrap_key, master_key)
+
+
+def unwrap_nacl_master_key_v2(envelope_b64: str, wrap_key: bytes) -> bytes:
+    """Secretbox-decrypt the nacl_master_key from a v2 login envelope.
+
+    Args:
+        envelope_b64: Value from users.nacl_key_login_envelope_b64 (starts with "v2:").
+        wrap_key: 32-byte Argon2id-derived key.
+
+    Returns:
+        32-byte nacl_master_key.
+
+    Raises:
+        nacl.exceptions.CryptoError: If wrap_key is wrong or data is tampered.
+    """
+    return _secretbox_decrypt(wrap_key, envelope_b64)
+
+
+def encrypt_nacl_private_key_v2(private_key_bytes: bytes, master_key: bytes) -> str:
+    """Secretbox-encrypt a private key blob using the nacl_master_key (v2 format).
+
+    Format: "v2:" + base64(nonce_24bytes + ciphertext_with_mac).
+    Stored in encrypted_x25519_private_b64 / encrypted_ed25519_signing_b64 after migration.
+    """
+    return _secretbox_encrypt(master_key, private_key_bytes)
+
+
+def decrypt_nacl_private_key_v2(encrypted_b64: str, master_key: bytes) -> bytes:
+    """Secretbox-decrypt a private key blob (v2 format)."""
+    return _secretbox_decrypt(master_key, encrypted_b64)
+
+
+# ── Migration helper ──────────────────────────────────────────────────────────
+
+
+def rewrap_all_envelopes(
+    password: str,
+    nacl_pbkdf2_salt: bytes,
+    nacl_key_login_envelope_b64: str,
+    encrypted_x25519_private_b64: str,
+    encrypted_ed25519_signing_b64: str,
+    nacl_key_recovery_envelope_b64: str | None,
+    recovery_phrase: str | None,
+) -> dict[str, str]:
+    """Migrate all user envelopes from v1 (AES-GCM + PBKDF2) to v2 (secretbox + Argon2id).
+
+    Called at login when detect_envelope_version(nacl_key_login_envelope_b64) == "v1".
+
+    Returns a dict of column_name -> new_v2_blob for all affected columns.
+    The caller is responsible for persisting these values to the DB.
+
+    Steps:
+      1. Derive v1 PBKDF2 wrap key and unwrap login envelope -> nacl_master_key
+      2. Decrypt both private key blobs with nacl_master_key
+      3. Derive v2 Argon2id wrap key
+      4. Re-wrap login envelope with v2 wrap key -> new login envelope
+      5. Re-encrypt private key blobs with nacl_master_key (secretbox format)
+      6. If recovery envelope present, re-wrap with recovery phrase (v2 format)
+    """
+    # Step 1: Unwrap v1 login envelope
+    v1_wrap_key = derive_nacl_login_wrap_key(password, nacl_pbkdf2_salt)
+    master_key = unwrap_nacl_master_key(nacl_key_login_envelope_b64, v1_wrap_key)
+
+    # Step 2: Decrypt private keys (v1 AES-GCM format)
+    x25519_bytes = decrypt_nacl_private_key(encrypted_x25519_private_b64, master_key)
+    ed25519_bytes = decrypt_nacl_private_key(encrypted_ed25519_signing_b64, master_key)
+
+    # Step 3: Derive v2 Argon2id wrap key
+    v2_wrap_key = derive_argon2id_wrap_key(password, nacl_pbkdf2_salt)
+
+    # Step 4: Re-wrap login envelope (v2)
+    new_login_envelope = wrap_nacl_master_key_v2(master_key, v2_wrap_key)
+
+    # Step 5: Re-encrypt private key blobs (v2)
+    new_x25519_enc = encrypt_nacl_private_key_v2(x25519_bytes, master_key)
+    new_ed25519_enc = encrypt_nacl_private_key_v2(ed25519_bytes, master_key)
+
+    result = {
+        "nacl_key_login_envelope_b64": new_login_envelope,
+        "encrypted_x25519_private_b64": new_x25519_enc,
+        "encrypted_ed25519_signing_b64": new_ed25519_enc,
+    }
+
+    # Step 6: Re-wrap recovery envelope if present
+    if nacl_key_recovery_envelope_b64 and recovery_phrase:
+        new_recovery_envelope = wrap_nacl_master_key_v2(
+            master_key,
+            derive_argon2id_wrap_key(recovery_phrase, nacl_pbkdf2_salt),
+        )
+        result["nacl_key_recovery_envelope_b64"] = new_recovery_envelope
+
+    return result
+
+
 def unwrap_nacl_master_key_with_phrase(
     envelope_b64: str,
     phrase: str,
