@@ -36,7 +36,8 @@
     "languageMenuLabel": "Seleziona lingua",
     "languageCode": "it",
     "languageFullName": "Italiano",
-    "about": "Informazioni"
+    "about": "Informazioni",
+    "messages": "Messaggi"
   },
   "avatar": {
     "ariaLabel": "Avatar di {{name}}"

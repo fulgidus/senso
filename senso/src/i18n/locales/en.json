@@ -36,7 +36,8 @@
     "languageMenuLabel": "Select language",
     "languageCode": "en",
     "languageFullName": "English",
-    "about": "About"
+    "about": "About",
+    "messages": "Messages"
   },
   "avatar": {
     "ariaLabel": "Avatar of {{name}}"
