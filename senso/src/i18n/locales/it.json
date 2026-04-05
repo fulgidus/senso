@@ -797,6 +797,19 @@
     "contacts": {
       "empty": "Nessun contatto. Invia o ricevi un messaggio per aggiungerne uno.",
       "deleteLabel": "Elimina contatto {{username}}"
+    },
+    "compose": {
+      "title": "Nuovo messaggio",
+      "dialogLabel": "Composizione messaggio",
+      "recipientLabel": "Destinatario",
+      "recipientPlaceholder": "$username o !handle",
+      "bodyLabel": "Messaggio",
+      "bodyPlaceholder": "Scrivi un messaggio in Markdown...",
+      "attachFile": "Allega file",
+      "sendButton": "Invia",
+      "sending": "Invio in corso...",
+      "sendError": "Errore durante l'invio del messaggio.",
+      "invalidRecipient": "Il destinatario deve iniziare con $ o !"
     }
   }
 }

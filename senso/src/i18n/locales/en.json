@@ -797,6 +797,19 @@
     "contacts": {
       "empty": "No contacts yet. Send or receive a message to add one.",
       "deleteLabel": "Delete contact {{username}}"
+    },
+    "compose": {
+      "title": "New message",
+      "dialogLabel": "Compose message",
+      "recipientLabel": "Recipient",
+      "recipientPlaceholder": "$username or !handle",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Write a Markdown message...",
+      "attachFile": "Attach file",
+      "sendButton": "Send",
+      "sending": "Sending...",
+      "sendError": "Error sending message.",
+      "invalidRecipient": "Recipient must start with $ or !"
     }
   }
 }
