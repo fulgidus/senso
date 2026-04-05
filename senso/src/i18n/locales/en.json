@@ -774,6 +774,28 @@
     "nukeConfirm": "Are you sure? This will delete ALL your uploaded data and history. It cannot be undone."
   },
   "messages": {
-    "loading": "Loading messages..."
+    "loading": "Loading messages...",
+    "pageTitle": "Messages",
+    "inboxTab": "Inbox",
+    "contactsTab": "Contacts",
+    "composeButton": "Compose",
+    "decrypting": "Decrypting...",
+    "noMessages": "No messages.",
+    "errorLoading": "Error loading messages.",
+    "decryptFailed": "[Could not decrypt this message]",
+    "fromLabel": "From",
+    "verifiedBadge": "Verified",
+    "signatureInvalid": "⚠ Signature invalid",
+    "tamperedWarning": "This message may have been tampered with.",
+    "signaturePanel": {
+      "title": "Signature details",
+      "senderLabel": "Sender",
+      "keyFingerprint": "Key fingerprint",
+      "algorithm": "Algorithm"
+    },
+    "contacts": {
+      "empty": "No contacts yet. Send or receive a message to add one.",
+      "deleteLabel": "Delete contact {{username}}"
+    }
   }
 }

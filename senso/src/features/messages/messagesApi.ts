@@ -2,10 +2,10 @@
  * messagesApi.ts — Authenticated API client for E2E messaging endpoints.
  *
  * Endpoints:
- *   POST /messages/poll               — pull pending encrypted messages for current user
+ *   POST /messages/send                        — send encrypted message
+ *   POST /messages/poll                        — pull pending encrypted messages
  *   GET  /messages/users/{username}/public-keys — fetch recipient public keys for compose
- *   POST /messages/send               — send encrypted message
- *   POST /attachments/upload          — upload encrypted attachment blob
+ *   POST /messages/attachments/upload          — upload encrypted attachment blob
  *
  * All payloads are encrypted on the client before reaching these functions.
  * Server never sees plaintext content.
@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/api-client";
 import { getBackendBaseUrl } from "@/lib/config";
 import { readAccessToken } from "@/features/auth/storage";
 
-const API_BASE = getBackendBaseUrl();
+const API_BASE = getBackendBaseUrl;
 
 function requireToken(): string {
   const token = readAccessToken();
@@ -23,7 +23,7 @@ function requireToken(): string {
   return token;
 }
 
-// ── Response types ────────────────────────────────────────────────────────────
+// ── Response types ──────────────────────────────────────────────────────────
 
 export interface PolledMessageDTO {
   id: string;
@@ -38,15 +38,15 @@ export interface RecipientPublicKeysDTO {
   signingKeyB64: string; // Ed25519 verify key (base64, 32 bytes)
 }
 
-export interface SendMessageRequest {
-  recipientHashes: string[]; // sha256($username) hex digests or !admin_handle
-  encryptedPayload: string; // base64 ciphertext
-}
-
 export interface SendMessageResponse {
   messageId: string;
   createdAt: string;
   recipientCount: number;
+}
+
+export interface SendMessageRequest {
+  recipientHashes: string[]; // sha256($username) hex digests or !admin_handle
+  encryptedPayload: string; // base64 ciphertext
 }
 
 // ── A decrypted message (client-side only, never persisted) ───────────────────
@@ -63,84 +63,89 @@ export interface DecryptedMessage {
   frontmatter: Record<string, unknown>; // full parsed YAML frontmatter
 }
 
-// ── API functions ─────────────────────────────────────────────────────────────
-
-/**
- * Pull all pending encrypted messages from the server.
- * Server marks them as delivered after this call.
- * Returns raw encrypted blobs — decrypt in the inbox component.
- */
-export async function pollMessages(): Promise<PolledMessageDTO[]> {
-  return apiRequest<PolledMessageDTO[]>(API_BASE, "/messages/poll", {
-    method: "POST",
-    token: requireToken(),
-  });
+export interface UploadedAttachment {
+  s3Addr: string; // storage address / URL for the encrypted blob
+  sizeBytes: number;
 }
 
+// ── API functions ───────────────────────────────────────────────────────────
+
 /**
- * Fetch X25519 + Ed25519 public keys for a recipient before compose.
- *
- * @param username — $adjective-noun-NNNN or !admin_handle (URL-encode if needed)
+ * Fetch the X25519 and Ed25519 public keys for a recipient by $username or !handle.
+ * Used by the compose flow before encrypting a message.
  */
 export async function getRecipientPublicKeys(username: string): Promise<RecipientPublicKeysDTO> {
+  const token = requireToken();
+  // URL-encode the username ($ → %24 so path parsing works)
   const encoded = encodeURIComponent(username);
-  return apiRequest<RecipientPublicKeysDTO>(API_BASE, `/messages/users/${encoded}/public-keys`, {
-    token: requireToken(),
+  const res = await apiRequest<{
+    username: string;
+    public_key_b64: string;
+    signing_key_b64: string;
+  }>(API_BASE(), `/messages/users/${encoded}/public-keys`, {
+    method: "GET",
+    token,
   });
+  return {
+    username: res.username,
+    publicKeyB64: res.public_key_b64,
+    signingKeyB64: res.signing_key_b64,
+  };
 }
 
 /**
- * Send an encrypted message payload to one or more recipients.
- *
- * @param recipientHashes — array of sha256($username) hex digests or !admin_handles
- * @param encryptedPayload — base64 ciphertext (encrypt before calling this)
+ * Send an encrypted message to one or more recipient hashes.
+ * @param recipientHashes — sha256($username) hex strings or !handle cleartext
+ * @param encryptedPayload — base64(JSON({ciphertextB64, ephemeralPublicKeyB64, nonceB64}))
  */
 export async function sendMessage(
   recipientHashes: string[],
   encryptedPayload: string,
 ): Promise<SendMessageResponse> {
-  return apiRequest<SendMessageResponse>(API_BASE, "/messages/send", {
+  const token = requireToken();
+  return apiRequest<SendMessageResponse>(API_BASE(), "/messages/send", {
     method: "POST",
-    token: requireToken(),
+    token,
     body: {
-      recipient_hashes: recipientHashes, // snake_case for FastAPI
+      recipient_hashes: recipientHashes,
       encrypted_payload: encryptedPayload,
     },
   });
 }
 
 /**
- * Upload an encrypted attachment ciphertext to MinIO.
- * Returns the s3:// address for embedding in message frontmatter.
+ * Poll for pending encrypted messages addressed to the current user.
+ * The server uses the authenticated user's identity to compute their recipient hash.
  */
-export async function uploadAttachment(
-  encryptedBlob: Blob,
-  filename: string,
-): Promise<{ attachmentId: string; s3Addr: string; sizeBytes: number }> {
+export async function pollMessages(): Promise<PolledMessageDTO[]> {
   const token = requireToken();
-  const formData = new FormData();
-  formData.append("file", encryptedBlob, filename);
+  const res = await apiRequest<{ messages: PolledMessageDTO[] }>(API_BASE(), "/messages/poll", {
+    method: "POST",
+    token,
+    body: {},
+  });
+  return res.messages;
+}
 
-  const response = await fetch(`${API_BASE}/attachments/upload`, {
+/**
+ * Upload an encrypted attachment blob and return its storage address.
+ * The blob must already be encrypted (encryptAttachment) before calling this.
+ */
+export async function uploadAttachment(blob: Blob, filename: string): Promise<UploadedAttachment> {
+  const token = requireToken();
+  const form = new FormData();
+  form.append("file", blob, filename);
+
+  const response = await fetch(`${API_BASE()}/messages/attachments/upload`, {
     method: "POST",
     headers: { authorization: `Bearer ${token}` },
-    body: formData,
+    body: form,
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error((data as { detail?: string })?.detail ?? `Upload failed (${response.status})`);
+    const data = (await response.json().catch(() => ({}))) as unknown;
+    throw new Error(`Attachment upload failed: ${response.status} — ${JSON.stringify(data)}`);
   }
 
-  const result = (await response.json()) as {
-    attachment_id: string;
-    s3_addr: string;
-    size_bytes: number;
-  };
-
-  return {
-    attachmentId: result.attachment_id,
-    s3Addr: result.s3_addr,
-    sizeBytes: result.size_bytes,
-  };
+  return response.json() as Promise<UploadedAttachment>;
 }

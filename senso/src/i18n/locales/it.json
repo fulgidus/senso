@@ -774,6 +774,28 @@
     "nukeConfirm": "Sei sicuro? Questa azione eliminerà TUTTI i tuoi dati caricati e la cronologia. Non è reversibile."
   },
   "messages": {
-    "loading": "Caricamento messaggi..."
+    "loading": "Caricamento messaggi...",
+    "pageTitle": "Messaggi",
+    "inboxTab": "Posta in arrivo",
+    "contactsTab": "Contatti",
+    "composeButton": "Componi",
+    "decrypting": "Decrittazione in corso...",
+    "noMessages": "Nessun messaggio.",
+    "errorLoading": "Errore nel caricamento dei messaggi.",
+    "decryptFailed": "[Impossibile decrittare questo messaggio]",
+    "fromLabel": "Da",
+    "verifiedBadge": "Verificato",
+    "signatureInvalid": "⚠ Firma non valida",
+    "tamperedWarning": "Questo messaggio potrebbe essere stato alterato.",
+    "signaturePanel": {
+      "title": "Dettagli firma",
+      "senderLabel": "Mittente",
+      "keyFingerprint": "Impronta chiave",
+      "algorithm": "Algoritmo"
+    },
+    "contacts": {
+      "empty": "Nessun contatto. Invia o ricevi un messaggio per aggiungerne uno.",
+      "deleteLabel": "Elimina contatto {{username}}"
+    }
   }
 }

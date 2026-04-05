@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import type { User, CryptoKeyMaterial } from "@/features/auth/types";
+import type { PolledMessageDTO } from "@/features/messages/messagesApi";
 
 export type AuthContextValue = {
   user: User;
@@ -13,6 +14,12 @@ export type AuthContextValue = {
    * (Review amendment: Gemini concern — bootstrap race condition) */
   isPolling: boolean;
   setIsPolling: (v: boolean) => void;
+  /** Pending (unread) message count — drives the nav badge in AppShell. */
+  pendingMessageCount: number;
+  setPendingMessageCount: (n: number) => void;
+  /** Raw polled messages from bootstrap poll — consumed by InboxTab without re-polling. */
+  polledMessages: PolledMessageDTO[];
+  setPolledMessages: (msgs: PolledMessageDTO[]) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

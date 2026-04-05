@@ -12,6 +12,7 @@ import {
 } from "@/features/auth/session";
 import { ApiClientError } from "@/lib/api-client";
 import type { User, CryptoKeyMaterial } from "@/features/auth/types";
+import { pollMessages, type PolledMessageDTO } from "@/features/messages/messagesApi";
 import {
   deriveArgon2idWrapKey,
   derivePbkdf2WrapKey,
@@ -103,6 +104,8 @@ export function useAuth() {
   const [state, setState] = useState<AuthState>(initialState);
   const [cryptoKeys, setCryptoKeys] = useState<CryptoKeyMaterial | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [pendingMessageCount, setPendingMessageCount] = useState(0);
+  const [polledMessages, setPolledMessages] = useState<PolledMessageDTO[]>([]);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -144,6 +147,22 @@ export function useAuth() {
         // Derive crypto keys after successful auth (fail silently if envelope missing)
         const keys = await deriveCryptoKeys(password, result.user);
         setCryptoKeys(keys);
+        // Poll once for undelivered messages at login — results cached in context for InboxTab.
+        // InboxTab must consume polledMessages from context, NOT call pollMessages() again.
+        // setIsPolling wraps the call so MessagesPage shows a spinner instead of a false
+        // empty state during the bootstrap window. (Review amendment #1)
+        setIsPolling(true);
+        pollMessages()
+          .then((msgs) => {
+            setPolledMessages(msgs);
+            setPendingMessageCount(msgs.length);
+          })
+          .catch(() => {
+            // Silent — badge stays 0, inbox shows empty state
+          })
+          .finally(() => {
+            setIsPolling(false);
+          });
       } catch (err) {
         const key = state.mode === "signup" ? signupErrorKey(err) : loginErrorKey(err);
         setState((current) => ({ ...current, loading: false, error: t(key) }));
@@ -185,6 +204,8 @@ export function useAuth() {
     await logout();
     setCryptoKeys(null);
     setIsPolling(false);
+    setPendingMessageCount(0);
+    setPolledMessages([]);
     setState((current) => ({
       ...current,
       user: null,
@@ -207,6 +228,10 @@ export function useAuth() {
       setCryptoKeys,
       isPolling,
       setIsPolling,
+      pendingMessageCount,
+      setPendingMessageCount,
+      polledMessages,
+      setPolledMessages,
     }),
     [
       beginGoogle,
@@ -218,6 +243,8 @@ export function useAuth() {
       submit,
       cryptoKeys,
       isPolling,
+      pendingMessageCount,
+      polledMessages,
     ],
   );
 }

@@ -167,6 +167,10 @@ function AppRoutes() {
         setCryptoKeys: auth.setCryptoKeys,
         isPolling: auth.isPolling,
         setIsPolling: auth.setIsPolling,
+        pendingMessageCount: auth.pendingMessageCount,
+        setPendingMessageCount: auth.setPendingMessageCount,
+        polledMessages: auth.polledMessages,
+        setPolledMessages: auth.setPolledMessages,
       }}
     >
       <AppShell>
