@@ -2,8 +2,8 @@
 phase: 15
 slug: e2e-messaging-frontend-client-side-libsodium-encrypt-decrypt-compose-and-inbox-ui-attachment-handling-and-admin-signed-message-verification
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-04
 ---
 
