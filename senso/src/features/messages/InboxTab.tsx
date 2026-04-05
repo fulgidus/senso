@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ShieldCheck, AlertTriangle } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Download } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import type { DecryptedMessage } from "./messagesApi";
+import { downloadAndDecryptAttachment, triggerBrowserDownload } from "./attachmentUtils";
+import type { AttachmentEntry } from "./attachmentUtils";
+import { useAuthContext } from "@/features/auth/AuthContext";
+import type { CryptoKeyMaterial } from "@/features/auth/types";
 
 interface InboxTabProps {
   messages: DecryptedMessage[];
@@ -46,7 +50,10 @@ export function InboxTab({ messages, loading, error }: InboxTabProps) {
 
 function MessageBubble({ message }: { message: DecryptedMessage }) {
   const { t } = useTranslation();
+  const { cryptoKeys } = useAuthContext();
   const [showSigPanel, setShowSigPanel] = useState(false);
+
+  const attachments = (message.frontmatter.attachments ?? []) as AttachmentEntry[];
 
   return (
     <li className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -84,6 +91,15 @@ function MessageBubble({ message }: { message: DecryptedMessage }) {
         <p className="italic text-sm text-muted-foreground">{t("messages.decryptFailed")}</p>
       )}
 
+      {/* Attachment download buttons */}
+      {attachments.length > 0 && (
+        <div className="mt-3 space-y-1.5 border-t border-border pt-3">
+          {attachments.map((att) => (
+            <AttachmentDownloadButton key={att.addr} attachment={att} cryptoKeys={cryptoKeys} />
+          ))}
+        </div>
+      )}
+
       {/* Signature detail panel (expandable) */}
       {showSigPanel && (
         <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
@@ -100,5 +116,48 @@ function MessageBubble({ message }: { message: DecryptedMessage }) {
         </div>
       )}
     </li>
+  );
+}
+
+function AttachmentDownloadButton({
+  attachment,
+  cryptoKeys,
+}: {
+  attachment: AttachmentEntry;
+  cryptoKeys: CryptoKeyMaterial | null;
+}) {
+  const { t } = useTranslation();
+  const [downloading, setDownloading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const handleDownload = async () => {
+    if (!cryptoKeys) {
+      setErr(t("messages.errorNoKeys"));
+      return;
+    }
+    setDownloading(true);
+    setErr(null);
+    try {
+      const blob = await downloadAndDecryptAttachment(attachment, cryptoKeys);
+      triggerBrowserDownload(blob, attachment.name);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("messages.errorDownload"));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => void handleDownload()}
+        disabled={downloading}
+        className="flex items-center gap-1.5 text-xs text-primary hover:underline disabled:opacity-50"
+      >
+        <Download className="h-3.5 w-3.5" />
+        {downloading ? t("messages.downloading") : attachment.name}
+      </button>
+      {err && <span className="text-xs text-destructive">{err}</span>}
+    </div>
   );
 }

@@ -788,6 +788,9 @@
     "verifiedBadge": "Verificato",
     "signatureInvalid": "⚠ Firma non valida",
     "tamperedWarning": "Questo messaggio potrebbe essere stato alterato.",
+    "errorNoKeys": "Chiavi crittografiche non disponibili. Effettua di nuovo l'accesso.",
+    "errorDownload": "Errore durante il download dell'allegato.",
+    "downloading": "Download in corso...",
     "signaturePanel": {
       "title": "Dettagli firma",
       "senderLabel": "Mittente",

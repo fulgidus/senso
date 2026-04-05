@@ -13,6 +13,7 @@ from __future__ import annotations
 import io
 import logging
 import uuid
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
@@ -86,3 +87,33 @@ async def upload_attachment(
         s3_addr=s3_addr,
         size_bytes=len(contents),
     )
+
+
+class AttachmentDownloadResponse(BaseModel):
+    presigned_url: str
+    expires_in_seconds: int = 3600
+
+
+@attachments_router.get("/{attachment_id}/download", response_model=AttachmentDownloadResponse)
+def download_attachment(
+    attachment_id: str,
+    current_user: UserDTO = Depends(get_current_user),
+    minio=Depends(get_minio_client),
+) -> AttachmentDownloadResponse:
+    """Return a presigned URL for downloading an encrypted attachment.
+
+    The URL expires in 1 hour. The client must decrypt the downloaded bytes.
+    Object name format: {user_id}/{attachment_id}
+    """
+    object_name = f"{current_user.id}/{attachment_id}"
+    try:
+        url = minio.presigned_get_object(
+            ATTACHMENTS_BUCKET,
+            object_name,
+            expires=timedelta(hours=1),
+        )
+    except Exception as exc:
+        logger.error("Failed to generate presigned URL for %s: %s", attachment_id, exc)
+        raise HTTPException(status_code=404, detail="Attachment not found.") from exc
+
+    return AttachmentDownloadResponse(presigned_url=url, expires_in_seconds=3600)

@@ -788,6 +788,9 @@
     "verifiedBadge": "Verified",
     "signatureInvalid": "⚠ Signature invalid",
     "tamperedWarning": "This message may have been tampered with.",
+    "errorNoKeys": "Crypto keys not available. Please log in again.",
+    "errorDownload": "Error downloading attachment.",
+    "downloading": "Downloading...",
     "signaturePanel": {
       "title": "Signature details",
       "senderLabel": "Sender",

@@ -149,3 +149,18 @@ export async function uploadAttachment(blob: Blob, filename: string): Promise<Up
 
   return response.json() as Promise<UploadedAttachment>;
 }
+
+/**
+ * Get a presigned URL for downloading an encrypted attachment.
+ * The returned URL is valid for 1 hour. Client must decrypt after download.
+ */
+export async function getAttachmentDownloadUrl(
+  attachmentId: string,
+): Promise<{ presignedUrl: string }> {
+  const result = await apiRequest<{ presigned_url: string }>(
+    API_BASE(),
+    `/attachments/${attachmentId}/download`,
+    { token: requireToken() },
+  );
+  return { presignedUrl: result.presigned_url };
+}
