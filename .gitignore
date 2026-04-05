@@ -25,3 +25,4 @@ e2e/report/
 e2e/artifacts/
 playwright-report/
 test-results/
+.pi/gsd

@@ -7,6 +7,7 @@ This roadmap delivers a reliable one-day hackathon demo by sequencing work from 
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -23,121 +24,142 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Runtime & Account Foundation
+
 **Goal**: Users can reliably access the app with persistent sessions on a reproducible local setup.
 **Depends on**: Nothing (first phase)
 **Requirements**: AUTH-01, AUTH-02, AUTH-03, DEMO-03
 **Success Criteria** (what must be TRUE):
-  1. User can create an account with email/password and immediately access the product.
-  2. User can sign in with Google OAuth and reach the same authenticated experience.
-  3. User stays signed in after browser refresh without re-authenticating.
-  4. A fresh machine can run the product locally via documented reproducible setup for judging.
-**Plans**: 3 plans
-Plans:
+
+1. User can create an account with email/password and immediately access the product.
+2. User can sign in with Google OAuth and reach the same authenticated experience.
+3. User stays signed in after browser refresh without re-authenticating.
+4. A fresh machine can run the product locally via documented reproducible setup for judging.
+   **Plans**: 3 plans
+   Plans:
+
 - [x] 01-01-PLAN.md - Build FastAPI-owned auth/session APIs with JWT refresh rotation and tests.
 - [x] 01-02-PLAN.md - Build Vite React auth UX with localStorage session persistence and Google fallback.
 - [x] 01-03-PLAN.md - Deliver one-command Docker Compose runtime, smoke checks, and judge runbook.
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 2: Financial Input Ingestion
+
 **Goal**: Users can upload financial documents and verify extracted data before coaching uses it.
 **Depends on**: Phase 1
 **Requirements**: INGT-01, INGT-02, INGT-03
 **Success Criteria** (what must be TRUE):
-  1. User can upload a bank CSV and see structured transactions extracted from that file.
-  2. User can upload a payslip/receipt image or PDF and see key financial fields extracted.
-  3. User can review extracted values and confirm/correct them before recommendations are generated.
-**Plans**: 5 plans
-Plans:
+
+1. User can upload a bank CSV and see structured transactions extracted from that file.
+2. User can upload a payslip/receipt image or PDF and see key financial fields extracted.
+3. User can review extracted values and confirm/correct them before recommendations are generated.
+   **Plans**: 5 plans
+   Plans:
+
 - [x] 02-01-PLAN.md - Migrate InMemoryDB to SQLAlchemy ORM + add MinIO infra and Docker services.
 - [x] 02-02-PLAN.md - Build ingestion engine core: schemas, LLM/OCR pipeline, module registry, adaptive pipeline.
 - [x] 02-03-PLAN.md - API endpoints (ingestion + admin routers) + IngestionService + AdminService + tests.
 - [x] 02-04-PLAN.md - Implement builtin extraction modules for all sample financial document types.
 - [x] 02-05-PLAN.md - Build frontend ingestion review UI (upload zone, file list, inspect modal, confirm flow).
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 3: Financial Profile Clarity
+
 **Goal**: Users can understand their current affordability baseline from uploaded data.
 **Depends on**: Phase 2
 **Requirements**: PROF-01, PROF-02, PROF-03
 **Success Criteria** (what must be TRUE):
-  1. User can view a profile summary showing income, recurring expenses, and monthly margin.
-  2. User can see transactions organized into clear spending categories.
-  3. User can see at least one highlighted high-impact spending pattern derived from their own data.
-**Plans**: 4 plans
-Plans:
+
+1. User can view a profile summary showing income, recurring expenses, and monthly margin.
+2. User can see transactions organized into clear spending categories.
+3. User can see at least one highlighted high-impact spending pattern derived from their own data.
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 03-01-PLAN.md - Backend models, categorization service, profile endpoints, and tests.
 - [x] 03-02-PLAN.md - Confirm-all endpoint wired to categorization trigger.
 - [x] 03-03-PLAN.md - Frontend processing flow: profile API client, useProfileStatus hook, ProcessingScreen, AuthedHome routing.
 - [x] 03-04-PLAN.md - Full profile UI: ProfileScreen, OnboardingChoiceScreen, QuestionnaireScreen, AuthedHome 5-screen routing.
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 4: Safe Grounded Text Coaching
+
 **Goal**: Users can ask decision questions by text and receive personalized, transparent, safe coaching.
 **Depends on**: Phase 3
 **Requirements**: COCH-01, COCH-03, COCH-04, COCH-05, SAFE-01, SAFE-02, SAFE-03
 **Success Criteria** (what must be TRUE):
-  1. User can ask a purchase/decision question by text and receive a profile-grounded recommendation.
-  2. Response explicitly shows user-specific numbers and reasoning used to reach the recommendation.
-  3. User can ask follow-up clarifications and receive coherent context-aware answers.
-  4. Unsafe or injection-style inputs are sanitized/rejected, and outputs remain within educational safety boundaries.
-**Plans**: 4 plans
-Plans:
+
+1. User can ask a purchase/decision question by text and receive a profile-grounded recommendation.
+2. Response explicitly shows user-specific numbers and reasoning used to reach the recommendation.
+3. User can ask follow-up clarifications and receive coherent context-aware answers.
+4. Unsafe or injection-style inputs are sanitized/rejected, and outputs remain within educational safety boundaries.
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 04-01-PLAN.md - Coaching service backend core: JSONSchema output shapes, Jinja2 composable prompts, CoachingService, SafetyScanner, guardrail extension, unit tests.
 - [x] 04-02-PLAN.md - Coaching API endpoints: POST /coaching/chat, GET /coaching/personas, auth guard, profile gate, locale validation, integration tests.
 - [x] 04-03-PLAN.md - Frontend coaching screen: ChatScreen, coachingApi.ts, structured response rendering, AuthedHome routing, ProfileScreen CTA.
 - [x] 04-04-PLAN.md - Safety hardening and boundary tests: injection corpus (10+ patterns), output boundary verification, schema validation tests, prompt composability tests.
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 5: Voice Coaching Loop
+
 **Goal**: Users can complete the same coaching interaction via voice with resilient text fallback.
 **Depends on**: Phase 4
 **Requirements**: COCH-02, VOIC-01, VOIC-02
 **Success Criteria** (what must be TRUE):
-  1. User can ask a coaching question by voice and the system converts it into a valid coaching request.
-  2. Each coaching response can be returned as audible spoken output.
-  3. If speech recognition fails or is unavailable, user can continue seamlessly with typed input.
-**Plans**: 5 plans
-Plans:
+
+1. User can ask a coaching question by voice and the system converts it into a valid coaching request.
+2. Each coaching response can be returned as audible spoken output.
+3. If speech recognition fails or is unavailable, user can continue seamlessly with typed input.
+   **Plans**: 5 plans
+   Plans:
+
 - [x] 05-01-PLAN.md - Backend TTS endpoint: TTSService, ElevenLabs SDK, POST /coaching/tts, 503 fallback, tests.
 - [x] 05-02-PLAN.md - Dual-channel LLM response shape: details_a2ui schema, voice-optimised message prompt, A2UI reference, DTO + TS type updates.
 - [x] 05-03-PLAN.md - A2UI frontend renderer: Lit custom element, A2UISurface React wrapper, AssistantBubble integration.
 - [x] 05-04-PLAN.md - Frontend voice input (STT): useVoiceInput hook, mic button in ChatScreen, live transcript, VOIC-02 feature detection.
 - [x] 05-05-PLAN.md - Frontend voice output (TTS): fetchTTSAudio, useTTS hook, VoicePlayButton in AssistantBubble, ElevenLabs + speechSynthesis fallback.
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 6: Learn+Act Cards & Demo Hardening
+
 **Goal**: Users can complete the full demo journey from upload to grounded spoken recommendation and immediate next actions.
 **Depends on**: Phase 5
 **Requirements**: ACTN-01, ACTN-02, ACTN-03, DEMO-01, DEMO-02
 **Success Criteria** (what must be TRUE):
-  1. Each coaching response includes at least one relevant educational resource card.
-  2. Each coaching response includes at least one relevant service/action card tied to user context.
-  3. User can open both education and action cards directly from the same response context.
-  4. The scripted flow (upload -> profile summary -> voice question -> grounded spoken recommendation -> cards) runs end-to-end in under 90 seconds.
-**Plans**: 4 plans
-Plans:
+
+1. Each coaching response includes at least one relevant educational resource card.
+2. Each coaching response includes at least one relevant service/action card tied to user context.
+3. User can open both education and action cards directly from the same response context.
+4. The scripted flow (upload -> profile summary -> voice question -> grounded spoken recommendation -> cards) runs end-to-end in under 90 seconds.
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 06-01-PLAN.md — Card reliability: prompt hardening + server-side fallback injection + backend integration tests
 - [x] 06-02-PLAN.md — MARP visual QA + speech-to-speech end-to-end fix
 - [x] 06-03-PLAN.md — Demo seed script + reset script
 - [x] 06-04-PLAN.md — Loading states + error recovery polish
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 7: Streaming & Nice-to-Have Polish
+
 **Goal**: Improve coaching UX and production-readiness with streaming responses, persona choice, persistent history, and full PII safety cross-check.
 **Depends on**: Phase 6
 **Requirements**: COCH-05, SAFE-01
 **Success Criteria** (what must be TRUE):
-  1. Coaching responses stream token-by-token via Server-Sent Events (EventSource) with graceful full-response fallback.
-  2. User can select a coaching persona from the picker UI; selected persona is persisted across sessions.
-  3. Conversation history is persisted in the database and loaded on returning to the chat screen.
-  4. own_pii_unsolicited safety check performs full profile cross-check against live session userProfile fields (not pattern-only).
-**Plans**: 4 plans
-Plans:
+
+1. Coaching responses stream token-by-token via Server-Sent Events (EventSource) with graceful full-response fallback.
+2. User can select a coaching persona from the picker UI; selected persona is persisted across sessions.
+3. Conversation history is persisted in the database and loaded on returning to the chat screen.
+4. own_pii_unsolicited safety check performs full profile cross-check against live session userProfile fields (not pattern-only).
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 07-01-PLAN.md - Persist default persona preference and expose config-driven persona theme metadata.
 - [x] 07-02-PLAN.md - Add SSE coaching delivery and rewrite-first own-profile safety protection.
 - [x] 07-03-PLAN.md - Wire streaming chat UI, restore toast, and final-only voice playback timing.
 - [x] 07-04-PLAN.md - Add persona switcher/settings UI with subtle per-message theming and visual verification.
-**UI hint**: yes
+      **UI hint**: yes
 
 ## Progress
 
@@ -165,19 +187,21 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 **Requirements**: CONT-01, CONT-02, CONT-03, CONT-04, CONT-05, CONT-06
 **Depends on:** Phase 7
 **Success Criteria** (what must be TRUE):
-  1. Admin user can manage content items (create, read, update, delete) via API endpoints.
-  2. Static JSON catalogs are migrated into the database and the BM25 search index loads from DB.
-  3. Content changes via admin API immediately reflect in search results after index rebuild.
-  4. Unauthenticated users can browse and search published content at /learn.
-  5. Individual content items are viewable at /learn/:id with type-specific rendering (article link, video player, slide viewer, partner CTA).
-  6. Direct URLs to /learn/:id are shareable outside the app without requiring login.
-**Plans:** 3 plans
+
+1. Admin user can manage content items (create, read, update, delete) via API endpoints.
+2. Static JSON catalogs are migrated into the database and the BM25 search index loads from DB.
+3. Content changes via admin API immediately reflect in search results after index rebuild.
+4. Unauthenticated users can browse and search published content at /learn.
+5. Individual content items are viewable at /learn/:id with type-specific rendering (article link, video player, slide viewer, partner CTA).
+6. Direct URLs to /learn/:id are shareable outside the app without requiring login.
+   **Plans:** 3 plans
 
 Plans:
+
 - [x] 08-01-PLAN.md - ContentItem DB model, admin CRUD API, and JSON catalog seed migration.
 - [x] 08-02-PLAN.md - DB-backed BM25 search index with rebuild + public content API endpoints.
 - [x] 08-03-PLAN.md - Public content browse and detail pages with type-specific rendering.
-**UI hint**: yes
+      **UI hint**: yes
 
 ### Phase 9: LLM Financial Intelligence with Categorization, Tagging, Timeline Inference & Crowdsourced Merchant Mapping
 
@@ -187,6 +211,7 @@ Plans:
 **Plans:** 7/7 plans complete
 
 Plans:
+
 - [x] TBD (run /gsd:plan-phase 9 to break down) (completed 2026-03-30)
 
 ### Phase 10: Transparency & Security with About Page, Encryption at Rest & LLM No-Data-Retention
@@ -197,6 +222,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 10-01-PLAN.md - Crypto foundations: sqlalchemy-utils/cryptography deps, Settings.encryption_key, PBKDF2 helpers, DB columns, schema updates.
 - [x] 10-02-PLAN.md - LLM no-data-retention: openai-beta no-store header, OpenRouter ZDR strict mode, gemini passthrough, tests.
 - [x] 10-03-PLAN.md - T2 column encryption: StringEncryptedType on 6 ORM columns, encryption roundtrip tests.
@@ -210,6 +236,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 11-01-PLAN.md - RBAC role column: add role VARCHAR(16) to users, Round 15 migration, require_tester dep, UserDTO + frontend User type with role.
 - [x] 11-02-PLAN.md - Pipeline trace infrastructure: IngestionTrace ORM model, Round 16 migration, ingestion_service instrumentation, admin trace endpoint.
 - [x] 11-03-PLAN.md - "Your Files" tab + Admin Inspector: ingestionFilesApi, FilesTab, AdminInspectorDrawer, wired into ProfileScreen.
@@ -223,6 +250,7 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
+
 - [x] 12-01-PLAN.md - Foundation hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat) + CSS accessibility rules + i18n keys.
 - [x] 12-02-PLAN.md - i18n hardcoded locale fix: replace all 14 "it-IT" instances + 3 hardcoded Italian strings with useLocaleFormat hook and i18n keys.
 - [x] 12-03-PLAN.md - OfflineBanner, BalanceMask components + AppShell integration + ripple feedback on nav buttons.
@@ -237,6 +265,7 @@ Plans:
 **Plans:** 8/8 plans complete
 
 Plans:
+
 - [x] 12.1-01-PLAN.md - Auth fixes: 401-intercept in api-client + token renewal + redirect to login on expiry (#26, #27)
 - [x] 12.1-02-PLAN.md - Coach picker fixes: dark theme rendering + persona persistence across new conversation (#24, #25)
 - [x] 12.1-03-PLAN.md - shadcn Dialog component + replace all window.confirm() / window.alert() calls (#28)
@@ -251,22 +280,26 @@ Plans:
 **Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.
 **Requirements**: TBD
 **Depends on:** Phase 12
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
+
 - [ ] 13-01-PLAN.md - PyNaCl dependency + nacl_crypto.py helpers + username_generator service + Round 17 DB migration (username, public_key_b64, signing_key_b64 columns)
-- [ ] 13-02-PLAN.md - Wire signup() to generate username and key pairs; update UserDTO with 3 new fields; add _to_user_dto() helper; repository.get_user_by_username; integration tests
+- [ ] 13-02-PLAN.md - Wire signup() to generate username and key pairs; update UserDTO with 3 new fields; add \_to_user_dto() helper; repository.get_user_by_username; integration tests
 - [ ] 13-03-PLAN.md - Replace obfuscated email with username in admin merchant map API; extend frontend User type; update user-avatar display utilities; AppShell username display
 
 ### Phase 14: E2E Messaging Backend — undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
 
-**Goal:** [To be planned]
+**Goal:** Build server-side E2E message routing: undelivered_messages + delivered_messages tables, pull-on-login delivery, APScheduler TTL purge, BIP-39 recovery envelope (backend only), and admin !handle claim endpoint.
 **Requirements**: TBD
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 14 to break down)
+
+- [ ] 14-01-PLAN.md - DB schema (Round 18: admin_handle + recovery envelope cols + 2 messaging tables + GIN indexes), Settings.message_ttl_days, APScheduler hourly TTL purge in lifespan.
+- [ ] 14-02-PLAN.md - BIP-39 recovery envelope: mnemonic package, nacl_crypto.py helpers, signup() extension, AuthResponseDTO.recovery_phrase (one-time), UserDTO.admin_handle.
+- [ ] 14-03-PLAN.md - Messaging API: POST /messages/send + POST /messages/poll, POST /admin/claim-handle, repository helpers, mount router, tests.
 
 ### Phase 15: E2E Messaging Frontend — client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
 
@@ -276,4 +309,5 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (run /gsd:plan-phase 15 to break down)

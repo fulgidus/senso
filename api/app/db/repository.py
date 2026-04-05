@@ -22,6 +22,13 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email.lower()).first()
 
 
+def get_user_by_username(db: Session, username: str) -> User | None:
+    """Look up a user by $username or !admin_handle."""
+    if username.startswith("!"):
+        return db.query(User).filter(User.admin_handle == username).first()
+    return db.query(User).filter(User.username == username).first()
+
+
 def get_user_by_id(db: Session, user_id: str) -> User | None:
     return db.query(User).filter(User.id == user_id).first()
 
@@ -439,3 +446,59 @@ def count_violations_for_user(db: Session, user_id: str) -> int:
         )
         .count()
     )
+
+
+# ── Phase 14: E2E messaging recipient hash helpers ──────────────────────────
+
+import hashlib as _hashlib
+
+
+def compute_recipient_hash(username: str) -> str:
+    """Return sha256($username) hex digest for zero-knowledge recipient routing.
+
+    D-01: Hash input is sha256($username) — include the ``$`` prefix verbatim.
+    D-02: Deterministic — same hash always for a given username.
+    D-03: Admin !handle usernames are NOT hashed (use cleartext routing).
+
+    Args:
+        username: Must include the ``$`` prefix (e.g. ``$witty-otter-42``).
+
+    Returns:
+        64-character lowercase hex sha256 digest.
+    """
+    return _hashlib.sha256(username.encode()).hexdigest()
+
+
+def get_all_recipient_hashes(db: Session) -> dict[str, str]:
+    """Return mapping of {recipient_hash: user_id} for all $-prefixed usernames.
+
+    Used by POST /messages/send to validate that recipient_hashes exist.
+    Admin !handles are excluded (validated separately via get_admin_handles).
+
+    Args:
+        db: SQLAlchemy Session.
+
+    Returns:
+        Dict mapping sha256($username) hex → user.id for all users with $-usernames.
+    """
+    rows = (
+        db.query(User.username, User.id)
+        .filter(User.username.isnot(None), User.username.like("$%"))
+        .all()
+    )
+    return {compute_recipient_hash(row.username): row.id for row in rows}
+
+
+def get_admin_handles(db: Session) -> set[str]:
+    """Return the set of all non-null admin_handle values (cleartext !handles).
+
+    Used by POST /messages/send to validate !handle recipients.
+
+    Args:
+        db: SQLAlchemy Session.
+
+    Returns:
+        Set of admin_handle strings (e.g. ``{"!senso-team", "!admin"}``).
+    """
+    rows = db.query(User.admin_handle).filter(User.admin_handle.isnot(None)).all()
+    return {row.admin_handle for row in rows}

@@ -121,6 +121,17 @@ class User(Base):
     strict_privacy_mode: bool = Column(Boolean, nullable=False, default=False)
     # Phase 11: RBAC role column — "user" | "tester" | "moderator" | "admin"
     role: str = Column(String(16), nullable=False, default="user")
+    # Phase 13: crypto identity — username + NaCl key columns
+    username: str | None = Column(String(64), unique=True, nullable=True, default=None)
+    public_key_b64: str | None = Column(Text, nullable=True, default=None)       # X25519 public key
+    signing_key_b64: str | None = Column(Text, nullable=True, default=None)      # Ed25519 verify key
+    nacl_pbkdf2_salt: str | None = Column(Text, nullable=True, default=None)            # base64 salt for NaCl PBKDF2
+    nacl_key_login_envelope_b64: str | None = Column(Text, nullable=True, default=None) # PBKDF2(pw)-wrapped nacl_master_key
+    encrypted_x25519_private_b64: str | None = Column(Text, nullable=True, default=None)  # AES-GCM(master, x25519_sk)
+    encrypted_ed25519_signing_b64: str | None = Column(Text, nullable=True, default=None) # AES-GCM(master, ed25519_sk)
+    # Phase 14: admin handle + BIP-39 recovery envelope
+    admin_handle: str | None = Column(String(64), unique=True, nullable=True, default=None)
+    nacl_key_recovery_envelope_b64: str | None = Column(Text, nullable=True, default=None)
 
     # Relationships
     chat_sessions_participated = relationship(
@@ -785,3 +796,65 @@ class IngestionTrace(Base):
     )
 
     upload = relationship("Upload", back_populates="traces")
+
+
+# ── Phase 14: E2E Messaging ────────────────────────────────────────────────
+
+# In tests, DATABASE_URL is sqlite — ARRAY is Postgres-only.
+# Use JSON as fallback so create_all() doesn't explode in SQLite test env.
+import os as _os
+_IS_SQLITE = _os.getenv("DATABASE_URL", "sqlite").startswith("sqlite")
+
+try:
+    from sqlalchemy.dialects.postgresql import ARRAY as _PG_ARRAY
+    _RecipientHashesType = Text if _IS_SQLITE else _PG_ARRAY(Text)  # type: ignore[assignment]
+except ImportError:
+    _RecipientHashesType = Text  # SQLite test fallback
+
+
+class UndeliveredMessage(Base):
+    """Routing table for E2E encrypted messages awaiting delivery.
+
+    Zero-knowledge design: no user_id FK — recipient identity is anchored
+    solely to sha256($username) stored in recipient_hashes[].
+    Row is deleted when recipient_hashes becomes empty after full delivery.
+    Purged by APScheduler TTL job after MESSAGE_TTL_DAYS days.
+    """
+
+    __tablename__ = "undelivered_messages"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    recipient_hashes: list[str] = Column(_RecipientHashesType, nullable=False)
+    encrypted_payload: str = Column(Text, nullable=False)
+    payload_size_bytes: int = Column(Integer, nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+
+
+class DeliveredMessage(Base):
+    """Inbox log for delivered E2E messages.
+
+    One row per message (shared across all recipients). Multiple recipients
+    get individual entries appended to delivered_at[].
+    created_at reflects the ORIGINAL message creation time, not the row insert time.
+    No user_id FK — recipient identity is solely the hash.
+    """
+
+    __tablename__ = "delivered_messages"
+
+    id: str = Column(String(36), primary_key=True, default=_uuid7)
+    recipient_hashes: list[str] = Column(
+        _RecipientHashesType, nullable=False
+    )  # all original recipients
+    encrypted_payload: str = Column(Text, nullable=False)
+    payload_size_bytes: int = Column(Integer, nullable=False)
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False
+    )  # ORIGINAL message creation time
+    delivered_at: list[dict] = Column(
+        JSON, nullable=False, default=list
+    )  # [{hash: str, at: ISO datetime str}]
+    source_message_id: str | None = Column(
+        String(36), nullable=True, default=None
+    )  # nullable — original undelivered_messages.id (may be null after TTL purge)

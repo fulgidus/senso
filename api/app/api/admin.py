@@ -6,7 +6,7 @@ All endpoints require is_admin=True (D-19/D-22).
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.api.ingestion import get_current_user
@@ -100,7 +100,7 @@ class MerchantMapAdminDTO(BaseModel):
     learned_method: str
     learned_provider_model: str | None = None
     learned_at: datetime
-    contributing_user_obfuscated: str | None = None
+    contributing_user_username: str | None = None
     is_blacklisted: bool
     blacklisted_reason: str | None = None
     model_config = ConfigDict(from_attributes=False)
@@ -122,12 +122,6 @@ class ModerationLogAdminDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-def _obfuscate_email(email: str) -> str:
-    """u****@domain.com obfuscation for admin privacy."""
-    if "@" not in email:
-        return "u****"
-    local, domain = email.split("@", 1)
-    return f"u****@{domain}"
 
 
 # ─── Phase 9: Merchant map admin endpoints ────────────────────────────────────
@@ -156,11 +150,11 @@ def list_merchant_map(
 
     result = []
     for row in rows:
-        obfuscated = None
+        contributing_user_username = None
         if row.contributing_user_id:
             user = db.query(User).filter(User.id == row.contributing_user_id).first()
             if user:
-                obfuscated = _obfuscate_email(user.email)
+                contributing_user_username = user.username
         result.append(
             MerchantMapAdminDTO(
                 id=row.id,
@@ -171,7 +165,7 @@ def list_merchant_map(
                 learned_method=row.learned_method,
                 learned_provider_model=row.learned_provider_model,
                 learned_at=row.learned_at,
-                contributing_user_obfuscated=obfuscated,
+                contributing_user_username=contributing_user_username,
                 is_blacklisted=row.is_blacklisted,
                 blacklisted_reason=row.blacklisted_reason,
             )
@@ -342,3 +336,48 @@ def revert_moderation_action(
     db.add(row)
     db.commit()
     return {"reverted": True}
+
+
+# ── Phase 14: Admin handle claim ─────────────────────────────────────────────
+
+class ClaimHandleRequest(BaseModel):
+    handle: str = Field(min_length=2, description="Admin handle, must start with !")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ClaimHandleResponse(BaseModel):
+    admin_handle: str = Field(alias="adminHandle")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+@router.post("/claim-handle", response_model=ClaimHandleResponse)
+def claim_admin_handle(
+    body: ClaimHandleRequest,
+    current_user: UserDTO = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> ClaimHandleResponse:
+    """Claim a !handle for the authenticated admin user.
+
+    D-25: Admin-only. Validates uniqueness. Stores !-prefixed handle on user.admin_handle.
+    D-26: admin_handle exposed in UserDTO (wired in Plan 14-02).
+    D-27: No settings UI in Phase 14 — Phase 15 adds the UI.
+    """
+    if not body.handle.startswith("!"):
+        raise HTTPException(status_code=422, detail="Handle must start with '!'.")
+
+    # Check uniqueness
+    existing = db.query(User).filter(User.admin_handle == body.handle).first()
+    if existing is not None:
+        raise HTTPException(
+            status_code=409, detail=f"Handle '{body.handle}' is already taken."
+        )
+
+    user_row = db.query(User).filter(User.id == current_user.id).first()
+    if user_row is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    user_row.admin_handle = body.handle
+    db.commit()
+    db.refresh(user_row)
+
+    return ClaimHandleResponse(admin_handle=user_row.admin_handle)
