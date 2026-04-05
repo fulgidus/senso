@@ -772,5 +772,8 @@
     "nukeDesc": "Elimina tutti i file caricati, i documenti estratti e la cronologia della chat. Utile per un demo pulito.",
     "nukeCta": "Reset totale",
     "nukeConfirm": "Sei sicuro? Questa azione eliminerà TUTTI i tuoi dati caricati e la cronologia. Non è reversibile."
+  },
+  "messages": {
+    "loading": "Caricamento messaggi..."
   }
 }

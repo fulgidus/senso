@@ -104,6 +104,38 @@ function secretboxDecrypt(key: Uint8Array, envelopeWithPrefix: string): Uint8Arr
   return plaintext;
 }
 
+// ── PBKDF2 wrap key derivation (v1 envelope format fallback) ─────────────────
+/**
+ * Derive a 32-byte wrap key from password + nacl_pbkdf2_salt using PBKDF2-SHA256.
+ *
+ * Used to unwrap v1 (legacy AES-GCM) login envelopes. After the backend migrates
+ * the envelope to v2 (Argon2id + secretbox), this function is no longer needed
+ * for that user. Kept for backward compatibility during the migration window.
+ *
+ * Params: PBKDF2-SHA256, 600_000 iterations, 32-byte output.
+ * MUST match api/app/db/nacl_crypto.py derive_nacl_login_wrap_key().
+ *
+ * @param password — plaintext password string
+ * @param saltB64  — base64-encoded nacl_pbkdf2_salt from login response
+ * @returns 32-byte Uint8Array wrap key
+ */
+export async function derivePbkdf2WrapKey(password: string, saltB64: string): Promise<Uint8Array> {
+  const salt = base64ToBytes(saltB64);
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt: salt.buffer as ArrayBuffer, iterations: 600_000 },
+    keyMaterial,
+    256, // 32 bytes
+  );
+  return new Uint8Array(bits);
+}
+
 // ── Argon2id key derivation ───────────────────────────────────────────────────
 /**
  * Derive a 32-byte wrap key from password + nacl_pbkdf2_salt using Argon2id.

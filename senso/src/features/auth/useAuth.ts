@@ -14,6 +14,7 @@ import { ApiClientError } from "@/lib/api-client";
 import type { User, CryptoKeyMaterial } from "@/features/auth/types";
 import {
   deriveArgon2idWrapKey,
+  derivePbkdf2WrapKey,
   unwrapLoginEnvelope,
   decryptPrivateKey,
   expandEd25519Seed,
@@ -75,8 +76,18 @@ async function deriveCryptoKeys(password: string, user: User): Promise<CryptoKey
     return null;
   }
   try {
-    const wrapKey = await deriveArgon2idWrapKey(password, user.naclPbkdf2Salt);
-    const naclMasterKey = await unwrapLoginEnvelope(user.naclKeyLoginEnvelopeB64, wrapKey);
+    const envelope = user.naclKeyLoginEnvelopeB64;
+    let naclMasterKey: Uint8Array;
+
+    if (envelope.startsWith("v2:")) {
+      // v2: use Argon2id wrap key (post-migration)
+      const wrapKey = await deriveArgon2idWrapKey(password, user.naclPbkdf2Salt);
+      naclMasterKey = await unwrapLoginEnvelope(envelope, wrapKey);
+    } else {
+      // v1: use PBKDF2 wrap key (legacy; backend migrates to v2 on next login)
+      const wrapKey = await derivePbkdf2WrapKey(password, user.naclPbkdf2Salt);
+      naclMasterKey = await unwrapLoginEnvelope(envelope, wrapKey);
+    }
     const x25519PrivateKey = await decryptPrivateKey(user.encryptedX25519PrivateB64, naclMasterKey);
     const ed25519Seed32 = await decryptPrivateKey(user.encryptedEd25519SigningB64, naclMasterKey);
     const { privateKey: ed25519SigningKey, publicKey: ed25519PublicKey } =

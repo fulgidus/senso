@@ -23,4 +23,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    // argon2-browser ships WASM — must be excluded from esbuild pre-bundling
+    // so that vite-plugin-wasm can handle it at build time.
+    exclude: ["argon2-browser"],
+  },
+  build: {
+    rollupOptions: {
+      // The argon2.wasm module imports a runtime glue module internally.
+      // Treat it as an external to avoid Rollup resolution failure.
+      external: [/argon2\.wasm$/],
+    },
+  },
 });

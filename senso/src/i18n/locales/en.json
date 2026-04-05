@@ -772,5 +772,8 @@
     "nukeDesc": "Deletes all uploaded files, extracted documents, and chat history. Useful for a clean demo.",
     "nukeCta": "Full reset",
     "nukeConfirm": "Are you sure? This will delete ALL your uploaded data and history. It cannot be undone."
+  },
+  "messages": {
+    "loading": "Loading messages..."
   }
 }

@@ -18,6 +18,7 @@ import type { User } from "@/features/auth/types";
 import { AboutPage } from "@/features/about/AboutPage";
 import { DebugScreen } from "@/features/debug/DebugScreen";
 import { SodiumProvider } from "@/providers/SodiumProvider";
+import { MessagesPage } from "@/features/messages/MessagesPage";
 
 // Route modules
 import { LoginPage } from "@/routes/LoginPage";
@@ -231,6 +232,14 @@ function AppRoutes() {
             />
           )}
           <Route path="/about" element={<AboutPage />} />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <MessagesPage />
+              </ProtectedRoute>
+            }
+          />
           {(user.isAdmin || user.role === "tester" || user.role === "admin") && (
             <Route path="/debug" element={<DebugScreen />} />
           )}
