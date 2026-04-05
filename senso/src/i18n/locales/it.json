@@ -810,6 +810,18 @@
       "sending": "Invio in corso...",
       "sendError": "Errore durante l'invio del messaggio.",
       "invalidRecipient": "Il destinatario deve iniziare con $ o !"
+    },
+    "recoveryPhrase": {
+      "title": "Salva la tua frase di recupero",
+      "dialogLabel": "Frase di recupero",
+      "description": "Questa è la tua frase di recupero di 24 parole. Salvala in un luogo sicuro — non sarà più mostrata.",
+      "wordGridLabel": "Parole della frase di recupero",
+      "copyAll": "Copia tutte le parole",
+      "copied": "Copiate!",
+      "downloadTxt": "Scarica come .txt",
+      "warning": "⚠ Senza questa frase, non potrai recuperare i tuoi messaggi in caso di perdita della password.",
+      "savedCheckbox": "Ho salvato la mia frase di recupero in un luogo sicuro.",
+      "continueButton": "Continua"
     }
   }
 }

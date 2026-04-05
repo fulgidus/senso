@@ -19,6 +19,7 @@ import { AboutPage } from "@/features/about/AboutPage";
 import { DebugScreen } from "@/features/debug/DebugScreen";
 import { SodiumProvider } from "@/providers/SodiumProvider";
 import { MessagesPage } from "@/features/messages/MessagesPage";
+import { RecoveryPhraseInterstitial } from "@/features/messages/RecoveryPhraseInterstitial";
 
 // Route modules
 import { LoginPage } from "@/routes/LoginPage";
@@ -157,6 +158,17 @@ function AppRoutes() {
 
   // ── State 5: Authenticated — route table using new route modules ──
   const user = auth.user;
+
+  // Show recovery phrase interstitial if phrase is set (one-time, immediately after signup)
+  if (auth.user?.recoveryPhrase) {
+    return (
+      <RecoveryPhraseInterstitial
+        phrase={auth.user.recoveryPhrase}
+        onConfirm={() => auth.updateUser({ recoveryPhrase: null })}
+      />
+    );
+  }
+
   return (
     <AuthContext.Provider
       value={{

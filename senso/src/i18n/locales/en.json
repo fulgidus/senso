@@ -810,6 +810,18 @@
       "sending": "Sending...",
       "sendError": "Error sending message.",
       "invalidRecipient": "Recipient must start with $ or !"
+    },
+    "recoveryPhrase": {
+      "title": "Save your recovery phrase",
+      "dialogLabel": "Recovery phrase",
+      "description": "This is your 24-word recovery phrase. Save it somewhere safe — it will never be shown again.",
+      "wordGridLabel": "Recovery phrase words",
+      "copyAll": "Copy all words",
+      "copied": "Copied!",
+      "downloadTxt": "Download as .txt",
+      "warning": "⚠ Without this phrase, you cannot recover your messages if you lose your password.",
+      "savedCheckbox": "I have saved my recovery phrase in a safe place.",
+      "continueButton": "Continue"
     }
   }
 }
