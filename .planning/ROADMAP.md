@@ -349,3 +349,111 @@ Plans:
 - [x] 16-03-PLAN.md - Mobile nav drawer tests (open/close/Escape/overlay/focus-trap/aria-modal). (completed 2026-04-05)
 - [x] 16-04-PLAN.md - Accessibility tests (axe-core + keyboard navigation + aria-live). (completed 2026-04-05)
 - [x] 16-05-PLAN.md - PWA, ergonomics & coach picker regression tests. (completed 2026-04-05)
+
+---
+
+## Milestone 2: Quality, Intelligence & Real Testing
+
+*Added 2026-04-06 — 7 phases to fix broken features, improve coach intelligence, and build real E2E coverage.*
+
+### Phase 17: MARP Real Rendering
+
+**Goal:** Replace `marked`-based slide renderer with `@marp-team/marp-core`. MARP directives, themes (`senso-light`/`senso-dark`), fullscreen portal.
+**Requirements**: Defined in 17-CONTEXT.md
+**Depends on:** Phase 16
+**Plans:** 0/2 plans complete
+
+Plans:
+
+- [ ] 17-01-PLAN.md - Install marp-core, rewrite renderer, register themes
+- [ ] 17-02-PLAN.md - Fullscreen portal, keyboard nav, vitest unit tests
+
+### Phase 18: Ingestion Reliability + Non-Ledger Document Support
+
+**Goal:** Fix fingerprinting (MIME-first, binary XLSX fix, content-hash dedup), add payslip/utility/invoice/receipt extractors that enrich the user profile.
+**Requirements**: Defined in 18-CONTEXT.md
+**Depends on:** Phase 16
+**Plans:** 0/5 plans complete
+
+Plans:
+
+- [ ] 18-01-PLAN.md - Content-hash dedup + MIME-first routing + XLSX text extraction
+- [ ] 18-02-PLAN.md - Payslip builtin module + profile income enrichment
+- [ ] 18-03-PLAN.md - Utility bill + invoice builtin modules
+- [ ] 18-04-PLAN.md - Receipt module + unified enrich_from_extraction() dispatcher
+- [ ] 18-05-PLAN.md - Pipeline success condition fix + full test suite
+
+### Phase 19: Financial Timeline — Real Inference + Visibility
+
+**Goal:** Complete 6/6 event types, trigger timeline from non-ledger docs, inject timeline into coach prompt, improve TimelineTab visual.
+**Requirements**: Defined in 19-CONTEXT.md
+**Depends on:** Phase 18
+**Plans:** 0/4 plans complete
+
+Plans:
+
+- [ ] 19-01-PLAN.md - Complete relocation + debt_change event types
+- [ ] 19-02-PLAN.md - Non-ledger timeline triggers (payslip → income_shift, utility → subscription)
+- [ ] 19-03-PLAN.md - Coach system prompt timeline block + get_timeline_events tool
+- [ ] 19-04-PLAN.md - TimelineTab visual: date axis, empty state CTA, notification badge
+
+### Phase 20: Coach Intelligence — Tool Suite + Structured Memory
+
+**Goal:** Italy rules knowledge base, 7-tool LLM suite (transactions, profile, preferences, memory, timeline, rules, content), lean prompt architecture.
+**Requirements**: Defined in 20-CONTEXT.md
+**Depends on:** Phase 19
+**Plans:** 0/6 plans complete
+
+Plans:
+
+- [ ] 20-01-PLAN.md - Italy rules JSON + BM25 index + search_italy_rules tool
+- [ ] 20-02-PLAN.md - get_user_profile + search_user_transactions tools
+- [ ] 20-03-PLAN.md - User preferences (goals/dos/donts) + get_user_preferences tool + frontend editor
+- [ ] 20-04-PLAN.md - Structured coaching memory + recall_past_insights tool
+- [ ] 20-05-PLAN.md - Prompt refactor: remove static profile blob, wire all 7 tools
+- [ ] 20-06-PLAN.md - Integration tests + tool call verification + Italy rules coverage
+
+### Phase 21: Coach Output Rationalization
+
+**Goal:** Purchase intent classifier, conditional schema selection, remove fallback injection, surface caps (resource_cards ≤2, a2ui ≥2 rows), correct chat rendering hierarchy.
+**Requirements**: Defined in 21-CONTEXT.md
+**Depends on:** Phase 20
+**Plans:** 0/4 plans complete
+
+Plans:
+
+- [ ] 21-01-PLAN.md - Purchase intent classifier + conditional schema selection
+- [ ] 21-02-PLAN.md - Remove fallback injection + surface caps
+- [ ] 21-03-PLAN.md - details_a2ui quality gate
+- [ ] 21-04-PLAN.md - Chat UI rendering hierarchy
+
+### Phase 22: Mobile-First UI Overhaul
+
+**Goal:** Fix ChatScreen keyboard/safe area, pull-to-refresh, all tables → cards on mobile, profile tab layout, PWA standalone, coach picker dark mode + session bug, TTS fix.
+**Requirements**: Defined in 22-CONTEXT.md
+**Depends on:** Phase 21
+**Plans:** 0/6 plans complete
+
+Plans:
+
+- [ ] 22-01-PLAN.md - ChatScreen: visualViewport keyboard + safe area + scroll button
+- [ ] 22-02-PLAN.md - Pull-to-refresh hook: extract, guard, visual indicator
+- [ ] 22-03-PLAN.md - All tables → card layouts on mobile (systemic)
+- [ ] 22-04-PLAN.md - Profile tabs + admin route + nav tap targets
+- [ ] 22-05-PLAN.md - PWA standalone + coach picker dark mode + session fix
+- [ ] 22-06-PLAN.md - TTS fix + voice UX + STT Chromium
+
+### Phase 23: E2E Real Stack Test Suite
+
+**Goal:** Playwright tests against real Docker Compose stack (no mocks). Full user journey, tool call verification, error paths, mobile viewport.
+**Requirements**: Defined in 23-CONTEXT.md
+**Depends on:** Phase 22
+**Plans:** 0/5 plans complete
+
+Plans:
+
+- [ ] 23-01-PLAN.md - Real stack infrastructure: LLM stub + docker-compose.test.yml + fixtures
+- [ ] 23-02-PLAN.md - Full user journey E2E: register → upload → profile → coach
+- [ ] 23-03-PLAN.md - Coach tool call E2E: real DB data through tool executor
+- [ ] 23-04-PLAN.md - Error path E2E: token expiry, bad file, LLM timeout, offline
+- [ ] 23-05-PLAN.md - Mobile E2E: full journey on iPhone 14 viewport
