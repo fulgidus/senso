@@ -373,7 +373,7 @@ Plans:
 **Goal:** Fix fingerprinting (MIME-first, binary XLSX fix, content-hash dedup), add payslip/utility/invoice/receipt extractors that enrich the user profile.
 **Requirements**: Defined in 18-CONTEXT.md
 **Depends on:** Phase 16
-**Plans:** 0/5 plans complete
+**Plans:** 5/5 plans written (ready to execute)
 
 Plans:
 
@@ -388,25 +388,25 @@ Plans:
 **Goal:** Complete 6/6 event types, trigger timeline from non-ledger docs, inject timeline into coach prompt, improve TimelineTab visual.
 **Requirements**: Defined in 19-CONTEXT.md
 **Depends on:** Phase 18
-**Plans:** 0/4 plans complete
+**Plans:** 4/4 plans written (ready to execute)
 
 Plans:
 
 - [ ] 19-01-PLAN.md - Complete relocation + debt_change event types
 - [ ] 19-02-PLAN.md - Non-ledger timeline triggers (payslip → income_shift, utility → subscription)
 - [ ] 19-03-PLAN.md - Coach system prompt timeline block + get_timeline_events tool
-- [ ] 19-04-PLAN.md - TimelineTab visual: date axis, empty state CTA, notification badge
+- [ ] 19-04-PLAN.md - TimelineTab visual: date axis, Complete state CTA, notification badge
 
 ### Phase 20: Coach Intelligence — Tool Suite + Structured Memory
 
 **Goal:** Italy rules knowledge base, 7-tool LLM suite (transactions, profile, preferences, memory, timeline, rules, content), lean prompt architecture.
 **Requirements**: Defined in 20-CONTEXT.md
 **Depends on:** Phase 19
-**Plans:** 0/6 plans complete
+**Plans:** 6/6 plans written (ready to execute) · RESEARCH.md added (2025 Italian tax rules)
 
 Plans:
 
-- [ ] 20-01-PLAN.md - Italy rules JSON + BM25 index + search_italy_rules tool
+- [ ] 20-01-PLAN.md - Italy rules JSON (2025 data) + BM25 index + search_italy_rules tool
 - [ ] 20-02-PLAN.md - get_user_profile + search_user_transactions tools
 - [ ] 20-03-PLAN.md - User preferences (goals/dos/donts) + get_user_preferences tool + frontend editor
 - [ ] 20-04-PLAN.md - Structured coaching memory + recall_past_insights tool
@@ -418,7 +418,7 @@ Plans:
 **Goal:** Purchase intent classifier, conditional schema selection, remove fallback injection, surface caps (resource_cards ≤2, a2ui ≥2 rows), correct chat rendering hierarchy.
 **Requirements**: Defined in 21-CONTEXT.md
 **Depends on:** Phase 20
-**Plans:** 0/4 plans complete
+**Plans:** 4/4 plans written (ready to execute)
 
 Plans:
 
@@ -432,23 +432,24 @@ Plans:
 **Goal:** Fix ChatScreen keyboard/safe area, pull-to-refresh, all tables → cards on mobile, profile tab layout, PWA standalone, coach picker dark mode + session bug, TTS fix.
 **Requirements**: Defined in 22-CONTEXT.md
 **Depends on:** Phase 21
-**Plans:** 0/6 plans complete
+**Plans:** 6/6 plans written (ready to execute) · RESEARCH.md added (iOS visualViewport, vite-plugin-pwa, PTR)
 
 Plans:
 
 - [ ] 22-01-PLAN.md - ChatScreen: visualViewport keyboard + safe area + scroll button
-- [ ] 22-02-PLAN.md - Pull-to-refresh hook: extract, guard, visual indicator
-- [ ] 22-03-PLAN.md - All tables → card layouts on mobile (systemic)
-- [ ] 22-04-PLAN.md - Profile tabs + admin route + nav tap targets
-- [ ] 22-05-PLAN.md - PWA standalone + coach picker dark mode + session fix
-- [ ] 22-06-PLAN.md - TTS fix + voice UX + STT Chromium
+- [ ] 22-02-PLAN.md - Pull-to-refresh hook: extract, guard (passive:false), visual indicator
+- [ ] 22-03-PLAN.md - All tables → card layouts on mobile (systemic, 6 tables)
+- [ ] 22-04-PLAN.md - Profile tabs grid layout + admin route + nav tap targets (44px)
+- [ ] 22-05-PLAN.md - PWA standalone (vite-plugin-pwa) + coach picker dark mode + session fix
+- [ ] 22-06-PLAN.md - TTS fix (blob URL lifecycle) + voice UX + STT Chromium
 
 ### Phase 23: E2E Real Stack Test Suite
 
 **Goal:** Playwright tests against real Docker Compose stack (no mocks). Full user journey, tool call verification, error paths, mobile viewport.
 **Requirements**: Defined in 23-CONTEXT.md
+**RESEARCH.md added** (Project Dependencies pattern, Docker Compose healthchecks, FastAPI LLM stub, real account fixture)
 **Depends on:** Phase 22
-**Plans:** 0/5 plans complete
+**Plans:** 5/5 plans written (ready to execute)
 
 Plans:
 
