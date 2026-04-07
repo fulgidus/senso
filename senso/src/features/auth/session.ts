@@ -65,15 +65,15 @@ export async function signup(email: string, password: string): Promise<AuthPaylo
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
-    recovery_phrase?: string | null;
+    recoveryPhrase?: string | null;
   }>(backendBaseUrl, "/auth/signup", {
     method: "POST",
     body: { email, password },
   });
   const user = parseUser(raw.user);
-  // recovery_phrase is transient — only set at signup, cleared after interstitial
-  if (raw.recovery_phrase) {
-    user.recoveryPhrase = raw.recovery_phrase;
+  // recoveryPhrase is transient — only set at signup, cleared after interstitial
+  if (raw.recoveryPhrase) {
+    user.recoveryPhrase = raw.recoveryPhrase;
   }
   const payload: AuthPayload = {
     user,
