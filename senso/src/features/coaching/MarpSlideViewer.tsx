@@ -1,166 +1,152 @@
 /**
  * MarpSlideViewer - renders a MARP markdown slide deck inline in chat.
  *
- * - Looks up the raw .md source by slide_id from SLIDE_INDEX
- * - Strips the MARP front-matter block (lines between the first two `---` separators)
- * - Splits remaining content on `---` separators (with surrounding whitespace) to get individual slide bodies
- * - Renders each slide's markdown to HTML via `marked`
- * - Shows a swipeable prev/next navigation and a fullscreen toggle
- * - Applies `senso-light` or `senso-dark` CSS class based on the app's dark mode
+ * Uses @marp-team/marp-core for accurate MARP rendering:
+ * - Respects `theme: senso`, `class: lead`, `paginate:` and all MARP directives
+ * - Inline SVG mode scales slides natively to any 16:9 container
+ * - Single `senso` theme adapts to light/dark via CSS custom properties automatically
+ * - Fullscreen via ReactDOM.createPortal (Phase 17-02)
  */
 
 import { useState, useEffect, useRef } from "react"
-import { marked } from "marked"
+import { Marp } from "@marp-team/marp-core"
 import { SLIDE_INDEX } from "@/content/slideIndex"
+import SENSO_THEME_CSS from "@/styles/marp-senso-theme.css?raw"
 
-// Enable GFM line breaks so single newlines within a paragraph render as <br>
-marked.setOptions({ breaks: true })
+// ── Marp singleton ────────────────────────────────────────────────────────────
+// Created once at module load; reused for all renders (render() is stateless).
+let _marp: Marp | null = null
+function getMarp(): Marp {
+  if (_marp) return _marp
+  _marp = new Marp({
+    script: false,  // Don't inject browser polyfill script into HTML output
+    math: "katex",  // KaTeX is lighter than MathJax; needed for $$...$$ in slides
+    emoji: { shortcode: false, unicode: false },
+  })
+  _marp.themeSet.add(SENSO_THEME_CSS)
+  return _marp
+}
 
 interface MarpSlideViewerProps {
-    slideId: string
-    title: string
-}
-
-/**
- * Strip the MARP front-matter block (everything between the opening `---` and
- * the closing `---`), then split on `---` slide separators to get individual slide bodies.
- * Handles both `\n---\n` and `\n\n---\n\n` separator forms used in MARP decks.
- */
-function parseSlides(raw: string): string[] {
-    // Remove the front-matter block: lines 0..N where line 0 and lineN are "---"
-    const lines = raw.split("\n")
-    let fmEnd = -1
-    if (lines[0]?.trim() === "---") {
-        for (let i = 1; i < lines.length; i++) {
-            if (lines[i]?.trim() === "---") {
-                fmEnd = i
-                break
-            }
-        }
-    }
-    const body = fmEnd >= 0 ? lines.slice(fmEnd + 1).join("\n") : raw
-
-    // Split on `---` slide separators. MARP uses `\n---\n` or `\n\n---\n\n` patterns.
-    // The regex matches an optional newline before and after `---` to handle both forms.
-    return body
-        .split(/\n[ \t]*---[ \t]*\n/)
-        .map((s) => s.trim())
-        .filter(Boolean)
-}
-
-function renderSlide(md: string): string {
-    // marked.parse can return string | Promise<string>; we call it synchronously
-    const result = marked.parse(md, { async: false })
-    return result as string
+  slideId: string
+  title: string
 }
 
 export function MarpSlideViewer({ slideId, title }: MarpSlideViewerProps) {
-    const raw = SLIDE_INDEX[slideId]
-    const [current, setCurrent] = useState(0)
-    const [fullscreen, setFullscreen] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null)
+  const raw = SLIDE_INDEX[slideId]
+  const [current, setCurrent] = useState(0)
+  const [fullscreen, setFullscreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-    // Reset to first slide when the deck changes (prevents showing slide N of a new deck)
-    useEffect(() => {
-        setCurrent(0)
-    }, [slideId])
+  // Reset to slide 0 when deck changes
+  useEffect(() => {
+    setCurrent(0)
+  }, [slideId])
 
-    // Detect dark mode from document root class (Tailwind dark mode)
-    const [isDark, setIsDark] = useState(
-        () => document.documentElement.classList.contains("dark")
-    )
-    useEffect(() => {
-        const obs = new MutationObserver(() => {
-            setIsDark(document.documentElement.classList.contains("dark"))
-        })
-        obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
-        return () => obs.disconnect()
-    }, [])
+  // Focus container on mount for keyboard nav
+  useEffect(() => {
+    containerRef.current?.focus()
+  }, [])
 
-    if (!raw) {
-        return (
-            <div className="border border-border rounded-md px-3 py-2 bg-background text-sm text-muted-foreground">
-                {title}
-            </div>
-        )
-    }
-
-    const slides = parseSlides(raw)
-    const total = slides.length
-    const themeClass = isDark ? "senso-dark" : "senso-light"
-
-    const prev = () => setCurrent((c) => Math.max(0, c - 1))
-    const next = () => setCurrent((c) => Math.min(total - 1, c + 1))
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") next()
-        if (e.key === "ArrowLeft" || e.key === "ArrowUp") prev()
-        if (e.key === "Escape") setFullscreen(false)
-        if (e.key === "f" || e.key === "F") setFullscreen((v) => !v)
-    }
-
-    const viewer = (
-        <div
-            ref={containerRef}
-            className={`marp-viewer ${themeClass} ${fullscreen ? "marp-fullscreen" : "marp-inline"}`}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            aria-label={`Slide deck: ${title}`}
-        >
-            {/* Slide content */}
-            <div
-                className="marp-slide"
-                // eslint-disable-next-line react/no-danger
-                dangerouslySetInnerHTML={{ __html: renderSlide(slides[current] ?? "") }}
-            />
-
-            {/* Navigation bar */}
-            <div className="marp-nav">
-                <button
-                    onClick={prev}
-                    disabled={current === 0}
-                    className="marp-nav-btn"
-                    aria-label="Slide precedente"
-                >
-                    ‹
-                </button>
-                <span className="marp-nav-counter">
-                    {current + 1} / {total}
-                </span>
-                <button
-                    onClick={next}
-                    disabled={current === total - 1}
-                    className="marp-nav-btn"
-                    aria-label="Slide successiva"
-                >
-                    ›
-                </button>
-                <button
-                    onClick={() => setFullscreen((v) => !v)}
-                    className="marp-nav-btn marp-fullscreen-btn"
-                    aria-label={fullscreen ? "Esci da schermo intero" : "Schermo intero"}
-                >
-                    {fullscreen ? "⊠" : "⊞"}
-                </button>
-            </div>
-        </div>
-    )
-
-    if (fullscreen) {
-        return (
-            <div className="marp-fullscreen-overlay" onClick={() => setFullscreen(false)}>
-                <div onClick={(e) => e.stopPropagation()}>{viewer}</div>
-            </div>
-        )
-    }
-
+  if (!raw) {
     return (
-        <div className="border border-border rounded-xl overflow-hidden bg-background">
-            <div className="px-3 py-2 bg-muted/50 font-semibold text-sm flex items-center justify-between">
-                <span>{title}</span>
-                <span className="text-xs text-muted-foreground font-normal">{total} slide</span>
-            </div>
-            {viewer}
-        </div>
+      <div className="border border-border rounded-md px-3 py-2 bg-background text-sm text-muted-foreground">
+        {title}
+      </div>
     )
+  }
+
+  // Render the full deck; htmlAsArray gives one SVG string per slide
+  const marp = getMarp()
+  const { html: slideHtmlArray, css } = marp.render(raw, { htmlAsArray: true } as never)
+  const slides = slideHtmlArray as string[]
+  const total = slides.length
+
+  const prev = () => setCurrent((c) => Math.max(0, c - 1))
+  const next = () => setCurrent((c) => Math.min(total - 1, c + 1))
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); next() }
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); prev() }
+    if (e.key === "Escape") setFullscreen(false)
+    if (e.key === "f" || e.key === "F") setFullscreen((v) => !v)
+  }
+
+  // Inject MARP's scoped CSS into <head>; clean up on unmount
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    const style = document.createElement("style")
+    style.setAttribute("data-marp-viewer", slideId)
+    style.textContent = css
+    document.head.appendChild(style)
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [slideId, css])
+
+  // Inline viewer: fixed 16:9 aspect ratio, max 640px wide
+  // The <div class="marpit"> wrapper is required for MARP's CSS scoping to apply
+  const slideCanvas = (
+    <div
+      // marpit class is MARP's default container - CSS selectors are scoped to it
+      className="marpit"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: slides[current] ?? "" }}
+    />
+  )
+
+  const viewer = (
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className={`marp-viewer ${fullscreen ? "marp-fullscreen" : "marp-inline"}`}
+      aria-label={`Slide deck: ${title}`}
+    >
+      {/* 16:9 slide canvas - SVG inside scales natively via viewBox */}
+      <div className="marp-slide-canvas">
+        {slideCanvas}
+      </div>
+
+      {/* Navigation bar */}
+      <div className="marp-nav">
+        <button
+          onClick={prev}
+          disabled={current === 0}
+          className="marp-nav-btn"
+          aria-label="Slide precedente"
+        >
+          ‹
+        </button>
+        <span className="marp-nav-counter">
+          {current + 1} / {total}
+        </span>
+        <button
+          onClick={next}
+          disabled={current === total - 1}
+          className="marp-nav-btn"
+          aria-label="Slide successiva"
+        >
+          ›
+        </button>
+        <button
+          onClick={() => setFullscreen((v) => !v)}
+          className="marp-nav-btn marp-fullscreen-btn"
+          aria-label={fullscreen ? "Esci da schermo intero" : "Schermo intero"}
+        >
+          {fullscreen ? "⊠" : "⊞"}
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="border border-border rounded-xl overflow-hidden bg-background">
+      <div className="px-3 py-2 bg-muted/50 font-semibold text-sm flex items-center justify-between">
+        <span>{title}</span>
+        <span className="text-xs text-muted-foreground font-normal">{total} slide</span>
+      </div>
+      {viewer}
+    </div>
+  )
 }

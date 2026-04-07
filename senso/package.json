@@ -31,7 +31,6 @@
     "libsodium-wrappers": "^0.8.2",
     "lit": "^3.3.2",
     "lucide-react": "^1.0.1",
-    "marked": "^15.0.12",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
