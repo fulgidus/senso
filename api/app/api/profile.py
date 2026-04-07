@@ -360,3 +360,54 @@ def update_transaction_category(
         )
     db.commit()
     return {"updated": True, "category": body.category}
+
+
+# ── Phase 20: User financial preferences ─────────────────────────────────────
+
+
+class PreferencesBody(BaseModel):
+    goals: list[str] | None = None
+    dos: list[str] | None = None
+    donts: list[str] | None = None
+
+
+@router.get("/profile/preferences", tags=["profile"])
+def get_preferences(
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {
+        "goals": getattr(profile, "goals", None) or [],
+        "dos": getattr(profile, "dos", None) or [],
+        "donts": getattr(profile, "donts", None) or [],
+    }
+
+
+@router.patch("/profile/preferences", tags=["profile"])
+def patch_preferences(
+    body: PreferencesBody,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    from datetime import datetime, UTC as _UTC  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    if body.goals is not None:
+        profile.goals = body.goals
+    if body.dos is not None:
+        profile.dos = body.dos
+    if body.donts is not None:
+        profile.donts = body.donts
+    profile.updated_at = datetime.now(_UTC)
+    db.commit()
+    return {
+        "goals": profile.goals or [],
+        "dos": profile.dos or [],
+        "donts": profile.donts or [],
+    }

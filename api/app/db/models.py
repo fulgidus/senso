@@ -363,6 +363,10 @@ class UserProfile(Base):
     verified_income_sources: list = Column(JSON, nullable=False, default=list)
     fixed_expenses: list = Column(JSON, nullable=False, default=list)
     one_off_expenses: list = Column(JSON, nullable=False, default=list)
+    # User financial preferences (Phase 20)
+    goals: list = Column(JSON, nullable=False, default=list)
+    dos: list = Column(JSON, nullable=False, default=list)
+    donts: list = Column(JSON, nullable=False, default=list)
 
     user = relationship("User", back_populates="profile")
 

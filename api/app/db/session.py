@@ -408,6 +408,9 @@ def _add_missing_columns() -> None:
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS verified_income_sources JSONB NOT NULL DEFAULT '[]'::JSONB",
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS fixed_expenses JSONB NOT NULL DEFAULT '[]'::JSONB",
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS one_off_expenses JSONB NOT NULL DEFAULT '[]'::JSONB",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS goals JSONB NOT NULL DEFAULT '[]'::JSONB",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS dos JSONB NOT NULL DEFAULT '[]'::JSONB",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS donts JSONB NOT NULL DEFAULT '[]'::JSONB",
         # ── Round 21 (formerly Round 19): Phase 20 - Regional knowledge + User memory + nationalities - Regional knowledge + User memory + nationalities ────────
         # users.nationalities: JSON array of ISO 3166-1 alpha-2 (+ optional ISO 3166-2) codes
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS nationalities JSONB NOT NULL DEFAULT '[\"IT\"]'::JSONB",

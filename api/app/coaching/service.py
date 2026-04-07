@@ -150,6 +150,95 @@ _GET_TIMELINE_TOOL: dict = {
     },
 }
 
+# Phase 20: user profile + transaction search + preferences + insights recall tools
+_GET_USER_PROFILE_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "get_user_profile",
+        "description": (
+            "Get the user's current financial profile: income range, monthly expense estimate, "
+            "savings rate, top spending categories, and verified income sources. "
+            "Call at the start of any financial conversation."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": False,
+        },
+    },
+}
+
+_SEARCH_USER_TRANSACTIONS_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "search_user_transactions",
+        "description": (
+            "Search the user's personal transaction history by keyword. "
+            "Returns matching transactions with date, amount, category, and description."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Keywords to search in transaction descriptions.",
+                },
+                "category": {
+                    "type": "string",
+                    "description": "Optional: filter by spending category.",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results (default 10).",
+                    "default": 10,
+                },
+            },
+            "required": ["query"],
+            "additionalProperties": False,
+        },
+    },
+}
+
+_GET_USER_PREFERENCES_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "get_user_preferences",
+        "description": (
+            "Get the user's stated financial goals, spending preferences (dos), "
+            "and spending rules (don'ts). Use to align recommendations with their values."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": False,
+        },
+    },
+}
+
+_RECALL_INSIGHTS_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "recall_past_insights",
+        "description": (
+            "Recall previously captured insights about this user's financial behaviour, "
+            "goals, or context from past coaching conversations."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "Keyword to search (e.g. 'risparmio', 'affitto', 'spese fisse').",
+                },
+            },
+            "required": ["topic"],
+            "additionalProperties": False,
+        },
+    },
+}
+
 COACHING_DIR = Path(__file__).parent
 PERSONAS_DIR = COACHING_DIR.parent / "personas"
 SCHEMAS_DIR = COACHING_DIR / "schemas"
@@ -416,7 +505,15 @@ class CoachingService:
             raw = self.llm.complete_with_tools(
                 prompt=prompt,
                 system=system_prompt,
-                tools=[_SEARCH_CONTENT_TOOL, _SEARCH_REGIONAL_KNOWLEDGE_TOOL, _GET_TIMELINE_TOOL],
+                tools=[
+                    _SEARCH_CONTENT_TOOL,
+                    _SEARCH_REGIONAL_KNOWLEDGE_TOOL,
+                    _GET_TIMELINE_TOOL,
+                    _GET_USER_PROFILE_TOOL,
+                    _SEARCH_USER_TRANSACTIONS_TOOL,
+                    _GET_USER_PREFERENCES_TOOL,
+                    _RECALL_INSIGHTS_TOOL,
+                ],
                 tool_executor=self._tool_executor(locale, _nationalities, user_id=user_id),
                 response_schema=self._response_schema,
                 timeout=60.0,
@@ -597,6 +694,97 @@ class CoachingService:
                             "evidence": e.evidence_json,
                         })
                 return results
+            # Phase 20: user profile, transactions, preferences, insights
+            if name == "get_user_profile":
+                if not user_id:
+                    return {}
+                try:
+                    from app.services.profile_service import ProfileService  # noqa: PLC0415
+                    from app.db.models import UserProfile as _UP  # noqa: PLC0415
+                    profile = self.db.query(_UP).filter_by(user_id=user_id).first()
+                    if not profile:
+                        return {"error": "no profile"}
+                    inc = profile.income_summary or {}
+                    cats = profile.category_totals or {}
+                    top3 = sorted(cats.items(), key=lambda x: abs(x[1]), reverse=True)[:3]
+                    expenses = profile.monthly_expenses or 0
+                    income_avg = inc.get("amount") or inc.get("income_max") or 0
+                    return {
+                        "monthly_income_range": [inc.get("income_min"), inc.get("income_max")],
+                        "monthly_income_avg": income_avg,
+                        "monthly_expenses": expenses,
+                        "monthly_margin": profile.monthly_margin,
+                        "savings_rate_pct": round((income_avg - expenses) / income_avg * 100, 1) if income_avg else None,
+                        "top_spending_categories": [{"name": k, "amount": round(v, 2)} for k, v in top3],
+                        "verified_income_sources": profile.verified_income_sources or [],
+                        "fixed_expenses": profile.fixed_expenses or [],
+                        "extraordinary_income_total": profile.extraordinary_income_total,
+                        "months_covered": profile.months_covered,
+                    }
+                except Exception as exc:
+                    return {"error": str(exc)}
+            if name == "search_user_transactions":
+                if not user_id:
+                    return []
+                try:
+                    from app.db.models import Transaction as _Txn  # noqa: PLC0415
+                    query_str = arguments.get("query", "")
+                    category = arguments.get("category")
+                    limit = int(arguments.get("limit", 10))
+                    q = self.db.query(_Txn).filter(_Txn.user_id == user_id)
+                    if category:
+                        q = q.filter(_Txn.category == category)
+                    txns = q.order_by(_Txn.date.desc()).limit(500).all()
+                    # Simple keyword filtering (BM25 overkill for per-user <500 txns)
+                    kw = query_str.lower().split()
+                    matched = []
+                    for t in txns:
+                        desc = (t.description or "").lower()
+                        if any(k in desc for k in kw):
+                            matched.append({
+                                "date": str(t.date) if t.date else None,
+                                "amount": float(t.amount) if t.amount else None,
+                                "category": t.category,
+                                "description": t.description,
+                            })
+                            if len(matched) >= limit:
+                                break
+                    return matched
+                except Exception:
+                    return []
+            if name == "get_user_preferences":
+                if not user_id:
+                    return {"goals": [], "dos": [], "donts": []}
+                try:
+                    from app.db.models import UserProfile as _UP2  # noqa: PLC0415
+                    profile = self.db.query(_UP2).filter_by(user_id=user_id).first()
+                    if not profile:
+                        return {"goals": [], "dos": [], "donts": []}
+                    return {
+                        "goals": getattr(profile, "goals", None) or [],
+                        "dos": getattr(profile, "dos", None) or [],
+                        "donts": getattr(profile, "donts", None) or [],
+                    }
+                except Exception:
+                    return {"goals": [], "dos": [], "donts": []}
+            if name == "recall_past_insights":
+                if not user_id:
+                    return []
+                try:
+                    from app.db.models import UserProfile as _UP3  # noqa: PLC0415
+                    profile = self.db.query(_UP3).filter_by(user_id=user_id).first()
+                    if not profile:
+                        return []
+                    insights = profile.coaching_insights or []
+                    topic_kw = arguments.get("topic", "").lower().split()
+                    matched = []
+                    for ci in insights:
+                        text = f"{ci.get('headline','')} {ci.get('data_point','')} {ci.get('topic','')}".lower()
+                        if any(k in text for k in topic_kw):
+                            matched.append(ci)
+                    return matched[:5]
+                except Exception:
+                    return []
             raise ValueError(f"Unknown tool: {name!r}")
 
         return execute
