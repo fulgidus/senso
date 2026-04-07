@@ -289,19 +289,9 @@ class IngestionService:
         self, file_path: Path, content_type: str, llm_client: LLMClient, registry
     ) -> ExtractionResult:
         """Route to the appropriate extraction pipeline."""
-        suffix = file_path.suffix.lower()
-
-        # xlsx/xls: extract via openpyxl before any content preview
-        if suffix in (".xlsx", ".xls"):
-            return self._extract_xlsx(file_path)
-
-        # Read content preview for module matching
-        try:
-            preview = file_path.read_bytes()[:4096].decode("utf-8", errors="ignore")
-        except Exception:
-            preview = ""
-
-        module_entry = registry.match(file_path, preview)
+        # Registry now handles MIME-aware routing and XLSX cell-text fingerprinting.
+        # Pass content_type so MIME pre-filter can exclude irrelevant modules.
+        module_entry = registry.match(file_path, mime_type=content_type)
         if module_entry:
             raw_result = module_entry.extract_fn(file_path)
             if isinstance(raw_result, ExtractionResult):

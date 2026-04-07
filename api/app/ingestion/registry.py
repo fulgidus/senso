@@ -16,6 +16,9 @@ MODULES_DIR = Path(__file__).parent / "modules"
 FINGERPRINT_SCAN_BYTES = 4096
 MATCH_THRESHOLD = 0.3  # minimum score to consider a match
 
+# MIME types for XLSX files
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
 
 @dataclass
 class ModuleEntry:
@@ -25,6 +28,51 @@ class ModuleEntry:
     fingerprint: list[str]
     extract_fn: Any  # callable
     file_path: Path
+    mime_types: list[str] = field(default_factory=list)
+
+
+def _extract_xlsx_text(file_path: Path, max_cells: int = 200) -> str:
+    """Extract plain text from the first XLSX sheet for keyword fingerprinting.
+    Returns empty string on any error (graceful fallback to adaptive pipeline)."""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+        sheet = wb.active
+        if sheet is None:
+            return ""
+        parts: list[str] = []
+        count = 0
+        for row in sheet.iter_rows(values_only=True):
+            for cell in row:
+                if cell is not None:
+                    parts.append(str(cell))
+                    count += 1
+                    if count >= max_cells:
+                        break
+            if count >= max_cells:
+                break
+        wb.close()
+        return " ".join(parts)
+    except Exception as exc:
+        logger.debug("XLSX text extraction failed for %s: %s", file_path, exc)
+        return ""
+
+
+def _get_scan_text(file_path: Path, mime_type: str) -> str:
+    """Return the text to use for keyword fingerprint scoring.
+
+    - XLSX: extract cell text (ZIP bytes contain no readable keywords)
+    - PDF / plain text / CSV: read first FINGERPRINT_SCAN_BYTES as UTF-8
+    - Other binary: return empty string → falls through to adaptive pipeline
+    """
+    if mime_type == _XLSX_MIME or file_path.suffix.lower() in (".xlsx", ".xlsm"):
+        return _extract_xlsx_text(file_path)
+    try:
+        return file_path.read_bytes()[:FINGERPRINT_SCAN_BYTES].decode(
+            "utf-8", errors="ignore"
+        )
+    except Exception:
+        return ""
 
 
 class ModuleRegistry:
@@ -55,6 +103,7 @@ class ModuleRegistry:
             fingerprint = getattr(mod, "FINGERPRINT", None)
             version = getattr(mod, "MODULE_VERSION", None)
             extract_fn = getattr(mod, "extract", None)
+            mime_types = getattr(mod, "MIME_TYPES", [])
 
             if not isinstance(fingerprint, list) or not fingerprint:
                 logger.warning("Skipping %s: FINGERPRINT missing or empty", py_file)
@@ -74,32 +123,39 @@ class ModuleRegistry:
                     fingerprint=fingerprint,
                     extract_fn=extract_fn,
                     file_path=py_file,
+                    mime_types=mime_types if isinstance(mime_types, list) else [],
                 )
             )
             logger.info("Loaded module %s from %s", py_file.stem, source)
         except Exception as exc:
             logger.warning("Failed to load module %s: %s", py_file, exc)
 
-    def match(self, file_path: Path, content_preview: str = "") -> ModuleEntry | None:
+    def match(
+        self, file_path: Path, content_preview: str = "", mime_type: str = ""
+    ) -> ModuleEntry | None:
         """
         Two-step match:
-        1. Extension/MIME pre-filter (implicit via fingerprint keywords)
-        2. Content fingerprint scoring: keywords matched in first 4KB
+        1. MIME-type pre-filter: skip modules whose MIME_TYPES list excludes this file
+        2. Content fingerprint scoring: keywords matched in scan text
+           - XLSX: cell text extracted from workbook (not ZIP bytes)
+           - Other: first 4KB as UTF-8
         Returns best match above MATCH_THRESHOLD, or None.
         """
+        # Get scan text (XLSX-aware)
         if not content_preview:
-            try:
-                content_preview = file_path.read_bytes()[
-                    :FINGERPRINT_SCAN_BYTES
-                ].decode("utf-8", errors="ignore")
-            except Exception:
-                content_preview = ""
+            scan_text = _get_scan_text(file_path, mime_type)
+        else:
+            scan_text = content_preview
 
-        content_lower = content_preview.lower()
+        content_lower = scan_text.lower()
         best_score = 0.0
         best_module: ModuleEntry | None = None
 
         for entry in self.modules:
+            # MIME pre-filter: if the module declares MIME_TYPES, skip if no match
+            if entry.mime_types and mime_type and mime_type not in entry.mime_types:
+                continue
+
             if not entry.fingerprint:
                 continue
             matched = sum(1 for kw in entry.fingerprint if kw.lower() in content_lower)

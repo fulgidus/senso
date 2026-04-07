@@ -27,6 +27,10 @@ FINGERPRINT: list[str] = [
     "risultati ricerca",
 ]
 MODULE_VERSION: str = "1.0.0"
+MIME_TYPES: list[str] = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+]
 
 # Header names expected in the data header row (lowercased)
 _DATE_OP = "data_operazione"
