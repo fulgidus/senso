@@ -522,6 +522,19 @@ class IngestionService:
 
         self.db.commit()
 
+        # Phase 18: enrich user profile from non-ledger document types
+        if doc.document_type not in ("bank_statement", "unknown"):
+            try:
+                from app.services.profile_service import ProfileService
+                profile_svc = ProfileService(db=self.db)
+                profile_svc.enrich_from_extraction(upload.user_id, doc)
+            except Exception as _enrich_exc:
+                logger.warning(
+                    "Profile enrichment failed for upload %s: %s",
+                    upload.id,
+                    _enrich_exc,
+                )
+
     def list_uploads(self, user_id: str) -> list[UploadStatusDTO]:
         self.fail_stale_pending_uploads(user_id=user_id)
         uploads = (
