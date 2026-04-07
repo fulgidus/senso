@@ -10,10 +10,12 @@ import { ConfirmDialog } from "@/components/ConfirmDialog"
 export function DebugScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { onUnauthorized } = useAuth()
+  const { onUnauthorized, user } = useAuth()
   const [results, setResults] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [showNukeConfirm, setShowNukeConfirm] = useState(false)
+  const [showNukeAllConfirm, setShowNukeAllConfirm] = useState(false)
+  const isAdmin = user?.isAdmin || user?.role === "admin"
 
   const callDebug = async (
     action: string,
@@ -119,6 +121,38 @@ export function DebugScreen() {
         confirmLabel={t("debug.nukeCta")}
         onConfirm={() => { setShowNukeConfirm(false); void callDebug("nuke", "DELETE", "/debug/nuke") }}
         onCancel={() => setShowNukeConfirm(false)}
+      />
+
+      {/* Section 4 — Nuke ALL users (admin only) */}
+      {isAdmin && (
+        <section className="rounded-2xl border-2 border-destructive bg-card p-6 space-y-3">
+          <h2 className="text-base font-semibold text-destructive">
+            {t("debug.nukeAllTitle")}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t("debug.nukeAllDesc")}</p>
+          <button
+            disabled={loading["nukeAll"]}
+            onClick={() => setShowNukeAllConfirm(true)}
+            className="rounded-lg border-2 border-destructive bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading["nukeAll"] ? t("debug.loading") : t("debug.nukeAllCta")}
+          </button>
+          {results["nukeAll"] && (
+            <p className="text-xs font-mono text-muted-foreground break-all">
+              {results["nukeAll"]}
+            </p>
+          )}
+        </section>
+      )}
+
+      <ConfirmDialog
+        open={showNukeAllConfirm}
+        title={t("debug.nukeAllTitle")}
+        description={t("debug.nukeAllConfirm")}
+        confirmVariant="destructive"
+        confirmLabel={t("debug.nukeAllCta")}
+        onConfirm={() => { setShowNukeAllConfirm(false); void callDebug("nukeAll", "DELETE", "/debug/nuke-all") }}
+        onCancel={() => setShowNukeAllConfirm(false)}
       />
     </div>
   )

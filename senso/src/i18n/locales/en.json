@@ -772,7 +772,11 @@
     "nukeTitle": "Full data reset",
     "nukeDesc": "Deletes all uploaded files, extracted documents, and chat history. Useful for a clean demo.",
     "nukeCta": "Full reset",
-    "nukeConfirm": "Are you sure? This will delete ALL your uploaded data and history. It cannot be undone."
+    "nukeConfirm": "Are you sure? This will delete ALL your uploaded data and history. It cannot be undone.",
+    "nukeAllTitle": "☢️ Delete ALL Users",
+    "nukeAllDesc": "Deletes all accounts, data, and history for EVERY user. Your admin account will also be deleted — you will need to re-register.",
+    "nukeAllCta": "Delete all users",
+    "nukeAllConfirm": "WARNING: this will delete ALL user accounts and their data. Your admin account will also be removed. You will need to re-register. Continue?"
   },
   "messages": {
     "loading": "Loading messages...",

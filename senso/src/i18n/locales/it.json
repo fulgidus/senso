@@ -772,7 +772,11 @@
     "nukeTitle": "Reset totale dati",
     "nukeDesc": "Elimina tutti i file caricati, i documenti estratti e la cronologia della chat. Utile per un demo pulito.",
     "nukeCta": "Reset totale",
-    "nukeConfirm": "Sei sicuro? Questa azione eliminerà TUTTI i tuoi dati caricati e la cronologia. Non è reversibile."
+    "nukeConfirm": "Sei sicuro? Questa azione eliminerà TUTTI i tuoi dati caricati e la cronologia. Non è reversibile.",
+    "nukeAllTitle": "☢️ Elimina TUTTI gli utenti",
+    "nukeAllDesc": "Elimina tutti gli account, i dati e la cronologia di TUTTI gli utenti. Il tuo account admin verrà eliminato — dovrai registrarti di nuovo.",
+    "nukeAllCta": "Elimina tutti gli utenti",
+    "nukeAllConfirm": "ATTENZIONE: questa azione eliminerà TUTTI gli account utente e i loro dati. Anche il tuo account admin verrà cancellato. Dovrai registrarti di nuovo. Continuare?"
   },
   "messages": {
     "loading": "Caricamento messaggi...",
