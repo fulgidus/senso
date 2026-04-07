@@ -23,7 +23,7 @@ describe("MARP slide rendering - all decks", () => {
 
   it.each(deckEntries)(
     "renders deck %s with correct slide count",
-    (id, raw) => {
+    (_id, raw) => {
       const { html } = marp.render(raw, { htmlAsArray: true } as never)
       const slides = html as string[]
 
@@ -46,7 +46,7 @@ describe("MARP slide rendering - all decks", () => {
 
   it.each(deckEntries)(
     "deck %s renders without visible HTML comment text",
-    (id, raw) => {
+    (_id, raw) => {
       const { html } = marp.render(raw, { htmlAsArray: true } as never)
       const joined = (html as string[]).join("")
       // MARP comments (<!-- _class: lead -->) must be consumed, not rendered as text

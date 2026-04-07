@@ -27,6 +27,7 @@ import {
     getProfileStatus,
     getUncategorized,
     triggerCategorization,
+    getTimeline,
     type InsightCard,
     type UserProfile,
 } from "@/lib/profile-api"
@@ -117,6 +118,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     const [activeTab, setActiveTab] = useState<"summary" | "charts" | "timeline" | "files" | "connectors">("summary")
     const [uncategorizedCount, setUncategorizedCount] = useState(0)
     const [inspectUploadId, setInspectUploadId] = useState<string | null>(null)
+    const [hasNewTimelineEvents, setHasNewTimelineEvents] = useState(false)
     const [balanceMasked, setBalanceMasked] = useState(
         () => localStorage.getItem("senso:balanceMask") === "true"
     )
@@ -193,6 +195,11 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         // Fetch uncategorized count (non-blocking - ignore errors)
         void getUncategorized(token)
             .then((items) => setUncategorizedCount(items.length))
+            .catch(() => undefined)
+
+        // Check for new timeline events (non-blocking - for notification badge)
+        void getTimeline(token, false)
+            .then((evts) => setHasNewTimelineEvents(evts.some((e) => !e.is_user_dismissed)))
             .catch(() => undefined)
     }, [token, onNoProfile])
 
@@ -354,13 +361,16 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
                     {t("profile.spendingBreakdown")}
                 </button>
                 <button
-                    onClick={() => setActiveTab("timeline")}
-                    className={`rounded-full px-4 py-1.5 text-sm font-medium ${activeTab === "timeline"
+                    onClick={() => { setActiveTab("timeline"); setHasNewTimelineEvents(false) }}
+                    className={`relative rounded-full px-4 py-1.5 text-sm font-medium ${activeTab === "timeline"
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                 >
                     {t("timeline.tabLabel")}
+                    {hasNewTimelineEvents && activeTab !== "timeline" && (
+                        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive" />
+                    )}
                 </button>
                 <button
                     onClick={() => setActiveTab("files")}

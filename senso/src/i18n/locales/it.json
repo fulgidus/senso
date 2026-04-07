@@ -698,7 +698,11 @@
         "addContextPlaceholder": "Aggiungi contesto a questo evento...",
         "editContext": "Modifica contesto",
         "showDismissed": "Mostra {{count}} eventi nascosti",
-        "tabLabel": "Timeline"
+        "tabLabel": "Timeline",
+        "emptyCta": "Carica documenti",
+        "basedOnTransactions": "Basato su {{count}} transazioni",
+        "relocation": "Trasferimento",
+        "debt_change": "Variazione debito"
     },
     "uncategorized": {
         "emptyHeading": "Ottimo lavoro!",

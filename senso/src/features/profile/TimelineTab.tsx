@@ -332,22 +332,42 @@ export function TimelineTab({ token }: Props) {
                     <p className="text-base font-semibold text-foreground">{t("timeline.emptyHeading")}</p>
                     <p className="mt-1 text-sm text-muted-foreground">{t("timeline.emptyBody")}</p>
                 </div>
+                <Button variant="outline" size="sm" onClick={() => window.location.href = "/upload"}>
+                    {t("timeline.emptyCta")}
+                </Button>
             </div>
         )
     }
 
     return (
         <div className="space-y-4">
-            {/* Active events */}
-            {activeEvents.map((event) => (
-                <TimelineEventCard
-                    key={event.id}
-                    event={event}
-                    token={token}
-                    onDismissed={handleDismissed}
-                    onContextSaved={handleContextSaved}
-                />
-            ))}
+            {/* Active events - vertical connector timeline */}
+            {activeEvents.length > 0 && (
+                <ol className="relative border-l border-border ml-3 space-y-6 pb-2">
+                    {activeEvents.map((event) => {
+                        const Icon = getEventIcon(event.event_type)
+                        const txnCount = (event.evidence_json as Record<string, unknown>)?.transaction_count as number | undefined
+                        return (
+                            <li key={event.id} className="ml-6">
+                                <span className="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 ring-2 ring-background">
+                                    <Icon className="h-3 w-3 text-primary" />
+                                </span>
+                                <TimelineEventCard
+                                    event={event}
+                                    token={token}
+                                    onDismissed={handleDismissed}
+                                    onContextSaved={handleContextSaved}
+                                />
+                                {txnCount !== undefined && (
+                                    <p className="text-xs text-muted-foreground mt-1 ml-1">
+                                        {t("timeline.basedOnTransactions", { count: txnCount })}
+                                    </p>
+                                )}
+                            </li>
+                        )
+                    })}
+                </ol>
+            )}
 
             {/* Dismissed events section */}
             {dismissedEvents.length > 0 && (

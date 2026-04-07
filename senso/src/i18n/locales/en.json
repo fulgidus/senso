@@ -698,7 +698,11 @@
         "addContextPlaceholder": "Add context to this event...",
         "editContext": "Edit context",
         "showDismissed": "Show {{count}} hidden events",
-        "tabLabel": "Timeline"
+        "tabLabel": "Timeline",
+        "emptyCta": "Upload documents",
+        "basedOnTransactions": "Based on {{count}} transactions",
+        "relocation": "Relocation",
+        "debt_change": "Debt Change"
     },
     "uncategorized": {
         "emptyHeading": "Great job!",
