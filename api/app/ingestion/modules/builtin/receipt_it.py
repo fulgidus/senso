@@ -56,8 +56,8 @@ def extract(file_path: Path, raw_text: str | None = None) -> dict:
     # ── Total amount ─────────────────────────────────────────────────────────
     total_amount: Decimal | None = None
     for pattern in [
-        r"totale\s+[:€]?\s*([\d.,]+)",
-        r"importo\s+[:€]?\s*([\d.,]+)",
+        r"totale\s+(?:eur|€)?\s*[:€]?\s*([\d.,]+)",
+        r"importo\s+(?:eur|€)?\s*[:€]?\s*([\d.,]+)",
         r"da\s+pagare\s*[:€]?\s*([\d.,]+)",
         r"totale\s+complessivo\s*[:€]?\s*([\d.,]+)",
     ]:

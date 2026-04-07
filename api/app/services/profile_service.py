@@ -15,6 +15,7 @@ from app.db.repository import (
     upsert_categorization_job,
     upsert_user_profile,
 )
+from app.db.models import UserProfile
 from app.ingestion.llm import get_llm_client
 from app.schemas.profile import CategorizationStatusDTO, UserProfileDTO
 

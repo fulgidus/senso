@@ -91,10 +91,10 @@ def extract(file_path: Path, raw_text: str | None = None) -> dict:
     # ── Total amount (IVA incl.) ──────────────────────────────────────────────
     total_amount: Decimal | None = None
     for pattern in [
-        r"totale\s+(?:fattura|da\s+pagare|documento)\s*[:€]?\s*([\d.,]+)",
-        r"importo\s+totale\s*[:€]?\s*([\d.,]+)",
-        r"totale\s+(?:ivato|complessivo)\s*[:€]?\s*([\d.,]+)",
-        r"\btotale\b\s*[:€]?\s*([\d.,]+)",
+        r"totale\s+(?:fattura|da\s+pagare|documento)\s*(?:eur|€)?\s*[:\s]?\s*([\d.,]+)",
+        r"importo\s+totale\s*(?:eur|€)?\s*[:€]?\s*([\d.,]+)",
+        r"totale\s+(?:ivato|complessivo)\s*(?:eur|€)?\s*[:€]?\s*([\d.,]+)",
+        r"\btotale\b\s*(?:eur|€)?\s*[:€]?\s*([\d.,]+)",
     ]:
         m = re.search(pattern, raw_text, re.IGNORECASE)
         if m:

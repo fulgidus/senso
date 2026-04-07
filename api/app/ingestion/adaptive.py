@@ -84,6 +84,30 @@ class AdaptiveResult:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+_NON_LEDGER_TYPES = frozenset({"payslip", "receipt", "invoice", "utility_bill"})
+
+
+def _extraction_has_content(ext: ExtractedDocument) -> bool:
+    """Return True if extraction produced usable content.
+
+    For bank statements: requires at least one transaction.
+    For non-ledger types: requires at least one non-null key field.
+    Unknown with no content: False.
+    """
+    if ext.transactions:
+        return True
+    if ext.document_type in _NON_LEDGER_TYPES:
+        return any([
+            ext.net_income,
+            ext.gross_income,
+            ext.total_due,       # utility_bill
+            ext.total_amount,    # receipt / invoice
+            ext.merchant,
+            ext.provider,
+        ])
+    return False
+
+
 def run_adaptive_pipeline(
     file_path: Path,
     raw_text: str,
@@ -110,7 +134,7 @@ def run_adaptive_pipeline(
     if module_name:
         extraction = _run_registered_module(file_path, module_name, registry, result)
         if extraction is not None:
-            if extraction.transactions or extraction.document_type != "unknown":
+            if _extraction_has_content(extraction):
                 result.extraction = extraction
                 result.confidence = 0.7
                 result.tier_used = "pdf_adaptive_module"
