@@ -17,7 +17,7 @@ affects: []
 tech-stack:
   added: []
   patterns:
-    - "Public routes at root BrowserRouter level, before auth check — /learn and /learn/:id bypass authentication"
+    - "Public routes at root BrowserRouter level, before auth check - /learn and /learn/:id bypass authentication"
     - "AppRoutes component checks location.pathname for /learn prefix before rendering auth-gated routes"
     - "Type-specific content rendering: ArticleDetail, VideoDetail, SlideDetail, PartnerDetail sub-components"
 
@@ -48,7 +48,7 @@ completed: 2026-03-30
 
 # Phase 8 Plan 03: Public Content Browse + Detail Pages Summary
 
-**Public /learn browse page with type filters, BM25 search, and responsive grid, plus /learn/:id detail page with article links, YouTube embeds, MARP slides, and partner CTAs — all shareable without auth**
+**Public /learn browse page with type filters, BM25 search, and responsive grid, plus /learn/:id detail page with article links, YouTube embeds, MARP slides, and partner CTAs - all shareable without auth**
 
 ## Performance
 
@@ -80,8 +80,8 @@ completed: 2026-03-30
 - `senso/src/i18n/locales/en.json` - Added "content" i18n keys (English translations)
 
 ## Decisions Made
-- BrowserRouter moved to root level with AppRoutes component that checks pathname for /learn prefix to render public routes before checking auth state — preserves existing auth flow while enabling unauthenticated content pages
-- MarpSlideViewer reused directly from coaching feature for slide_deck items — avoids component duplication
+- BrowserRouter moved to root level with AppRoutes component that checks pathname for /learn prefix to render public routes before checking auth state - preserves existing auth flow while enabling unauthenticated content pages
+- MarpSlideViewer reused directly from coaching feature for slide_deck items - avoids component duplication
 - Native fetch used in contentApi.ts since public endpoints require no auth headers (no apiRequest wrapper needed)
 
 ## Deviations from Plan

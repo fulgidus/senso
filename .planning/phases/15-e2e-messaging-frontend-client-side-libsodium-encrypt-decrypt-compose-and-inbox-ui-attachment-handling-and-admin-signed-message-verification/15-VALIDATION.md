@@ -36,8 +36,8 @@ created: 2026-04-04
 
 ## Per-Task Verification Map
 
-| Task ID  | Plan | Wave | Area                        | Test Type   | Automated Command                            | Status     |
-| -------- | ---- | ---- | --------------------------- | ----------- | -------------------------------------------- | ---------- |
+| Task ID  | Plan | Wave | Area                        | Test Type   | Automated Command                            | Status    |
+| -------- | ---- | ---- | --------------------------- | ----------- | -------------------------------------------- | --------- |
 | 15-01-01 | 01   | 1    | libsodium init              | unit        | `pnpm test --run crypto`                     | ⬜ pending |
 | 15-01-02 | 01   | 1    | argon2 KDF                  | unit        | `pnpm test --run kdf`                        | ⬜ pending |
 | 15-01-03 | 01   | 1    | Argon2id interop            | integration | `pytest tests/test_kdf_interop.py`           | ⬜ pending |
@@ -60,10 +60,10 @@ _Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ## Wave 0 Requirements
 
-- [ ] `senso/src/features/messages/__tests__/crypto.test.ts` — libsodium encrypt/decrypt + Ed25519 sign/verify round-trip stubs
-- [ ] `senso/src/features/messages/__tests__/kdf.test.ts` — Argon2id KDF stub with known vector
-- [ ] `api/tests/test_kdf_interop.py` — Python Argon2id vs browser argon2-browser cross-language interop test vectors
-- [ ] `api/tests/test_envelope_migration.py` — AES-GCM → secretbox migration round-trip test
+- [ ] `senso/src/features/messages/__tests__/crypto.test.ts` - libsodium encrypt/decrypt + Ed25519 sign/verify round-trip stubs
+- [ ] `senso/src/features/messages/__tests__/kdf.test.ts` - Argon2id KDF stub with known vector
+- [ ] `api/tests/test_kdf_interop.py` - Python Argon2id vs browser argon2-browser cross-language interop test vectors
+- [ ] `api/tests/test_envelope_migration.py` - AES-GCM → secretbox migration round-trip test
 
 _These must be created in Wave 0 (first plan) before any implementation tasks._
 

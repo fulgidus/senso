@@ -12,7 +12,7 @@ note: claude (current runtime) skipped for independence. codex not installed.
 
 I will now investigate the current state of the coaching prompts, frontend components, and content catalogs to provide grounded feedback on the implementation plans.
 
-### Phase 6: Learn+Act Cards & Demo Hardening — Cross-AI Plan Review
+### Phase 6: Learn+Act Cards & Demo Hardening - Cross-AI Plan Review
 
 This review evaluates the proposed implementation plans for the final "Demo Hardening" phase of the S.E.N.S.O. project.
 
@@ -54,25 +54,25 @@ Only one independent reviewer (Gemini) was available. `claude` CLI was skipped a
 
 ### Agreed Strengths
 
-- **Fallback injection is the right call** — dual-layer reliability (prompt hardening + server-side fallback) is robust against LLM non-compliance during a live demo.
-- **The seed/reset scripts address the single highest-risk demo failure mode** — the ability to run `reset-demo.sh && seed-demo.sh` in one command is critical for a hackathon.
-- **The test suite in 06-01 is well-scoped** — 10 tests covering BM25 paths, fallback injection, and locale isolation provide meaningful regression coverage.
+- **Fallback injection is the right call** - dual-layer reliability (prompt hardening + server-side fallback) is robust against LLM non-compliance during a live demo.
+- **The seed/reset scripts address the single highest-risk demo failure mode** - the ability to run `reset-demo.sh && seed-demo.sh` in one command is critical for a hackathon.
+- **The test suite in 06-01 is well-scoped** - 10 tests covering BM25 paths, fallback injection, and locale isolation provide meaningful regression coverage.
 
 ### Agreed Concerns
 
-1. **[MEDIUM] Fallback trigger threshold (30 chars) is too low** — natural Italian financial questions like "Posso comprarlo?" (16 chars) or "È conveniente?" (14 chars) fall below the threshold and would receive no cards. The trigger should use a semantic signal (e.g., `affordability_verdict != null` OR `len(message) > 15`) rather than a character-count proxy.
+1. **[MEDIUM] Fallback trigger threshold (30 chars) is too low** - natural Italian financial questions like "Posso comprarlo?" (16 chars) or "È conveniente?" (14 chars) fall below the threshold and would receive no cards. The trigger should use a semantic signal (e.g., `affordability_verdict != null` OR `len(message) > 15`) rather than a character-count proxy.
 
-2. **[MEDIUM] STT-TTS feedback loop not addressed in 06-02** — the plan fixes TTS timing but doesn't document how STT is disabled/paused while TTS audio is playing. In a speaker-based demo (not headphones), the microphone will pick up the assistant's spoken output and loop it back as user input. This must be verified in the end-to-end voice test.
+2. **[MEDIUM] STT-TTS feedback loop not addressed in 06-02** - the plan fixes TTS timing but doesn't document how STT is disabled/paused while TTS audio is playing. In a speaker-based demo (not headphones), the microphone will pick up the assistant's spoken output and loop it back as user input. This must be verified in the end-to-end voice test.
 
-3. **[LOW] 75-second client timeout is too permissive for a 90-second demo** — if the timeout fires, the demo has effectively failed. Consider 30-40 seconds as the client timeout to match user expectations, with the Retry button as the recovery path.
+3. **[LOW] 75-second client timeout is too permissive for a 90-second demo** - if the timeout fires, the demo has effectively failed. Consider 30-40 seconds as the client timeout to match user expectations, with the Retry button as the recovery path.
 
 ### Divergent Views
 
-N/A — only one external reviewer. No divergence to report.
+N/A - only one external reviewer. No divergence to report.
 
 ### Priority Action Items Before Execution
 
 1. **06-01 Task 1**: Change the fallback trigger from `len(message) < 30` to a combined check: skip if `len(message) < 15` OR `affordability_verdict` is absent (i.e., the response is truly conversational, not a financial recommendation).
-2. **06-02 Task 2**: Add explicit STT mute/unmute logic during TTS playback in `useVoiceMode` — disable `recognition` on TTS start, re-enable on TTS `onEnd`.
+2. **06-02 Task 2**: Add explicit STT mute/unmute logic during TTS playback in `useVoiceMode` - disable `recognition` on TTS start, re-enable on TTS `onEnd`.
 3. **06-04 Task 1**: Lower client-side timeout from 75s to 35s; this is also safer because the backend 60s LLM timeout should trigger a 502 before the frontend timeout fires.
 4. **06-01 Task 2** (optional enhancement): Add a test in `test_coaching_cards.py` that validates all slide IDs in `slides.json` exist as keys in `slideIndex.ts` (cross-catalog integrity check).

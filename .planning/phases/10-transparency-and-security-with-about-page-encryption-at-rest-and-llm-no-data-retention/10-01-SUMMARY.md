@@ -41,7 +41,7 @@ key-files:
     - api/app/services/auth_service.py
 
 key-decisions:
-  - "violation_count and banned_until were already present in Round 12 — NOT added again in Round 13"
+  - "violation_count and banned_until were already present in Round 12 - NOT added again in Round 13"
   - "server_wrap_user_key() uses lazy import of get_settings() to avoid circular imports at module load"
   - "All UserDTO constructions include strict_privacy_mode=bool(user.strict_privacy_mode) to handle DB NULL safely"
 
@@ -79,30 +79,30 @@ completed: 2026-03-31
 
 ## Task Commits
 
-1. **Task 1: Add crypto dependencies and Settings.encryption_key** — `bea41ef` (feat)
-2. **Task 2: Create api/app/db/crypto.py with PBKDF2 wrapped-key helpers** — `81b0260` (feat)
-3. **Task 3: DB columns, schema updates, and auth_service hook** — `ee680a2` (feat)
+1. **Task 1: Add crypto dependencies and Settings.encryption_key** - `bea41ef` (feat)
+2. **Task 2: Create api/app/db/crypto.py with PBKDF2 wrapped-key helpers** - `81b0260` (feat)
+3. **Task 3: DB columns, schema updates, and auth_service hook** - `ee680a2` (feat)
 
 ## Files Created/Modified
 
-- `api/pyproject.toml` — added sqlalchemy-utils and cryptography deps
-- `api/app/core/config.py` — added `encryption_key` field and `get_settings()` wiring
-- `api/app/db/crypto.py` — new file with 5 PBKDF2/AES-GCM helper functions
-- `api/tests/test_crypto.py` — new file with 4 passing unit tests
-- `api/app/db/session.py` — Round 13 migration block appended
-- `api/app/db/models.py` — 3 new columns on `User` model
-- `api/app/schemas/auth.py` — `strict_privacy_mode` on `UserDTO` and `UpdateMeRequest`
-- `api/app/services/auth_service.py` — key-wrap on signup; strict_privacy_mode on update_me and all DTO constructions
+- `api/pyproject.toml` - added sqlalchemy-utils and cryptography deps
+- `api/app/core/config.py` - added `encryption_key` field and `get_settings()` wiring
+- `api/app/db/crypto.py` - new file with 5 PBKDF2/AES-GCM helper functions
+- `api/tests/test_crypto.py` - new file with 4 passing unit tests
+- `api/app/db/session.py` - Round 13 migration block appended
+- `api/app/db/models.py` - 3 new columns on `User` model
+- `api/app/schemas/auth.py` - `strict_privacy_mode` on `UserDTO` and `UpdateMeRequest`
+- `api/app/services/auth_service.py` - key-wrap on signup; strict_privacy_mode on update_me and all DTO constructions
 
 ## Decisions Made
 
-- `violation_count` and `banned_until` were already present in Round 12 — only 3 new columns added in Round 13 (avoids "duplicate column" errors on existing DBs)
+- `violation_count` and `banned_until` were already present in Round 12 - only 3 new columns added in Round 13 (avoids "duplicate column" errors on existing DBs)
 - `server_wrap_user_key()` uses a lazy local `from app.core.config import get_settings` to avoid circular import at module load time
 - `strict_privacy_mode` always coerced to `bool` at the DTO boundary (`bool(user.strict_privacy_mode)`) to safely handle DB NULL on existing rows
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+None - plan executed exactly as written.
 
 ## Issues Encountered
 
@@ -110,7 +110,7 @@ None.
 
 ## User Setup Required
 
-None — `ENCRYPTION_KEY` defaults to a dev-safe 32-byte value. Override with real key in production `ENCRYPTION_KEY` env var.
+None - `ENCRYPTION_KEY` defaults to a dev-safe 32-byte value. Override with real key in production `ENCRYPTION_KEY` env var.
 
 ## Next Phase Readiness
 

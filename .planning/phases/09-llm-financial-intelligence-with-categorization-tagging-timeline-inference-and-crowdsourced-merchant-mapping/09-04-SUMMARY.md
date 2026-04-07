@@ -37,8 +37,8 @@ key_files:
 
 key_decisions:
   - "get_llm_client() factory used in endpoints instead of LLMClient(get_settings().llm_config) for consistency with profile_service.py"
-  - "Uncategorized transactions sorted: frequency-first (same description grouped) then by abs amount — surfaces most-actionable items first"
-  - "BackgroundTasks used for async TOS check — 202 Accepted returns immediately, check runs after response"
+  - "Uncategorized transactions sorted: frequency-first (same description grouped) then by abs amount - surfaces most-actionable items first"
+  - "BackgroundTasks used for async TOS check - 202 Accepted returns immediately, check runs after response"
 
 requirements-completed: []
 
@@ -49,7 +49,7 @@ metrics:
   files_modified: 3
 ---
 
-# Phase 09 Plan 04: Timeline, Uncategorized, and Notification API Endpoints — Summary
+# Phase 09 Plan 04: Timeline, Uncategorized, and Notification API Endpoints - Summary
 
 **5 new profile sub-endpoints (timeline CRUD + uncategorized review + manual category correction) and a notifications router, with async TOS check on context submission.**
 
@@ -77,9 +77,9 @@ metrics:
 
 ## Files Created/Modified
 
-- `api/app/api/profile.py` — Added DTOs (TimelineEventDTO, UncategorizedTransactionDTO, DismissEventRequest, AddContextRequest, CategoryUpdateRequest) + 5 new endpoints
-- `api/app/api/notifications.py` — New router: GET /notifications, POST /{id}/read, POST /read-all
-- `api/app/main.py` — Added `notifications_router` import and `app.include_router(notifications_router, prefix="/notifications")`
+- `api/app/api/profile.py` - Added DTOs (TimelineEventDTO, UncategorizedTransactionDTO, DismissEventRequest, AddContextRequest, CategoryUpdateRequest) + 5 new endpoints
+- `api/app/api/notifications.py` - New router: GET /notifications, POST /{id}/read, POST /read-all
+- `api/app/main.py` - Added `notifications_router` import and `app.include_router(notifications_router, prefix="/notifications")`
 
 ## Decisions Made
 
@@ -89,7 +89,7 @@ metrics:
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+None - plan executed exactly as written.
 
 ## Issues Encountered
 

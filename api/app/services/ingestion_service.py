@@ -226,7 +226,7 @@ class IngestionService:
         raw_output: str | None = None,
         duration_ms: int | None = None,
     ) -> None:
-        """Write a single trace row. Never raises — failures are logged and swallowed."""
+        """Write a single trace row. Never raises - failures are logged and swallowed."""
         from app.db.models import IngestionTrace  # noqa: PLC0415
 
         try:

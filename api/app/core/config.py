@@ -19,8 +19,8 @@ class Settings:
     minio_endpoint: str
     minio_access_key: str
     minio_secret_key: str
-    minio_bucket: str  # user uploads — treat as sensitive, do not nuke
-    minio_tts_bucket: str  # TTS audio cache — safe to nuke entirely
+    minio_bucket: str  # user uploads - treat as sensitive, do not nuke
+    minio_tts_bucket: str  # TTS audio cache - safe to nuke entirely
     # Debug flags
     llm_debug: bool
     # Database URL

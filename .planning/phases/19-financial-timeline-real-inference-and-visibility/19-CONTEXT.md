@@ -5,7 +5,7 @@ created: "2026-04-06"
 status: ready-to-execute
 ---
 
-# Phase 19 Context — Financial Timeline: Real Inference + Visibility
+# Phase 19 Context - Financial Timeline: Real Inference + Visibility
 
 ## Why This Phase Exists
 
@@ -49,7 +49,7 @@ Phase 9 but almost never fires in practice:
 - New Jinja2 template block `timeline_block.j2`: condensed 3-event summary injected when
   relevant events exist (non-dismissed, last 180 days)
 - Coach prompt assembly in `CoachingService` includes timeline block after profile block
-- New tool: `get_timeline_events(types: list[str])` — LLM can fetch specific event types
+- New tool: `get_timeline_events(types: list[str])` - LLM can fetch specific event types
 
 ### 19-04: Timeline tab visual improvements
 - Date axis: events sorted chronologically with relative date labels ("3 mesi fa", "ieri")
@@ -61,11 +61,11 @@ Phase 9 but almost never fires in practice:
 ## Scope
 
 **In scope:**
-- `api/app/ingestion/adaptive.py` — `_run_timeline_inference()` completing 6/6 types
-- `api/app/services/profile_service.py` — timeline trigger calls from enrichment
-- `api/app/coaching/service.py` + `prompts/` — timeline context injection + new tool
-- `senso/src/features/profile/TimelineTab.tsx` — visual improvements
-- `api/tests/` — timeline inference tests
+- `api/app/ingestion/adaptive.py` - `_run_timeline_inference()` completing 6/6 types
+- `api/app/services/profile_service.py` - timeline trigger calls from enrichment
+- `api/app/coaching/service.py` + `prompts/` - timeline context injection + new tool
+- `senso/src/features/profile/TimelineTab.tsx` - visual improvements
+- `api/tests/` - timeline inference tests
 
 **Not in scope:**
 - Push notifications for timeline events (notifications exist but won't be extended)

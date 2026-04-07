@@ -14,7 +14,7 @@ dependency_graph:
     - 3-tier sm→md→lg LLM escalation in categorization_service (_classify_with_escalation)
     - merchant map pre-check in run_categorization (Step 1.5 before LLM)
     - implicit merchant map write-back after LLM classification (D-08)
-    - timeline inference in run_categorization (Step 4 — 4 of 6 event types)
+    - timeline inference in run_categorization (Step 4 - 4 of 6 event types)
     - tos_check_system.j2 prompt + tos_check_response.schema.json (for Plan 03)
   affects: [09-03, 09-04, api/app/services/categorization_service.py, api/app/db/repository.py]
 
@@ -34,9 +34,9 @@ key_files:
     - api/app/services/categorization_service.py
 
 key_decisions:
-  - "3-tier escalation uses per-tier confidence thresholds: sm≥0.6, md≥0.5, lg≥0.4 — lower threshold for stronger models"
+  - "3-tier escalation uses per-tier confidence thresholds: sm≥0.6, md≥0.5, lg≥0.4 - lower threshold for stronger models"
   - "write_merchant_map() called implicitly after each successful LLM classification (D-08 silent learning)"
-  - "_run_timeline_inference() implements 4 of 6 D-13 event types: major_purchase, extraordinary_income, subscription_accumulation, income_shift — relocation and debt_change deferred (insufficient transaction fields for reliable detection)"
+  - "_run_timeline_inference() implements 4 of 6 D-13 event types: major_purchase, extraordinary_income, subscription_accumulation, income_shift - relocation and debt_change deferred (insufficient transaction fields for reliable detection)"
   - "upsert_timeline_event matches on (user_id, event_type, event_date) to prevent duplicate events on re-runs"
 
 requirements-completed: []
@@ -48,7 +48,7 @@ metrics:
   files_modified: 4
 ---
 
-# Phase 09 Plan 02: Merchant Map + 3-Tier LLM Escalation + Timeline Inference — Summary
+# Phase 09 Plan 02: Merchant Map + 3-Tier LLM Escalation + Timeline Inference - Summary
 
 **3-tier sm→md→lg LLM escalation replaces single-tier batch classification, merchant map pre-check runs before LLM, implicit write-back after classification, and 4-event-type timeline inference runs as final pipeline step.**
 
@@ -79,15 +79,15 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `api/app/db/repository.py` — Added `lookup_merchant_map`, `write_merchant_map`, `get_timeline_events`, `upsert_timeline_event`, `get_timeline_event`, `dismiss_timeline_event`, `set_timeline_context`
-- `api/app/services/categorization_service.py` — Step 1.5 merchant pre-check, `_classify_with_escalation()`, implicit write-back, Step 4 `_run_timeline_inference()`
-- `api/app/ingestion/prompts/tos_check_system.j2` — TOS check system prompt for Plan 03
-- `api/app/ingestion/schemas/tos_check_response.schema.json` — TOS check response schema (`clean`, `violations`, `severity`)
+- `api/app/db/repository.py` - Added `lookup_merchant_map`, `write_merchant_map`, `get_timeline_events`, `upsert_timeline_event`, `get_timeline_event`, `dismiss_timeline_event`, `set_timeline_context`
+- `api/app/services/categorization_service.py` - Step 1.5 merchant pre-check, `_classify_with_escalation()`, implicit write-back, Step 4 `_run_timeline_inference()`
+- `api/app/ingestion/prompts/tos_check_system.j2` - TOS check system prompt for Plan 03
+- `api/app/ingestion/schemas/tos_check_response.schema.json` - TOS check response schema (`clean`, `violations`, `severity`)
 
 ## Decisions Made
 
 - **3-tier confidence thresholds:** sm≥0.6, md≥0.5, lg≥0.4. Smaller models need higher confidence to avoid false positives; stronger models tolerate lower thresholds.
-- **4 of 6 event types implemented:** `relocation` and `debt_change` omitted — transaction fields (description, category, amount) don't reliably distinguish relocation vs. travel spend, or debt_change without explicit loan repayment category. Noted as deferred.
+- **4 of 6 event types implemented:** `relocation` and `debt_change` omitted - transaction fields (description, category, amount) don't reliably distinguish relocation vs. travel spend, or debt_change without explicit loan repayment category. Noted as deferred.
 - **Implicit merchant map learning (D-08):** `write_merchant_map()` called after every successful non-"uncategorized" LLM result. No user prompt required.
 
 ## Deviations from Plan
@@ -103,12 +103,12 @@ Each task was committed atomically:
 
 ---
 
-**Total deviations:** 1 (scope reduction — 2 event types deferred for accuracy)
+**Total deviations:** 1 (scope reduction - 2 event types deferred for accuracy)
 **Impact on plan:** Minor. Core pipeline intelligence is complete. `relocation`/`debt_change` are stretch goals that would require richer metadata to implement correctly.
 
 ## Issues Encountered
 
-None — implementation followed plan structure exactly.
+None - implementation followed plan structure exactly.
 
 ## User Setup Required
 

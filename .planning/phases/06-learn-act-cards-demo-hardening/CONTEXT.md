@@ -12,20 +12,20 @@ recommendation and immediate next actions.
 The following was completed during Phases 4 and 5 and does not need to be rebuilt:
 
 ### Backend
-- `coaching_response.schema.json` — full schema with `action_cards[]`, `resource_cards[]`,
+- `coaching_response.schema.json` - full schema with `action_cards[]`, `resource_cards[]`,
   `learn_cards[]`, `affordability_verdict`, `details_a2ui`, `new_insight`.
-- `ContentIndex` BM25 engine (`api/app/content/search.py`) — locale-partitioned, built at
+- `ContentIndex` BM25 engine (`api/app/content/search.py`) - locale-partitioned, built at
   startup, exposes `search_content(query, locale, top_k, content_types)`.
-- `_SEARCH_CONTENT_TOOL` — LLM tool definition wired into `CoachingService.chat()`.
-- `_tool_executor` closure — handles `search_content` tool calls during LLM inference.
+- `_SEARCH_CONTENT_TOOL` - LLM tool definition wired into `CoachingService.chat()`.
+- `_tool_executor` closure - handles `search_content` tool calls during LLM inference.
 - Content catalogs (all under `api/app/content/`):
-  - `articles.json` — 12 articles, `it` and `en`, covering budget, loans, ETF, emergency fund.
-  - `videos.json` — 8 videos with YouTube `video_id`, `it` and `en`.
-  - `slides.json` — 6 MARP slide decks, `it` and `en`.
-  - `partners.json` — 5 Italian partner offers (Fineco, Hype, Moneyfarm, ING, buddybank).
-- `response_format.j2` — LLM is instructed to call `search_content` before populating
+  - `articles.json` - 12 articles, `it` and `en`, covering budget, loans, ETF, emergency fund.
+  - `videos.json` - 8 videos with YouTube `video_id`, `it` and `en`.
+  - `slides.json` - 6 MARP slide decks, `it` and `en`.
+  - `partners.json` - 5 Italian partner offers (Fineco, Hype, Moneyfarm, ING, buddybank).
+- `response_format.j2` - LLM is instructed to call `search_content` before populating
   `resource_cards`; never invent URLs.
-- `_repair_response()` — ensures `action_cards`, `resource_cards`, `learn_cards` default to
+- `_repair_response()` - ensures `action_cards`, `resource_cards`, `learn_cards` default to
   `[]` if missing.
 
 ### Frontend
@@ -49,9 +49,9 @@ The following was completed during Phases 4 and 5 and does not need to be rebuil
 ### 1. Card reliability (untested end-to-end)
 Cards have never been observed appearing in the live app. The LLM pipeline supports them via
 the `search_content` tool call, but whether the model reliably calls the tool and whether the
-response is correctly parsed and rendered has not been tested. The full path —
+response is correctly parsed and rendered has not been tested. The full path -
 `search_content` tool call → BM25 hit → populated `resource_cards`/`action_cards` in JSON →
-frontend rendering — needs end-to-end verification and any reliability fixes.
+frontend rendering - needs end-to-end verification and any reliability fixes.
 
 **Risk area:** The LLM may skip the tool call for simple questions. The prompt instructs it
 to call `search_content` for any question "where the user would benefit from reading material"
@@ -70,8 +70,8 @@ needs to be verified to set `slide_id` from the catalog result.
 ### 3. Speech-to-speech loop (untested end-to-end)
 The full STT → coaching API → TTS path has never been tested as a single continuous flow.
 Individual pieces (STT hook, TTS hook, coaching API) were each built and unit-tested in
-isolation. The integrated loop — user speaks → transcript sent → coaching response plays
-back — needs an end-to-end test and fixes for any timing or state issues.
+isolation. The integrated loop - user speaks → transcript sent → coaching response plays
+back - needs an end-to-end test and fixes for any timing or state issues.
 
 ### 4. Demo seed data (no seed script exists)
 Real sample files exist at `api/app/ingestion/samples/` but there is no script to create a
@@ -79,18 +79,18 @@ demo account and upload them. A seed script is required so the demo can be reset
 re-run in one command.
 
 **Available sample files:**
-| File | Type | Institution |
-|------|------|-------------|
-| `revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_4700b8.csv` | CSV bank statement | Revolut IT |
-| `revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_d8fee2.pdf` | PDF bank statement | Revolut IT |
-| `fineco_it/FinecoIT_movements_20260324.xlsx` | XLSX movements | Fineco IT |
-| `satispay_it/SatispayIT_Export_Report.xlsx` | XLSX transactions | Satispay IT |
-| `satispay_it/SatispayIT_Export_Report.pdf` | PDF report | Satispay IT |
-| `paypal_it/PaypalIT_XLKMUX84JSM7Y-CSR-...` | CSV + PDF | PayPal IT |
-| `edison_energia_it/610*.pdf` | PDF utility bills (6 files) | Edison Energia IT |
-| `generic_invoice_it/ricevuta*.pdf` | PDF receipts (4 files) | Generic invoice IT |
+| File                                                                            | Type                        | Institution        |
+| ------------------------------------------------------------------------------- | --------------------------- | ------------------ |
+| `revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_4700b8.csv` | CSV bank statement          | Revolut IT         |
+| `revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_d8fee2.pdf` | PDF bank statement          | Revolut IT         |
+| `fineco_it/FinecoIT_movements_20260324.xlsx`                                    | XLSX movements              | Fineco IT          |
+| `satispay_it/SatispayIT_Export_Report.xlsx`                                     | XLSX transactions           | Satispay IT        |
+| `satispay_it/SatispayIT_Export_Report.pdf`                                      | PDF report                  | Satispay IT        |
+| `paypal_it/PaypalIT_XLKMUX84JSM7Y-CSR-...`                                      | CSV + PDF                   | PayPal IT          |
+| `edison_energia_it/610*.pdf`                                                    | PDF utility bills (6 files) | Edison Energia IT  |
+| `generic_invoice_it/ricevuta*.pdf`                                              | PDF receipts (4 files)      | Generic invoice IT |
 
-**Note:** These files are gitignored and never shipped in Docker — they are local development
+**Note:** These files are gitignored and never shipped in Docker - they are local development
 references only.
 
 ### 5. Loading/skeleton states
@@ -136,7 +136,7 @@ Target wall time: under 90 seconds from step 1 to step 6 for a prepared presente
 - Cards render **inline in chat**, below the spoken message text, in the `AssistantBubble`.
 - Card order (already implemented): action cards → resource cards → learn cards →
   affordability verdict → A2UI detail panel.
-- No modal or separate panel required — inline is sufficient and cleaner for demo.
+- No modal or separate panel required - inline is sufficient and cleaner for demo.
 - Cards must be **visually polished** for demo judges: clear typography, proper spacing,
   real thumbnails for videos, readable slide navigation.
 - Partner offer cards must show the partner name and CTA button clearly.
@@ -147,16 +147,16 @@ Target wall time: under 90 seconds from step 1 to step 6 for a prepared presente
 
 ## Key design decisions already made
 
-| Decision | Source |
-|----------|--------|
-| BM25 in-process (not Qdrant) for content search | CONVENTIONS.md |
-| LLM calls `search_content` tool before populating `resource_cards` | `response_format.j2` |
-| `resource_cards.url` must be from catalog — never LLM-invented | CONVENTIONS.md |
-| `slide_id` field on ResourceCard maps to `SLIDE_INDEX` in frontend | `ResourceCardRouter` |
-| `action_type: "calculator"` renders `LoanCalculatorCard` with sliders | CONVENTIONS.md |
-| `action_type: "funnel"` renders `PartnerOfferCard` | CONVENTIONS.md |
-| TTS falls back to browser `speechSynthesis` when ElevenLabs returns 503 | Phase 5 decision |
-| Sample files are gitignored, never shipped in Docker image | `samples/.gitignore` |
+| Decision                                                                | Source               |
+| ----------------------------------------------------------------------- | -------------------- |
+| BM25 in-process (not Qdrant) for content search                         | CONVENTIONS.md       |
+| LLM calls `search_content` tool before populating `resource_cards`      | `response_format.j2` |
+| `resource_cards.url` must be from catalog - never LLM-invented          | CONVENTIONS.md       |
+| `slide_id` field on ResourceCard maps to `SLIDE_INDEX` in frontend      | `ResourceCardRouter` |
+| `action_type: "calculator"` renders `LoanCalculatorCard` with sliders   | CONVENTIONS.md       |
+| `action_type: "funnel"` renders `PartnerOfferCard`                      | CONVENTIONS.md       |
+| TTS falls back to browser `speechSynthesis` when ElevenLabs returns 503 | Phase 5 decision     |
+| Sample files are gitignored, never shipped in Docker image              | `samples/.gitignore` |
 
 ---
 

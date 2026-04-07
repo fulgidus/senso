@@ -5,7 +5,7 @@ status: complete
 completed_at: "2026-04-05"
 ---
 
-# Summary: 16-01 — Dependencies + Playwright Config + Shared Fixtures
+# Summary: 16-01 - Dependencies + Playwright Config + Shared Fixtures
 
 ## What was built
 
@@ -17,10 +17,10 @@ completed_at: "2026-04-05"
 
 ## Key files
 
-- `senso/package.json` — @axe-core/playwright added
-- `senso/playwright.config.ts` — mobile projects added
-- `senso/e2e/support/fixtures.ts` — authedPage fixture
-- `senso/e2e/support/touch-helpers.ts` — touch gesture utilities
-- `senso/e2e/support/api-mocks.ts` — extended with messages + multi-persona mocks
+- `senso/package.json` - @axe-core/playwright added
+- `senso/playwright.config.ts` - mobile projects added
+- `senso/e2e/support/fixtures.ts` - authedPage fixture
+- `senso/e2e/support/touch-helpers.ts` - touch gesture utilities
+- `senso/e2e/support/api-mocks.ts` - extended with messages + multi-persona mocks
 
 ## Self-Check: PASSED

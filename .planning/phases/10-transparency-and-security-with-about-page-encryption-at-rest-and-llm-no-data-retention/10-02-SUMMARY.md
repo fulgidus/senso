@@ -38,7 +38,7 @@ key-decisions:
 
 patterns-established:
   - "Dual-path privacy: standard mode adds no-store header for OpenAI; strict mode adds ZDR for OpenRouter AND excludes OpenAI"
-  - "Tests use unittest.mock to capture kwargs passed to OpenAI() and create() — no live API calls required"
+  - "Tests use unittest.mock to capture kwargs passed to OpenAI() and create() - no live API calls required"
 
 requirements-completed: []
 
@@ -81,10 +81,10 @@ Each task was committed atomically:
 
 ## Decisions Made
 
-- `no-store` header injected on **all** direct OpenAI calls (not just strict mode) as baseline privacy hygiene — minimal overhead, maximum safety
+- `no-store` header injected on **all** direct OpenAI calls (not just strict mode) as baseline privacy hygiene - minimal overhead, maximum safety
 - ZDR body (`extra_body`) is **strict-mode only** for OpenRouter, preserving standard-mode performance
 - `strict_mode=True` excludes `"openai"` entirely from the provider chain (no ZDR guarantee available for OpenAI through OpenRouter)
-- In `_openai_compat_complete_with_tools`, ZDR is injected in both `call_kwargs_1` (Step 1 tool discovery) and `call_kwargs_2` (Step 3 final output) — every API call in the round-trip must carry the header
+- In `_openai_compat_complete_with_tools`, ZDR is injected in both `call_kwargs_1` (Step 1 tool discovery) and `call_kwargs_2` (Step 3 final output) - every API call in the round-trip must carry the header
 
 ## Deviations from Plan
 
@@ -92,8 +92,8 @@ None - plan executed exactly as written.
 
 ## Issues Encountered
 
-- Pre-existing test failures in `test_tts.py` (`elevenlabs` import error) and `test_coaching_endpoints.py` (DB migration issue) are unrelated to our llm.py changes. Verified by running the test suite on the base branch (before our changes) — those failures were pre-existing.
-- Our targeted test suite (`test_llm_noretention.py`, `test_ingestion_service.py`, `test_coaching_service.py`, `test_ingestion_endpoints.py`) — 49 tests all pass.
+- Pre-existing test failures in `test_tts.py` (`elevenlabs` import error) and `test_coaching_endpoints.py` (DB migration issue) are unrelated to our llm.py changes. Verified by running the test suite on the base branch (before our changes) - those failures were pre-existing.
+- Our targeted test suite (`test_llm_noretention.py`, `test_ingestion_service.py`, `test_coaching_service.py`, `test_ingestion_endpoints.py`) - 49 tests all pass.
 
 ## User Setup Required
 

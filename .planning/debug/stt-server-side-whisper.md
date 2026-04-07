@@ -7,7 +7,7 @@ updated: 2026-04-02T01:00:00Z
 
 ## Current Focus
 
-hypothesis: CONFIRMED — LibreWolf blocks Web Speech API; MediaRecorder is universally available. Implemented full server-side Whisper STT fallback.
+hypothesis: CONFIRMED - LibreWolf blocks Web Speech API; MediaRecorder is universally available. Implemented full server-side Whisper STT fallback.
 test: Backend tests (6/6 pass), frontend build (clean)
 expecting: Voice input works on LibreWolf via Whisper transcription
 next_action: Human verification in browser (LibreWolf or Firefox)
@@ -35,13 +35,13 @@ started: Always (by design - LibreWolf blocks Web Speech API)
 
 - timestamp: 2026-04-02T00:30:00Z
   checked: api/app/api/coaching.py, api/app/core/llm_config.py
-  found: LLM config uses LLM_OPENAI_API_KEY env var for OpenAI; openai SDK already in pyproject.toml; TTS uses ElevenLabs SDK directly in endpoint — same pattern acceptable for STT
+  found: LLM config uses LLM_OPENAI_API_KEY env var for OpenAI; openai SDK already in pyproject.toml; TTS uses ElevenLabs SDK directly in endpoint - same pattern acceptable for STT
   implication: Can instantiate OpenAI client directly in /coaching/stt endpoint using api_key from llm_config
 
 - timestamp: 2026-04-02T00:45:00Z
   checked: senso/src/features/coaching/useVoiceInput.ts, useVoiceMode.ts, VoiceModeBar.tsx
   found: isAvailable propagates up cleanly; VoiceModeBar disables mic when !isSttAvailable
-  implication: Only need to change useVoiceInput.ts to add MediaRecorder backend — all consumers update automatically
+  implication: Only need to change useVoiceInput.ts to add MediaRecorder backend - all consumers update automatically
 
 - timestamp: 2026-04-02T01:00:00Z
   checked: docker compose run --rm api uv run pytest tests/test_stt_endpoint.py -v
@@ -78,7 +78,7 @@ files_changed:
 **Root Cause Confirmed:** LibreWolf disables `window.SpeechRecognition` for privacy. The hook only supported that single backend, so `isAvailable=false` on those browsers.
 
 **Fix Summary:**
-- Backend: Added `POST /coaching/stt` endpoint in `api/app/api/coaching.py` (lines 487–551) — accepts multipart audio, calls Whisper `whisper-1`, returns `{ text }`. Requires `LLM_OPENAI_API_KEY` in env; returns 503 if absent, 400 for empty audio, 502 for Whisper failure.
+- Backend: Added `POST /coaching/stt` endpoint in `api/app/api/coaching.py` (lines 487-551) - accepts multipart audio, calls Whisper `whisper-1`, returns `{ text }`. Requires `LLM_OPENAI_API_KEY` in env; returns 503 if absent, 400 for empty audio, 502 for Whisper failure.
 - Frontend: Rewrote `senso/src/features/coaching/useVoiceInput.ts` (all 270 lines) with dual-backend architecture:
   - Detects backend at mount: `web-speech` → `media-recorder` → `none`
   - `isAvailable` is `true` for either Web Speech API OR MediaRecorder (blocks only if neither)
@@ -95,15 +95,15 @@ files_changed:
 1. **On LibreWolf (or Firefox with `media.webspeech.recognition.enable=false`):**
    - Open the app and log in
    - Open a coaching chat session
-   - Click the voice mode toggle (headset icon) — it should open without error (permission dialog appears)
+   - Click the voice mode toggle (headset icon) - it should open without error (permission dialog appears)
    - **Expected:** Mic button is now ENABLED (was disabled before)
    - Hold the mic button and say something
    - Release the mic button
-   - **Expected:** After ~1–2 seconds (Whisper transcription), the text appears in the chat input and is sent
+   - **Expected:** After ~1-2 seconds (Whisper transcription), the text appears in the chat input and is sent
    - The hint text below the mic should say "Tieni premuto il microfono per parlare" (not the "non disponibile" message)
 
-2. **On Chrome/Edge (Web Speech API available) — regression check:**
-   - Same flow — should still work with real-time interim transcripts (no change in behavior)
+2. **On Chrome/Edge (Web Speech API available) - regression check:**
+   - Same flow - should still work with real-time interim transcripts (no change in behavior)
    - The `isAvailable` flag is still `true` and the preferred Web Speech API backend is used
 
 3. **Backend requires `LLM_OPENAI_API_KEY`:**

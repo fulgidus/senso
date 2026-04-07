@@ -5,20 +5,20 @@ verified_at: 2026-04-05
 verifier: orchestrator
 ---
 
-# Phase 15 Verification — E2E Messaging Frontend
+# Phase 15 Verification - E2E Messaging Frontend
 
 ## Automated Check Results
 
 ### Frontend Tests
 
 - **76/76 tests pass** across 16 test files
-- No regressions vs Wave 0 baseline (60 → 76 — 16 new tests added)
+- No regressions vs Wave 0 baseline (60 → 76 - 16 new tests added)
 
 ### Backend Tests
 
 - Phase 15 crypto tests (`test_kdf_interop.py`, `test_envelope_migration.py`) require Postgres
   to exist (conftest.py connects at import time). The test DB tables are not initialized in
-  the current CI environment — pre-existing infrastructure issue, documented in STATE.md.
+  the current CI environment - pre-existing infrastructure issue, documented in STATE.md.
 - **Not a Phase 15 regression.** All Phase 15 backend code (`nacl_crypto.py`, `auth_service.py`,
   `attachments.py`) was verified by prior waves' executor agents (wave 1: 305 backend tests green
   on executor machine with initialized DB).
@@ -50,18 +50,18 @@ verifier: orchestrator
 | no-hardcoded-locale test passes                       | 2/2 tests green in final suite                                       | ✓      |
 | nyquist_compliant: true                               | Set in 15-VALIDATION.md                                              | ✓      |
 
-## Manual Verification Items (deferred — requires live stack)
+## Manual Verification Items (deferred - requires live stack)
 
 | Item                                     | Why Manual                                      |
 | ---------------------------------------- | ----------------------------------------------- |
 | Recovery phrase copy-to-clipboard        | Clipboard API not testable in jsdom             |
-| libsodium WASM load time < 500ms         | Performance — DevTools Network tab              |
+| libsodium WASM load time < 500ms         | Performance - DevTools Network tab              |
 | Attachment download + decrypt end-to-end | Requires live MinIO + session with key material |
 | Admin verified badge visual rendering    | UI rendering with real admin message            |
-| STT hold-to-speak (existing issue)       | Chromium micStreamRef contention — pre-existing |
+| STT hold-to-speak (existing issue)       | Chromium micStreamRef contention - pre-existing |
 
 ## Score: 21/21 automated must-haves ✓
 
-Phase 15 goal achieved: client-side E2E encryption fully wired — libsodium WASM init,
+Phase 15 goal achieved: client-side E2E encryption fully wired - libsodium WASM init,
 Argon2id KDF, envelope migration, X25519 compose + inbox, recovery phrase interstitial,
 attachment flow, admin signature verification, and full i18n coverage.

@@ -1,4 +1,4 @@
-# Research: Playwright E2E Patterns (2024–2026)
+# Research: Playwright E2E Patterns (2024-2026)
 
 > Playwright version baseline: **v1.44+** (May 2024) through current **v1.51+** (2025).  
 > All API signatures are verified against official Playwright docs and the upstream `deviceDescriptorsSource.json`.
@@ -11,7 +11,7 @@ Playwright's recommended patterns have consolidated around **Project Dependencie
 
 ---
 
-## Part 1 — Real Stack E2E Tests Against Docker Compose
+## Part 1 - Real Stack E2E Tests Against Docker Compose
 
 ### 1.1 Override File Pattern
 
@@ -123,9 +123,9 @@ healthcheck:
 
 ---
 
-### 1.3 Playwright globalSetup — Project Dependencies (Recommended, v1.31+)
+### 1.3 Playwright globalSetup - Project Dependencies (Recommended, v1.31+)
 
-The **Project Dependencies** pattern is Playwright's recommended approach as of v1.31. It shows up in HTML reports, supports traces, and works with fixtures — none of which work with `globalSetup:` config option.
+The **Project Dependencies** pattern is Playwright's recommended approach as of v1.31. It shows up in HTML reports, supports traces, and works with fixtures - none of which work with `globalSetup:` config option.
 
 ```ts
 // playwright.config.ts
@@ -137,13 +137,13 @@ export default defineConfig({
     baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
   },
   projects: [
-    // 1. Setup project — runs first, waits for Docker services
+    // 1. Setup project - runs first, waits for Docker services
     {
       name: 'setup',
       testMatch: /global\.setup\.ts/,
       teardown: 'teardown',         // linked teardown
     },
-    // 2. Teardown project — runs after all tests complete
+    // 2. Teardown project - runs after all tests complete
     {
       name: 'teardown',
       testMatch: /global\.teardown\.ts/,
@@ -195,7 +195,7 @@ teardown('clean up test data', async ({ request }) => {
 });
 ```
 
-> **Alternative (legacy) `globalSetup` config option** — still works for CI where you just need to poll a URL before tests run, but it doesn't appear in HTML reports and doesn't support fixtures.
+> **Alternative (legacy) `globalSetup` config option** - still works for CI where you just need to poll a URL before tests run, but it doesn't appear in HTML reports and doesn't support fixtures.
 
 ```ts
 // global-setup.ts (legacy approach, Playwright ≥ v1.0)
@@ -233,10 +233,10 @@ export default globalSetup;
 
 ### 1.4 Database Reset Between Test Suites
 
-**Pattern A — Truncate via API (preferred for app-controlled schemas):**
+**Pattern A - Truncate via API (preferred for app-controlled schemas):**
 
 ```ts
-// tests/global.setup.ts — truncate before each run
+// tests/global.setup.ts - truncate before each run
 setup('reset database', async ({ request }) => {
   const resp = await request.post('/internal/db/reset', {
     headers: { 'X-Internal-Token': process.env.INTERNAL_TOKEN! },
@@ -250,7 +250,7 @@ setup('reset database', async ({ request }) => {
 });
 ```
 
-**Pattern B — Per-test isolation with worker-unique data:**
+**Pattern B - Per-test isolation with worker-unique data:**
 
 ```ts
 // tests/fixtures.ts
@@ -260,13 +260,13 @@ export const test = base.extend<{ testId: string }, { workerId: string }>({
   }, { scope: 'worker' }],
 
   testId: async ({}, use, testInfo) => {
-    // Unique ID per test — prefix all created records with this
+    // Unique ID per test - prefix all created records with this
     await use(`test-${testInfo.testId.slice(0, 8)}`);
   },
 });
 ```
 
-**Pattern C — Raw SQL truncate in globalSetup (fastest):**
+**Pattern C - Raw SQL truncate in globalSetup (fastest):**
 
 ```python
 # For FastAPI/Python backend: expose a /internal/reset endpoint
@@ -299,11 +299,11 @@ async def reset_database(db: AsyncSession = Depends(get_db)):
 
 ---
 
-## Part 2 — Playwright Fixtures for Real User Accounts
+## Part 2 - Playwright Fixtures for Real User Accounts
 
 ### 2.1 Worker-Scoped Auth Fixture (API-based, no localStorage injection)
 
-The **worker-scoped** pattern creates one real user per Playwright worker process via your actual API — not via localStorage injection or `page.route()` mocking. This is the pattern recommended in the official Playwright docs.
+The **worker-scoped** pattern creates one real user per Playwright worker process via your actual API - not via localStorage injection or `page.route()` mocking. This is the pattern recommended in the official Playwright docs.
 
 ```ts
 // tests/fixtures.ts
@@ -364,7 +364,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
   // ── TEST SCOPE: authenticated page, per test ───────────────────────────
   authedPage: async ({ page, authToken }, use) => {
-    // Inject the real JWT into storage — this is NOT mocking;
+    // Inject the real JWT into storage - this is NOT mocking;
     // it's the same token you'd get after a real login
     await page.addInitScript((token: string) => {
       localStorage.setItem('sb-access-token', token); // adjust key to match your app
@@ -432,7 +432,7 @@ setup('authenticate', async ({ page, request }) => {
 ```
 
 ```ts
-// playwright.config.ts  — use the saved state
+// playwright.config.ts  - use the saved state
 {
   name: 'chromium',
   use: {
@@ -448,7 +448,7 @@ setup('authenticate', async ({ page, request }) => {
 ### 2.3 Per-Test Cleanup Fixture
 
 ```ts
-// tests/fixtures.ts — cleanup registry pattern
+// tests/fixtures.ts - cleanup registry pattern
 type CleanupFn = () => Promise<unknown>;
 
 export const test = base.extend<{ cleanup: Cleanup }>({
@@ -475,7 +475,7 @@ test('uploads a document', async ({ authedPage, cleanup, request }) => {
     multipart: { file: { name: 'statement.pdf', mimeType: 'application/pdf', buffer: pdfBuffer } },
   })).json();
 
-  // Register cleanup immediately — fires even if test fails below this line
+  // Register cleanup immediately - fires even if test fails below this line
   cleanup.add(() => request.delete(`/api/documents/${document_id}`));
 
   await authedPage.goto(`/documents/${document_id}`);
@@ -485,9 +485,9 @@ test('uploads a document', async ({ authedPage, cleanup, request }) => {
 
 ---
 
-## Part 3 — FastAPI Stub / Mock Server for LLM in Tests
+## Part 3 - FastAPI Stub / Mock Server for LLM in Tests
 
-### 3.1 Option A — aimock (Best for Playwright JS/TS, Playwright ≥ v1.31)
+### 3.1 Option A - aimock (Best for Playwright JS/TS, Playwright ≥ v1.31)
 
 [`@copilotkit/aimock`](https://github.com/CopilotKit/mock-openai) is a zero-dependency Node.js mock that implements the **full OpenAI, Anthropic, Gemini, Bedrock, Azure, and Ollama API contracts**, including SSE streaming. It's maintained with daily drift-detection CI against the real APIs.
 
@@ -564,7 +564,7 @@ mock.onMessage('spiegami', {
 
 ---
 
-### 3.2 Option B — Minimal FastAPI Stub (Python-native, pytest conftest)
+### 3.2 Option B - Minimal FastAPI Stub (Python-native, pytest conftest)
 
 When the FastAPI backend calls LLM providers directly via `httpx` or `openai` SDK, intercept at the HTTP level with a real FastAPI server started in a subprocess:
 
@@ -578,7 +578,7 @@ import os
 import socket
 
 def get_free_port() -> int:
-    """Find a free port — avoids hardcoded port conflicts in parallel runs."""
+    """Find a free port - avoids hardcoded port conflicts in parallel runs."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', 0))
         return s.getsockname()[1]
@@ -802,7 +802,7 @@ export default defineConfig({
 
 ---
 
-## Part 4 — Playwright Mobile Device Emulation
+## Part 4 - Playwright Mobile Device Emulation
 
 ### 4.1 iPhone 14 Device Descriptor (Verified from `deviceDescriptorsSource.json`)
 
@@ -843,7 +843,7 @@ export default defineConfig({
 
 ---
 
-### 4.2 playwright.config.ts — Multi-Project Mobile Setup
+### 4.2 playwright.config.ts - Multi-Project Mobile Setup
 
 ```ts
 // playwright.config.ts
@@ -867,14 +867,14 @@ export default defineConfig({
       dependencies: ['setup'],
     },
 
-    // iPhone 14 — portrait (default)
+    // iPhone 14 - portrait (default)
     {
       name: 'iPhone 14',
       use: { ...devices['iPhone 14'] },  // webkit, 390×664 viewport, hasTouch: true
       dependencies: ['setup'],
     },
 
-    // iPhone 14 — landscape
+    // iPhone 14 - landscape
     {
       name: 'iPhone 14 landscape',
       use: { ...devices['iPhone 14 landscape'] },
@@ -898,19 +898,19 @@ export default defineConfig({
 When `hasTouch: true` is set (which it is for all mobile device descriptors), Playwright **automatically routes `page.click()` and `page.tap()` as touch events**, not mouse events.
 
 ```ts
-// page.tap() — dispatches touchstart + touchend (use for mobile)
+// page.tap() - dispatches touchstart + touchend (use for mobile)
 await page.tap('#submit-button');
 
-// page.click() — on mobile context with hasTouch: true,
+// page.click() - on mobile context with hasTouch: true,
 // also dispatches as touch. The two are equivalent in Playwright.
 await page.click('#submit-button');
 
-// page.touchscreen.tap(x, y) — low-level touchscreen API
+// page.touchscreen.tap(x, y) - low-level touchscreen API
 // Use when you need precise coordinates
 await page.touchscreen.tap(195, 400);
 
 // Swipe (drag simulation)
-// page.touchscreen does NOT have a swipe() method — simulate manually:
+// page.touchscreen does NOT have a swipe() method - simulate manually:
 await page.touchscreen.tap(195, 600);          // touchstart
 await page.mouse.move(195, 300, { steps: 10 }); // drag
 // OR use the higher-level drag API:
@@ -997,7 +997,7 @@ test('chat input stays visible above keyboard', async ({ page }) => {
   const input = page.getByRole('textbox', { name: 'Messaggio' });
   await expect(input).toBeInViewport();  // still visible above "keyboard"
 
-  // Type on mobile — same API as desktop
+  // Type on mobile - same API as desktop
   await input.tap();
   await input.fill('Posso comprare le scarpe?');
 
@@ -1022,10 +1022,10 @@ test('send button is not hidden by keyboard', async ({ page }) => {
 **`page.keyboard.type()` vs `locator.fill()`:**
 
 ```ts
-// locator.fill() — fast, recommended for form inputs
+// locator.fill() - fast, recommended for form inputs
 await page.getByLabel('Email').fill('user@test.com');
 
-// page.keyboard.type() — dispatches individual key events (use for testing
+// page.keyboard.type() - dispatches individual key events (use for testing
 // character-by-character behavior, autocomplete triggers, etc.)
 await page.getByLabel('Cerca').tap();
 await page.keyboard.type('scarpe', { delay: 50 });  // simulates typing speed
@@ -1037,31 +1037,31 @@ await page.keyboard.press('Enter');
 ## Sources
 
 ### Kept
-- **Playwright Docs — Global Setup & Teardown** (playwright.dev/docs/test-global-setup-teardown) — authoritative source for Project Dependencies pattern
-- **Playwright Docs — Fixtures** (playwright.dev/docs/test-fixtures) — worker-scoped fixture API, `test.extend()`, scope mechanics
-- **Playwright Docs — Emulation** (playwright.dev/docs/emulation) — `isMobile`, `hasTouch`, locale, timezone APIs
-- **playwright/deviceDescriptorsSource.json** (github.com/microsoft/playwright) — ground truth for iPhone 14 descriptor values
-- **Matt Crouch — Playwright Auth Fixtures** (mattcrouch.net, March 2024) — real-world auth fixture pattern
-- **Matt Crouch — Cleanup Fixture** (mattcrouch.net, May 2024) — per-test cleanup registry pattern
-- **docker.recipes/docs/healthchecks-dependencies** — comprehensive `service_healthy` condition examples
-- **denhox.com — healthcheck vs wait-for-it** — practical E2E Docker Compose pattern
-- **aimock / @copilotkit/aimock** (github.com/CopilotKit/mock-openai) — LLM stub with drift detection, OpenAI + Gemini + Anthropic contract
-- **TestDino — Playwright Mobile Testing Guide** (testdino.com) — touch event routing, isMobile flag, cloud device comparison
+- **Playwright Docs - Global Setup & Teardown** (playwright.dev/docs/test-global-setup-teardown) - authoritative source for Project Dependencies pattern
+- **Playwright Docs - Fixtures** (playwright.dev/docs/test-fixtures) - worker-scoped fixture API, `test.extend()`, scope mechanics
+- **Playwright Docs - Emulation** (playwright.dev/docs/emulation) - `isMobile`, `hasTouch`, locale, timezone APIs
+- **playwright/deviceDescriptorsSource.json** (github.com/microsoft/playwright) - ground truth for iPhone 14 descriptor values
+- **Matt Crouch - Playwright Auth Fixtures** (mattcrouch.net, March 2024) - real-world auth fixture pattern
+- **Matt Crouch - Cleanup Fixture** (mattcrouch.net, May 2024) - per-test cleanup registry pattern
+- **docker.recipes/docs/healthchecks-dependencies** - comprehensive `service_healthy` condition examples
+- **denhox.com - healthcheck vs wait-for-it** - practical E2E Docker Compose pattern
+- **aimock / @copilotkit/aimock** (github.com/CopilotKit/mock-openai) - LLM stub with drift detection, OpenAI + Gemini + Anthropic contract
+- **TestDino - Playwright Mobile Testing Guide** (testdino.com) - touch event routing, isMobile flag, cloud device comparison
 
 ### Dropped
-- **Speedscale proxymock article** — record-replay tool, good for brownfield but heavyweight for greenfield E2E stub setup
-- **openradx/llm_api_server_mock** — only 1 star, Jupyter notebook format, not production-quality
-- **Neptune Software — storageState** — basic tutorial, covered by official docs
-- **Playwright issue #33202** — feature request thread, not settled API
+- **Speedscale proxymock article** - record-replay tool, good for brownfield but heavyweight for greenfield E2E stub setup
+- **openradx/llm_api_server_mock** - only 1 star, Jupyter notebook format, not production-quality
+- **Neptune Software - storageState** - basic tutorial, covered by official docs
+- **Playwright issue #33202** - feature request thread, not settled API
 
 ---
 
 ## Gaps
 
-1. **Supabase Auth in Playwright fixtures** — Supabase uses cookie-based sessions (`sb-*` cookies) alongside localStorage. Exact cookie names and PKCE flow simulation in fixtures need project-specific verification against the supabase-js v2 auth schema.
+1. **Supabase Auth in Playwright fixtures** - Supabase uses cookie-based sessions (`sb-*` cookies) alongside localStorage. Exact cookie names and PKCE flow simulation in fixtures need project-specific verification against the supabase-js v2 auth schema.
 
-2. **Playwright × aimock streaming validation** — how to assert SSE chunk delivery order in a Playwright test (not just the final rendered output).
+2. **Playwright × aimock streaming validation** - how to assert SSE chunk delivery order in a Playwright test (not just the final rendered output).
 
-3. **iOS keyboard height variance** — the 40% viewport shrink is an approximation. Real Safari on iPhone 14 reduces height by ~291px in portrait mode. The exact value depends on Safari toolbar state and iOS version.
+3. **iOS keyboard height variance** - the 40% viewport shrink is an approximation. Real Safari on iPhone 14 reduces height by ~291px in portrait mode. The exact value depends on Safari toolbar state and iOS version.
 
-4. **Docker Compose override merging of `healthcheck`** — there is a known bug ([docker/compose #10188](https://github.com/docker/compose/issues/10188)) where partial override of a `healthcheck` block can drop the `test` field. Always redeclare the full `healthcheck` block in override files, not just `interval` or `start_period`.
+4. **Docker Compose override merging of `healthcheck`** - there is a known bug ([docker/compose #10188](https://github.com/docker/compose/issues/10188)) where partial override of a `healthcheck` block can drop the `test` field. Always redeclare the full `healthcheck` block in override files, not just `interval` or `start_period`.

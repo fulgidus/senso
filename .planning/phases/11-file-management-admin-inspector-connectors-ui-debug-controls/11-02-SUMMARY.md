@@ -18,7 +18,7 @@ key_files:
     - api/app/services/ingestion_service.py
     - api/app/api/admin.py
 decisions:
-  - "IngestionTrace model and Round 16 migration were completed by the 11-01 parallel agent (commit e43a3a5) — no re-work needed"
+  - "IngestionTrace model and Round 16 migration were completed by the 11-01 parallel agent (commit e43a3a5) - no re-work needed"
   - "_record_trace never raises so tracing is purely additive and cannot break ingestion"
   - "IngestionTraceDTO placed inline in admin.py consistent with other Phase 9 DTOs in that file"
   - "Trace endpoint URL is /admin/ingestion/uploads/{upload_id}/trace (not /admin/uploads/{upload_id}/trace) for namespace clarity"
@@ -46,13 +46,13 @@ Already completed by the 11-01 parallel agent (commit `e43a3a5`). Verified prese
 ### Task 2: Instrumented ingestion service + admin endpoint (commit `a870328`)
 
 **`api/app/services/ingestion_service.py`:**
-- Added `_record_trace(self, db, upload_id, step_order, step_name, ...)` helper — never raises, swallows and logs all exceptions
+- Added `_record_trace(self, db, upload_id, step_order, step_name, ...)` helper - never raises, swallows and logs all exceptions
 - Instrumented `run_extraction_background()` with 5 trace points:
-  1. `start` (step_order=1) — file identity confirmed
-  2. `ocr_extraction` (step_order=2) — OCR/extraction pipeline output (doc_type, tier, confidence), with timing + error capture
-  3. `module_match` (step_order=3) — matched module name/source
-  4. `llm_call` (step_order=4) — raw text snippet (first 500 chars), transaction + warning counts
-  5. `persistence` (step_order=5) — DB write timing
+  1. `start` (step_order=1) - file identity confirmed
+  2. `ocr_extraction` (step_order=2) - OCR/extraction pipeline output (doc_type, tier, confidence), with timing + error capture
+  3. `module_match` (step_order=3) - matched module name/source
+  4. `llm_call` (step_order=4) - raw text snippet (first 500 chars), transaction + warning counts
+  5. `persistence` (step_order=5) - DB write timing
 
 **`api/app/api/admin.py`:**
 - Added `IngestionTraceDTO` (Pydantic, `from_attributes=True`)
@@ -61,9 +61,9 @@ Already completed by the 11-01 parallel agent (commit `e43a3a5`). Verified prese
 ## Deviations from Plan
 
 ### Pre-existing completion
-**Task 1 already done by 11-01 parallel agent** — `IngestionTrace` model, `Upload.traces` relationship, and Round 16 migration were all committed in `e43a3a5` as part of the 11-01 execution. This agent skipped Task 1 and proceeded directly to Task 2.
+**Task 1 already done by 11-01 parallel agent** - `IngestionTrace` model, `Upload.traces` relationship, and Round 16 migration were all committed in `e43a3a5` as part of the 11-01 execution. This agent skipped Task 1 and proceeded directly to Task 2.
 
-**Rule applied:** None — this was the expected outcome of parallel plan execution. No deviation from intent.
+**Rule applied:** None - this was the expected outcome of parallel plan execution. No deviation from intent.
 
 ### Trace endpoint URL
 Plan spec showed `/admin/uploads/{upload_id}/trace` in one place and `/admin/ingestion/uploads/{upload_id}/trace` in another. Chose the longer form (`/admin/ingestion/uploads/...`) for namespace clarity and consistency with ingestion-focused admin operations.
@@ -71,16 +71,16 @@ Plan spec showed `/admin/uploads/{upload_id}/trace` in one place and `/admin/ing
 ## Test Results
 
 - 237 passed, 1 skipped (pre-existing TTS import issue), 21 deselected (`slow` + `test_tts`)
-- All existing ingestion tests pass — tracing is purely additive
+- All existing ingestion tests pass - tracing is purely additive
 
 ## Known Stubs
 
-None — all trace instrumentation writes real data from the actual pipeline execution.
+None - all trace instrumentation writes real data from the actual pipeline execution.
 
 ## Self-Check: PASSED
 
-- `api/app/services/ingestion_service.py` — `_record_trace` present (line 215), 5 trace calls instrumented ✓
-- `api/app/api/admin.py` — `IngestionTraceDTO` present, `get_ingestion_trace` endpoint present ✓
-- `api/app/db/models.py` — `IngestionTrace` class present (line 763) ✓
-- `api/app/db/session.py` — Round 16 migration present ✓
+- `api/app/services/ingestion_service.py` - `_record_trace` present (line 215), 5 trace calls instrumented ✓
+- `api/app/api/admin.py` - `IngestionTraceDTO` present, `get_ingestion_trace` endpoint present ✓
+- `api/app/db/models.py` - `IngestionTrace` class present (line 763) ✓
+- `api/app/db/session.py` - Round 16 migration present ✓
 - Commit `a870328` exists ✓

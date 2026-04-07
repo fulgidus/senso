@@ -6,7 +6,7 @@ import { getProfileStatus, getProfile } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
 
 /**
- * "/" resolver — redirect-only, no UI of its own.
+ * "/" resolver - redirect-only, no UI of its own.
  *
  * Logic gates, evaluated in order:
  *   1. !user.firstName                              → /setup
@@ -18,52 +18,52 @@ import { readAccessToken } from "@/features/auth/storage"
  * users never reach this component).
  */
 export function RootResolver() {
-  const { user } = useAuthContext()
-  const token = readAccessToken()
-  const { t } = useTranslation()
-  const [target, setTarget] = useState<string | null>(null)
+    const { user } = useAuthContext()
+    const token = readAccessToken()
+    const { t } = useTranslation()
+    const [target, setTarget] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Gate 1: setup not done
-    if (!user.firstName) {
-      setTarget("/setup")
-      return
+    useEffect(() => {
+        // Gate 1: setup not done
+        if (!user.firstName) {
+            setTarget("/setup")
+            return
+        }
+
+        // Gate 2+3: check both confirmed flag and categorization status
+        if (!token) {
+            setTarget("/onboarding")
+            return
+        }
+
+        void Promise.all([getProfileStatus(token), getProfile(token).catch(() => null)])
+            .then(([statusData, profile]) => {
+                // Questionnaire path: profile confirmed → go to chat directly
+                if (profile?.confirmed) {
+                    setTarget("/chat")
+                    return
+                }
+                // Document upload path: categorization complete → go to chat
+                if (statusData.status === "complete") {
+                    setTarget("/chat")
+                } else {
+                    setTarget("/onboarding")
+                }
+            })
+            .catch(() => {
+                // On error, fall through to onboarding (safe default)
+                setTarget("/onboarding")
+            })
+    }, [user.firstName, token])
+
+    if (!target) {
+        // Brief loading while we check profile status
+        return (
+            <main className="flex min-h-screen items-center justify-center">
+                <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
+            </main>
+        )
     }
 
-    // Gate 2+3: check both confirmed flag and categorization status
-    if (!token) {
-      setTarget("/onboarding")
-      return
-    }
-
-    void Promise.all([getProfileStatus(token), getProfile(token).catch(() => null)])
-      .then(([statusData, profile]) => {
-        // Questionnaire path: profile confirmed → go to chat directly
-        if (profile?.confirmed) {
-          setTarget("/chat")
-          return
-        }
-        // Document upload path: categorization complete → go to chat
-        if (statusData.status === "complete") {
-          setTarget("/chat")
-        } else {
-          setTarget("/onboarding")
-        }
-      })
-      .catch(() => {
-        // On error, fall through to onboarding (safe default)
-        setTarget("/onboarding")
-      })
-  }, [user.firstName, token])
-
-  if (!target) {
-    // Brief loading while we check profile status
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">{t("app.loading")}</p>
-      </main>
-    )
-  }
-
-  return <Navigate to={target} replace />
+    return <Navigate to={target} replace />
 }

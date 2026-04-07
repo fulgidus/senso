@@ -13,6 +13,6 @@ The total reset button (admin action to reset the user's data) is broken. Clicki
 ## Solution
 
 - Debug the reset button click handler and the API endpoint it calls.
-- Phase 6 established that FK CASCADE delete from users is sufficient for full reset — verify the cascade chain is intact.
+- Phase 6 established that FK CASCADE delete from users is sufficient for full reset - verify the cascade chain is intact.
 - Verify the correct table names are used (uploads, chat_sessions, chat_messages per Phase 6 convention).
 - Add error handling and feedback if the reset fails.

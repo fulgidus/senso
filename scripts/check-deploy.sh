@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-deploy.sh — verify the deployed frontend was actually rebuilt.
+# check-deploy.sh - verify the deployed frontend was actually rebuilt.
 #
 # Computes the same src_hash locally and compares to what's in /version.json.
 # If they mismatch → build failed and Dokploy silently fell back to stale image.
@@ -17,7 +17,7 @@ echo "Local src_hash: $LOCAL_HASH"
 echo "Checking ${FRONTEND_URL}/version.json ..."
 
 RESPONSE=$(curl -sf --max-time 10 "${FRONTEND_URL}/version.json" 2>/dev/null) || {
-  echo "FAIL: /version.json not reachable — build failed, Dokploy is serving a stale image."
+  echo "FAIL: /version.json not reachable - build failed, Dokploy is serving a stale image."
   exit 1
 }
 
@@ -36,7 +36,7 @@ if [ "$LOCAL_HASH" = "$DEPLOYED_HASH" ]; then
   exit 0
 fi
 
-echo "FAIL: src_hash mismatch — build failed and Dokploy fell back to a stale image."
+echo "FAIL: src_hash mismatch - build failed and Dokploy fell back to a stale image."
 echo "  Local:    $LOCAL_HASH"
 echo "  Deployed: $DEPLOYED_HASH"
 exit 1

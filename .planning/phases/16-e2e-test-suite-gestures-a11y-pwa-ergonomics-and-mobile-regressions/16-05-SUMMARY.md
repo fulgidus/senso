@@ -5,7 +5,7 @@ status: complete
 completed_at: "2026-04-05"
 ---
 
-# Summary: 16-05 — PWA, Ergonomics & Coach Picker Regression Tests
+# Summary: 16-05 - PWA, Ergonomics & Coach Picker Regression Tests
 
 ## What was built
 

@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-The "profile/my-files" page breaks on entering and there are no error boundaries. When a page crashes, the user is stuck with a blank screen and can only recover by manually refreshing the browser. This is unacceptable UX — a crash in one section should not require a full page refresh.
+The "profile/my-files" page breaks on entering and there are no error boundaries. When a page crashes, the user is stuck with a blank screen and can only recover by manually refreshing the browser. This is unacceptable UX - a crash in one section should not require a full page refresh.
 
 ## Solution
 

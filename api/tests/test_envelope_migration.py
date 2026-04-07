@@ -1,5 +1,5 @@
 """
-Envelope migration tests — Phase 15 (task 15-03-01)
+Envelope migration tests - Phase 15 (task 15-03-01)
 
 Tests for v1 (AES-GCM + PBKDF2) → v2 (secretbox + Argon2id) migration.
 """

@@ -20,13 +20,13 @@ Prima di investire, prima di pagare debiti a basso tasso, prima di qualsiasi alt
 
 ## Quanto accantonare
 
-| Situazione | Obiettivo consigliato |
-|---|---|
-| Dipendente stabile | 3 mesi di spese |
-| Lavoro variabile / freelance | 6 mesi di spese |
-| Unico reddito familiare | 6+ mesi di spese |
+| Situazione                   | Obiettivo consigliato |
+| ---------------------------- | --------------------- |
+| Dipendente stabile           | 3 mesi di spese       |
+| Lavoro variabile / freelance | 6 mesi di spese       |
+| Unico reddito familiare      | 6+ mesi di spese      |
 
-> Calcola le tue spese mensili essenziali (affitto + cibo + bollette + trasporti) — non le totali.
+> Calcola le tue spese mensili essenziali (affitto + cibo + bollette + trasporti) - non le totali.
 
 ---
 

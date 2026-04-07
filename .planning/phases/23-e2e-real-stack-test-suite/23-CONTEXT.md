@@ -5,14 +5,14 @@ created: "2026-04-06"
 status: ready-to-execute
 ---
 
-# Phase 23 Context — E2E Real Stack Test Suite
+# Phase 23 Context - E2E Real Stack Test Suite
 
 ## Why This Phase Exists
 
 All existing Playwright tests mock the API via `page.route()`. Zero tests exercise
 the real running stack. This means:
 - The backend and frontend can be independently broken with no test catching it
-- Ingestion pipeline, LLM tool calls, profile enrichment, TTS — none are tested E2E
+- Ingestion pipeline, LLM tool calls, profile enrichment, TTS - none are tested E2E
 - The hackathon demo could fail due to integration gaps not caught by mocked tests
 
 ## What Real E2E Means
@@ -24,10 +24,10 @@ LLM backend that returns valid fixture responses.
 
 ## LLM Strategy for E2E
 
-Option A — **Real LLM** (integration tests, costs money): Use `GEMINI_API_KEY` from env.
+Option A - **Real LLM** (integration tests, costs money): Use `GEMINI_API_KEY` from env.
 Only used in CI when key is available; tests skip gracefully otherwise.
 
-Option B — **LLM stub server** (deterministic, free): A tiny FastAPI stub at
+Option B - **LLM stub server** (deterministic, free): A tiny FastAPI stub at
 `http://localhost:9000` that accepts the same request format and returns pre-baked valid
 responses. Tests always pass in CI.
 
@@ -41,7 +41,7 @@ tagged `@live-llm`. Both tagged separately in CI.
   llm-stub server + seeded test user
 - `senso/e2e/support/real-stack-fixtures.ts`: `realAuthedPage` fixture that creates a
   real user account via API (not localStorage injection)
-- LLM stub server: `api/tests/llm_stub_server.py` — FastAPI app that returns
+- LLM stub server: `api/tests/llm_stub_server.py` - FastAPI app that returns
   valid coaching responses for known prompts
 - Test account cleanup: `DELETE FROM users WHERE email LIKE '%e2e-test%'` after each suite
 
@@ -73,10 +73,10 @@ tagged `@live-llm`. Both tagged separately in CI.
 ## Scope
 
 **In scope:**
-- `api/tests/llm_stub_server.py` — LLM stub (FastAPI)
-- `docker-compose.test.yml` — test stack override
-- `senso/e2e/real-stack/` — new directory for real stack specs
-- `senso/e2e/support/real-stack-fixtures.ts` — real account fixture
+- `api/tests/llm_stub_server.py` - LLM stub (FastAPI)
+- `docker-compose.test.yml` - test stack override
+- `senso/e2e/real-stack/` - new directory for real stack specs
+- `senso/e2e/support/real-stack-fixtures.ts` - real account fixture
 
 **Not in scope:**
 - Visual regression screenshots

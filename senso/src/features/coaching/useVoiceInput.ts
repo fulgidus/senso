@@ -1,11 +1,11 @@
 /**
  * useVoiceInput - Voice input hook with two backends:
  *
- *   1. Web Speech API (preferred) — real-time interim transcripts, zero latency.
+ *   1. Web Speech API (preferred) - real-time interim transcripts, zero latency.
  *      Available in Chrome, Edge, Safari. Blocked by LibreWolf and some Firefox
  *      builds for privacy reasons.
  *
- *   2. MediaRecorder + OpenAI Whisper (fallback) — records audio, POSTs to
+ *   2. MediaRecorder + OpenAI Whisper (fallback) - records audio, POSTs to
  *      /coaching/stt when the user stops, returns final transcript. Available
  *      in ALL modern browsers (Chrome, Firefox, LibreWolf, Safari).
  *

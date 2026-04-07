@@ -31,7 +31,7 @@ outputs (`response_format={"type":"json_schema",...}`) instead of the loose
      the `tool_executor(name, arguments) -> Any` callable is invoked.
   2. Tool result is injected back and a second call with `response_schema`
      produces the final structured output.
-  Gemini provider does not support this flow — falls back to a single
+  Gemini provider does not support this flow - falls back to a single
   `complete()` call with no tools.
 
 Inject via get_llm_client() FastAPI dependency.
@@ -260,7 +260,7 @@ class LLMClient:
           3. If model returns a plain text/JSON answer in step 1 (no tool call
              requested): return that directly.
 
-        Gemini path: tool calling differs from OpenAI API — falls back to a
+        Gemini path: tool calling differs from OpenAI API - falls back to a
         plain complete() with response_schema (no tool enrichment).
 
         Args:
@@ -538,7 +538,7 @@ class LLMClient:
         if strict_mode and base_url and "openrouter" in base_url:
             call_kwargs["extra_body"] = {"provider": {"zdr": True}}
         if response_schema is not None:
-            # Structured outputs — schema travels in the API call, not in the prompt
+            # Structured outputs - schema travels in the API call, not in the prompt
             schema_name = (
                 response_schema.get("$id") or response_schema.get("title") or "response"
             )
@@ -620,7 +620,7 @@ class LLMClient:
         # If no tool calls were made, proceed directly to final call
         tool_calls = getattr(choice1.message, "tool_calls", None) or []
         if not tool_calls:
-            # Model answered directly — re-call with response_schema to get
+            # Model answered directly - re-call with response_schema to get
             # the structured output (the first answer may be prose).
             # If no schema required, return the content directly.
             if response_schema is None:

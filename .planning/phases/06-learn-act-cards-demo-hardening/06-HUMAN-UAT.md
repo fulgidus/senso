@@ -33,7 +33,7 @@ expected: `bash scripts/seed-demo.sh` completes with "Demo seed complete!" when 
 result: [pending]
 
 ### 6. Loading skeleton animation during live LLM call
-expected: During the 5-15 second window while the coaching API is generating a response, the chat shows a skeleton bubble with three animated bouncing dots, three shimmer skeleton text lines, and a card placeholder rectangle — not a blank space or simple spinner.
+expected: During the 5-15 second window while the coaching API is generating a response, the chat shows a skeleton bubble with three animated bouncing dots, three shimmer skeleton text lines, and a card placeholder rectangle - not a blank space or simple spinner.
 result: [pending]
 
 ### 7. Error banner auto-dismiss + retry

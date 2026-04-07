@@ -39,10 +39,10 @@ key-files:
     - senso/src/i18n/locales/en.json
 
 key-decisions:
-  - "35s client-side timeout chosen — below backend 60s LLM timeout so backend 502 fires first on LLM failure, client timeout only triggers on connection hang"
+  - "35s client-side timeout chosen - below backend 60s LLM timeout so backend 502 fires first on LLM failure, client timeout only triggers on connection hang"
   - "setErrorWithAutoDismiss wrapper preserves profile_required errors indefinitely (navigation CTA); auto-dismisses all other codes after 8s"
   - "useTTS.stop() resets usingFallback so the tooltip clears on manual stop"
-  - "VoiceModeBar isGenerating handling already correct — no change needed (ttsGenerating key renders Generazione audio... correctly)"
+  - "VoiceModeBar isGenerating handling already correct - no change needed (ttsGenerating key renders Generazione audio... correctly)"
 
 patterns-established:
   - "Timeout pattern: setTimeout fires setIsLoading(false) + setErrorWithAutoDismiss; cleared via clearTimeout in both success and catch paths"
@@ -68,7 +68,7 @@ completed: 2026-03-29
 - **Files modified:** 4
 
 ## Accomplishments
-- Replaced the single-line pulsing thinking text with a full skeleton bubble: animated 3-dot indicator, 3 skeleton text lines, and a card placeholder — clear visual weight for the 5-15s LLM wait
+- Replaced the single-line pulsing thinking text with a full skeleton bubble: animated 3-dot indicator, 3 skeleton text lines, and a card placeholder - clear visual weight for the 5-15s LLM wait
 - Added a 35-second client-side fetch timeout so the loading state cannot hang indefinitely during a demo (backend fires 502 first at 60s for LLM failures; 35s timeout catches connection hangs)
 - `setErrorWithAutoDismiss()` wrapper auto-clears transient errors (llm_error, network_error) after 8 seconds; `profile_required` errors stay persistent with their navigation CTA
 - Retry button in error banner re-sends `lastUserMessageRef.current` for llm_error and network_error cases
@@ -84,25 +84,25 @@ Each task was committed atomically:
 **Plan metadata:** _(docs commit follows)_
 
 ## Files Created/Modified
-- `senso/src/features/coaching/ChatScreen.tsx` — skeleton bubble, setErrorWithAutoDismiss, 35s timeout, retry button in error banner, VoicePlayButton usingFallback tooltip
-- `senso/src/features/coaching/useTTS.ts` — extend UseTTSResult with ttsError/usingFallback; stop() resets usingFallback; fallbackSpeak onEnd resets usingFallback
-- `senso/src/i18n/locales/it.json` — added coaching.retryLastMessage, coaching.ttsFallbackActive
-- `senso/src/i18n/locales/en.json` — mirrored coaching.retryLastMessage, coaching.ttsFallbackActive
+- `senso/src/features/coaching/ChatScreen.tsx` - skeleton bubble, setErrorWithAutoDismiss, 35s timeout, retry button in error banner, VoicePlayButton usingFallback tooltip
+- `senso/src/features/coaching/useTTS.ts` - extend UseTTSResult with ttsError/usingFallback; stop() resets usingFallback; fallbackSpeak onEnd resets usingFallback
+- `senso/src/i18n/locales/it.json` - added coaching.retryLastMessage, coaching.ttsFallbackActive
+- `senso/src/i18n/locales/en.json` - mirrored coaching.retryLastMessage, coaching.ttsFallbackActive
 
 ## Decisions Made
-- **35s timeout (not 75s):** Per cross-AI review guidance — 35s sits below backend's 60s LLM timeout and well within the 90s demo target
+- **35s timeout (not 75s):** Per cross-AI review guidance - 35s sits below backend's 60s LLM timeout and well within the 90s demo target
 - **setErrorWithAutoDismiss pattern:** Centralizes auto-dismiss logic; single ref for timer allows proper cleanup when a new error arrives before the previous dismissal fires
 - **VoiceModeBar unchanged:** Already had `isGenerating` → `t("coaching.ttsGenerating")` status text wired correctly; no change needed
 
 ## Deviations from Plan
 
-None — plan executed exactly as written with one adjustment: timeout value is 35s (per instructions) instead of the 75s reference in the original plan context. The plan itself already specified 35s after the cross-AI review.
+None - plan executed exactly as written with one adjustment: timeout value is 35s (per instructions) instead of the 75s reference in the original plan context. The plan itself already specified 35s after the cross-AI review.
 
 ## Issues Encountered
-None — TypeScript compiled cleanly on first build attempt. The `setIsLoading` inside the timeout callback was initially written using a functional updater with side effects (antipattern); corrected to direct `setIsLoading(false)` + `setErrorWithAutoDismiss()` calls instead.
+None - TypeScript compiled cleanly on first build attempt. The `setIsLoading` inside the timeout callback was initially written using a functional updater with side effects (antipattern); corrected to direct `setIsLoading(false)` + `setErrorWithAutoDismiss()` calls instead.
 
 ## User Setup Required
-None — no external service configuration required.
+None - no external service configuration required.
 
 ## Next Phase Readiness
 - All plan 06-04 success criteria met:
@@ -112,11 +112,11 @@ None — no external service configuration required.
   - ✅ 35s client-side timeout prevents infinite loading
   - ✅ TTS fallback is silent; usingFallback tooltip signals degraded mode
   - ✅ `docker compose run --rm frontend pnpm build` passes with 0 TypeScript errors
-- Phase 06 complete — all 4 plans executed
+- Phase 06 complete - all 4 plans executed
 
 ## Self-Check: PASSED
-- `f781830` — verified in git log
-- `68c4bee` — verified in git log
+- `f781830` - verified in git log
+- `68c4bee` - verified in git log
 - All 4 modified files staged and committed in task commits
 - Build output: `✓ built in 5.21s` with no TypeScript errors
 

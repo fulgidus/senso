@@ -6,7 +6,7 @@ nyquist_compliant: false
 created: "2026-04-06"
 ---
 
-# Phase 23 — Validation Strategy
+# Phase 23 - Validation Strategy
 
 ## Test Commands
 
@@ -26,13 +26,13 @@ cd senso && npx playwright test e2e/real-stack/ --grep @live-llm
 
 ## Per-Plan Test Map
 
-| Plan | Spec | What it guards |
-|---|---|---|
-| 23-01 | infrastructure | Docker test stack starts clean; real account creates successfully |
-| 23-02 | `real-stack/journey.spec.ts` | Full upload → profile → coach round trip |
-| 23-03 | `real-stack/tool-calls.spec.ts` | Coach tool calls use real DB data |
-| 23-04 | `real-stack/error-paths.spec.ts` | Token expiry, bad file, LLM timeout, offline |
-| 23-05 | `real-stack/mobile-journey.spec.ts` | Full journey on iPhone 14 viewport |
+| Plan  | Spec                                | What it guards                                                    |
+| ----- | ----------------------------------- | ----------------------------------------------------------------- |
+| 23-01 | infrastructure                      | Docker test stack starts clean; real account creates successfully |
+| 23-02 | `real-stack/journey.spec.ts`        | Full upload → profile → coach round trip                          |
+| 23-03 | `real-stack/tool-calls.spec.ts`     | Coach tool calls use real DB data                                 |
+| 23-04 | `real-stack/error-paths.spec.ts`    | Token expiry, bad file, LLM timeout, offline                      |
+| 23-05 | `real-stack/mobile-journey.spec.ts` | Full journey on iPhone 14 viewport                                |
 
 ## Acceptance Gate
 

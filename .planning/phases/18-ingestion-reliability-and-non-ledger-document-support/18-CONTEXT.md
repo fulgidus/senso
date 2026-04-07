@@ -5,7 +5,7 @@ created: "2026-04-06"
 status: ready-to-execute
 ---
 
-# Phase 18 Context — Ingestion Reliability + Non-Ledger Document Support
+# Phase 18 Context - Ingestion Reliability + Non-Ledger Document Support
 
 ## Why This Phase Exists
 
@@ -18,7 +18,7 @@ file content. This fails because:
 - **Binary formats** (XLSX, ODS): the first 4096 bytes are ZIP/OLE headers, not text.
   `"conto corrente"` is never found. All Fineco XLSX uploads fall through to the adaptive
   LLM path (slower, costs money, less accurate).
-- **Binary threshold**: matching is `1 if keyword in text else 0` — a file matching 3/5
+- **Binary threshold**: matching is `1 if keyword in text else 0` - a file matching 3/5
   keywords scores the same as 5/5 if one is a false negative. Order of modules matters.
 - **No content-hash dedup**: the same file can be re-uploaded and re-processed indefinitely,
   burning LLM calls and creating duplicate transaction rows.
@@ -29,7 +29,7 @@ The schema defines `payslip`, `receipt`, `invoice`, `utility_bill` as valid `doc
 values with dedicated fields (`net_salary`, `employer`, `monthly_amount`, `provider`, etc.).
 But the ingestion pipeline only validates extraction success via `transaction count > 0`.
 A correctly parsed payslip with `net_salary = 1850` and `0 transactions` is treated as
-a failure and falls through to the LLM fallback — which then tries to extract transactions
+a failure and falls through to the LLM fallback - which then tries to extract transactions
 from a pay stub, failing again.
 
 The profile is never enriched from non-ledger documents. Users who upload their payslip
@@ -65,7 +65,7 @@ get nothing useful back.
 - `ProfileService.enrich_from_extraction()`: unified method called after any non-ledger
   successful extraction to update the relevant profile fields
 
-### 18-05: Pipeline fix — non-ledger success condition + tests
+### 18-05: Pipeline fix - non-ledger success condition + tests
 - Fix `run_adaptive_pipeline()` success condition: success is
   `transactions > 0 OR (non-ledger fields populated AND confidence ≥ 0.6)`
 - Fix `IngestionService._run_extraction()` to call profile enrichment after non-ledger
@@ -75,15 +75,15 @@ get nothing useful back.
 ## Scope
 
 **In scope:**
-- `api/app/ingestion/registry.py` — MIME routing, binary XLSX text extraction for scan
-- `api/app/db/models.py` — `content_hash` column on `uploads`, `fixed_expenses` +
+- `api/app/ingestion/registry.py` - MIME routing, binary XLSX text extraction for scan
+- `api/app/db/models.py` - `content_hash` column on `uploads`, `fixed_expenses` +
   `one_off_expenses` + `verified_income_sources` on `user_profiles`
-- `api/app/db/session.py` — migration for new columns
-- `api/app/ingestion/modules/builtin/` — 4 new modules
-- `api/app/ingestion/adaptive.py` — success condition fix
-- `api/app/services/ingestion_service.py` — dedup check, profile enrichment call
-- `api/app/services/profile_service.py` — `enrich_from_extraction()` method
-- `api/tests/` — tests for each new path
+- `api/app/db/session.py` - migration for new columns
+- `api/app/ingestion/modules/builtin/` - 4 new modules
+- `api/app/ingestion/adaptive.py` - success condition fix
+- `api/app/services/ingestion_service.py` - dedup check, profile enrichment call
+- `api/app/services/profile_service.py` - `enrich_from_extraction()` method
+- `api/tests/` - tests for each new path
 
 **Not in scope:**
 - Vector embeddings for documents

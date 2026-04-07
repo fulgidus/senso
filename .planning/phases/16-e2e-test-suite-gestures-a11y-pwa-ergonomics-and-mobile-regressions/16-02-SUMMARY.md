@@ -5,7 +5,7 @@ status: complete
 completed_at: "2026-04-05"
 ---
 
-# Summary: 16-02 — Gesture & Scroll Regression Tests
+# Summary: 16-02 - Gesture & Scroll Regression Tests
 
 ## What was built
 

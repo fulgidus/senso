@@ -22,7 +22,7 @@ COPY . .
 
 RUN pnpm build
 
-# Stamp version info computed at build time — no external args needed.
+# Stamp version info computed at build time - no external args needed.
 # src_hash = SHA-256 of all source files, detects stale layer cache.
 RUN sh -c '\
   BUILT_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ") && \

@@ -1,4 +1,4 @@
-# Phase 23: E2E Real Stack Test Suite — Research
+# Phase 23: E2E Real Stack Test Suite - Research
 
 **Researched:** 2026-04-06
 **Domain:** Playwright real-stack E2E, Docker Compose test infrastructure, LLM stub server, mobile emulation
@@ -17,12 +17,12 @@ Playwright's recommended pattern (since v1.31) for real-stack tests is **Project
 ## Standard Stack
 
 ### Core
-| Library/Tool | Version | Purpose | Why Standard |
-|---------|---------|---------|--------------|
-| Playwright | 1.44+ | E2E test runner + browser automation | Already in project (phases 16) |
-| Docker Compose | 2.x | Test stack orchestration | Already in project |
-| pytest | Latest | Backend unit/integration tests | Already in project |
-| FastAPI | 0.135.2 | LLM stub server | Same as main backend — no new dep |
+| Library/Tool   | Version | Purpose                              | Why Standard                      |
+| -------------- | ------- | ------------------------------------ | --------------------------------- |
+| Playwright     | 1.44+   | E2E test runner + browser automation | Already in project (phases 16)    |
+| Docker Compose | 2.x     | Test stack orchestration             | Already in project                |
+| pytest         | Latest  | Backend unit/integration tests       | Already in project                |
+| FastAPI        | 0.135.2 | LLM stub server                      | Same as main backend - no new dep |
 
 ---
 
@@ -31,12 +31,12 @@ Playwright's recommended pattern (since v1.31) for real-stack tests is **Project
 ### docker-compose.test.yml structure
 
 ```yaml
-# docker-compose.test.yml — overrides only what differs for tests
+# docker-compose.test.yml - overrides only what differs for tests
 services:
   db:
     environment:
       POSTGRES_DB: senso_test  # separate test DB
-    healthcheck:  # MUST redeclare full block — partial override silently drops test: field
+    healthcheck:  # MUST redeclare full block - partial override silently drops test: field
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d senso_test"]
       interval: 3s
       timeout: 5s
@@ -124,7 +124,7 @@ export default defineConfig({
 });
 ```
 
-### global.setup.ts — wait for services + seed
+### global.setup.ts - wait for services + seed
 
 ```ts
 import { test as setup, expect } from '@playwright/test';
@@ -170,7 +170,7 @@ export const test = base.extend<{}, WorkerFixtures>({
 
     await use({ email, password, userId: user_id });
 
-    // Teardown — runs even on failure
+    // Teardown - runs even on failure
     await api.delete(`/internal/users/${user_id}`, {
       headers: { 'X-Internal-Token': process.env.INTERNAL_TOKEN! },
     });
@@ -272,7 +272,7 @@ CMD ["uvicorn", "llm_stub_server:app", "--host", "0.0.0.0", "--port", "4010"]
 ## FastAPI DB Reset Endpoint (Internal)
 
 ```python
-# Guarded by ALLOW_TEST_RESET env var — only active in test environments
+# Guarded by ALLOW_TEST_RESET env var - only active in test environments
 @router.post("/internal/db/reset")
 async def reset_db(
     request: Request,
@@ -297,14 +297,14 @@ async def reset_db(
 ## iPhone 14 Emulation (Playwright)
 
 ### Exact descriptor (from deviceDescriptorsSource.json)
-| Property | Value |
-|----------|-------|
-| viewport | 390 × 664 (screen minus Safari toolbar) |
-| screen | 390 × 844 |
-| deviceScaleFactor | 3 |
-| isMobile | true |
-| hasTouch | true |
-| defaultBrowserType | webkit |
+| Property           | Value                                   |
+| ------------------ | --------------------------------------- |
+| viewport           | 390 × 664 (screen minus Safari toolbar) |
+| screen             | 390 × 844                               |
+| deviceScaleFactor  | 3                                       |
+| isMobile           | true                                    |
+| hasTouch           | true                                    |
+| defaultBrowserType | webkit                                  |
 
 ### Keyboard open simulation (Playwright has no native keyboard API)
 
@@ -341,16 +341,16 @@ expect(box!.height).toBeGreaterThanOrEqual(44);
 **How to avoid:** `{ scope: 'worker' }` gives each Playwright worker its own isolated account.
 
 ### Pitfall 4: Asserting SSE streaming intermediate states
-**What goes wrong:** Playwright can't assert chunk order for SSE streams — only final DOM state.
+**What goes wrong:** Playwright can't assert chunk order for SSE streams - only final DOM state.
 **How to avoid:** Assert only final rendered state. For tool calls, assert the tool was called by checking DB state or response content, not SSE stream order.
 
 ---
 
 ## Sources
 
-- Playwright docs — Project Dependencies: https://playwright.dev/docs/test-global-setup-teardown
-- Playwright deviceDescriptorsSource.json — iPhone 14 exact values
-- Docker Compose docs — condition: service_healthy: https://docs.docker.com/compose/compose-file/05-services/#condition
+- Playwright docs - Project Dependencies: https://playwright.dev/docs/test-global-setup-teardown
+- Playwright deviceDescriptorsSource.json - iPhone 14 exact values
+- Docker Compose docs - condition: service_healthy: https://docs.docker.com/compose/compose-file/05-services/#condition
 - Docker Compose bug #10188: partial healthcheck override
 
 **Research date:** 2026-04-06

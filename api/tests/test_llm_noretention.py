@@ -1,4 +1,4 @@
-"""Tests for LLM no-retention header/body injection. Uses unittest.mock — no live API calls."""
+"""Tests for LLM no-retention header/body injection. Uses unittest.mock - no live API calls."""
 
 from unittest.mock import MagicMock, patch
 

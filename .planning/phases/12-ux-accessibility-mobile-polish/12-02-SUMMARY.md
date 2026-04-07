@@ -22,7 +22,7 @@ key_files:
     - senso/src/features/profile/FilesTab.tsx
 decisions:
   - "Used import.meta.glob with { as: 'raw', eager: true } for regression test instead of Node fs/path (jsdom environment)"
-  - "Excluded useVoiceInput.ts and useTTS.ts from it-IT check — they use it-IT as a dynamic locale tag for browser Speech API, not hardcoded formatting"
+  - "Excluded useVoiceInput.ts and useTTS.ts from it-IT check - they use it-IT as a dynamic locale tag for browser Speech API, not hardcoded formatting"
   - "Extended scope to AdminInspectorDrawer and FilesTab (Rule 1 auto-fix) to make regression test pass cleanly"
 metrics:
   duration: "~15 minutes"
@@ -42,10 +42,10 @@ All number/date/currency formatting in screen files now routes through the `useL
 
 ## Tasks Completed
 
-| Task | Name | Commit | Files |
-|------|------|--------|-------|
-| 1 | Fix ChatScreen + ProfileScreen | `bef8bc9` | ChatScreen.tsx, ProfileScreen.tsx |
-| 2 | Fix remaining screens + regression test | `72a51e2` | UncategorizedScreen.tsx, QuestionnaireScreen.tsx, AdminInspectorDrawer.tsx, FilesTab.tsx, no-hardcoded-locale.test.ts |
+| Task | Name                                    | Commit    | Files                                                                                                                 |
+| ---- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| 1    | Fix ChatScreen + ProfileScreen          | `bef8bc9` | ChatScreen.tsx, ProfileScreen.tsx                                                                                     |
+| 2    | Fix remaining screens + regression test | `72a51e2` | UncategorizedScreen.tsx, QuestionnaireScreen.tsx, AdminInspectorDrawer.tsx, FilesTab.tsx, no-hardcoded-locale.test.ts |
 
 ## Verification
 
@@ -67,13 +67,13 @@ All number/date/currency formatting in screen files now routes through the `useL
 **2. [Rule 3 - Blocking] Used `import.meta.glob` instead of Node `fs`/`path` in regression test**
 - **Found during:** Task 2
 - **Issue:** The plan's test template used Node.js `fs`/`path` + `__dirname`, which don't exist in Vite's jsdom test environment
-- **Fix:** Rewrote test to use `import.meta.glob([..., { as: "raw", eager: true }])` — standard Vite pattern for scanning source files at test time
+- **Fix:** Rewrote test to use `import.meta.glob([..., { as: "raw", eager: true }])` - standard Vite pattern for scanning source files at test time
 - **Files modified:** `no-hardcoded-locale.test.ts`
 - **Commit:** `72a51e2`
 
 ## Known Stubs
 
-None — all locale-sensitive formatting paths are now wired to `useLocaleFormat`.
+None - all locale-sensitive formatting paths are now wired to `useLocaleFormat`.
 
 ## Self-Check: PASSED
 

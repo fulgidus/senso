@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-Table column sorting is a hidden feature. There is no visual indication that columns are sortable — the only way to discover it is to hover with a mouse and notice the cursor changes. On mobile, this feature is virtually invisible.
+Table column sorting is a hidden feature. There is no visual indication that columns are sortable - the only way to discover it is to hover with a mouse and notice the cursor changes. On mobile, this feature is virtually invisible.
 
 ## Solution
 

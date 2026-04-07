@@ -6,7 +6,7 @@
  *   2. User holds the mic button → STT starts (pointerDown).
  *   3. User releases the mic button → STT stops → onFinalTranscript fires → message sent.
  *   4. When the assistant reply arrives, caller calls `onAssistantMessage(text)`.
- *   5. TTS auto-plays the reply — STT is immediately stopped to prevent feedback loop.
+ *   5. TTS auto-plays the reply - STT is immediately stopped to prevent feedback loop.
  *   6. When TTS finishes, if `voiceAutoListen` is true → mic reopens automatically.
  *
  * STT-TTS feedback loop prevention:
@@ -98,11 +98,11 @@ export function useVoiceMode({
         wasPlayingRef.current = isPlaying
 
         if (!wasPlaying && isPlaying) {
-            // Rising edge: TTS just started — immediately stop STT to prevent
+            // Rising edge: TTS just started - immediately stop STT to prevent
             // the microphone from picking up the assistant's audio output.
             stopRecording()
         } else if (wasPlaying && !isPlaying) {
-            // Falling edge: TTS just finished — re-enable STT if auto-listen is on.
+            // Falling edge: TTS just finished - re-enable STT if auto-listen is on.
             if (voiceAutoListenRef.current && isVoiceMode) {
                 // Small delay to avoid echo / UI flash before mic reopens.
                 setIsAutoListening(true)
@@ -121,7 +121,7 @@ export function useVoiceMode({
     // We call getUserMedia once on first voice mode activation (user gesture) so
     // the browser's permission dialog appears at a deliberate moment rather than
     // buried inside recognition.start() on the first hold-to-talk press.
-    // The stream is released immediately — we only need the permission grant, NOT
+    // The stream is released immediately - we only need the permission grant, NOT
     // a live track. Chromium stores the grant persistently in its permission store
     // so recognition.start() never re-prompts regardless of whether a MediaStream
     // is currently open. Holding a stream alive while SpeechRecognition is active
@@ -141,11 +141,11 @@ export function useVoiceMode({
         if (!micPermissionGranted.current) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-                // Release immediately — we only needed the permission grant.
+                // Release immediately - we only needed the permission grant.
                 stream.getTracks().forEach((t) => t.stop())
                 micPermissionGranted.current = true
             } catch {
-                // Permission denied or not supported — don't enter voice mode.
+                // Permission denied or not supported - don't enter voice mode.
                 return
             }
         }

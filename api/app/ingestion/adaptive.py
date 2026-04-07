@@ -92,7 +92,7 @@ def run_adaptive_pipeline(
     hint: str | None = None,
 ) -> ExtractionResult:
     """
-    Full adaptive pipeline. Never raises — returns ExtractionResult with
+    Full adaptive pipeline. Never raises - returns ExtractionResult with
     appropriate tier_used and warnings describing what happened.
     """
     result = AdaptiveResult()
@@ -131,7 +131,7 @@ def run_adaptive_pipeline(
         result.tier_used = "pdf_llm_text"
         return _to_extraction_result(result)
 
-    # Phase 5: Complete failure — return empty doc with all warnings
+    # Phase 5: Complete failure - return empty doc with all warnings
     result.failure_modes.append(AdaptiveFailureMode.COMPLETE_FAILURE)
     result.warnings.append(
         "All adaptive pipeline stages failed; returning empty document"
@@ -143,7 +143,7 @@ def run_adaptive_pipeline(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Phase 1 — Document classification
+# Phase 1 - Document classification
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -181,7 +181,7 @@ def _classify_document(text: str, llm_client: LLMClient, result: AdaptiveResult)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Phase 2 — Module generation, unit-test generation, sandbox validation
+# Phase 2 - Module generation, unit-test generation, sandbox validation
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -209,7 +209,7 @@ def _generate_and_validate_module(
             retry_error=last_error if attempt > 0 else None,
         )
         if module_code is None:
-            break  # LLM unavailable — no point retrying
+            break  # LLM unavailable - no point retrying
 
         # Sandbox syntax + interface check
         sandbox_ok, sandbox_error = _sandbox_validate_module(module_code, result)
@@ -235,13 +235,13 @@ def _generate_and_validate_module(
                 )
                 continue
 
-        # All checks passed — save and register
+        # All checks passed - save and register
         module_name = _save_and_register_module(
             module_code, file_path, registry, result
         )
         if module_name:
             return module_name
-        break  # save failed — don't retry
+        break  # save failed - don't retry
 
     return None
 
@@ -463,7 +463,7 @@ def _save_and_register_module(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Phase 3 — Run registered module on actual file
+# Phase 3 - Run registered module on actual file
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -497,7 +497,7 @@ def _run_registered_module(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Phase 4 — Direct LLM text extraction
+# Phase 4 - Direct LLM text extraction
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -537,7 +537,7 @@ def _llm_text_extraction(
             result.warnings.append(
                 f"LLM text extraction attempt {attempt + 1} failed: {exc}"
             )
-            break  # no fallback — LLM unavailable
+            break  # no fallback - LLM unavailable
         except json.JSONDecodeError as exc:
             result.failure_modes.append(AdaptiveFailureMode.JSON_INVALID)
             result.warnings.append(

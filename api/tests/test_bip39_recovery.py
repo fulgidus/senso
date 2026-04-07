@@ -1,4 +1,4 @@
-"""Tests for BIP-39 recovery envelope helpers — Phase 14."""
+"""Tests for BIP-39 recovery envelope helpers - Phase 14."""
 import os
 import pytest
 

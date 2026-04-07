@@ -26,8 +26,8 @@ key_files:
     - senso/src/i18n/locales/it.json
     - senso/src/i18n/locales/en.json
 decisions:
-  - "Added new API functions to lib/profile-api.ts (not a new src/api/profileApi.ts) — the existing pattern uses token-based apiRequest and there was no src/api/ directory"
-  - "ProfileScreen tab bar uses three tabs: Riepilogo (summary), Grafici (charts), Timeline — clean separation without breaking existing content"
+  - "Added new API functions to lib/profile-api.ts (not a new src/api/profileApi.ts) - the existing pattern uses token-based apiRequest and there was no src/api/ directory"
+  - "ProfileScreen tab bar uses three tabs: Riepilogo (summary), Grafici (charts), Timeline - clean separation without breaking existing content"
   - "handleContextSaved refreshes full timeline to get distilled context from backend (not optimistic)"
 metrics:
   duration: "~7 minutes"
@@ -82,10 +82,10 @@ New functions: `getTimeline`, `dismissTimelineEvent`, `addTimelineContext`, `get
 Added to `it.json` and `en.json`:
 - `timeline.*` (14 keys)
 - `uncategorized.*` (8 keys)
-- `notifications.*` (9 keys — stub for Plan 09-07)
+- `notifications.*` (9 keys - stub for Plan 09-07)
 - `profile.uncategorizedBadge`
-- `admin.merchantMap.*` (15 keys — stub for Plan 09-07)
-- `admin.moderation.*` (15 keys — stub for Plan 09-07)
+- `admin.merchantMap.*` (15 keys - stub for Plan 09-07)
+- `admin.moderation.*` (15 keys - stub for Plan 09-07)
 
 ## Deviations from Plan
 
@@ -107,8 +107,8 @@ Added to `it.json` and `en.json`:
 
 ## Commits
 
-| Hash | Description |
-|------|-------------|
+| Hash    | Description                                                                    |
+| ------- | ------------------------------------------------------------------------------ |
 | ce0cd8c | feat(09-06): add Timeline tab, UncategorizedScreen, and profile API extensions |
 
 ## Self-Check

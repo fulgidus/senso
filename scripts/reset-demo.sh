@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reset-demo.sh — Wipe demo user data between demo runs
+# reset-demo.sh - Wipe demo user data between demo runs
 # Usage: bash scripts/reset-demo.sh
 #
 # Strategy: connect directly to the Postgres container and run SQL to delete
@@ -12,7 +12,7 @@
 #   audio_cache, refresh_sessions, categorization_jobs, welcome_cache
 #
 # Cascade order: deleting `users` row cascades to all child tables automatically.
-# welcome_cache is not user-keyed — cleared separately.
+# welcome_cache is not user-keyed - cleared separately.
 #
 # The demo user account itself is also deleted so seed-demo.sh can re-create it.
 
@@ -67,7 +67,7 @@ BEGIN
   -- Find the user
   SELECT id INTO uid FROM users WHERE email = '${DEMO_EMAIL}';
   IF uid IS NULL THEN
-    RAISE NOTICE 'Demo user ${DEMO_EMAIL} not found — nothing to delete.';
+    RAISE NOTICE 'Demo user ${DEMO_EMAIL} not found - nothing to delete.';
     RETURN;
   END IF;
 
@@ -78,7 +78,7 @@ BEGIN
   DELETE FROM users WHERE id = uid;
   RAISE NOTICE 'Deleted user and all cascaded data for ${DEMO_EMAIL} (id=%)', uid;
 
-  -- welcome_cache is not user-keyed — clear it for a clean welcome experience
+  -- welcome_cache is not user-keyed - clear it for a clean welcome experience
   DELETE FROM welcome_cache;
   RAISE NOTICE 'welcome_cache cleared';
 
@@ -104,7 +104,7 @@ docker compose run --rm --no-deps \
   -c "mc rm --recursive --force local/senso-uploads/ 2>/dev/null; mc rm --recursive --force local/senso-tts-audio/ 2>/dev/null; echo 'MinIO buckets cleared'" \
   2>/dev/null \
   && ok "MinIO buckets cleared" \
-  || warn "MinIO clear failed or minio-init service unavailable (non-fatal — bucket may be empty or will be overwritten)"
+  || warn "MinIO clear failed or minio-init service unavailable (non-fatal - bucket may be empty or will be overwritten)"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""

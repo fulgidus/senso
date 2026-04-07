@@ -26,9 +26,9 @@ key_files:
     - senso/src/i18n/locales/it.json
     - senso/src/i18n/locales/en.json
 decisions:
-  - "ConnectorsTab is a placeholder (6 static bank cards, 'Prossimamente') — no live bank API integration yet"
+  - "ConnectorsTab is a placeholder (6 static bank cards, 'Prossimamente') - no live bank API integration yet"
   - "/debug route gated by isAdmin OR role==='tester' OR role==='admin' to match SettingsScreen visibility logic"
-  - "Nuke action requires explicit window.confirm() before calling endpoint — destructive action guard"
+  - "Nuke action requires explicit window.confirm() before calling endpoint - destructive action guard"
 metrics:
   duration: "~30min (continuation agent)"
   completed: "2026-04-01T11:15:45Z"
@@ -42,19 +42,19 @@ metrics:
 
 ## What Was Built
 
-### Task 1 — Backend debug API (commit `36dc39b`, prior session)
+### Task 1 - Backend debug API (commit `36dc39b`, prior session)
 - `api/app/api/debug.py`: three endpoints all gated by `require_tester`:
-  - `POST /debug/restart-ingestion` — re-queues categorization for all user uploads
-  - `POST /debug/purge-coaching` — clears `coaching_insights` on user profile
-  - `POST /debug/nuke` — deletes all user data (uploads, profile, coaching insights)
+  - `POST /debug/restart-ingestion` - re-queues categorization for all user uploads
+  - `POST /debug/purge-coaching` - clears `coaching_insights` on user profile
+  - `POST /debug/nuke` - deletes all user data (uploads, profile, coaching insights)
 - `api/app/main.py`: registers `debug_router` with prefix `/debug`
 
-### Task 2 — Frontend (commit `18777dc`)
+### Task 2 - Frontend (commit `18777dc`)
 - **`ConnectorsTab.tsx`**: 6 placeholder bank/fintech cards (Intesa Sanpaolo, Fineco, UniCredit, ING, Revolut, N26) each showing a "Prossimamente" badge. Uses `Building2` icon from lucide-react.
 - **`DebugScreen.tsx`**: Three action sections with `callDebug` helper. Nuke requires `window.confirm()`. Displays success/error feedback inline. Auth via `readAccessToken()`.
 - **`App.tsx`**: Imports `DebugScreen`, adds `/debug` route inside authenticated routes, gated to `user.isAdmin || user.role === "tester" || user.role === "admin"`.
 - **`ProfileScreen.tsx`**: Adds "Connectors" tab button after "Files", renders `<ConnectorsTab />`. Tab type union updated to include `"connectors"`. Summary/Charts guard updated to exclude `"connectors"`.
-- **`SettingsScreen.tsx`**: Developer tools block after About section — link to `/debug` visible only to tester/admin users.
+- **`SettingsScreen.tsx`**: Developer tools block after About section - link to `/debug` visible only to tester/admin users.
 - **i18n** (`it.json` + `en.json`): Added `connectors.*`, `debug.*` namespaces and `settings.devToolsTitle`, `settings.devToolsHint`, `settings.devToolsCta` keys.
 
 ## Deviations from Plan
@@ -68,17 +68,17 @@ None.
 
 ## Known Stubs
 
-**1. ConnectorsTab — all 6 bank cards are static placeholders**
+**1. ConnectorsTab - all 6 bank cards are static placeholders**
 - File: `senso/src/features/profile/ConnectorsTab.tsx`
 - Reason: No live open-banking / PSD2 API integration exists yet. Cards show "Prossimamente" (coming soon).
 - Future plan: A dedicated connectors/integrations plan will wire real bank connection flows.
 
 ## Self-Check: PASSED
 
-| Item | Result |
-|------|--------|
-| `api/app/api/debug.py` | ✅ FOUND |
-| `senso/src/features/debug/DebugScreen.tsx` | ✅ FOUND |
+| Item                                           | Result  |
+| ---------------------------------------------- | ------- |
+| `api/app/api/debug.py`                         | ✅ FOUND |
+| `senso/src/features/debug/DebugScreen.tsx`     | ✅ FOUND |
 | `senso/src/features/profile/ConnectorsTab.tsx` | ✅ FOUND |
-| Commit `36dc39b` (backend debug API) | ✅ FOUND |
-| Commit `18777dc` (frontend debug/connectors) | ✅ FOUND |
+| Commit `36dc39b` (backend debug API)           | ✅ FOUND |
+| Commit `18777dc` (frontend debug/connectors)   | ✅ FOUND |

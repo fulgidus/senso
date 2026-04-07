@@ -8,10 +8,10 @@ files: []
 
 ## Problem
 
-A nugget/badge in the profile shows the raw string "estimated_from_transactions" instead of a localized human-readable label. Additionally, the tag is inaccurate — the user also completed the questionnaire, so the data source label should reflect combined sources, not just transactions.
+A nugget/badge in the profile shows the raw string "estimated_from_transactions" instead of a localized human-readable label. Additionally, the tag is inaccurate - the user also completed the questionnaire, so the data source label should reflect combined sources, not just transactions.
 
 ## Solution
 
 - Add i18n key for estimation source labels (e.g., `profile.source.estimated_from_transactions`, `profile.source.combined`).
-- Fix the logic that determines the data source tag — should check if questionnaire data also contributed.
+- Fix the logic that determines the data source tag - should check if questionnaire data also contributed.
 - Ensure all such system-generated labels go through the i18n pipeline.

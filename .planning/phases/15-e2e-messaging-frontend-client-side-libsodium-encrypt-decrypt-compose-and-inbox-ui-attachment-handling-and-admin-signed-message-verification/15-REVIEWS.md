@@ -6,7 +6,7 @@ plans_reviewed:
   [15-01-PLAN.md, 15-02-PLAN.md, 15-03-PLAN.md, 15-04-PLAN.md, 15-05-PLAN.md, 15-06-PLAN.md]
 ---
 
-# Cross-AI Plan Review — Phase 15: E2E Messaging Frontend
+# Cross-AI Plan Review - Phase 15: E2E Messaging Frontend
 
 ## Gemini Review
 
@@ -40,7 +40,7 @@ Phase 15 is a comprehensive and technically rigorous implementation of client-si
 
 ## 5. Risk Assessment: LOW
 
-The overall risk is **LOW**. The plans are highly detailed, include robust verification steps (cross-language interop tests), and follow established cryptographic standards. The most complex part—the dual-format KDF and envelope migration—is handled with enough fallback logic to prevent user lockouts. The dependency chain between waves is logical and well-sequenced.
+The overall risk is **LOW**. The plans are highly detailed, include robust verification steps (cross-language interop tests), and follow established cryptographic standards. The most complex part-the dual-format KDF and envelope migration-is handled with enough fallback logic to prevent user lockouts. The dependency chain between waves is logical and well-sequenced.
 
 **Final Verdict:** The plans are ready for execution. The attention to detail regarding libsodium's `crypto_box_easy` vs `sumo` builds is a highlight of technical competence.
 
@@ -52,31 +52,31 @@ _Note: codex CLI unavailable; claude skipped for independence. Consensus from Ge
 
 ### Agreed Strengths
 
-- **Crypto interoperability** — explicit `crypto_box_easy` = XSalsa20-Poly1305 (not XChaCha20), compatible with PyNaCl Box. Both reviewers flagged this as a key correctness decision.
-- **Poll-once pattern** — single `pollMessages()` at bootstrap, cached in `AuthContext.polledMessages`. Prevents double-delivery bug where navigating to inbox twice clears messages.
-- **Transparent envelope migration** — `v2:` prefix detection allows AES-GCM → secretbox migration without schema changes. Both reviewers found this elegant.
-- **Memory-only key material** — `CryptoKeyMaterial` type kept outside `User` serialization. Keys cleared on `signOut()`.
-- **Cross-language Argon2id interop test** — RFC 9106 Low Memory params locked identically in Python and browser; interop hex vector must be manually locked before Wave 1 ships.
+- **Crypto interoperability** - explicit `crypto_box_easy` = XSalsa20-Poly1305 (not XChaCha20), compatible with PyNaCl Box. Both reviewers flagged this as a key correctness decision.
+- **Poll-once pattern** - single `pollMessages()` at bootstrap, cached in `AuthContext.polledMessages`. Prevents double-delivery bug where navigating to inbox twice clears messages.
+- **Transparent envelope migration** - `v2:` prefix detection allows AES-GCM → secretbox migration without schema changes. Both reviewers found this elegant.
+- **Memory-only key material** - `CryptoKeyMaterial` type kept outside `User` serialization. Keys cleared on `signOut()`.
+- **Cross-language Argon2id interop test** - RFC 9106 Low Memory params locked identically in Python and browser; interop hex vector must be manually locked before Wave 1 ships.
 
 ### Agreed Concerns
 
 | Severity | Concern                                                                                                                                                                                                                                                          | Source |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| MEDIUM   | **Stale contact key cache** — if a recipient rotates keys (recovery flow), locally cached X25519 key sends ciphertext the recipient can't decrypt. No refresh-on-failure logic in compose flow.                                                                  | Gemini |
-| LOW      | **Bootstrap race condition** — `/messages` might render "No messages" briefly before `polledMessages` resolves in `AuthContext`. `isPolling` flag missing.                                                                                                       | Gemini |
-| LOW      | **Recovery phrase tab-close risk** — phrase is cleared after user confirms; if browser crashes between interstitial dismiss and app navigation, account is unrecoverable. `isPolling` boolean would help differentiate "not yet polled" from "polled and empty". | Gemini |
-| LOW      | **js-yaml safe loading** — use `schema: JSON_SCHEMA` in `yaml.load()` calls to guard against YAML deserialization edge cases.                                                                                                                                    | Gemini |
+| MEDIUM   | **Stale contact key cache** - if a recipient rotates keys (recovery flow), locally cached X25519 key sends ciphertext the recipient can't decrypt. No refresh-on-failure logic in compose flow.                                                                  | Gemini |
+| LOW      | **Bootstrap race condition** - `/messages` might render "No messages" briefly before `polledMessages` resolves in `AuthContext`. `isPolling` flag missing.                                                                                                       | Gemini |
+| LOW      | **Recovery phrase tab-close risk** - phrase is cleared after user confirms; if browser crashes between interstitial dismiss and app navigation, account is unrecoverable. `isPolling` boolean would help differentiate "not yet polled" from "polled and empty". | Gemini |
+| LOW      | **js-yaml safe loading** - use `schema: JSON_SCHEMA` in `yaml.load()` calls to guard against YAML deserialization edge cases.                                                                                                                                    | Gemini |
 
 ### Divergent Views
 
-None — single external reviewer (Gemini). Internal plan-checker found 3 blocking issues (all fixed before this review ran).
+None - single external reviewer (Gemini). Internal plan-checker found 3 blocking issues (all fixed before this review ran).
 
 ### Actionable Items Before Execution
 
-1. **Add `isPolling` state to AuthContext** (15-04-03 or 15-02-03) — lets `MessagesPage` show a spinner instead of empty state during bootstrap poll.
-2. **Add key refresh-on-fail in `useEncryptAndSend`** — if `sendMessage` returns a "recipient key mismatch" error (or any encryption failure), re-fetch keys via `getRecipientPublicKeys()` and retry once.
+1. **Add `isPolling` state to AuthContext** (15-04-03 or 15-02-03) - lets `MessagesPage` show a spinner instead of empty state during bootstrap poll.
+2. **Add key refresh-on-fail in `useEncryptAndSend`** - if `sendMessage` returns a "recipient key mismatch" error (or any encryption failure), re-fetch keys via `getRecipientPublicKeys()` and retry once.
 3. **Use `yaml.load(content, { schema: yaml.JSON_SCHEMA })`** in `parseMessage.ts` instead of bare `yaml.load()`.
-4. **Add "Download as text" button** to recovery phrase interstitial alongside "Copy all" — encourages durable backup.
+4. **Add "Download as text" button** to recovery phrase interstitial alongside "Copy all" - encourages durable backup.
 
 ### Overall Risk: LOW
 

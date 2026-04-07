@@ -17,13 +17,13 @@ created: 2026-03-30
 
 ## Design System
 
-| Property          | Value                                                         |
-| ----------------- | ------------------------------------------------------------- |
-| Tool              | shadcn                                                        |
-| Preset            | style: radix-vega · baseColor: olive · cssVariables: true     |
-| Component library | radix-ui (via shadcn)                                         |
-| Icon library      | lucide-react (established in components.json)                 |
-| Font              | Geist Variable (loaded via @fontsource-variable/geist)        |
+| Property          | Value                                                     |
+| ----------------- | --------------------------------------------------------- |
+| Tool              | shadcn                                                    |
+| Preset            | style: radix-vega · baseColor: olive · cssVariables: true |
+| Component library | radix-ui (via shadcn)                                     |
+| Icon library      | lucide-react (established in components.json)             |
+| Font              | Geist Variable (loaded via @fontsource-variable/geist)    |
 
 > Source: `senso/components.json` + `senso/src/index.css`
 
@@ -56,18 +56,18 @@ Exceptions:
 
 All sizes from existing codebase patterns. Weights: **400 (regular)** and **600 (semibold)** only.
 
-| Role    | Size  | Weight          | Line Height |
-| ------- | ----- | --------------- | ----------- |
-| Body    | 16px  | 400 (regular)   | 1.5         |
-| Label   | 14px  | 400 (regular)   | 1.4         |
-| Heading | 20px  | 600 (semibold)  | 1.2         |
-| Display | 24px  | 600 (semibold)  | 1.2         |
+| Role    | Size | Weight         | Line Height |
+| ------- | ---- | -------------- | ----------- |
+| Body    | 16px | 400 (regular)  | 1.5         |
+| Label   | 14px | 400 (regular)  | 1.4         |
+| Heading | 20px | 600 (semibold) | 1.2         |
+| Display | 24px | 600 (semibold) | 1.2         |
 
 Notes:
-- Monospace font for `description_raw` merchant strings in admin table: `text-sm font-mono` (14px — Label role, system monospace stack). No bespoke size.
-- Timeline event date chip: `text-sm text-muted-foreground` (14px — Label role). Tailwind `text-xs` (12px) is NOT used for date chips; fold into Label role with `text-muted-foreground` for visual de-emphasis.
+- Monospace font for `description_raw` merchant strings in admin table: `text-sm font-mono` (14px - Label role, system monospace stack). No bespoke size.
+- Timeline event date chip: `text-sm text-muted-foreground` (14px - Label role). Tailwind `text-xs` (12px) is NOT used for date chips; fold into Label role with `text-muted-foreground` for visual de-emphasis.
 - Category picker option text: 14px / 400 (matches existing filter/picker patterns)
-- Notification badge numeral: rendered with `text-xs` (12px) as a **density variant of the Label role** — the badge's fixed 16px diameter container constrains the numeral visually. This is NOT a 5th declared size token; `text-xs` is a Tailwind utility alias for the Label role in constrained-space contexts. The size table remains 4 entries.
+- Notification badge numeral: rendered with `text-xs` (12px) as a **density variant of the Label role** - the badge's fixed 16px diameter container constrains the numeral visually. This is NOT a 5th declared size token; `text-xs` is a Tailwind utility alias for the Label role in constrained-space contexts. The size table remains 4 entries.
 
 > Source: `index.css` body { font-size: 16px; line-height: 1.5 }; confirmed against ProfileScreen heading `text-xl font-semibold` (20px/600), label `text-sm` (14px/400), `text-2xl` (24px/600) on CTA. Restricted to 4 sizes max per design contract.
 
@@ -77,12 +77,12 @@ Notes:
 
 All tokens are CSS custom properties defined in `senso/src/index.css`.
 
-| Role            | Light mode value      | Dark mode value   | Usage                                             |
-| --------------- | --------------------- | ----------------- | ------------------------------------------------- |
-| Dominant (60%)  | `#FFFFFF` (oklch 1)   | `#112D4E`         | Page background, surfaces                         |
-| Secondary (30%) | `#DBE2EF`             | `#1a3a5c`         | Cards (`bg-card`), section containers, sidebar    |
-| Accent (10%)    | `#3F72AF`             | `#5B9BD5`         | `var(--primary)` — see reserved list below        |
-| Destructive     | `#112D4E` (light) / `oklch(0.704 0.191 22.216)` (dark) | same | Blacklist button, ban action, permanent removal |
+| Role            | Light mode value                                       | Dark mode value | Usage                                           |
+| --------------- | ------------------------------------------------------ | --------------- | ----------------------------------------------- |
+| Dominant (60%)  | `#FFFFFF` (oklch 1)                                    | `#112D4E`       | Page background, surfaces                       |
+| Secondary (30%) | `#DBE2EF`                                              | `#1a3a5c`       | Cards (`bg-card`), section containers, sidebar  |
+| Accent (10%)    | `#3F72AF`                                              | `#5B9BD5`       | `var(--primary)` - see reserved list below      |
+| Destructive     | `#112D4E` (light) / `oklch(0.704 0.191 22.216)` (dark) | same            | Blacklist button, ban action, permanent removal |
 
 **Accent (`var(--primary)`) reserved for:**
 1. Primary CTA buttons (`variant="default"`)
@@ -93,7 +93,7 @@ All tokens are CSS custom properties defined in `senso/src/index.css`.
 6. Active tab underline in ProfileScreen Timeline tab
 7. Focus ring (`var(--ring)`)
 
-**Second semantic color — warning amber:** Used exclusively for the "uncategorized transactions exist" banner (matches existing stale-profile banner pattern: `border-yellow-500/40 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-300`). Not a new token — reuse existing Tailwind amber utilities.
+**Second semantic color - warning amber:** Used exclusively for the "uncategorized transactions exist" banner (matches existing stale-profile banner pattern: `border-yellow-500/40 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-300`). Not a new token - reuse existing Tailwind amber utilities.
 
 > Source: `senso/src/index.css` CSS custom properties; confirmed against ProfileScreen stale banner pattern.
 
@@ -103,9 +103,9 @@ All tokens are CSS custom properties defined in `senso/src/index.css`.
 
 New components introduced in Phase 9, with their visual contracts:
 
-### 1. ProfileScreen — "Timeline" Tab
+### 1. ProfileScreen - "Timeline" Tab
 
-> Focal point: The first timeline event card — its icon, date chip, and title anchor the user's attention and establish the chronological narrative.
+> Focal point: The first timeline event card - its icon, date chip, and title anchor the user's attention and establish the chronological narrative.
 
 **Container:** New third tab alongside existing chart sections. Tab bar uses `rounded-full px-4 py-1.5 text-sm font-medium` pill style with `bg-primary text-primary-foreground` for active state.
 
@@ -135,7 +135,7 @@ rounded-2xl border border-border bg-card p-5
 
 ### 2. Review Uncategorized Screen (`/profile/uncategorized`)
 
-> Focal point: The category picker dropdown on the first transaction row — this is the primary action the user must take to resolve the uncategorized state.
+> Focal point: The category picker dropdown on the first transaction row - this is the primary action the user must take to resolve the uncategorized state.
 
 **Route:** New route, accessible from:
 - ProfileScreen: amber warning banner CTA "Rivedi transazioni" when uncategorized > 0
@@ -151,7 +151,7 @@ p text-sm text-muted-foreground: "{{count}} transazioni richiedono la tua attenz
 
 **Transaction row:**
 ```
-rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact list)
+rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl - compact list)
 ├── Left: description text-sm font-medium text-foreground (truncate at 1 line)
 │         date text-sm text-muted-foreground
 │         source filename badge: rounded-full bg-secondary px-2 py-1 text-sm
@@ -172,11 +172,11 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 
 ### 3. Admin Merchant Map Page (`/admin/learned-merchants`)
 
-> Focal point: The Description column (raw transaction text in monospace) paired with the Canonical merchant column — this pairing is the core data the admin is reviewing and acting on.
+> Focal point: The Description column (raw transaction text in monospace) paired with the Canonical merchant column - this pairing is the core data the admin is reviewing and acting on.
 
 **Route:** Admin-only. New nav item in admin section. Label: "Merchant map" (or `t("admin.merchantMap.title")`).
 
-**Layout:** Follows `ContentAdminPage.tsx` pattern — full-page, search/filter bar at top, table body.
+**Layout:** Follows `ContentAdminPage.tsx` pattern - full-page, search/filter bar at top, table body.
 
 **Filter bar:**
 - Search input (same style as ContentAdminPage: `rounded-lg border border-border px-3 py-2 text-sm`)
@@ -184,17 +184,17 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 - Filter by `is_blacklisted` (toggle: Active | Blacklisted | All)
 
 **Table columns:**
-| Column               | Width  | Notes                                                     |
-| -------------------- | ------ | --------------------------------------------------------- |
-| Description          | flex-1 | `text-sm font-mono text-foreground` — raw transaction text (14px, Label role) |
-| Canonical merchant   | 160px  | `text-sm text-foreground`                                 |
-| Category             | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-1 text-sm` |
-| Confidence           | 80px   | `text-sm text-muted-foreground` — percentage format       |
-| Method               | 100px  | Small badge: manual=primary, sm/md/lg=secondary           |
-| Provider:model       | 140px  | `text-sm text-muted-foreground font-mono` (truncated)     |
-| Contributing user    | 120px  | Obfuscated `u****@domain.com` — `text-sm text-muted-foreground` |
-| Date                 | 100px  | Relative (e.g. "3 giorni fa") `text-sm text-muted-foreground` |
-| Actions              | 80px   | Blacklist button (if active) / Unblacklist + reason badge (if blacklisted) |
+| Column             | Width  | Notes                                                                         |
+| ------------------ | ------ | ----------------------------------------------------------------------------- |
+| Description        | flex-1 | `text-sm font-mono text-foreground` - raw transaction text (14px, Label role) |
+| Canonical merchant | 160px  | `text-sm text-foreground`                                                     |
+| Category           | 120px  | Pill badge: `rounded-full bg-secondary px-2 py-1 text-sm`                     |
+| Confidence         | 80px   | `text-sm text-muted-foreground` - percentage format                           |
+| Method             | 100px  | Small badge: manual=primary, sm/md/lg=secondary                               |
+| Provider:model     | 140px  | `text-sm text-muted-foreground font-mono` (truncated)                         |
+| Contributing user  | 120px  | Obfuscated `u****@domain.com` - `text-sm text-muted-foreground`               |
+| Date               | 100px  | Relative (e.g. "3 giorni fa") `text-sm text-muted-foreground`                 |
+| Actions            | 80px   | Blacklist button (if active) / Unblacklist + reason badge (if blacklisted)    |
 
 **Blacklist action:** Clicking "Blacklist" opens an inline row expansion (not modal) showing a textarea "Motivo del blacklisting" + "Conferma blacklist" button (`variant="destructive" size="sm"`).
 
@@ -204,13 +204,13 @@ rounded-xl border border-border bg-card px-4 py-3 (NOT rounded-2xl — compact l
 
 ### 4. Notification Bell + Panel
 
-> Focal point: The unread count badge on the bell icon — it is the sole visual signal that draws the user to open the panel; everything else is secondary until the panel is open.
+> Focal point: The unread count badge on the bell icon - it is the sole visual signal that draws the user to open the panel; everything else is secondary until the panel is open.
 
-**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). The bell button element **must carry** `aria-label={t("notifications.bellAriaLabel")}` with i18n value `"Notifiche — {{count}} non lette"` (when count > 0) or `"Notifiche"` (when count is 0). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center` (max display "9+"). `text-xs` is 12px — used here as a density variant of the Label role within the constrained 16px badge container, not a new size token.
+**Bell location:** App header (`AppShell.tsx`), immediately to the left of `LanguageSwitcher`. Uses `Bell` lucide icon (h-5 w-5). The bell button element **must carry** `aria-label={t("notifications.bellAriaLabel")}` with i18n value `"Notifiche - {{count}} non lette"` (when count > 0) or `"Notifiche"` (when count is 0). Unread badge: `absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center` (max display "9+"). `text-xs` is 12px - used here as a density variant of the Label role within the constrained 16px badge container, not a new size token.
 
 **Panel:** Dropdown, `absolute right-0 top-full mt-1 z-50 w-80 max-h-[480px] overflow-y-auto rounded-xl border border-border bg-background shadow-lg` (matches existing dropdown pattern from `AppShell.tsx`).
 
-**Panel header:** `flex items-center justify-between px-4 py-3 border-b border-border` — "Notifiche" h3 text-sm font-semibold + "Segna tutto come letto" ghost button (text-sm text-primary, only shown if unread > 0).
+**Panel header:** `flex items-center justify-between px-4 py-3 border-b border-border` - "Notifiche" h3 text-sm font-semibold + "Segna tutto come letto" ghost button (text-sm text-primary, only shown if unread > 0).
 
 **Notification item:**
 ```
@@ -237,7 +237,7 @@ px-4 py-3 hover:bg-accent transition-colors cursor-pointer
 
 ### 5. Admin Moderation Queue (`/admin/moderation`)
 
-> Focal point: The severity badge and violations pill row — they convey risk level at a glance and drive which action the admin takes first.
+> Focal point: The severity badge and violations pill row - they convey risk level at a glance and drive which action the admin takes first.
 
 **Route:** Admin-only. New nav item in admin section. Label: "Moderazione".
 
@@ -261,35 +261,35 @@ rounded-xl border border-border bg-card px-4 py-3 mb-2
 
 All strings must be added to `senso/src/i18n/locales/it.json` and `en.json`. Keys use dot notation per convention.
 
-| Element                               | Italian copy (i18n key)                                                                              |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Primary CTA — review uncategorized** | "Rivedi transazioni" (`timeline.reviewUncategorizedCta`)                                            |
-| **Primary CTA — save timeline context**| "Salva contesto" (`timeline.saveContext`)                                                            |
-| **Primary CTA — dismiss event**        | "Nascondi evento" (`timeline.dismissEvent`)                                                          |
-| **Primary CTA — blacklist merchant**   | "Blacklista voce" (`admin.merchantMap.blacklistBtn`)                                                 |
-| **Empty state — no timeline events**   | Heading: "Nessun evento rilevato" · Body: "Man mano che carichi documenti, rileveremo eventi come cambi di lavoro, grandi acquisti e cambi di abbonamenti." (`timeline.emptyHeading`, `timeline.emptyBody`) |
-| **Empty state — no uncategorized**     | Heading: "Ottimo lavoro!" · Body: "Tutte le transazioni sono categorizzate. Il tuo profilo è completo." (`uncategorized.emptyHeading`, `uncategorized.emptyBody`) |
-| **Empty state — no notifications**     | "Nessuna notifica" (`notifications.empty`)                                                           |
-| **Error — timeline load failure**      | "Impossibile caricare la timeline. Controlla la connessione e riprova." (`timeline.errorLoad`)        |
-| **Error — merchant map load failure**  | "Impossibile caricare i dati dei merchant. Controlla la connessione e riprova." (`admin.merchantMap.loadError`) |
-| **Error — context save failure**       | "Salvataggio non riuscito. Controlla la connessione e riprova." (`timeline.errorSave`)               |
-| **Error — category save failure**      | "Categoria non salvata. Riprova." (`uncategorized.errorSave`)                                        |
-| **Destructive: blacklist merchant**    | Inline confirm label: "Questa voce non sarà più usata per la categorizzazione. Confermi?" + "Blacklista" button / "Annulla" link (`admin.merchantMap.blacklistConfirm`) |
-| **Destructive: dismiss timeline event**| Reason picker label: "Perché vuoi nascondere questo evento?" — reason options: "Assunzione errata", "Errore di calcolo", "Evento superato", "Duplicato", "Altro" (`timeline.dismissReasonLabel`, individual option keys) |
-| **Moderation: warning notification**   | Title: "Avviso di moderazione" · Body: "Uno dei tuoi contributi è stato rimosso per violazione delle linee guida. Puoi fare ricorso." (`notifications.moderationWarning`) |
-| **Moderation: timeout notification**   | Title: "Accesso temporaneamente limitato" · Body: "Hai ricevuto una sospensione di {{hours}}h. Potrai tornare ad aggiungere contesto il {{date}}." (`notifications.moderationTimeout`) |
-| **Uncategorized badge on ProfileScreen** | "{{count}} da rivedere" (`profile.uncategorizedBadge`) on amber CTA near insight cards section    |
-| **Processing screen new step**         | "Rilevamento eventi finanziari" (`processing.stepTimeline`)                                          |
-| **Notification bell aria-label**       | "Notifiche — {{count}} non lette" (when count > 0) / "Notifiche" (when count = 0) (`notifications.bellAriaLabel`) |
-| **Admin: confirm penalty button**      | "Conferma penalità" (`admin.moderation.confirmPenalty`)                                              |
+| Element                                  | Italian copy (i18n key)                                                                                                                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Primary CTA - review uncategorized**   | "Rivedi transazioni" (`timeline.reviewUncategorizedCta`)                                                                                                                                                                 |
+| **Primary CTA - save timeline context**  | "Salva contesto" (`timeline.saveContext`)                                                                                                                                                                                |
+| **Primary CTA - dismiss event**          | "Nascondi evento" (`timeline.dismissEvent`)                                                                                                                                                                              |
+| **Primary CTA - blacklist merchant**     | "Blacklista voce" (`admin.merchantMap.blacklistBtn`)                                                                                                                                                                     |
+| **Empty state - no timeline events**     | Heading: "Nessun evento rilevato" · Body: "Man mano che carichi documenti, rileveremo eventi come cambi di lavoro, grandi acquisti e cambi di abbonamenti." (`timeline.emptyHeading`, `timeline.emptyBody`)              |
+| **Empty state - no uncategorized**       | Heading: "Ottimo lavoro!" · Body: "Tutte le transazioni sono categorizzate. Il tuo profilo è completo." (`uncategorized.emptyHeading`, `uncategorized.emptyBody`)                                                        |
+| **Empty state - no notifications**       | "Nessuna notifica" (`notifications.empty`)                                                                                                                                                                               |
+| **Error - timeline load failure**        | "Impossibile caricare la timeline. Controlla la connessione e riprova." (`timeline.errorLoad`)                                                                                                                           |
+| **Error - merchant map load failure**    | "Impossibile caricare i dati dei merchant. Controlla la connessione e riprova." (`admin.merchantMap.loadError`)                                                                                                          |
+| **Error - context save failure**         | "Salvataggio non riuscito. Controlla la connessione e riprova." (`timeline.errorSave`)                                                                                                                                   |
+| **Error - category save failure**        | "Categoria non salvata. Riprova." (`uncategorized.errorSave`)                                                                                                                                                            |
+| **Destructive: blacklist merchant**      | Inline confirm label: "Questa voce non sarà più usata per la categorizzazione. Confermi?" + "Blacklista" button / "Annulla" link (`admin.merchantMap.blacklistConfirm`)                                                  |
+| **Destructive: dismiss timeline event**  | Reason picker label: "Perché vuoi nascondere questo evento?" - reason options: "Assunzione errata", "Errore di calcolo", "Evento superato", "Duplicato", "Altro" (`timeline.dismissReasonLabel`, individual option keys) |
+| **Moderation: warning notification**     | Title: "Avviso di moderazione" · Body: "Uno dei tuoi contributi è stato rimosso per violazione delle linee guida. Puoi fare ricorso." (`notifications.moderationWarning`)                                                |
+| **Moderation: timeout notification**     | Title: "Accesso temporaneamente limitato" · Body: "Hai ricevuto una sospensione di {{hours}}h. Potrai tornare ad aggiungere contesto il {{date}}." (`notifications.moderationTimeout`)                                   |
+| **Uncategorized badge on ProfileScreen** | "{{count}} da rivedere" (`profile.uncategorizedBadge`) on amber CTA near insight cards section                                                                                                                           |
+| **Processing screen new step**           | "Rilevamento eventi finanziari" (`processing.stepTimeline`)                                                                                                                                                              |
+| **Notification bell aria-label**         | "Notifiche - {{count}} non lette" (when count > 0) / "Notifiche" (when count = 0) (`notifications.bellAriaLabel`)                                                                                                        |
+| **Admin: confirm penalty button**        | "Conferma penalità" (`admin.moderation.confirmPenalty`)                                                                                                                                                                  |
 
 ---
 
 ## Registry Safety
 
-| Registry        | Blocks Used                                                   | Safety Gate  |
-| --------------- | ------------------------------------------------------------- | ------------ |
-| shadcn official | `button` (existing), `chart` (existing — recharts wrapper)    | not required |
+| Registry        | Blocks Used                                                | Safety Gate  |
+| --------------- | ---------------------------------------------------------- | ------------ |
+| shadcn official | `button` (existing), `chart` (existing - recharts wrapper) | not required |
 
 No third-party registries declared. Phase 9 reuses:
 - Existing `recharts` (via `@/components/ui/chart`) for any new chart variants in the timeline
@@ -297,23 +297,23 @@ No third-party registries declared. Phase 9 reuses:
 - Existing Lucide icons from `lucide-react`
 
 New Lucide icons required for Phase 9 (all from existing `lucide-react` package, no new registry):
-- `Bell` — notification bell
-- `ShieldOff` — ban notification type
-- `Clock` — timeline empty state, timeout notification
-- `RotateCcw` — appeal reverted notification
-- `CheckCircle` — empty uncategorized state, appeal confirmed notification
+- `Bell` - notification bell
+- `ShieldOff` - ban notification type
+- `Clock` - timeline empty state, timeout notification
+- `RotateCcw` - appeal reverted notification
+- `CheckCircle` - empty uncategorized state, appeal confirmed notification
 
 ---
 
 ## Screen × State Matrix
 
-| Screen / Component             | Loading state           | Empty state              | Error state              | Populated state         |
-| ------------------------------ | ----------------------- | ------------------------ | ------------------------ | ----------------------- |
-| ProfileScreen Timeline tab     | Skeleton cards (3×)     | Clock icon + copy        | AlertTriangle + retry    | Event cards list        |
-| Review Uncategorized screen    | Skeleton rows (5×)      | CheckCircle + copy       | AlertTriangle + retry    | Transaction row list    |
-| Notification panel             | 3× skeleton rows        | Bell icon + "no notifs"  | —                        | Notification items      |
-| Admin merchant map table       | Skeleton table rows     | "Nessuna voce"           | AlertTriangle + retry    | Table rows              |
-| Admin moderation queue         | Skeleton rows           | "Nessuna segnalazione"   | AlertTriangle + retry    | Queue items             |
+| Screen / Component          | Loading state       | Empty state             | Error state           | Populated state      |
+| --------------------------- | ------------------- | ----------------------- | --------------------- | -------------------- |
+| ProfileScreen Timeline tab  | Skeleton cards (3×) | Clock icon + copy       | AlertTriangle + retry | Event cards list     |
+| Review Uncategorized screen | Skeleton rows (5×)  | CheckCircle + copy      | AlertTriangle + retry | Transaction row list |
+| Notification panel          | 3× skeleton rows    | Bell icon + "no notifs" | -                     | Notification items   |
+| Admin merchant map table    | Skeleton table rows | "Nessuna voce"          | AlertTriangle + retry | Table rows           |
+| Admin moderation queue      | Skeleton rows       | "Nessuna segnalazione"  | AlertTriangle + retry | Queue items          |
 
 Skeleton pattern: `animate-pulse rounded bg-muted` (matches existing `SkeletonCard` in ProfileScreen).
 
@@ -329,7 +329,7 @@ Skeleton pattern: `animate-pulse rounded bg-muted` (matches existing `SkeletonCa
 
 ### Dismiss Event (Timeline)
 - **Trigger:** Ghost "Nascondi evento" button
-- **Expansion:** Inline, no modal — reason picker appears below description within same card
+- **Expansion:** Inline, no modal - reason picker appears below description within same card
 - **Confirm:** `POST /profile/timeline/{id}/dismiss` with `{ reason, detail? }`
 - **Result:** Card animates to 50% opacity, title gets `line-through`, moves to "dismissed" section
 
@@ -337,13 +337,13 @@ Skeleton pattern: `animate-pulse rounded bg-muted` (matches existing `SkeletonCa
 - **Trigger:** Ghost "Aggiungi contesto" button
 - **Expansion:** Inline textarea below description, autofocus
 - **Character limit:** None shown visually (backend enforces; show error only if backend rejects)
-- **Save:** `POST /profile/timeline/{id}/context` — shows spinner in button during save
+- **Save:** `POST /profile/timeline/{id}/context` - shows spinner in button during save
 - **After save:** Textarea replaced by distilled context (italic muted text) + "Modifica contesto" ghost button
 
 ### Blacklist Merchant (Admin)
 - **Trigger:** "Blacklista" button in admin table row
-- **Expansion:** Inline row expansion (not modal) — textarea for reason (required, min 5 chars)
-- **Confirm:** `POST /admin/learned-merchants/{id}/blacklist` — row immediately dims to 50% opacity
+- **Expansion:** Inline row expansion (not modal) - textarea for reason (required, min 5 chars)
+- **Confirm:** `POST /admin/learned-merchants/{id}/blacklist` - row immediately dims to 50% opacity
 - **Unblacklist:** "Ripristina" ghost button on blacklisted rows
 
 ### Notification Bell

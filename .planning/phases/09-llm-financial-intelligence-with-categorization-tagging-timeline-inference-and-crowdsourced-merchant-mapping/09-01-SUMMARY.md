@@ -17,7 +17,7 @@ key_files:
     - api/app/db/session.py
 decisions:
   - "date imported from datetime for FinancialTimeline.event_date (was missing from models.py imports)"
-  - "LLMType already included 'classification' in llm_config.py — no change needed to llm.py"
+  - "LLMType already included 'classification' in llm_config.py - no change needed to llm.py"
   - "classification route verified: _parse_route('text:classification:sm') returns ('text','classification','sm')"
 metrics:
   duration: "11 min"
@@ -26,16 +26,16 @@ metrics:
   files_modified: 2
 ---
 
-# Phase 09 Plan 01: DB Models & LLM Classification Route — Summary
+# Phase 09 Plan 01: DB Models & LLM Classification Route - Summary
 
 **One-liner:** Added 4 Phase 9 SQLAlchemy ORM models (MerchantMap, FinancialTimeline, ModerationLog, Notification) with idempotent Round 11 DDL migrations and confirmed text:classification:sm/md/lg route parsing works.
 
 ## Tasks Completed
 
-| Task | Description | Commit | Status |
-|------|-------------|--------|--------|
-| 1 | Add MerchantMap, FinancialTimeline, ModerationLog, Notification ORM models | a161858 | ✅ |
-| 2 | DDL for new tables in session.py + verify classification route | a161858 | ✅ |
+| Task | Description                                                                | Commit  | Status |
+| ---- | -------------------------------------------------------------------------- | ------- | ------ |
+| 1    | Add MerchantMap, FinancialTimeline, ModerationLog, Notification ORM models | a161858 | ✅      |
+| 2    | DDL for new tables in session.py + verify classification route             | a161858 | ✅      |
 
 ## What Was Built
 
@@ -73,16 +73,16 @@ All protected by the existing SAVEPOINT idempotent pattern.
 
 ### Discoveries (No Change Needed)
 
-- `LLMType` in `llm_config.py` already includes `"classification"` — the plan's Task 2 llm.py change was a no-op.
+- `LLMType` in `llm_config.py` already includes `"classification"` - the plan's Task 2 llm.py change was a no-op.
 - Docker stack port conflicts with another project on port 9000/9001 (MinIO). Tests run with `--no-deps` using SQLite. Verified: 56 tests pass (auth, ingestion service, coaching service, module registry).
 
 ## Self-Check
 
 ### Created files exist:
-- `api/app/db/models.py` — modified ✅
-- `api/app/db/session.py` — modified ✅
+- `api/app/db/models.py` - modified ✅
+- `api/app/db/session.py` - modified ✅
 
 ### Commits exist:
-- `a161858` — `feat(09-01): add Phase 9 ORM models and DDL migrations` ✅
+- `a161858` - `feat(09-01): add Phase 9 ORM models and DDL migrations` ✅
 
 ## Self-Check: PASSED

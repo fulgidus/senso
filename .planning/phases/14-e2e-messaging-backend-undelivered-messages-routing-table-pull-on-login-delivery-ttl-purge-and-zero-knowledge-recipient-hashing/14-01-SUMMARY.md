@@ -6,7 +6,7 @@ absorbed_by: "15"
 completed_at: "2026-04-05"
 ---
 
-# Summary 14-01 — Phase 14 Absorbed into Phase 15
+# Summary 14-01 - Phase 14 Absorbed into Phase 15
 
 Phase 14 backend deliverables were fully implemented during Phase 15 execution.
 No separate Phase 14 work was performed. All tasks complete per Phase 15 VERIFICATION.md.

@@ -11,7 +11,7 @@ commits:
   - "5019120 feat(15-01-04): add Argon2id interop test and lock cross-language test vector"
 ---
 
-# Plan 15-01 SUMMARY — Packages + Crypto Stubs + Backend Endpoints
+# Plan 15-01 SUMMARY - Packages + Crypto Stubs + Backend Endpoints
 
 ## What Was Built
 
@@ -26,26 +26,26 @@ commits:
 ## Key Files Created/Modified
 
 - `senso/package.json` (6 packages added)
-- `senso/src/features/messages/__tests__/crypto.test.ts` (XSalsa20-Poly1305 + Ed25519 tests — 5 passing)
+- `senso/src/features/messages/__tests__/crypto.test.ts` (XSalsa20-Poly1305 + Ed25519 tests - 5 passing)
 - `senso/src/features/messages/__tests__/kdf.test.ts` (Argon2id stub with locked hex vector)
 - `senso/src/types/argon2-browser.d.ts` (type declarations for argon2-browser)
 - `senso/tsconfig.app.json` (removed deprecated `baseUrl` option)
 - `senso/.vite-hooks/pre-commit` (added --no-stash to work around symlink issue)
 - `.gitignore` (added .pi/gsd symlink exclusion)
 - `api/app/api/messages.py` (PublicKeysResponse + get_user_public_keys endpoint)
-- `api/app/api/attachments.py` (new — upload_attachment endpoint)
+- `api/app/api/attachments.py` (new - upload_attachment endpoint)
 - `api/app/main.py` (attachments_router imported and mounted)
 - `api/app/db/repository.py` (get_user_by_username updated for !handle support)
 - `api/pyproject.toml` (argon2-cffi>=23.1.0 added)
-- `api/tests/test_kdf_interop.py` (new — Argon2id interop test with locked vector)
-- `api/tests/test_envelope_migration.py` (new — stub for Plan 15-03)
+- `api/tests/test_kdf_interop.py` (new - Argon2id interop test with locked vector)
+- `api/tests/test_envelope_migration.py` (new - stub for Plan 15-03)
 
 ## Implementation Notes
 
 ### Task 15-01-01 (Packages)
 
 - Docker Compose `pnpm add` ran inside container but didn't update host package.json (no volume mount). Packages were added to package.json manually with exact versions from container install output, then `pnpm install` run on host.
-- The pre-commit hook was failing due to `.pi/gsd` being a symlink — fixed by adding `--no-stash` to `vp staged` in `.vite-hooks/pre-commit`.
+- The pre-commit hook was failing due to `.pi/gsd` being a symlink - fixed by adding `--no-stash` to `vp staged` in `.vite-hooks/pre-commit`.
 
 ### Task 15-01-02 (Crypto Stubs)
 
@@ -75,4 +75,4 @@ commits:
 - [x] Backend message tests pass (10/10)
 - [x] Argon2id hex vector locked in test_kdf_interop.py
 - [x] Argon2id hex vector referenced in kdf.test.ts
-- [ ] Docker Compose frontend build verification deferred (API container failing due to missing apscheduler in current image — pre-existing infra issue)
+- [ ] Docker Compose frontend build verification deferred (API container failing due to missing apscheduler in current image - pre-existing infra issue)

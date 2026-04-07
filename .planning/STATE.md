@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone 2 in progress
-last_updated: "2026-04-06T23:00:53.750Z"
+last_updated: "2026-04-07T09:15:12.705Z"
 last_activity: 2026-04-06
 progress:
-  total_phases: 24
-  completed_phases: 17
-  total_plans: 107
-  completed_plans: 75
+  total_phases: 25
+  completed_phases: 18
+  total_plans: 108
+  completed_plans: 76
 ---
 
 # Project State
@@ -19,17 +19,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Help users make better financial decisions in the moment by combining real personal financial data with direct, educational AI guidance and concrete actions.
-**Current focus:** Milestone 2 — Phases 17-23 bootstrapped, pending execution
+**Current focus:** Milestone 2 - Phases 17-23 bootstrapped, pending execution
 
 ## Current Position
 
-Phase: 16/23 complete — Phases 17-23 bootstrapped 2026-04-06
+Phase: 16/23 complete - Phases 17-23 bootstrapped 2026-04-06
 Plan: 69/101 plans executed (32 new plans in Phases 17-23)
 
 > **Note:** `pi-gsd-tools state reconcile` reports 15/16 phases and 69/69 plans because
-> phases 15–16 plans were executed outside the GSD plan-registration flow. The `progress`
+> phases 15-16 plans were executed outside the GSD plan-registration flow. The `progress`
 > command correctly shows 74/74 from filesystem scan. Phase 14 was not executed as a
-> separate phase — all its deliverables (messaging tables, TTL purge, BIP-39 envelope,
+> separate phase - all its deliverables (messaging tables, TTL purge, BIP-39 envelope,
 > admin handle claim) were built during Phase 15 execution.
 
 ## Performance Metrics
@@ -258,7 +258,7 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
-- Phase 12.1.1 inserted after Phase 12.1: fix remaining pending todos — coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (URGENT)
+- Phase 12.1.1 inserted after Phase 12.1: fix remaining pending todos - coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (URGENT)
 - Phase 12.1 inserted after Phase 12: Add a phase for all the todos, we need to prioritize them because they impact current usability (URGENT)
 - Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping

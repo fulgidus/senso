@@ -37,13 +37,13 @@ key-files:
     - senso/src/features/settings/SettingsScreen.tsx
 
 key-decisions:
-  - "voiceAutoListen and voiceGender toggles intentionally use local state + batch save (not individual optimistic API calls) — consistent with existing design; only strictPrivacyMode requires immediate persistence"
-  - "haptic.tap() fires unconditionally at start of handleSend (before guard clause) so haptic triggers even if message is empty — acceptable UX, vibration is very short"
-  - "getGreetingKey() replaces the entire fallbackWelcome pattern in handleNewConversation — simpler, locale-agnostic, no gender/persona name needed for a fallback greeting"
+  - "voiceAutoListen and voiceGender toggles intentionally use local state + batch save (not individual optimistic API calls) - consistent with existing design; only strictPrivacyMode requires immediate persistence"
+  - "haptic.tap() fires unconditionally at start of handleSend (before guard clause) so haptic triggers even if message is empty - acceptable UX, vibration is very short"
+  - "getGreetingKey() replaces the entire fallbackWelcome pattern in handleNewConversation - simpler, locale-agnostic, no gender/persona name needed for a fallback greeting"
 
 patterns-established:
   - "Toggle haptic: add haptic.tap() at the top of each toggle handler before state mutation"
-  - "Send haptic: tap() on initiation, error() on catch — supplements visual feedback, never replaces it"
+  - "Send haptic: tap() on initiation, error() on catch - supplements visual feedback, never replaces it"
 
 requirements-completed: []
 
@@ -85,19 +85,19 @@ Each task was committed atomically:
 - `senso/src/features/settings/SettingsScreen.tsx` - useHapticFeedback import + haptic.tap() on all toggles
 
 ## Decisions Made
-- `voiceAutoListen` and `voiceGender` are local state + batch save by design — no individual optimistic API calls needed or added. Only `handlePrivacyToggle` (strictPrivacyMode) requires immediate persistence because it's a security-sensitive setting.
-- `haptic.tap()` placed at the very top of `handleSend` (before the early-return guard) — acceptable because a short 10ms vibration on an empty-input tap is not harmful and simplifies the code.
-- `getGreetingKey()` replaces `fallbackWelcome.${effectiveGender}` entirely — the greeting fallback does not need persona name interpolation; the time-of-day greeting is friendlier and locale-agnostic.
+- `voiceAutoListen` and `voiceGender` are local state + batch save by design - no individual optimistic API calls needed or added. Only `handlePrivacyToggle` (strictPrivacyMode) requires immediate persistence because it's a security-sensitive setting.
+- `haptic.tap()` placed at the very top of `handleSend` (before the early-return guard) - acceptable because a short 10ms vibration on an empty-input tap is not harmful and simplifies the code.
+- `getGreetingKey()` replaces `fallbackWelcome.${effectiveGender}` entirely - the greeting fallback does not need persona name interpolation; the time-of-day greeting is friendlier and locale-agnostic.
 
 ## Deviations from Plan
 
-None — plan executed exactly as written. The optimistic UI audit confirmed the existing pattern was already correct for all toggles; no refactoring was required.
+None - plan executed exactly as written. The optimistic UI audit confirmed the existing pattern was already correct for all toggles; no refactoring was required.
 
 ## Issues Encountered
 None. Build passed on first attempt (`✓ built in 3.12s`). All 29 tests passed on first run.
 
 ## User Setup Required
-None — no external service configuration required.
+None - no external service configuration required.
 
 ## Next Phase Readiness
 - Phase 12 is fully complete. All 5 plans executed and verified.

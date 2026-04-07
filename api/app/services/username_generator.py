@@ -56,7 +56,7 @@ def generate_username(db: Session) -> str:
     Raises:
         RuntimeError: If all retries exhausted (astronomically unlikely with 40×40×9990 space).
     """
-    from app.db.models import User  # noqa: PLC0415 — avoid circular at module level
+    from app.db.models import User  # noqa: PLC0415 - avoid circular at module level
 
     for _ in range(_MAX_RETRIES):
         adj = random.choice(ADJECTIVES)
@@ -65,7 +65,7 @@ def generate_username(db: Session) -> str:
         candidate = f"${adj}-{noun}-{digits}"
         if db.query(User).filter(User.username == candidate).first() is None:
             return candidate
-    raise RuntimeError("Username generator exhausted retries — namespace may be full.")
+    raise RuntimeError("Username generator exhausted retries - namespace may be full.")
 
 
 def generate_admin_username() -> str:

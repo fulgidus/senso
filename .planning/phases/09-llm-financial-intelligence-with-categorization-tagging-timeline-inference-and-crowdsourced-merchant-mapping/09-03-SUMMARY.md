@@ -22,7 +22,7 @@ tech_stack:
   added: []
   patterns:
     - "Threading pattern for LLM side-channel checks: threading.Event + daemon thread + done.wait(timeout)"
-    - "Progressive enforcement: count prior violations → warn/24h/7d/ban — same pattern as guardrail.py"
+    - "Progressive enforcement: count prior violations → warn/24h/7d/ban - same pattern as guardrail.py"
     - "Service wraps repository: NotificationService.create() calls create_notification() then db.commit()"
 
 key_files:
@@ -34,10 +34,10 @@ key_files:
     - api/app/db/session.py
 
 key_decisions:
-  - "get_schema() imported from app.ingestion.prompts.loader (not app.ingestion.schemas.loader — that file does not exist; loader.py lives in prompts/)"
-  - "TOS check defaults to clean=True on LLM error (fail open) — avoids blocking users when LLM is unavailable"
-  - "Distillation falls back to raw text[:200] on LLM error — ensures context is always stored even without LLM"
-  - "count_violations_for_user counts BEFORE the new violation is applied — so progressive levels are: 0=warn, 1=24h, 2=7d, 3+=ban"
+  - "get_schema() imported from app.ingestion.prompts.loader (not app.ingestion.schemas.loader - that file does not exist; loader.py lives in prompts/)"
+  - "TOS check defaults to clean=True on LLM error (fail open) - avoids blocking users when LLM is unavailable"
+  - "Distillation falls back to raw text[:200] on LLM error - ensures context is always stored even without LLM"
+  - "count_violations_for_user counts BEFORE the new violation is applied - so progressive levels are: 0=warn, 1=24h, 2=7d, 3+=ban"
 
 requirements-completed: []
 
@@ -48,7 +48,7 @@ metrics:
   files_modified: 4
 ---
 
-# Phase 09 Plan 03: ModerationService + NotificationService — Summary
+# Phase 09 Plan 03: ModerationService + NotificationService - Summary
 
 **TOS check with threading + progressive enforcement (warn→24h→7d→ban) and notification creation service, backed by 7 new repository functions and users penalty columns.**
 
@@ -77,14 +77,14 @@ metrics:
 
 ## Files Created/Modified
 
-- `api/app/services/moderation_service.py` — `ModerationService`: `check_timeline_context`, `_run_tos_check`, `_run_distillation`, `_enforce`, `_apply_timeout`, `_apply_ban`, `is_user_write_blocked`
-- `api/app/services/notification_service.py` — `NotificationService`: `create`, `list_for_user`, `unread_count`, `mark_read`, `mark_all_read`
-- `api/app/db/repository.py` — Added `create_notification`, `get_notifications`, `count_unread_notifications`, `mark_notification_read`, `mark_all_notifications_read`, `log_moderation`, `count_violations_for_user`; updated imports for `ModerationLog`, `Notification`
-- `api/app/db/session.py` — Round 12: `ALTER TABLE users ADD COLUMN IF NOT EXISTS violation_count` + `banned_until`
+- `api/app/services/moderation_service.py` - `ModerationService`: `check_timeline_context`, `_run_tos_check`, `_run_distillation`, `_enforce`, `_apply_timeout`, `_apply_ban`, `is_user_write_blocked`
+- `api/app/services/notification_service.py` - `NotificationService`: `create`, `list_for_user`, `unread_count`, `mark_read`, `mark_all_read`
+- `api/app/db/repository.py` - Added `create_notification`, `get_notifications`, `count_unread_notifications`, `mark_notification_read`, `mark_all_notifications_read`, `log_moderation`, `count_violations_for_user`; updated imports for `ModerationLog`, `Notification`
+- `api/app/db/session.py` - Round 12: `ALTER TABLE users ADD COLUMN IF NOT EXISTS violation_count` + `banned_until`
 
 ## Decisions Made
 
-- **Import path fix:** `get_schema()` lives in `app.ingestion.prompts.loader`, not `app.ingestion.schemas.loader`. Plan had the wrong path — auto-fixed.
+- **Import path fix:** `get_schema()` lives in `app.ingestion.prompts.loader`, not `app.ingestion.schemas.loader`. Plan had the wrong path - auto-fixed.
 - **Fail-open TOS check:** On LLM error, returns `{"clean": True, ...}` to avoid blocking users when LLM is temporarily unavailable.
 - **Distillation fallback:** Returns `raw_text[:200]` on LLM error so context is always stored.
 
@@ -97,17 +97,17 @@ metrics:
 - **Issue:** Plan specified `from app.ingestion.schemas.loader import get_schema` but `schemas/loader.py` does not exist; `get_schema()` is in `app.ingestion.prompts.loader`
 - **Fix:** Used correct import `from app.ingestion.prompts.loader import get_schema`
 - **Files modified:** `api/app/services/moderation_service.py`
-- **Verification:** `from app.services.moderation_service import ModerationService` — exits 0
+- **Verification:** `from app.services.moderation_service import ModerationService` - exits 0
 - **Committed in:** 9b62878
 
 ---
 
 **Total deviations:** 1 auto-fixed (1 blocking import path)
-**Impact on plan:** Minimal — same functionality, correct module path.
+**Impact on plan:** Minimal - same functionality, correct module path.
 
 ## Issues Encountered
 
-None — apart from the import path deviation above.
+None - apart from the import path deviation above.
 
 ## User Setup Required
 

@@ -1,4 +1,4 @@
-# Phase 22: Mobile-First UI Overhaul — Research
+# Phase 22: Mobile-First UI Overhaul - Research
 
 **Researched:** 2026-04-06
 **Domain:** iOS visualViewport keyboard handling, PWA manifest, vite-plugin-pwa, pull-to-refresh, React mobile UI
@@ -14,27 +14,27 @@ Three areas in this phase have significant "looks simple, isn't" traps:
 
 2. **Pull-to-refresh on iOS:** `overscroll-behavior-y: none` does NOT stop iOS rubber-band bounce. Must use `touchmove` with `{ passive: false }` and `e.preventDefault()` when `scrollTop === 0`.
 
-3. **vite-plugin-pwa icon format:** Never combine `purpose: 'any maskable'` in one entry — always split into two entries. Use v0.21.x config.
+3. **vite-plugin-pwa icon format:** Never combine `purpose: 'any maskable'` in one entry - always split into two entries. Use v0.21.x config.
 
 **Primary recommendation:** Use the exact patterns in this document. iOS has many silent failures where "standard" approaches work on Android but not iOS Safari.
 
 ---
 
-## iOS visualViewport Keyboard — The Truth
+## iOS visualViewport Keyboard - The Truth
 
 ### Why standard approaches fail on iOS
 
-| Approach | Android | iOS |
-|----------|---------|-----|
-| `window.resize` | ✅ fires on keyboard | ❌ does NOT fire |
-| `100dvh` | ✅ accounts for keyboard | ❌ only accounts for browser chrome |
-| `interactive-widget=resizes-content` | ✅ keyboard shrinks layout | ❌ silently ignored |
-| `visualViewport.resize` | ✅ | ✅ (with ~1s close delay) |
+| Approach                             | Android                   | iOS                                |
+| ------------------------------------ | ------------------------- | ---------------------------------- |
+| `window.resize`                      | ✅ fires on keyboard       | ❌ does NOT fire                    |
+| `100dvh`                             | ✅ accounts for keyboard   | ❌ only accounts for browser chrome |
+| `interactive-widget=resizes-content` | ✅ keyboard shrinks layout | ❌ silently ignored                 |
+| `visualViewport.resize`              | ✅                         | ✅ (with ~1s close delay)           |
 
 ### Correct keyboard detection pattern
 
 ```tsx
-// Listen to focusin/focusout — more reliable than viewport resize
+// Listen to focusin/focusout - more reliable than viewport resize
 // Avoids false positives from rotation/zoom/address-bar collapse
 const handleFocusIn = (e: FocusEvent) => {
   const target = e.target as HTMLElement;
@@ -95,7 +95,7 @@ function useKeyboardHeight() {
 
 /* safe-area-inset-bottom REQUIREMENTS */
 /* 1. Must have viewport-fit=cover in <meta name="viewport"> */
-/* 2. iOS sets safe-area to 0 while keyboard is open — no double-application needed */
+/* 2. iOS sets safe-area to 0 while keyboard is open - no double-application needed */
 ```
 
 ### Meta viewport (required)
@@ -110,15 +110,15 @@ function useKeyboardHeight() {
 
 ---
 
-## Pull-to-Refresh — Correct Pattern
+## Pull-to-Refresh - Correct Pattern
 
 ### The two lines that kill most PTR implementations
 
 ```ts
-// 1. MUST use { passive: false } — otherwise e.preventDefault() is silently ignored on iOS
+// 1. MUST use { passive: false } - otherwise e.preventDefault() is silently ignored on iOS
 container.addEventListener('touchmove', onTouchMove, { passive: false });
 
-// 2. Guard FIRST in touchmove handler — before any other logic
+// 2. Guard FIRST in touchmove handler - before any other logic
 const onTouchMove = (e: TouchEvent) => {
   if (container.scrollTop > 0) { cancel(); return; } // not at top, no PTR
   // ...rest of PTR logic
@@ -149,7 +149,7 @@ function usePullToRefresh(
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (el.scrollTop > 0) return; // guard — must be first
+      if (el.scrollTop > 0) return; // guard - must be first
       const dy = e.touches[0].clientY - startY.current;
       if (dy <= 0) return;
       pullDistance.current = dy;
@@ -196,7 +196,7 @@ function usePullToRefresh(
 
 ---
 
-## vite-plugin-pwa — Correct Config (v0.21.x)
+## vite-plugin-pwa - Correct Config (v0.21.x)
 
 ### Install
 ```bash
@@ -257,10 +257,10 @@ export default defineConfig({
 ### Icon anti-pattern to avoid
 
 ```ts
-// ❌ WRONG — Chrome/Android will reject this
+// ❌ WRONG - Chrome/Android will reject this
 { src: 'icon-512.png', purpose: 'any maskable' }
 
-// ✅ CORRECT — separate entries
+// ✅ CORRECT - separate entries
 { src: 'icon-512.png', purpose: 'any' }
 { src: 'maskable-512.png', purpose: 'maskable' }
 ```
@@ -271,12 +271,12 @@ Maskable icon safe zone: center circle with diameter = 80% of icon size (≈410p
 
 ## Don't Hand-Roll
 
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| iOS keyboard detection | `window.resize` listener | `visualViewport.resize` | `window.resize` doesn't fire on iOS keyboard open |
-| PTR passive guard | Custom scroll position check | `{ passive: false }` touchmove | `e.preventDefault()` silently fails on passive handlers |
-| PWA icon | One `any maskable` entry | Two separate entries | Chrome rejects combined purpose values |
-| `overscroll-behavior` on iOS | CSS only | CSS + `e.preventDefault()` in passive:false | iOS ignores CSS overscroll for rubber-band |
+| Problem                      | Don't Build                  | Use Instead                                 | Why                                                     |
+| ---------------------------- | ---------------------------- | ------------------------------------------- | ------------------------------------------------------- |
+| iOS keyboard detection       | `window.resize` listener     | `visualViewport.resize`                     | `window.resize` doesn't fire on iOS keyboard open       |
+| PTR passive guard            | Custom scroll position check | `{ passive: false }` touchmove              | `e.preventDefault()` silently fails on passive handlers |
+| PWA icon                     | One `any maskable` entry     | Two separate entries                        | Chrome rejects combined purpose values                  |
+| `overscroll-behavior` on iOS | CSS only                     | CSS + `e.preventDefault()` in passive:false | iOS ignores CSS overscroll for rubber-band              |
 
 ---
 
@@ -304,8 +304,8 @@ Maskable icon safe zone: center circle with diameter = 80% of icon size (≈410p
 
 - MDN visualViewport API: https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport
 - vite-plugin-pwa docs: https://vite-pwa-org.netlify.app/guide/
-- Webkit blog: "CSS interactive-widget on iOS" — confirmed not supported
-- overscroll-behavior MDN — confirmed iOS behavior differences
+- Webkit blog: "CSS interactive-widget on iOS" - confirmed not supported
+- overscroll-behavior MDN - confirmed iOS behavior differences
 
 **Research date:** 2026-04-06
 **Valid until:** 2026-10-06 (30 days for fast-moving PWA/iOS Safari behavior)

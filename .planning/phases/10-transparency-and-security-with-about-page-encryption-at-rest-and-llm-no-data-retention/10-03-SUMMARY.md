@@ -61,7 +61,7 @@ completed: 2026-03-31
 ## Accomplishments
 
 - All 6 T2 columns (Transaction.description, UserProfile.income_summary/category_totals/insight_cards/coaching_insights, ModerationLog.raw_input) now use StringEncryptedType(AesGcmEngine) for transparent encryption at rest
-- Encryption/decryption fully transparent to application query logic — no changes to services, endpoints, or queries
+- Encryption/decryption fully transparent to application query logic - no changes to services, endpoints, or queries
 - Two roundtrip tests validate String and JSON column encryption and decryption correctly
 - Full test suite passes (237 tests pass, 1 pre-existing TTS failure unrelated to this plan)
 
@@ -81,7 +81,7 @@ Each task was committed atomically:
 
 ## Decisions Made
 
-- Applied StringEncryptedType only to the 6 columns defined in D-06 T2 scope — did NOT change questionnaire_answers, data_sources, monthly_expenses, monthly_margin, or CategorizationJob.progress_detail
+- Applied StringEncryptedType only to the 6 columns defined in D-06 T2 scope - did NOT change questionnaire_answers, data_sources, monthly_expenses, monthly_margin, or CategorizationJob.progress_detail
 - No DDL migration needed: AesGcmEngine stores its output as base64 TEXT, matching existing Postgres column types (VARCHAR/TEXT)
 - Tests use scope="module" with a completely isolated in-memory SQLite to avoid conftest reset_db fixture interference
 

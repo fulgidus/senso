@@ -63,7 +63,7 @@ class TTSRequest(BaseModel):
     persona_id: str | None = None
     gender: str | None = None
     message_id: str | None = (
-        None  # FK to chat_messages.id — optional for AudioCache tracking
+        None  # FK to chat_messages.id - optional for AudioCache tracking
     )
 
 
@@ -500,15 +500,15 @@ async def stt_transcribe(
     is unavailable (e.g. LibreWolf blocks it for privacy).
 
     Provider selection via STT_PROVIDER env var (default: "elevenlabs"):
-      - "elevenlabs": ElevenLabs Scribe v1 — requires ELEVENLABS_API_KEY
-      - "openai":     OpenAI Whisper v1    — requires LLM_OPENAI_API_KEY
+      - "elevenlabs": ElevenLabs Scribe v1 - requires ELEVENLABS_API_KEY
+      - "openai":     OpenAI Whisper v1    - requires LLM_OPENAI_API_KEY
 
     Returns JSON: { "text": "<transcript>" }
 
     Raises:
-        503 stt_unavailable  — required API key not configured for the active provider
-        400 stt_empty_audio  — Empty file uploaded
-        502 stt_failed       — STT API call failed
+        503 stt_unavailable  - required API key not configured for the active provider
+        400 stt_empty_audio  - Empty file uploaded
+        502 stt_failed       - STT API call failed
     """
     import io
 

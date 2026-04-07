@@ -28,7 +28,7 @@ Root cause: `profile-api.ts` types were missing `incomeMin`, `incomeMax`, `expen
 
 Fix:
 - Added `incomeMin/Max` and `expenseMin/Max` fields to both the `IncomeSource` entry type and the top-level `UserProfile` type in `profile-api.ts`
-- `ProfileScreen.tsx` now renders a `BalanceMask`-wrapped range line (e.g. "Fascia: €1.500 – €2.000") below the main figure when both min and max are non-null
+- `ProfileScreen.tsx` now renders a `BalanceMask`-wrapped range line (e.g. "Fascia: €1.500 - €2.000") below the main figure when both min and max are non-null
 - Added `profile.incomeRange` and `profile.expenseRange` i18n keys in `en.json` and `it.json`
 
 Note: The save-button confirmation, edit/override controls, and "auto-calculated vs user annotation" UX remain as a separate todo (`add-visual-confirmation-for-profile-save-and-edit-reset-controls`).

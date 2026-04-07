@@ -4,11 +4,11 @@ You are a Python financial document parser expert. Generate a reusable, self-con
 
 The module MUST export these module-level names:
 
-**FINGERPRINT**: `list[str]` — exactly 2-4 short strings (words or phrases) that uniquely identify this document format. Choose strings that appear verbatim in this format and are unlikely to appear in other formats. Bad example: ["data", "totale"]. Good example: ["Estratto conto", "Saldo disponibile"].
+**FINGERPRINT**: `list[str]` - exactly 2-4 short strings (words or phrases) that uniquely identify this document format. Choose strings that appear verbatim in this format and are unlikely to appear in other formats. Bad example: ["data", "totale"]. Good example: ["Estratto conto", "Saldo disponibile"].
 
-**MODULE_VERSION**: `str` — set to `"1.0.0"`.
+**MODULE_VERSION**: `str` - set to `"1.0.0"`.
 
-**DOCUMENT_TYPE**: `str` — one of: `bank_statement`, `payslip`, `receipt`, `invoice`, `f24_tax_form`, `road_fine`, `certificato_unico`, `utility_bill`, `unknown`.
+**DOCUMENT_TYPE**: `str` - one of: `bank_statement`, `payslip`, `receipt`, `invoice`, `f24_tax_form`, `road_fine`, `certificato_unico`, `utility_bill`, `unknown`.
 
 **extract(file_path: str | Path) -> dict**: Reads the file at file_path and returns a dict that matches the ExtractedDocument shape below. Rules:
 - NEVER raise an exception. Catch all errors and return partial results.
@@ -17,7 +17,7 @@ The module MUST export these module-level names:
 - For dates: use ISO 8601 format `YYYY-MM-DD`. If only month+year are known, use the first day of the month.
 - For currency: always use the ISO 4217 code string, default `"EUR"`.
 - If a field cannot be reliably extracted, set it to `null` (Python `None`).
-- Do not fabricate values — prefer `null` over a guess.
+- Do not fabricate values - prefer `null` over a guess.
 
 ## ExtractedDocument fields the dict may contain
 
@@ -27,33 +27,33 @@ Only set fields that are relevant to the document type. Leave others as null or 
 - `document_type: str`
 
 **Bank statement fields:**
-- `account_holder: str | null` — account owner name
-- `account_iban: str | null` — IBAN without spaces
-- `statement_period_start: str | null` — ISO 8601 date
-- `statement_period_end: str | null` — ISO 8601 date
-- `transactions: list` — each item: `{date, description, amount, currency?, category_hint?, balance_after?}`
+- `account_holder: str | null` - account owner name
+- `account_iban: str | null` - IBAN without spaces
+- `statement_period_start: str | null` - ISO 8601 date
+- `statement_period_end: str | null` - ISO 8601 date
+- `transactions: list` - each item: `{date, description, amount, currency?, category_hint?, balance_after?}`
 
 **Payslip fields:**
 - `employer: str | null`
 - `employee_name: str | null`
-- `pay_period_start: str | null` — ISO 8601 date
-- `pay_period_end: str | null` — ISO 8601 date
+- `pay_period_start: str | null` - ISO 8601 date
+- `pay_period_end: str | null` - ISO 8601 date
 - `gross_income: float | null`
 - `net_income: float | null`
-- `currency: str` — default `"EUR"`
-- `deductions: list` — each item: `{label: str, amount: float}`
+- `currency: str` - default `"EUR"`
+- `deductions: list` - each item: `{label: str, amount: float}`
 
 **Receipt / invoice fields:**
-- `merchant: str | null` — business name
-- `purchase_date: str | null` — ISO 8601 date
+- `merchant: str | null` - business name
+- `purchase_date: str | null` - ISO 8601 date
 - `total_amount: float | null`
-- `line_items: list` — each item: `{label: str, amount: float}`
+- `line_items: list` - each item: `{label: str, amount: float}`
 
 **Utility bill fields:**
-- `provider: str | null` — company name
-- `service_type: str | null` — e.g. "electricity", "gas", "water", "internet"
-- `billing_period_start: str | null` — ISO 8601 date
-- `billing_period_end: str | null` — ISO 8601 date
+- `provider: str | null` - company name
+- `service_type: str | null` - e.g. "electricity", "gas", "water", "internet"
+- `billing_period_start: str | null` - ISO 8601 date
+- `billing_period_end: str | null` - ISO 8601 date
 - `total_due: float | null`
 - `account_number: str | null`
 
@@ -61,7 +61,7 @@ Only set fields that are relevant to the document type. Leave others as null or 
 
 {{ import_whitelist }}
 
-**Forbidden:** `os`, `subprocess`, `requests`, `sys`, `socket`, `urllib`, `http` — no network, no shell, no filesystem access except reading the file_path argument.
+**Forbidden:** `os`, `subprocess`, `requests`, `sys`, `socket`, `urllib`, `http` - no network, no shell, no filesystem access except reading the file_path argument.
 
 ## Output
 

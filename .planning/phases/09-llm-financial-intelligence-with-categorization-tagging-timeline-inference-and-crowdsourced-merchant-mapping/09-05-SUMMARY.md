@@ -22,7 +22,7 @@ dependency_graph:
 tech_stack:
   added: []
   patterns:
-    - "Admin email obfuscation: u****@domain.com — avoids exposing contributing user emails"
+    - "Admin email obfuscation: u****@domain.com - avoids exposing contributing user emails"
     - "Moderation revert: atomic SQL ban clear + ORM content restore + notification"
 
 key_files:
@@ -31,7 +31,7 @@ key_files:
     - api/app/api/admin.py
 
 key-decisions:
-  - "Contributing user shown as obfuscated email u****@domain.com — admin can see domain but not local part"
+  - "Contributing user shown as obfuscated email u****@domain.com - admin can see domain but not local part"
   - "Moderation revert uses raw SQL for banned_until=NULL to avoid ORM session conflict with parallel DDL-style update"
   - "action_taken set to admin_confirmed_{original} or admin_reverted for audit trail"
 
@@ -44,7 +44,7 @@ metrics:
   files_modified: 1
 ---
 
-# Phase 09 Plan 05: Admin Merchant Map + Moderation Queue Endpoints — Summary
+# Phase 09 Plan 05: Admin Merchant Map + Moderation Queue Endpoints - Summary
 
 **6 admin endpoints for crowdsourced merchant map management (search, blacklist, unblacklist) and TOS moderation queue (list, confirm, revert) with full audit trail.**
 
@@ -72,17 +72,17 @@ metrics:
 
 ## Files Created/Modified
 
-- `api/app/api/admin.py` — Added Phase 9 DTOs (MerchantMapAdminDTO, ModerationLogAdminDTO, BlacklistRequest), `_obfuscate_email()`, 6 new endpoints; updated imports for `MerchantMap, ModerationLog, FinancialTimeline, User, datetime, ConfigDict`
+- `api/app/api/admin.py` - Added Phase 9 DTOs (MerchantMapAdminDTO, ModerationLogAdminDTO, BlacklistRequest), `_obfuscate_email()`, 6 new endpoints; updated imports for `MerchantMap, ModerationLog, FinancialTimeline, User, datetime, ConfigDict`
 
 ## Decisions Made
 
-- **Email obfuscation pattern:** `u****@domain.com` — admin can see which domain the contributor is from but not their exact email.
+- **Email obfuscation pattern:** `u****@domain.com` - admin can see which domain the contributor is from but not their exact email.
 - **`admin_confirmed_{original}` naming:** preserves original action in audit log while marking as reviewed.
 - **Import cleanup:** moved all new model imports to top-level rather than inside functions for clarity.
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+None - plan executed exactly as written.
 
 ## Issues Encountered
 

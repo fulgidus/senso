@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-The first spending breakdown graph is displayed as a histogram (bar chart), but it should be a pie chart. A pie chart is far more appropriate for showing spending category proportions — it visually communicates "parts of a whole" which is exactly what spending breakdown represents.
+The first spending breakdown graph is displayed as a histogram (bar chart), but it should be a pie chart. A pie chart is far more appropriate for showing spending category proportions - it visually communicates "parts of a whole" which is exactly what spending breakdown represents.
 
 ## Solution
 

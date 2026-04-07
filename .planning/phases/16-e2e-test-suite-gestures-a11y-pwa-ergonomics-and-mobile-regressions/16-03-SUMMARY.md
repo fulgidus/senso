@@ -5,7 +5,7 @@ status: complete
 completed_at: "2026-04-05"
 ---
 
-# Summary: 16-03 — Mobile Nav Drawer Tests
+# Summary: 16-03 - Mobile Nav Drawer Tests
 
 ## What was built
 

@@ -89,7 +89,7 @@ Each task was committed atomically:
 ## Decisions Made
 - **PageTransition displayChildren swap**: Component keeps a separate `displayChildren` state and swaps content at the 80ms mid-fade point, so new page content doesn't flash through a transparent layer.
 - **Overlay as always-rendered**: Changing from `{drawerOpen && <div/>}` to always-rendered with `opacity-0 pointer-events-none` / `opacity-100` was necessary to allow CSS transitions (CSS can't transition elements that don't exist in DOM).
-- **Merged ref pattern for ChatScreen**: `listRef.current = el; pullToRefresh.containerRef(el)` inside a `useCallback` — cleanest way to attach both the scroll-tracking ref and the touch-event hook to the same element.
+- **Merged ref pattern for ChatScreen**: `listRef.current = el; pullToRefresh.containerRef(el)` inside a `useCallback` - cleanest way to attach both the scroll-tracking ref and the touch-event hook to the same element.
 - **ProfileScreen containerRef cast**: `usePullToRefresh.containerRef` is typed as `React.RefCallback<HTMLElement>` while `<main ref={...}>` expects `React.Ref<HTMLMainElement>`; cast via `as React.RefCallback<HTMLElement>` is safe since HTMLMainElement extends HTMLElement.
 
 ## Deviations from Plan
@@ -107,7 +107,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 - All animation and gesture polish from plan 12-04 is complete
 - Phase 12 has one remaining plan (12-05) which can build on these patterns
-- `usePullToRefresh` is reusable — other list screens can adopt the same RefCallback merge pattern
+- `usePullToRefresh` is reusable - other list screens can adopt the same RefCallback merge pattern
 
 ---
 *Phase: 12-ux-accessibility-mobile-polish*

@@ -2,7 +2,7 @@
 Tests for Phase 10 T2 column encryption (StringEncryptedType with AesGcmEngine).
 
 Uses in-memory SQLite because StringEncryptedType stores as TEXT regardless of
-the underlying DB engine — the encrypt/decrypt logic is in Python, not Postgres.
+the underlying DB engine - the encrypt/decrypt logic is in Python, not Postgres.
 """
 
 import os

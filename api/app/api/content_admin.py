@@ -225,7 +225,7 @@ def bulk_publish(
                 )
                 processed_groups.add(item.localization_group)
             elif not item.localization_group:
-                # Item not in a group — update individually
+                # Item not in a group - update individually
                 service.update_item(
                     item_id,
                     ContentItemUpdate(is_published=data.is_published),

@@ -1,4 +1,4 @@
-"""Public content API endpoints — no authentication required.
+"""Public content API endpoints - no authentication required.
 
 Serves published content for browse pages and search.
 """

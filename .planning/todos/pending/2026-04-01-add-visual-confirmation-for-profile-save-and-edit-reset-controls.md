@@ -9,10 +9,10 @@ files: []
 ## Problem
 
 Three related issues with the profile save/edit flow:
-1. The "Save" button on profile figures never changes state — no visual confirmation that the values have been saved/confirmed by the system.
+1. The "Save" button on profile figures never changes state - no visual confirmation that the values have been saved/confirmed by the system.
 2. There is no button to edit or reset figures back to the auto-calculated value.
 3. The auto-calculated value should always be visible as a reference point (showing the margin of error between user opinion and system evaluation).
-4. "Save profile" is misleading phrasing — it should be something like "Override", "Annotate", "Set my figures", etc.
+4. "Save profile" is misleading phrasing - it should be something like "Override", "Annotate", "Set my figures", etc.
 
 ## Solution
 

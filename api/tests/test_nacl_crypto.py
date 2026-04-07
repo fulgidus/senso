@@ -1,4 +1,4 @@
-"""Tests for nacl_crypto.py Phase 13 — key pairs, master-key envelope, private-key encryption."""
+"""Tests for nacl_crypto.py Phase 13 - key pairs, master-key envelope, private-key encryption."""
 import base64
 import os
 import pytest
@@ -158,7 +158,7 @@ def test_decrypt_private_key_fails_wrong_master_key():
 
 
 def test_full_signup_crypto_flow():
-    """Integration: full Phase 13 signup crypto flow — password to recovered private keys."""
+    """Integration: full Phase 13 signup crypto flow - password to recovered private keys."""
     test_pw = "test-signup-ph13"
     nacl_salt = os.urandom(32)
 

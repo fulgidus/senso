@@ -42,10 +42,10 @@ key-files:
     - senso/src/features/auth/types.ts
 
 key-decisions:
-  - "role column added alongside is_admin Boolean (not replacing it) for backward compat — existing code using is_admin=True continues to work"
-  - "require_admin uses role=='admin' OR is_admin check — both signals count until full migration"
-  - "require_tester: role in (tester, admin) OR is_admin — admins can access tester features"
-  - "Round 15 backfill: UPDATE users SET role='admin' WHERE is_admin=TRUE — promotes existing admins on startup"
+  - "role column added alongside is_admin Boolean (not replacing it) for backward compat - existing code using is_admin=True continues to work"
+  - "require_admin uses role=='admin' OR is_admin check - both signals count until full migration"
+  - "require_tester: role in (tester, admin) OR is_admin - admins can access tester features"
+  - "Round 15 backfill: UPDATE users SET role='admin' WHERE is_admin=TRUE - promotes existing admins on startup"
 
 patterns-established:
   - "RBAC: role column is source of truth; is_admin is legacy compat column"
@@ -102,7 +102,7 @@ Each task was committed atomically:
 ## Decisions Made
 
 - **Keep is_admin column**: Role column added alongside existing `is_admin` Boolean. The compat fallback (`OR is_admin`) in require_admin/require_tester ensures no breakage for existing admin users.
-- **Round 15 backfill**: `UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND (role = 'user' OR role IS NULL)` — runs at startup to promote pre-existing admins.
+- **Round 15 backfill**: `UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND (role = 'user' OR role IS NULL)` - runs at startup to promote pre-existing admins.
 - **role="admin" for starting_admins on signup**: The auth service signup explicitly sets `role="admin"` when `is_admin` is True, ensuring new admin signups get the role column set correctly.
 
 ## Deviations from Plan

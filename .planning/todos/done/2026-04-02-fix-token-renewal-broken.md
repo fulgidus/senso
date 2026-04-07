@@ -35,7 +35,7 @@ Code audit confirmed the `apiRequest` 401 auto-refresh logic and `makeOnUnauthor
 - `makeOnUnauthorized` with no stored refresh token → null + navigate
 - Refresh succeeds → tokens persisted + new access token returned
 - Refresh fails → null + navigate + tokens cleared
-- Navigate optional — no crash when omitted
+- Navigate optional - no crash when omitted
 - End-to-end: 401 → refresh → retry (3-fetch flow)
 - End-to-end: 401 + failed refresh → throws + session cleared
 

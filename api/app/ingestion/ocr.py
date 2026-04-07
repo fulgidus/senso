@@ -54,7 +54,7 @@ def extract_pdf_text_layer(file_path: Path) -> str:
         return extract_text_with_liteparse(file_path)
     except ImportError:
         logger.warning(
-            "liteparse unavailable — skipping text extraction for %s", file_path.name
+            "liteparse unavailable - skipping text extraction for %s", file_path.name
         )
         return ""
 
@@ -68,7 +68,7 @@ def extract_text_with_tesseract(file_path: Path) -> str:
     try:
         return extract_text_with_liteparse(file_path, ocr_enabled=True)
     except ImportError:
-        logger.warning("liteparse unavailable — skipping OCR for %s", file_path.name)
+        logger.warning("liteparse unavailable - skipping OCR for %s", file_path.name)
         return ""
 
 
@@ -198,7 +198,7 @@ def extract_with_pdf_pipeline(
             len(text),
         )
 
-    # Step 5: Last resort — LLM vision
+    # Step 5: Last resort - LLM vision
     logger.info("PDF %s: all text paths exhausted, trying LLM vision", file_path.name)
     return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision")
 
@@ -247,7 +247,7 @@ def extract_with_image_pipeline(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Legacy entry point (kept for backwards compat — routes to the new pipelines)
+# Legacy entry point (kept for backwards compat - routes to the new pipelines)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 

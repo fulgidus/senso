@@ -1,4 +1,4 @@
-# Local development overrides — NOT used in production (Dokploy ignores this file).
+# Local development overrides - NOT used in production (Dokploy ignores this file).
 # Restores host port bindings so services are reachable directly on localhost.
 services:
   postgres:

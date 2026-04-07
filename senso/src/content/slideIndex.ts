@@ -1,5 +1,5 @@
 /**
- * slideIndex.ts — static import map for all MARP slide decks.
+ * slideIndex.ts - static import map for all MARP slide decks.
  *
  * Vite resolves `?raw` imports at build time; we enumerate them here so
  * MarpSlideViewer can look up any slide by its catalog ID without dynamic
@@ -14,10 +14,10 @@ import enBudgetBasics from "./slides/en-slide-budget-basics.md?raw"
 import enCompoundInterest from "./slides/en-slide-compound-interest.md?raw"
 
 export const SLIDE_INDEX: Record<string, string> = {
-  "it-slide-budget-base": itBudgetBase,
-  "it-slide-tan-taeg": itTanTaeg,
-  "it-slide-fondo-emergenza": itFondoEmergenza,
-  "it-slide-etf-intro": itEtfIntro,
-  "en-slide-budget-basics": enBudgetBasics,
-  "en-slide-compound-interest": enCompoundInterest,
+    "it-slide-budget-base": itBudgetBase,
+    "it-slide-tan-taeg": itTanTaeg,
+    "it-slide-fondo-emergenza": itFondoEmergenza,
+    "it-slide-etf-intro": itEtfIntro,
+    "en-slide-budget-basics": enBudgetBasics,
+    "en-slide-compound-interest": enCompoundInterest,
 }

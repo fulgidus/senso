@@ -36,9 +36,9 @@ metrics:
 
 ## What Was Built
 
-### Task 1 — `ingestionFilesApi.ts` + `FilesTab.tsx` + i18n keys (commit `9bf9d35`)
+### Task 1 - `ingestionFilesApi.ts` + `FilesTab.tsx` + i18n keys (commit `9bf9d35`)
 
-**`senso/src/api/ingestionFilesApi.ts`** — 5 exported functions:
+**`senso/src/api/ingestionFilesApi.ts`** - 5 exported functions:
 - `listUploads(token)` → GET `/ingestion/uploads` → `UploadFile[]`
 - `deleteUpload(token, id)` → DELETE `/ingestion/uploads/{id}` → `void`
 - `retryUpload(token, id)` → POST `/ingestion/uploads/{id}/retry` → `{upload_id, status}`
@@ -47,7 +47,7 @@ metrics:
 
 Exported types: `UploadFile`, `ExtractedDocumentDetail`, `TraceStep`.
 
-**`senso/src/features/profile/FilesTab.tsx`** — File list component:
+**`senso/src/features/profile/FilesTab.tsx`** - File list component:
 - Props: `{ token, isAdmin, onInspect? }`
 - Loads files on mount with loading skeleton
 - Status badge: pending/queued=yellow, processing=blue, done=green, failed=red
@@ -57,24 +57,24 @@ Exported types: `UploadFile`, `ExtractedDocumentDetail`, `TraceStep`.
 
 **i18n keys** added to `it.json` and `en.json` under `"files"` namespace (12 keys each).
 
-### Task 2 — `AdminInspectorDrawer.tsx` + `ProfileScreen.tsx` wiring (commit `b2db8bb`)
+### Task 2 - `AdminInspectorDrawer.tsx` + `ProfileScreen.tsx` wiring (commit `b2db8bb`)
 
-**`senso/src/features/profile/AdminInspectorDrawer.tsx`** — Full-screen pipeline inspector:
+**`senso/src/features/profile/AdminInspectorDrawer.tsx`** - Full-screen pipeline inspector:
 - Props: `{ uploadId, token, onClose }`
 - Fetches `getExtracted` + `getTrace` in parallel on mount
 - Loading skeleton while fetching
 - 5 collapsible sections (chevron toggle):
-  1. **Upload metadata** — id, status, method, source, uploaded_at, size_bytes
-  2. **Extracted document** — type, module, confidence (%), raw_text (scrollable), extracted_at
-  3. **Payload JSON** — recursive `JsonTree` component (strings=green, numbers=blue, booleans=orange, null=gray; objects/arrays toggle expand/collapse)
-  4. **Transactions** — visible when document_type contains "bank_statement"; each row shows date/description/amount/currency/category, expandable to full JSON
-  5. **Pipeline trace** — ordered steps with status badge (success=green, error=red, skipped=gray), duration_ms, input/output summaries, expandable raw_input/raw_output
+  1. **Upload metadata** - id, status, method, source, uploaded_at, size_bytes
+  2. **Extracted document** - type, module, confidence (%), raw_text (scrollable), extracted_at
+  3. **Payload JSON** - recursive `JsonTree` component (strings=green, numbers=blue, booleans=orange, null=gray; objects/arrays toggle expand/collapse)
+  4. **Transactions** - visible when document_type contains "bank_statement"; each row shows date/description/amount/currency/category, expandable to full JSON
+  5. **Pipeline trace** - ordered steps with status badge (success=green, error=red, skipped=gray), duration_ms, input/output summaries, expandable raw_input/raw_output
 - Copy buttons: per-section "copy JSON" (Clipboard icon) + global "copy all" at top; 1-second "Copied!" flash on click
 - `inspector.noExtracted` shown when getExtracted returns null
 
 **i18n keys** added under `"inspector"` namespace (11 keys in both locales).
 
-**`senso/src/features/profile/ProfileScreen.tsx`** — surgical additions only:
+**`senso/src/features/profile/ProfileScreen.tsx`** - surgical additions only:
 - Tab type extended: `"summary" | "charts" | "timeline" | "files"`
 - `inspectUploadId` state added
 - 4th tab button "I tuoi file" (i18n `files.tabLabel`)
@@ -90,7 +90,7 @@ docker compose run --rm frontend pnpm build
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+None - plan executed exactly as written.
 
 ## Known Stubs
 
@@ -98,10 +98,10 @@ None — plan executed exactly as written.
 
 ## Self-Check
 
-- [x] `senso/src/api/ingestionFilesApi.ts` — created, committed in `9bf9d35`
-- [x] `senso/src/features/profile/FilesTab.tsx` — created, committed in `9bf9d35`
-- [x] `senso/src/features/profile/AdminInspectorDrawer.tsx` — created, committed in `b2db8bb`
-- [x] `senso/src/features/profile/ProfileScreen.tsx` — modified, committed in `b2db8bb`
-- [x] `senso/src/i18n/locales/it.json` — modified, committed in `9bf9d35`
-- [x] `senso/src/i18n/locales/en.json` — modified, committed in `9bf9d35`
+- [x] `senso/src/api/ingestionFilesApi.ts` - created, committed in `9bf9d35`
+- [x] `senso/src/features/profile/FilesTab.tsx` - created, committed in `9bf9d35`
+- [x] `senso/src/features/profile/AdminInspectorDrawer.tsx` - created, committed in `b2db8bb`
+- [x] `senso/src/features/profile/ProfileScreen.tsx` - modified, committed in `b2db8bb`
+- [x] `senso/src/i18n/locales/it.json` - modified, committed in `9bf9d35`
+- [x] `senso/src/i18n/locales/en.json` - modified, committed in `9bf9d35`
 - [x] Build passes: `✓ built in 3.27s`

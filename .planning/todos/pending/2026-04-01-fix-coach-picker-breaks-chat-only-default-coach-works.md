@@ -1,6 +1,6 @@
 ---
 created: "2026-04-01T18:59:18.910Z"
-title: Fix coach picker breaks chat — only default coach works
+title: Fix coach picker breaks chat - only default coach works
 area: ui
 source: .planning/notes/2026-04-01-pwa-ux-bug-dump.md
 files: []

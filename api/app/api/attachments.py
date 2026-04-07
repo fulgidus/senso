@@ -1,8 +1,8 @@
 """
-Attachments API — Phase 15
+Attachments API - Phase 15
 
 Endpoint:
-  POST /attachments/upload — upload encrypted attachment ciphertext to MinIO.
+  POST /attachments/upload - upload encrypted attachment ciphertext to MinIO.
 
 This endpoint is intentionally dumb: it stores whatever bytes it receives.
 The client is responsible for encrypting before upload and decrypting after download.
@@ -43,10 +43,10 @@ async def upload_attachment(
     """Upload an encrypted attachment ciphertext to MinIO.
 
     The client MUST encrypt the file before uploading. This endpoint stores
-    raw bytes without inspection — server is zero-knowledge about content.
+    raw bytes without inspection - server is zero-knowledge about content.
 
     Returns:
-        s3_addr: s3://attachments/<attachment_id> — embed in message frontmatter.
+        s3_addr: s3://attachments/<attachment_id> - embed in message frontmatter.
     """
     contents = await file.read()
     if len(contents) > MAX_ATTACHMENT_BYTES:

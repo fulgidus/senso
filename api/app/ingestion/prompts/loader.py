@@ -5,7 +5,7 @@ Jinja2 environment backed by the .j2 files in this package directory.
 JSON Schema contracts live in ../schemas/*.schema.json.
 
 Schema contracts are passed to LLMClient as response_schema= (structured
-outputs) — they do NOT appear in the prompt text.  validate() is the
+outputs) - they do NOT appear in the prompt text.  validate() is the
 post-hoc safety net only.
 
 All render_*() functions are the public surface; callers never touch

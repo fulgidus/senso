@@ -3,7 +3,7 @@ created: "2026-03-31T19:25:24.480Z"
 updated: "2026-04-01T00:00:00.000Z"
 title: E2E Encrypted Messaging, Identity & Crypto Architecture
 area: architecture
-supersedes: "Original symmetric envelope scheme (flawed — can't encrypt for someone without their key in a symmetric model)"
+supersedes: "Original symmetric envelope scheme (flawed - can't encrypt for someone without their key in a symmetric model)"
 files:
   - api/app/db/crypto.py
   - api/app/db/models.py
@@ -30,11 +30,11 @@ Transition all app-level crypto to a PGP-style asymmetric model. Every user gets
 - **Username purpose**: Internal messaging only, NOT login.
 - **Username generation**: Brute-force uniqueness check at creation time. Add entropy (longer digit suffix, larger word pools) if collision rate grows. No pre-generated pool.
 - **Login email**: Kept as a "necessary evil" for auth. Goal: eliminate eventually.
-- **Contact methods** (email, phone): PII — encrypted at rest, admin-readable only in emergencies.
+- **Contact methods** (email, phone): PII - encrypted at rest, admin-readable only in emergencies.
 
 ### Key Management
 
-- **Private key wrapping**: Multiple recovery envelopes — email+password, passkey, BIP39-style recovery phrase, SSO-derived key.
+- **Private key wrapping**: Multiple recovery envelopes - email+password, passkey, BIP39-style recovery phrase, SSO-derived key.
 - **Key permanence**: Key pair is permanent until algorithm obsolescence forces migration.
 - **No server-side recovery**: Lose all envelopes = lose all private data (by design).
 - **No revocation**: Server cannot link messages to users, so revocation is not possible.

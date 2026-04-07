@@ -1,5 +1,5 @@
 """
-Cross-language Argon2id KDF interop test — Phase 15 (task 15-01-04)
+Cross-language Argon2id KDF interop test - Phase 15 (task 15-01-04)
 
 Verifies that Python argon2-cffi produces identical output to browser argon2-browser
 for the same (password, salt, params) inputs.
@@ -22,7 +22,7 @@ import argon2
 import argon2.low_level
 
 
-# RFC 9106 Low Memory — must match argon2-browser config in kdf.test.ts exactly
+# RFC 9106 Low Memory - must match argon2-browser config in kdf.test.ts exactly
 TIME_COST = 3
 MEMORY_COST = 65536   # kibibytes (64 MiB)
 PARALLELISM = 4

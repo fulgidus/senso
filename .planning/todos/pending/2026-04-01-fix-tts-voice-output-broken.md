@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-TTS (text-to-speech) is broken. Voice output does not work. This is critical — voice is a primary differentiator for the hackathon demo.
+TTS (text-to-speech) is broken. Voice output does not work. This is critical - voice is a primary differentiator for the hackathon demo.
 
 ## Solution
 

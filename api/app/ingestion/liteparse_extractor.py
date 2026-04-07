@@ -52,7 +52,7 @@ def extract_text_with_liteparse(
         from liteparse import LiteParse  # type: ignore[import]
     except ImportError:
         logger.warning(
-            "liteparse not installed — falling back to legacy extraction for %s",
+            "liteparse not installed - falling back to legacy extraction for %s",
             file_path.name,
         )
         raise  # callers catch ImportError to trigger their own fallback
@@ -88,7 +88,7 @@ def extract_text_with_liteparse(
         if len(text) >= 50:  # OCR_CHAR_THRESHOLD from ocr.py
             return text
         logger.debug(
-            "liteparse text-only returned %d chars for %s — retrying with OCR",
+            "liteparse text-only returned %d chars for %s - retrying with OCR",
             len(text),
             file_path.name,
         )

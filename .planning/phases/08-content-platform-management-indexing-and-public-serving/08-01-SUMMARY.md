@@ -20,7 +20,7 @@ tech-stack:
   patterns:
     - "ContentItem uses metadata_ Column('metadata') to avoid SQLAlchemy Base.metadata clash"
     - "ContentItemDTO uses serialization_alias='metadata' (not alias) for from_attributes ORM compatibility"
-    - "JSON catalog seed runs once idempotently in create_tables() — checks row count before inserting"
+    - "JSON catalog seed runs once idempotently in create_tables() - checks row count before inserting"
 
 key-files:
   created:
@@ -35,7 +35,7 @@ key-files:
 
 key-decisions:
   - "ContentItemDTO uses serialization_alias='metadata' instead of alias='metadata' to avoid SQLAlchemy MetaData conflict when from_attributes=True"
-  - "metadata_ stores all type-specific fields as a JSONB dict — no separate columns per content type"
+  - "metadata_ stores all type-specific fields as a JSONB dict - no separate columns per content type"
   - "JSON catalog seed checks existing row count for idempotency instead of per-item upsert"
 
 patterns-established:

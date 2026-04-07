@@ -1,4 +1,4 @@
-# Phase 17 — MARP Real Rendering: Research
+# Phase 17 - MARP Real Rendering: Research
 
 **Researched:** 2026-04-06
 **Sources:** marp-core README, marpit.marp.app docs (theme-css, usage), live library inspection
@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Core API — `marp.render()`
+## 1. Core API - `marp.render()`
 
 ```typescript
 import { Marp } from '@marp-team/marp-core'
@@ -21,9 +21,9 @@ const { html, css } = marp.render(rawMarkdown)
 ```
 
 **Returns:**
-- `html` — a complete string with all slides rendered, wrapped in the container element (default: `<div class="marpit">`)
-- `css` — scoped CSS for all slides; selectors are automatically prefixed with the container selector
-- `comments` — slide presenter notes (unused for this phase)
+- `html` - a complete string with all slides rendered, wrapped in the container element (default: `<div class="marpit">`)
+- `css` - scoped CSS for all slides; selectors are automatically prefixed with the container selector
+- `comments` - slide presenter notes (unused for this phase)
 
 **Slide structure in `html`:** Each slide is a `<section>` element. With default inline SVG mode, each `<section>` is wrapped in an `<svg viewBox="0 0 1280 720">`, enabling automatic aspect-ratio scaling.
 
@@ -61,21 +61,21 @@ h2 { font-size: 1.5rem; font-weight: 600; }
 **Rules:**
 - `/* @theme name */` comment is required at the top
 - `:root` in theme CSS maps to each `<section>` element (not `<html>`)
-- `section { width, height }` defines the canvas — must be static px values (CSS vars NOT allowed here)
+- `section { width, height }` defines the canvas - must be static px values (CSS vars NOT allowed here)
 - All other declarations CAN use CSS custom properties
-- Slide size defaults to 1280×720 (16:9) — keep this, it matches the `size: 16:9` implied by slides
+- Slide size defaults to 1280×720 (16:9) - keep this, it matches the `size: 16:9` implied by slides
 
 **Theme must be added before calling `render()`.**
 
 ---
 
-## 3. CSS Isolation — Container Scoping (Built-in)
+## 3. CSS Isolation - Container Scoping (Built-in)
 
 MARP's container mechanism is the correct isolation approach (D-08 decision confirmed):
 
 - Default container: `<div class="marpit">`
 - All generated CSS is automatically scoped: `div.marpit section { ... }`, `div.marpit h1 { ... }` etc.
-- **Zero additional work required** — MARP handles selector prefixing internally via PostCSS
+- **Zero additional work required** - MARP handles selector prefixing internally via PostCSS
 
 The generated `css` will NOT leak outside `<div class="marpit">`. No shadow DOM, no manual scoping, no style injection into `<head>` needed beyond normal CSS handling.
 
@@ -94,28 +94,28 @@ useEffect(() => {
 
 ---
 
-## 4. CSS Custom Properties — Dark Mode
+## 4. CSS Custom Properties - Dark Mode
 
 **Confirmed: CSS vars survive PostCSS and resolve at browser render time.**
 
-PostCSS (used internally by Marp/Marpit) does NOT resolve CSS custom properties — it's a browser feature, not a build-time feature. So `background: var(--background)` in the theme CSS will appear verbatim in the generated `css` string, and the browser will resolve it using the current document's CSS custom property values.
+PostCSS (used internally by Marp/Marpit) does NOT resolve CSS custom properties - it's a browser feature, not a build-time feature. So `background: var(--background)` in the theme CSS will appear verbatim in the generated `css` string, and the browser will resolve it using the current document's CSS custom property values.
 
 **This means:**
 - `var(--background)` resolves to `#fff` in light mode (Tailwind default)
 - `var(--background)` resolves to `#112D4E` when `html.dark` class is present
-- **No JS dark mode detection needed** — remove the `MutationObserver` from the component
+- **No JS dark mode detection needed** - remove the `MutationObserver` from the component
 
-**EXCEPTION:** `section { width: 1280px; height: 720px; }` must use literal px values — CSS vars cannot be used for slide canvas dimensions.
+**EXCEPTION:** `section { width: 1280px; height: 720px; }` must use literal px values - CSS vars cannot be used for slide canvas dimensions.
 
-**App token mapping for the `senso` theme (from `senso/src/index.css` lines 53–100):**
+**App token mapping for the `senso` theme (from `senso/src/index.css` lines 53-100):**
 
-| MARP property | App token | Light value | Dark value |
-|---|---|---|---|
-| `background` | `var(--background)` | `oklch(1 0 0)` | `#112D4E` |
-| `color` | `var(--foreground)` | `oklch(0.153...)` | `#F9F7F7` |
-| `--primary` | `var(--primary)` | `#3F72AF` | `#5B9BD5` |
-| `--card` bg | `var(--card)` | `#DBE2EF` | `#1a3a5c` |
-| `--muted` | `var(--muted)` | *(check index.css)* | *(check index.css)* |
+| MARP property | App token           | Light value         | Dark value          |
+| ------------- | ------------------- | ------------------- | ------------------- |
+| `background`  | `var(--background)` | `oklch(1 0 0)`      | `#112D4E`           |
+| `color`       | `var(--foreground)` | `oklch(0.153...)`   | `#F9F7F7`           |
+| `--primary`   | `var(--primary)`    | `#3F72AF`           | `#5B9BD5`           |
+| `--card` bg   | `var(--card)`       | `#DBE2EF`           | `#1a3a5c`           |
+| `--muted`     | `var(--muted)`      | *(check index.css)* | *(check index.css)* |
 
 ---
 
@@ -159,7 +159,7 @@ The `<div class="marpit">` wrapper from `marp.render()` contains all slides. For
 **Recommendation: use `htmlAsArray: true` env option:**
 ```typescript
 const { html: slideHtmlArray, css } = marp.render(markdown, { htmlAsArray: true })
-// slideHtmlArray is string[] — one HTML string per slide
+// slideHtmlArray is string[] - one HTML string per slide
 // Each string is a <section>...</section> (without outer container)
 // Must wrap in <div class="marpit"> for CSS scoping
 ```
@@ -171,12 +171,12 @@ This lets the component show one slide at a time without additional DOM parsing.
 ## 6. Removing Obsolete Code
 
 The current `MarpSlideViewer.tsx` has:
-- `parseSlides(raw: string): string[]` — **DELETE**: MARP handles slide splitting
-- `renderSlide(md: string): string` — **DELETE**: replaced by `marp.render()`
-- `marked` import and `marked.setOptions()` — **DELETE**
-- `MutationObserver` for dark mode — **DELETE**: CSS vars handle this
-- `isDark` state — **DELETE**: no longer needed
-- `themeClass` (`senso-light`/`senso-dark`) — **DELETE**: single `senso` theme
+- `parseSlides(raw: string): string[]` - **DELETE**: MARP handles slide splitting
+- `renderSlide(md: string): string` - **DELETE**: replaced by `marp.render()`
+- `marked` import and `marked.setOptions()` - **DELETE**
+- `MutationObserver` for dark mode - **DELETE**: CSS vars handle this
+- `isDark` state - **DELETE**: no longer needed
+- `themeClass` (`senso-light`/`senso-dark`) - **DELETE**: single `senso` theme
 
 **Keep:**
 - `current` state (slide index)
@@ -191,7 +191,7 @@ The current `MarpSlideViewer.tsx` has:
 
 `@marp-team/marp-core` uses DOM APIs only in the browser helper script (which we disable with `script: false`). The `render()` method itself is pure text processing and runs fine in any JS environment.
 
-**However:** Calling `marp.render()` during Vite's SSR pass would fail if the bundle isn't marked client-only. Since `MarpSlideViewer.tsx` already uses `useState`/`useEffect`/`useRef`, it's implicitly client-only in React. **No additional `use client` or dynamic import needed** — existing component structure is sufficient.
+**However:** Calling `marp.render()` during Vite's SSR pass would fail if the bundle isn't marked client-only. Since `MarpSlideViewer.tsx` already uses `useState`/`useEffect`/`useRef`, it's implicitly client-only in React. **No additional `use client` or dynamic import needed** - existing component structure is sufficient.
 
 ---
 
@@ -201,7 +201,7 @@ The current `MarpSlideViewer.tsx` has:
 - `highlight.js` (~heavy)
 - `katex` and `mathjax-full` (~very heavy)
 
-**Mitigation:** Set `math: false` in the Marp constructor — this prevents the MathJax/KaTeX bundles from being included in the render path. Emoji is similar: set `emoji: { shortcode: false, unicode: false }`.
+**Mitigation:** Set `math: false` in the Marp constructor - this prevents the MathJax/KaTeX bundles from being included in the render path. Emoji is similar: set `emoji: { shortcode: false, unicode: false }`.
 
 Vite will likely tree-shake unused modules but explicit `false` options are safer.
 
@@ -256,13 +256,13 @@ describe('MARP slide rendering', () => {
 
 ### Manual Verification
 
-| Check | How |
-|---|---|
-| Slides render with MARP theme (not plain HTML) | Open `/learn`, click any slide card |
-| Dark mode works | Toggle app dark mode, verify slide background/text changes |
-| No CSS bleed | Inspect page outside `.marpit` — no unexpected style overrides |
-| Fullscreen letterboxed | Open fullscreen, resize window |
-| All 6 decks render | Verify each in SLIDE_INDEX |
+| Check                                          | How                                                            |
+| ---------------------------------------------- | -------------------------------------------------------------- |
+| Slides render with MARP theme (not plain HTML) | Open `/learn`, click any slide card                            |
+| Dark mode works                                | Toggle app dark mode, verify slide background/text changes     |
+| No CSS bleed                                   | Inspect page outside `.marpit` - no unexpected style overrides |
+| Fullscreen letterboxed                         | Open fullscreen, resize window                                 |
+| All 6 decks render                             | Verify each in SLIDE_INDEX                                     |
 
 ### Build Gate
 
@@ -277,8 +277,8 @@ docker compose run --rm frontend pnpm test     # unit tests
 
 **Wave 0 (17-01):** Install + theme CSS + renderer rewrite + CSS injection
 - Single task complexity: moderate (one component, clean rewrite)
-- Key risk: CSS var resolution for `section { width, height }` — must use px literals
+- Key risk: CSS var resolution for `section { width, height }` - must use px literals
 
 **Wave 1 (17-02):** Fullscreen portal + keyboard nav + unit tests
-- `createPortal` is straightforward — portal into `document.body`
+- `createPortal` is straightforward - portal into `document.body`
 - Tests need `jsdom` vitest environment (check existing test config)

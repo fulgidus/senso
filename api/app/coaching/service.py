@@ -95,7 +95,7 @@ _SEARCH_REGIONAL_KNOWLEDGE_TOOL: dict = {
                     "type": "string",
                     "description": (
                         "ISO 3166-1 alpha-2 country code to search (e.g. 'IT', 'DE', 'FR', 'US'). "
-                        "Optional — omit to search the user's registered nations. "
+                        "Optional - omit to search the user's registered nations. "
                         "Provide when the user explicitly asks about a different country."
                     ),
                 },

@@ -1,6 +1,6 @@
-# Research: Italian Tax Rules 2025 — Giovani (18–30)
+# Research: Italian Tax Rules 2025 - Giovani (18-30)
 
-> **Purpose:** Financial coaching app (S.E.N.S.O.) — all numbers must be accurate for 2025 tax year.  
+> **Purpose:** Financial coaching app (S.E.N.S.O.) - all numbers must be accurate for 2025 tax year.  
 > **Research date:** 2026-04-06  
 > **Primary locale:** Italian (it)
 
@@ -8,20 +8,20 @@
 
 ## Summary
 
-This document covers 11 key tax/benefit topics relevant to Italian young adults (18–30) for tax year 2025, with verified numbers from official sources (Agenzia delle Entrate, INPS, Ministero della Cultura, Ministero della Salute). The main structural changes for 2025 vs prior years are: IRPEF three-bracket system made permanent (Legge di Bilancio 2025, L. 207/2024); bonus affitti giovani potentially transitioning for new contracts from 30 June 2025; regime forfettario unchanged at €85,000 cap; cedolare secca confirmed with three tiers including 26% for multi-property short rentals.
+This document covers 11 key tax/benefit topics relevant to Italian young adults (18-30) for tax year 2025, with verified numbers from official sources (Agenzia delle Entrate, INPS, Ministero della Cultura, Ministero della Salute). The main structural changes for 2025 vs prior years are: IRPEF three-bracket system made permanent (Legge di Bilancio 2025, L. 207/2024); bonus affitti giovani potentially transitioning for new contracts from 30 June 2025; regime forfettario unchanged at €85,000 cap; cedolare secca confirmed with three tiers including 26% for multi-property short rentals.
 
 ---
 
-## 1. IRPEF 2025 — Scaglioni e Aliquote
+## 1. IRPEF 2025 - Scaglioni e Aliquote
 
 **Source:** [Agenzia delle Entrate](https://www.agenziaentrate.gov.it/portale/imposta-sul-reddito-delle-persone-fisiche-irpef-/aliquote-e-calcolo-dell-irpef) · [FISCOeTASSE](https://www.fiscoetasse.com/new-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html)  
-**Legal basis:** Art. 1, commi 2–9, L. 207/2024 (Legge di Bilancio 2025) — rende strutturale D.Lgs. 216/2023
+**Legal basis:** Art. 1, commi 2-9, L. 207/2024 (Legge di Bilancio 2025) - rende strutturale D.Lgs. 216/2023
 
-| Scaglione | Aliquota |
-|-----------|----------|
-| Fino a **€28.000** | **23%** |
-| Da €28.001 a **€50.000** | **35%** |
-| Oltre **€50.000** | **43%** |
+| Scaglione                | Aliquota |
+| ------------------------ | -------- |
+| Fino a **€28.000**       | **23%**  |
+| Da €28.001 a **€50.000** | **35%**  |
+| Oltre **€50.000**        | **43%**  |
 
 **Novità 2025:** Riduzione strutturale da 4 a 3 scaglioni (accorpamento dei primi due: ex 23% fino a €15K + 25% da €15K a €28K → unico 23% fino a €28K).
 
@@ -31,7 +31,7 @@ This document covers 11 key tax/benefit topics relevant to Italian young adults 
   - 7,1% se reddito ≤ €8.500
   - 5,3% se reddito tra €8.501 e €15.000
   - 4,8% se reddito tra €15.001 e €20.000
-- Detrazione aggiuntiva €1.000 per reddito €20.001–€32.000 (decresce a zero a €40.000)
+- Detrazione aggiuntiva €1.000 per reddito €20.001-€32.000 (decresce a zero a €40.000)
 
 ### No-Tax Area 2025 (reddito sotto cui IRPEF = €0)
 - Lavoro dipendente: ≤ **€8.500**
@@ -39,30 +39,30 @@ This document covers 11 key tax/benefit topics relevant to Italian young adults 
 
 ---
 
-## 2. INPS 2025 — Aliquote Contributive
+## 2. INPS 2025 - Aliquote Contributive
 
 ### A) Lavoratori Dipendenti (settore privato)
 **Source:** [INPS Circolare n. 26 del 30-01-2025](https://www.inps.it/) · [InformazioneFiscale](https://www.informazionefiscale.it/Contributi-INPS-2025-dipendenti-istruzioni-calcolo-importi)
 
-| Voce | Aliquota | A carico di |
-|------|----------|-------------|
-| IVS (invalidità, vecchiaia, superstiti) | ~23,81% | Datore di lavoro |
-| IVS quota lavoratore | ~9,19% | Dipendente |
-| **Totale IVS** | **~33%** | Datore (23,81%) + Dipendente (9,19%) |
+| Voce                                    | Aliquota | A carico di                          |
+| --------------------------------------- | -------- | ------------------------------------ |
+| IVS (invalidità, vecchiaia, superstiti) | ~23,81%  | Datore di lavoro                     |
+| IVS quota lavoratore                    | ~9,19%   | Dipendente                           |
+| **Totale IVS**                          | **~33%** | Datore (23,81%) + Dipendente (9,19%) |
 
 - **Minimale retribuzione giornaliera 2025:** €57,32
 - **Prima fascia pensionabile annua:** €55.448 (oltre cui si applica aliquota aggiuntiva 1% a carico lavoratore)
 - **Massimale annuo base contributiva:** €120.607
 - **Fringe benefit esente 2025:** €1.000 (generale) / €2.000 (dipendenti con figli a carico)
 
-### B) Gestione Separata INPS — Partita IVA (professionisti senza altra cassa)
+### B) Gestione Separata INPS - Partita IVA (professionisti senza altra cassa)
 **Source:** [INPS Circolare n. 27 del 30-01-2025](https://www.inps.it/it/it/inps-comunica/atti/circolari-messaggi-e-normativa/dettaglio.circolari-e-messaggi.2025.01.circolare-numero-27-del-30-01-2025_14807.html) · [RegimeMinimi](https://www.regimeminimi.com/aliquote-gestione-separata-inps-2025/)
 
-| Categoria | Aliquota IVS | Aliquote aggiuntive | **Totale** |
-|-----------|-------------|---------------------|------------|
-| Professionisti senza altra cassa | 25,00% | 1,07% (maternità, malattia, ISCRO) | **26,07%** |
-| Collaboratori (co.co.co.) | 33,00% | 2,03% | **35,03%** |
-| Professionisti con altra cassa | 24,00% | — | **24,00%** |
+| Categoria                        | Aliquota IVS | Aliquote aggiuntive                | **Totale** |
+| -------------------------------- | ------------ | ---------------------------------- | ---------- |
+| Professionisti senza altra cassa | 25,00%       | 1,07% (maternità, malattia, ISCRO) | **26,07%** |
+| Collaboratori (co.co.co.)        | 33,00%       | 2,03%                              | **35,03%** |
+| Professionisti con altra cassa   | 24,00%       | -                                  | **24,00%** |
 
 - **Minimale contributivo Gestione Separata 2025:** €18.555
 - **Massimale contributivo:** €120.607
@@ -75,7 +75,7 @@ This document covers 11 key tax/benefit topics relevant to Italian young adults 
 
 ---
 
-## 3. Bonus Cultura 2025 — Carta della Cultura Giovani (ex 18app)
+## 3. Bonus Cultura 2025 - Carta della Cultura Giovani (ex 18app)
 
 **Source:** [Ministero della Cultura](https://cartegiovani.cultura.gov.it/) · [InformazioneFiscale](https://www.informazionefiscale.it/carta-cultura-2025-bonus-come-richiederlo-requisiti)  
 **Legal basis:** Decreto MiC n. 225 del 29 dicembre 2023
@@ -93,11 +93,11 @@ This document covers 11 key tax/benefit topics relevant to Italian young adults 
 - Chi ha entrambi i requisiti (ISEE ≤ €35.000 + maturità 100/100): **€1.000 totali**
 
 ### Date 2025
-| Evento | Data |
-|--------|------|
-| Apertura richieste | 31 gennaio 2025 |
-| Scadenza attivazione | 30 giugno 2025 |
-| Scadenza utilizzo | 31 dicembre 2025 |
+| Evento               | Data             |
+| -------------------- | ---------------- |
+| Apertura richieste   | 31 gennaio 2025  |
+| Scadenza attivazione | 30 giugno 2025   |
+| Scadenza utilizzo    | 31 dicembre 2025 |
 
 ### Cosa si può acquistare
 Libri, cinema, teatro, musei, mostre, concerti, parchi naturali, musica registrata, abbonamenti riviste, corsi di musica/teatro/danza/lingua straniera, strumenti musicali.
@@ -114,15 +114,15 @@ Libri, cinema, teatro, musei, mostre, concerti, parchi naturali, musica registra
 - Disagio psicologico documentato
 
 ### Importi per fascia ISEE
-| ISEE | Importo massimo | Max per seduta |
-|------|-----------------|----------------|
-| < €15.000 | **€1.500** | €50 |
-| €15.000 – €30.000 | **€1.000** | €50 |
-| €30.000 – €50.000 | **€500** | €50 |
+| ISEE              | Importo massimo | Max per seduta |
+| ----------------- | --------------- | -------------- |
+| < €15.000         | **€1.500**      | €50            |
+| €15.000 - €30.000 | **€1.000**      | €50            |
+| €30.000 - €50.000 | **€500**        | €50            |
 
 ### Modalità e scadenze 2025
 - **Domanda:** Esclusivamente online (INPS.it, con SPID/CIE)
-- **Finestra domande:** 15 settembre – 14 novembre 2025
+- **Finestra domande:** 15 settembre - 14 novembre 2025
 - **Esclusione:** Residenti in Provincia autonoma di Trento (non finanziato per il 2025)
 - Utilizzo solo presso psicoterapeuti iscritti all'albo aderenti alla misura
 
@@ -134,21 +134,21 @@ Libri, cinema, teatro, musei, mostre, concerti, parchi naturali, musica registra
 **Legal basis:** Art. 16, comma 1-ter, TUIR; Legge n. 431/1998
 
 ### Requisiti
-- **Età:** 20–30 anni (non ancora compiuti 31) al momento della stipula del contratto
+- **Età:** 20-30 anni (non ancora compiuti 31) al momento della stipula del contratto
 - **Reddito complessivo:** ≤ **€15.493,71** annui
 - **Contratto:** Registrato ai sensi L. 431/1998 (libero mercato o canone concordato)
 - **Abitazione:** Principale, diversa da quella dei genitori
 - **Esclusi:** Immobili A/1, A/8, A/9 (lusso), ERP, locazioni turistiche
 
 ### Importo detrazione
-| Parametro | Valore |
-|-----------|--------|
-| Percentuale | 20% del canone annuo |
-| Minimo garantito | **€991,60** |
-| Massimo consentito | **€2.000** |
-| Durata | Primi **4 anni** del contratto |
+| Parametro          | Valore                         |
+| ------------------ | ------------------------------ |
+| Percentuale        | 20% del canone annuo           |
+| Minimo garantito   | **€991,60**                    |
+| Massimo consentito | **€2.000**                     |
+| Durata             | Primi **4 anni** del contratto |
 
-### ⚠️ Attenzione — novità 2025
+### ⚠️ Attenzione - novità 2025
 - **Contratti stipulati dal 30 giugno 2025 in poi** potrebbero non dare diritto a questa detrazione specifica (la Legge di Bilancio 2025 e D.Lgs. 192/2024 introducono aiuti alternativi tramite welfare aziendale)
 - La detrazione è **alternativa** (non cumulabile) ai rimborsi affitto ricevuti dal datore di lavoro come fringe benefit
 
@@ -162,11 +162,11 @@ Nel Modello 730/2025 → Quadro E → Rigo E71 con codice tipologia "4"
 **Source:** [Agenzia delle Entrate](https://www.agenziaentrate.gov.it/portale/come-e-quando-presentare-la-dichiarazione-dei-redditi12) · [FISCOeTASSE](https://www.fiscoetasse.com/approfondimenti/14665-dichiarazione-730-il-calendario-delle-scadenze.html)
 
 ### Scadenze 2025 (per redditi 2024)
-| Modello | Scadenza |
-|---------|----------|
+| Modello                                        | Scadenza              |
+| ---------------------------------------------- | --------------------- |
 | **730 precompilato** (direttamente online AdE) | **30 settembre 2025** |
-| 730 tramite CAF/sostituto d'imposta | 30 settembre 2025 |
-| **Modello Redditi PF** (autonomi, partite IVA) | **30 novembre 2025** |
+| 730 tramite CAF/sostituto d'imposta            | 30 settembre 2025     |
+| **Modello Redditi PF** (autonomi, partite IVA) | **30 novembre 2025**  |
 
 ### Chi può usare il 730
 - Lavoratori dipendenti e pensionati
@@ -181,14 +181,14 @@ Nel Modello 730/2025 → Quadro E → Rigo E71 con codice tipologia "4"
 
 ### Chi è esonerato
 - Reddito esclusivamente da lavoro dipendente con un solo datore + reddito complessivo ≤ €8.500 (no-tax area)
-- Reddito solo da pensione ≤ €8.000–€8.500 (a seconda dell'età)
+- Reddito solo da pensione ≤ €8.000-€8.500 (a seconda dell'età)
 
 ### Accesso 730 precompilato
 Disponibile sul sito AdE dal **30 aprile 2025** con SPID/CIE
 
 ---
 
-## 7. TFR — Trattamento di Fine Rapporto
+## 7. TFR - Trattamento di Fine Rapporto
 
 **Source:** [Laborability](https://laborability.com/lavoro-in-pillole/liquidazione-tfr) · Art. 2120 Codice Civile
 
@@ -214,7 +214,7 @@ Il TFR è liquidato **alla cessazione del rapporto di lavoro**, per qualsiasi mo
 
 ### Tempi di pagamento (settore privato)
 - **Non esiste termine legale specifico** per il privato
-- Per prassi: entro **30–45 giorni** dalla cessazione
+- Per prassi: entro **30-45 giorni** dalla cessazione
 - Alcuni CCNL specificano tempi certi (es. CCNL Commercio: 45 giorni; Metalmeccanici: 30 giorni da indice ISTAT)
 
 ### Anticipazione TFR (durante il rapporto)
@@ -235,7 +235,7 @@ Richiedibile se:
 
 ---
 
-## 8. ISEE 2025 — Indicatore Situazione Economica Equivalente
+## 8. ISEE 2025 - Indicatore Situazione Economica Equivalente
 
 **Source:** [INPS](https://www.inps.it) · [CreditNews](https://www.creditnews.it/soglie-isee-2025-tutte-le-novita-per-bonus-e-agevolazioni/) · [AcliVicenza](https://www.aclivicenza.it/notizie/item/1261-isee-2025-le-soglie-per-accedere-a-bonus-agevolazioni-2025)
 
@@ -250,16 +250,16 @@ La scala di equivalenza parte da 1,00 (1 persona) e aumenta per ogni componente 
 Presentando la **DSU (Dichiarazione Sostitutiva Unica)** a un CAF o tramite portale INPS (con SPID/CIE). Valida 12 mesi dalla presentazione.
 
 ### Soglie ISEE rilevanti per giovani adulti 2025
-| Bonus / Agevolazione | Soglia ISEE |
-|---------------------|-------------|
-| Carta della Cultura Giovani | ≤ €35.000 |
-| Bonus Psicologo (max €1.500) | < €15.000 |
-| Bonus Psicologo (max €1.000) | €15.000–€30.000 |
-| Bonus Psicologo (max €500) | €30.000–€50.000 |
-| Reddito di Cittadinanza / ADI | ≤ €9.360 |
-| Assegno Unico figli | Beneficio massimo ≤ €15.000 |
-| Borse di studio universitarie | Tipicamente ≤ €25.000–€30.000 |
-| Bonus trasporti | ≤ €20.000 |
+| Bonus / Agevolazione          | Soglia ISEE                   |
+| ----------------------------- | ----------------------------- |
+| Carta della Cultura Giovani   | ≤ €35.000                     |
+| Bonus Psicologo (max €1.500)  | < €15.000                     |
+| Bonus Psicologo (max €1.000)  | €15.000-€30.000               |
+| Bonus Psicologo (max €500)    | €30.000-€50.000               |
+| Reddito di Cittadinanza / ADI | ≤ €9.360                      |
+| Assegno Unico figli           | Beneficio massimo ≤ €15.000   |
+| Borse di studio universitarie | Tipicamente ≤ €25.000-€30.000 |
+| Bonus trasporti               | ≤ €20.000                     |
 
 ### Nota: ISEE universitario
 Per gli studenti universitari fuori sede esiste un **ISEE universitario** che prevede un calcolo separato del reddito dello studente (escluso dal nucleo familiare se specifici requisiti). Spesso più basso dell'ISEE ordinario.
@@ -272,17 +272,17 @@ Per gli studenti universitari fuori sede esiste un **ISEE universitario** che pr
 **Legal basis:** L. 190/2014, confermato e modificato da L. 207/2024
 
 ### Limite di ricavi/compensi
-| Soglia | Effetto |
-|--------|---------|
-| ≤ **€85.000** | Accesso/permanenza nel regime |
+| Soglia                    | Effetto                                                     |
+| ------------------------- | ----------------------------------------------------------- |
+| ≤ **€85.000**             | Accesso/permanenza nel regime                               |
 | > €85.000 in corso d'anno | Uscita immediata dal regime (tassazione ordinaria dal 2026) |
-| > **€100.000** | Uscita immediata già dall'anno stesso |
+| > **€100.000**            | Uscita immediata già dall'anno stesso                       |
 
 ### Aliquote imposta sostitutiva
-| Situazione | Aliquota | Sostituisce |
-|------------|----------|-------------|
-| Attività consolidata (dal 6° anno) | **15%** | IRPEF + addizionali + IRAP |
-| Nuova attività (primi 5 anni) | **5%** | IRPEF + addizionali + IRAP |
+| Situazione                         | Aliquota | Sostituisce                |
+| ---------------------------------- | -------- | -------------------------- |
+| Attività consolidata (dal 6° anno) | **15%**  | IRPEF + addizionali + IRAP |
+| Nuova attività (primi 5 anni)      | **5%**   | IRPEF + addizionali + IRAP |
 
 **Condizione per aliquota 5%:** Attività non esercitata nei 3 anni precedenti come autonomo o dipendente nello stesso settore; il volume d'affari non supera €85.000.
 
@@ -295,12 +295,12 @@ Imposta = Reddito imponibile × 15% (o 5%)
 ```
 
 **Coefficienti ATECO più comuni:**
-| Attività | Coefficiente |
-|----------|-------------|
-| Professionisti (avvocati, consulenti, designer, IT) | **78%** |
-| Artigiani | **67%** |
-| Commercianti dettaglio | **40–54%** |
-| Intermediari commercio | **62%** |
+| Attività                                            | Coefficiente |
+| --------------------------------------------------- | ------------ |
+| Professionisti (avvocati, consulenti, designer, IT) | **78%**      |
+| Artigiani                                           | **67%**      |
+| Commercianti dettaglio                              | **40-54%**   |
+| Intermediari commercio                              | **62%**      |
 
 *Esempio:* Consulente IT, €30.000 ricavi: €30.000 × 78% × 5% = **€1.170** di imposta (primo anno)
 
@@ -323,7 +323,7 @@ Imposta = Reddito imponibile × 15% (o 5%)
 
 ---
 
-## 10. Affitti — Fiscalità Proprietario e Inquilino 2025
+## 10. Affitti - Fiscalità Proprietario e Inquilino 2025
 
 ### A) Cedolare Secca (per il PROPRIETARIO)
 
@@ -331,12 +331,12 @@ Imposta = Reddito imponibile × 15% (o 5%)
 
 Regime fiscale opzionale che **sostituisce IRPEF, addizionali, imposta di registro e bollo** sul contratto di locazione.
 
-| Tipo di contratto | Aliquota cedolare secca |
-|-------------------|------------------------|
-| **Libero mercato** (4+4 ordinario) | **21%** |
-| **Canone concordato** (3+2, comuni alta densità, università, calamità) | **10%** |
-| **Affitti brevi** — 1 immobile/anno | 21% |
-| **Affitti brevi** — >1 immobile/anno | **26%** |
+| Tipo di contratto                                                      | Aliquota cedolare secca |
+| ---------------------------------------------------------------------- | ----------------------- |
+| **Libero mercato** (4+4 ordinario)                                     | **21%**                 |
+| **Canone concordato** (3+2, comuni alta densità, università, calamità) | **10%**                 |
+| **Affitti brevi** - 1 immobile/anno                                    | 21%                     |
+| **Affitti brevi** - >1 immobile/anno                                   | **26%**                 |
 
 **Affitti brevi:** Contratti ≤ 30 giorni, anche con servizi (pulizia, biancheria).
 
@@ -347,21 +347,21 @@ Regime fiscale opzionale che **sostituisce IRPEF, addizionali, imposta di regist
 
 ### B) Detrazioni IRPEF per l'INQUILINO (Art. 16 TUIR)
 
-**Contratti a canone libero (mercato) — abitazione principale:**
-| Reddito complessivo | Detrazione annua |
-|--------------------|-----------------|
-| ≤ €15.493,71 | **€300** |
-| €15.493,71 – €30.987,41 | **€150** |
-| > €30.987,41 | €0 |
+**Contratti a canone libero (mercato) - abitazione principale:**
+| Reddito complessivo     | Detrazione annua |
+| ----------------------- | ---------------- |
+| ≤ €15.493,71            | **€300**         |
+| €15.493,71 - €30.987,41 | **€150**         |
+| > €30.987,41            | €0               |
 
-**Contratti a canone concordato — abitazione principale:**
-| Reddito complessivo | Detrazione annua |
-|--------------------|-----------------|
-| ≤ €15.493,71 | **€495,80** |
-| €15.493,71 – €30.987,41 | **€247,90** |
-| > €30.987,41 | €0 |
+**Contratti a canone concordato - abitazione principale:**
+| Reddito complessivo     | Detrazione annua |
+| ----------------------- | ---------------- |
+| ≤ €15.493,71            | **€495,80**      |
+| €15.493,71 - €30.987,41 | **€247,90**      |
+| > €30.987,41            | €0               |
 
-**Bonus Affitti Giovani Under 31** (vedi sezione 5): 20% del canone, min €991,60 max €2.000 — alternativo alle detrazioni ordinarie dell'Art. 16.
+**Bonus Affitti Giovani Under 31** (vedi sezione 5): 20% del canone, min €991,60 max €2.000 - alternativo alle detrazioni ordinarie dell'Art. 16.
 
 ---
 
@@ -374,13 +374,13 @@ Regime fiscale opzionale che **sostituisce IRPEF, addizionali, imposta di regist
 Detrazione IRPEF del **50%** sulle spese per acquisto di mobili e grandi elettrodomestici **nuovi**, collegata obbligatoriamente a interventi di ristrutturazione edilizia.
 
 ### Parametri chiave 2025
-| Parametro | Valore |
-|-----------|--------|
-| Aliquota detrazione | **50%** |
+| Parametro              | Valore                           |
+| ---------------------- | -------------------------------- |
+| Aliquota detrazione    | **50%**                          |
 | Tetto massimo di spesa | **€5.000** per unità immobiliare |
-| Risparmio massimo | **€2.500** (50% × €5.000) |
-| Ripartizione | 10 quote annuali uguali |
-| Scadenza utilizzo | 31 dicembre 2025 |
+| Risparmio massimo      | **€2.500** (50% × €5.000)        |
+| Ripartizione           | 10 quote annuali uguali          |
+| Scadenza utilizzo      | 31 dicembre 2025                 |
 
 ### Requisiti obbligatori
 1. Aver eseguito **lavori di ristrutturazione edilizia** (Bonus Ristrutturazioni 50%/36%) sull'immobile **a partire dal 1° gennaio 2024** (anno precedente all'acquisto)
@@ -388,7 +388,7 @@ Detrazione IRPEF del **50%** sulle spese per acquisto di mobili e grandi elettro
 3. Pagamenti **tracciabili**: bonifico bancario/postale o carta di credito/debito
 
 ### ⚠️ Senza ristrutturazione: NON è possibile
-Il Bonus Mobili non è una detrazione autonoma — richiede obbligatoriamente il Bonus Ristrutturazioni come presupposto.
+Il Bonus Mobili non è una detrazione autonoma - richiede obbligatoriamente il Bonus Ristrutturazioni come presupposto.
 
 ### Cosa è detraibile
 - **Mobili:** Letti, armadi, librerie, scrivanie, divani, tavoli, sedie, cassettiere, materassi, lampade
@@ -404,31 +404,31 @@ Secondo prime anticipazioni, il Bonus Mobili **non sarà prorogato al 2026**. Co
 ## Sources
 
 ### Fonti mantenute (usate attivamente)
-| Fonte | URL | Perché rilevante |
-|-------|-----|-----------------|
-| Agenzia delle Entrate — IRPEF | https://www.agenziaentrate.gov.it/portale/imposta-sul-reddito-delle-persone-fisiche-irpef-/aliquote-e-calcolo-dell-irpef | Fonte primaria ufficiale sugli scaglioni |
-| INPS Circolare 26/2025 (30-01-2025) | https://www.inps.it | Ufficiale — minimali/massimali dipendenti 2025 |
-| INPS Circolare 27/2025 (30-01-2025) | https://www.inps.it | Ufficiale — aliquote Gestione Separata 2025 |
-| Ministero della Cultura | https://cartegiovani.cultura.gov.it/ | Ufficiale — Carta della Cultura Giovani |
-| Ministero della Salute — Bonus Psicologo | https://www.salute.gov.it/new/it/tema/salute-mentale/bonus-psicologo | Ufficiale — bonus psicologia |
-| FISCOeTASSE — IRPEF 2025 | https://www.fiscoetasse.com/new-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html | Dettaglio normativo 2025 |
-| InformazioneFiscale — INPS dipendenti | https://www.informazionefiscale.it/Contributi-INPS-2025-dipendenti-istruzioni-calcolo-importi | Sintesi circolare INPS 26/2025 |
-| RegimeMinimi — Gestione Separata | https://www.regimeminimi.com/aliquote-gestione-separata-inps-2025/ | Aliquote 2025 tabellate con fonte INPS |
-| InformazioneFiscale — Carta Cultura | https://www.informazionefiscale.it/carta-cultura-2025-bonus-come-richiederlo-requisiti | Dettaglio operativo bonus cultura |
-| Studio Protto — Bonus Psicologo | https://studioprotto.it/studio-associato-protto/bonus-psicologo-2025/ | Importi/fasce ISEE verificati |
-| CAF Public — Bonus Affitti Giovani | https://www.cafpublic.it/bonus-affitto-giovani-under-31-2025-requisiti-importo-e-modello-730 | Guida operativa dettagliata e aggiornata |
-| Fenalca — Cedolare Secca | https://www.fenalca.it/cedolare-secca-affitti-2025-nuove-aliquote-come-funziona-e-quanto-si-paga/ | Tutte e 3 le aliquote 2025 |
-| bsness.com — Regime Forfettario | https://www.bsness.com/business-plan/regime-forfettario-2025/ | Guida aggiornata al 12/10/2025 con fonti AdE |
-| Mansarda.it — Bonus Mobili | https://www.mansarda.it/leggi-e-regolamenti/bonus-mobili-2025-senza-ristrutturazione-requisiti-e-funzionamento/ | Requisiti e tetto €5.000 verificati |
-| Laborability — TFR | https://laborability.com/lavoro-in-pillole/liquidazione-tfr | Guida completa su calcolo, tempi, anticipazione |
+| Fonte                                    | URL                                                                                                                      | Perché rilevante                                |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Agenzia delle Entrate - IRPEF            | https://www.agenziaentrate.gov.it/portale/imposta-sul-reddito-delle-persone-fisiche-irpef-/aliquote-e-calcolo-dell-irpef | Fonte primaria ufficiale sugli scaglioni        |
+| INPS Circolare 26/2025 (30-01-2025)      | https://www.inps.it                                                                                                      | Ufficiale - minimali/massimali dipendenti 2025  |
+| INPS Circolare 27/2025 (30-01-2025)      | https://www.inps.it                                                                                                      | Ufficiale - aliquote Gestione Separata 2025     |
+| Ministero della Cultura                  | https://cartegiovani.cultura.gov.it/                                                                                     | Ufficiale - Carta della Cultura Giovani         |
+| Ministero della Salute - Bonus Psicologo | https://www.salute.gov.it/new/it/tema/salute-mentale/bonus-psicologo                                                     | Ufficiale - bonus psicologia                    |
+| FISCOeTASSE - IRPEF 2025                 | https://www.fiscoetasse.com/new-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html                       | Dettaglio normativo 2025                        |
+| InformazioneFiscale - INPS dipendenti    | https://www.informazionefiscale.it/Contributi-INPS-2025-dipendenti-istruzioni-calcolo-importi                            | Sintesi circolare INPS 26/2025                  |
+| RegimeMinimi - Gestione Separata         | https://www.regimeminimi.com/aliquote-gestione-separata-inps-2025/                                                       | Aliquote 2025 tabellate con fonte INPS          |
+| InformazioneFiscale - Carta Cultura      | https://www.informazionefiscale.it/carta-cultura-2025-bonus-come-richiederlo-requisiti                                   | Dettaglio operativo bonus cultura               |
+| Studio Protto - Bonus Psicologo          | https://studioprotto.it/studio-associato-protto/bonus-psicologo-2025/                                                    | Importi/fasce ISEE verificati                   |
+| CAF Public - Bonus Affitti Giovani       | https://www.cafpublic.it/bonus-affitto-giovani-under-31-2025-requisiti-importo-e-modello-730                             | Guida operativa dettagliata e aggiornata        |
+| Fenalca - Cedolare Secca                 | https://www.fenalca.it/cedolare-secca-affitti-2025-nuove-aliquote-come-funziona-e-quanto-si-paga/                        | Tutte e 3 le aliquote 2025                      |
+| bsness.com - Regime Forfettario          | https://www.bsness.com/business-plan/regime-forfettario-2025/                                                            | Guida aggiornata al 12/10/2025 con fonti AdE    |
+| Mansarda.it - Bonus Mobili               | https://www.mansarda.it/leggi-e-regolamenti/bonus-mobili-2025-senza-ristrutturazione-requisiti-e-funzionamento/          | Requisiti e tetto €5.000 verificati             |
+| Laborability - TFR                       | https://laborability.com/lavoro-in-pillole/liquidazione-tfr                                                              | Guida completa su calcolo, tempi, anticipazione |
 
 ### Fonti scartate
-| Fonte | Motivo esclusione |
-|-------|-------------------|
-| QuotidianoPlus — IRPEF 33% | Titolo fuorviante, riferito ad anno diverso/proposta futura |
-| Investiq.it — scaglioni IRPEF | Blog SEO, informazioni mutuate da fonti primarie già usate |
-| WDonna.it — Carta Cultura | Fonte lifestyle, informazioni corrette ma fonti superiori disponibili |
-| Brocardi — Bonus Mobili | Cap €2.500 nel titolo è il risparmio (non il tetto spesa €5.000) — potenzialmente confusionario |
+| Fonte                         | Motivo esclusione                                                                               |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| QuotidianoPlus - IRPEF 33%    | Titolo fuorviante, riferito ad anno diverso/proposta futura                                     |
+| Investiq.it - scaglioni IRPEF | Blog SEO, informazioni mutuate da fonti primarie già usate                                      |
+| WDonna.it - Carta Cultura     | Fonte lifestyle, informazioni corrette ma fonti superiori disponibili                           |
+| Brocardi - Bonus Mobili       | Cap €2.500 nel titolo è il risparmio (non il tetto spesa €5.000) - potenzialmente confusionario |
 
 ---
 
@@ -437,13 +437,13 @@ Secondo prime anticipazioni, il Bonus Mobili **non sarà prorogato al 2026**. Co
 ### ⚠️ Incertezze da monitorare
 1. **Bonus Affitti Giovani e nuovi contratti dal 30/06/2025:** Il quadro normativo è in transizione. La CAF Public avverte che contratti stipulati dal 30 giugno 2025 potrebbero non dare diritto alla detrazione storica. Verificare con Circolare AdE aggiornata.
 
-2. **Contributi INPS dipendenti — aliquota esatta:** La cifra "~33% totale" (23,81% + 9,19%) è la più comune per i dipendenti del settore privato industria, ma varia per categoria (es. commercio, agricoltura, edilizia). Per precisione assoluta, verificare sull'allegato 1 Circolare INPS 26/2025 per la categoria specifica.
+2. **Contributi INPS dipendenti - aliquota esatta:** La cifra "~33% totale" (23,81% + 9,19%) è la più comune per i dipendenti del settore privato industria, ma varia per categoria (es. commercio, agricoltura, edilizia). Per precisione assoluta, verificare sull'allegato 1 Circolare INPS 26/2025 per la categoria specifica.
 
-3. **Bonus Psicologo 2025 — apertura definitiva non ancora confermata al momento della ricerca** (dato basato su Circolare INPS e apertura 15 settembre). Verificare sul sito INPS a partire da settembre 2025.
+3. **Bonus Psicologo 2025 - apertura definitiva non ancora confermata al momento della ricerca** (dato basato su Circolare INPS e apertura 15 settembre). Verificare sul sito INPS a partire da settembre 2025.
 
 4. **Bonus Mobili 2026:** Informazioni preliminari indicano la non proroga, ma la Legge di Bilancio 2026 non è stata ancora approvata al momento della ricerca (aprile 2026 = già approvata, dato da verificare).
 
-5. **Regime forfettario — soglia reddito dipendente:** La Legge di Bilancio 2025 ha portato la soglia di esclusione da €30.000 a **€35.000** (da verificare in Gazzetta Ufficiale L. 207/2024, Art. 1, comma relativo al forfettario).
+5. **Regime forfettario - soglia reddito dipendente:** La Legge di Bilancio 2025 ha portato la soglia di esclusione da €30.000 a **€35.000** (da verificare in Gazzetta Ufficiale L. 207/2024, Art. 1, comma relativo al forfettario).
 
 ### Approfondimenti suggeriti
 - Tabella coefficienti ATECO completa: [fattureincloud.it](https://www.fattureincloud.it/guida-regime-forfettario/requisiti-di-accesso/)
@@ -453,4 +453,4 @@ Secondo prime anticipazioni, il Bonus Mobili **non sarà prorogato al 2026**. Co
 
 ---
 
-*Research prodotta per il progetto S.E.N.S.O. — usare come fonte per il content catalog del coaching LLM. Tutti i valori numerici devono essere inseriti nel catalogo con `locale: "it"` e `year: 2025`. Aggiornare annualmente.*
+*Research prodotta per il progetto S.E.N.S.O. - usare come fonte per il content catalog del coaching LLM. Tutti i valori numerici devono essere inseriti nel catalogo con `locale: "it"` e `year: 2025`. Aggiornare annualmente.*

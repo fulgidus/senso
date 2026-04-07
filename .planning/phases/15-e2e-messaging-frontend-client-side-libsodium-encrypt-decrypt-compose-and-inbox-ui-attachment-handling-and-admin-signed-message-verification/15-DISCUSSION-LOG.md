@@ -1,7 +1,7 @@
-# Phase 15: E2E Messaging Frontend — Discussion Log
+# Phase 15: E2E Messaging Frontend - Discussion Log
 
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
-> Decisions captured in 15-CONTEXT.md — this log preserves the alternatives considered.
+> Decisions captured in 15-CONTEXT.md - this log preserves the alternatives considered.
 
 **Date:** 2026-04-04
 **Phase:** 15-e2e-messaging-frontend
@@ -65,8 +65,8 @@ User's answer (freeform): "these keys are needed for all kind of operations that
 
 | Option                                | Description                                 | Selected |
 | ------------------------------------- | ------------------------------------------- | -------- |
-| No — one-time display only            | Matches backend design; simpler             | ✓        |
-| Yes — password re-auth reveals phrase | More user-friendly but adds Settings screen |          |
+| No - one-time display only            | Matches backend design; simpler             | ✓        |
+| Yes - password re-auth reveals phrase | More user-friendly but adds Settings screen |          |
 
 ---
 
@@ -84,8 +84,8 @@ File read: `.planning/todos/pending/2026-03-31-replace-obfuscate-email-with-enve
 
 | Option                                               | Description                                     | Selected |
 | ---------------------------------------------------- | ----------------------------------------------- | -------- |
-| Stick with PBKDF2 — match existing backend           | No migration needed                             |          |
-| Migrate to Argon2id — update both backend and client | Follow todo spec; stronger against GPU cracking | ✓        |
+| Stick with PBKDF2 - match existing backend           | No migration needed                             |          |
+| Migrate to Argon2id - update both backend and client | Follow todo spec; stronger against GPU cracking | ✓        |
 
 | Option                                      | Description                                            | Selected |
 | ------------------------------------------- | ------------------------------------------------------ | -------- |
@@ -111,7 +111,7 @@ User's exact words: "XChaCha20-Poly1305. Abandon AES-GCM"
 | Option                                               | Description                               | Selected |
 | ---------------------------------------------------- | ----------------------------------------- | -------- |
 | Regular $username messages are unverified but normal | No badge, no warning for regular users    |          |
-| All messages must be signed — reject unsigned        | Forces Ed25519 signature on every message | ✓        |
+| All messages must be signed - reject unsigned        | Forces Ed25519 signature on every message | ✓        |
 
 ---
 

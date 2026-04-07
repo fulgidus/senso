@@ -22,7 +22,7 @@ affects: [settings, coaching, auth, about]
 tech-stack:
   added: []
   patterns:
-    - "Public route block pattern (State 1b) in AppRoutes for unauthenticated access — mirrors existing /learn pattern"
+    - "Public route block pattern (State 1b) in AppRoutes for unauthenticated access - mirrors existing /learn pattern"
     - "Optimistic toggle + revert on error pattern in SettingsScreen for privacy toggle (mirrors voiceAutoListen pattern)"
     - "sessionStorage-backed dismiss state for inline notice banners (ttsNoticeDismissed)"
 
@@ -39,12 +39,12 @@ key-files:
     - senso/src/i18n/locales/en.json
 
 key-decisions:
-  - "Privacy section inserted before App info section in Settings — keeps transparency/privacy features grouped before meta-info"
-  - "ttsNoticeDismissed persisted to sessionStorage — resets per browser session so user is reminded after each login session"
-  - "Public /about route uses same PublicShell + State 1b pattern as /learn — no new infrastructure needed"
+  - "Privacy section inserted before App info section in Settings - keeps transparency/privacy features grouped before meta-info"
+  - "ttsNoticeDismissed persisted to sessionStorage - resets per browser session so user is reminded after each login session"
+  - "Public /about route uses same PublicShell + State 1b pattern as /learn - no new infrastructure needed"
 
 patterns-established:
-  - "State 1b: Public route block in AppRoutes — copy this block to add future public pages without authentication"
+  - "State 1b: Public route block in AppRoutes - copy this block to add future public pages without authentication"
   - "Optimistic update + error revert pattern for single-field PATCH calls in Settings"
 
 requirements-completed: []
@@ -67,7 +67,7 @@ completed: 2026-03-31
 - **Files modified:** 8
 
 ## Accomplishments
-- Created `AboutPage.tsx` with 6 static sections (What, How, Data, AI, Safety, Legal) all using `t("about.*")` keys — no hardcoded strings
+- Created `AboutPage.tsx` with 6 static sections (What, How, Data, AI, Safety, Legal) all using `t("about.*")` keys - no hardcoded strings
 - Added public `/about` route in `App.tsx` using the existing `PublicShell` + State 1b pattern so it renders without authentication
 - Added Privacy section in `SettingsScreen` with `strictPrivacyMode` toggle that calls `updateMe` with optimistic update + error revert
 - Added About link card in Privacy section pointing to `/about`
@@ -84,31 +84,31 @@ Each task was committed atomically:
 2. **Task 2: AboutPage, /about route, Privacy section, privacy badge** - `3faa538` (feat)
 
 ## Files Created/Modified
-- `senso/src/features/about/AboutPage.tsx` — New public About page component with 6 sections
-- `senso/src/App.tsx` — Added `AboutPage` import, `isAboutRoute`, State 1b block, and authenticated `/about` route
-- `senso/src/features/settings/SettingsScreen.tsx` — Added `Shield`, `Link` imports; `strictPrivacyMode` state, `handlePrivacyToggle` handler, Privacy section JSX with toggle and About link card
-- `senso/src/features/coaching/ChatScreen.tsx` — Added `ShieldCheck`, `ShieldOff` imports; `ttsNoticeDismissed` state; privacy badge in header; TTS disabled notice before input area
-- `senso/src/features/auth/types.ts` — Added `strictPrivacyMode?: boolean` to `User` type
-- `senso/src/features/auth/session.ts` — Extended `RawUser`, `parseUser`, and `updateMe` with `strict_privacy_mode`
-- `senso/src/i18n/locales/it.json` — Added `nav.about`, `settings.privacy*`, `settings.about*`, top-level `about.*` block, `coaching.privacyBadge/ttsDisabledStrict`
-- `senso/src/i18n/locales/en.json` — Mirrored all new keys from it.json in English
+- `senso/src/features/about/AboutPage.tsx` - New public About page component with 6 sections
+- `senso/src/App.tsx` - Added `AboutPage` import, `isAboutRoute`, State 1b block, and authenticated `/about` route
+- `senso/src/features/settings/SettingsScreen.tsx` - Added `Shield`, `Link` imports; `strictPrivacyMode` state, `handlePrivacyToggle` handler, Privacy section JSX with toggle and About link card
+- `senso/src/features/coaching/ChatScreen.tsx` - Added `ShieldCheck`, `ShieldOff` imports; `ttsNoticeDismissed` state; privacy badge in header; TTS disabled notice before input area
+- `senso/src/features/auth/types.ts` - Added `strictPrivacyMode?: boolean` to `User` type
+- `senso/src/features/auth/session.ts` - Extended `RawUser`, `parseUser`, and `updateMe` with `strict_privacy_mode`
+- `senso/src/i18n/locales/it.json` - Added `nav.about`, `settings.privacy*`, `settings.about*`, top-level `about.*` block, `coaching.privacyBadge/ttsDisabledStrict`
+- `senso/src/i18n/locales/en.json` - Mirrored all new keys from it.json in English
 
 ## Decisions Made
-- Privacy section inserted before "App info" section in Settings — keeps transparency features grouped logically before meta-info
-- `ttsNoticeDismissed` persisted to `sessionStorage` — resets on each browser session so users are reminded after each login
-- Public `/about` route uses the same `PublicShell` + State 1b pattern as `/learn` — no new infrastructure needed
+- Privacy section inserted before "App info" section in Settings - keeps transparency features grouped logically before meta-info
+- `ttsNoticeDismissed` persisted to `sessionStorage` - resets on each browser session so users are reminded after each login
+- Public `/about` route uses the same `PublicShell` + State 1b pattern as `/learn` - no new infrastructure needed
 
 ## Deviations from Plan
-None — plan executed exactly as written.
+None - plan executed exactly as written.
 
 ## Issues Encountered
 - JSX structural error during ChatScreen edit: inserting the TTS notice block consumed the `{isVoiceMode ? (` ternary opener, leaving the `VoiceModeBar` orphaned. Fixed immediately by re-inserting the ternary opener after the notice block. No separate commit needed (caught before commit).
 
 ## Known Stubs
-None — all new UI is wired to real data:
+None - all new UI is wired to real data:
 - `strictPrivacyMode` toggle reads from `user.strictPrivacyMode` and writes via `updateMe` → `PATCH /auth/me`
 - Privacy badge reads `user.strictPrivacyMode` from `AuthContext`
-- `AboutPage` is intentionally static (no API calls — it's an informational page)
+- `AboutPage` is intentionally static (no API calls - it's an informational page)
 
 ## User Setup Required
 None - no external service configuration required.

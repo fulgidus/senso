@@ -135,10 +135,10 @@ Decimal phases appear between their surrounding integers in numeric order.
    **Plans**: 4 plans
    Plans:
 
-- [x] 06-01-PLAN.md — Card reliability: prompt hardening + server-side fallback injection + backend integration tests
-- [x] 06-02-PLAN.md — MARP visual QA + speech-to-speech end-to-end fix
-- [x] 06-03-PLAN.md — Demo seed script + reset script
-- [x] 06-04-PLAN.md — Loading states + error recovery polish
+- [x] 06-01-PLAN.md - Card reliability: prompt hardening + server-side fallback injection + backend integration tests
+- [x] 06-02-PLAN.md - MARP visual QA + speech-to-speech end-to-end fix
+- [x] 06-03-PLAN.md - Demo seed script + reset script
+- [x] 06-04-PLAN.md - Loading states + error recovery polish
       **UI hint**: yes
 
 ### Phase 7: Streaming & Nice-to-Have Polish
@@ -182,7 +182,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 12. UX, Accessibility & Mobile Polish                                | 5/5            | Complete | 2026-04-01 |
 | 12.1. Usability TODO Sweep (INSERTED)                                | 8/8            | Complete | 2026-04-02 |
 | 13. Crypto Identity Foundation                                       | 3/3            | Complete | 2026-04-03 |
-| 14. E2E Messaging Backend                                            | 0/0            | Skipped  | —          |
+| 14. E2E Messaging Backend                                            | 0/0            | Skipped  | -          |
 | 15. E2E Messaging Frontend                                           | 6/6            | Complete | 2026-04-05 |
 | 16. E2E Test Suite & Mobile Regressions                              | 5/5            | Complete | 2026-04-05 |
 
@@ -211,7 +211,7 @@ Plans:
 ### Phase 9: LLM Financial Intelligence with Categorization, Tagging, Timeline Inference & Crowdsourced Merchant Mapping
 
 **Goal:** Transactions are automatically categorized and tagged by LLM, complex documents get structured metadata extraction, a financial timeline infers life events from data, and users can crowdsource merchant categorization to improve accuracy for all users.
-**Requirements**: Defined in phase context (09-CONTEXT.md) — no formal REQUIREMENTS.md IDs assigned
+**Requirements**: Defined in phase context (09-CONTEXT.md) - no formal REQUIREMENTS.md IDs assigned
 **Depends on:** Phase 8
 **Plans:** 7/7 plans complete
 
@@ -228,7 +228,7 @@ Plans:
 ### Phase 10: Transparency & Security with About Page, Encryption at Rest & LLM No-Data-Retention
 
 **Goal:** Users see a clear About page explaining inner workings and disclaimers, sensitive financial data is encrypted at rest, and LLM calls enforce no-data-retention policies for user privacy.
-**Requirements**: Defined in phase context (10-CONTEXT.md) — no formal REQUIREMENTS.md IDs assigned
+**Requirements**: Defined in phase context (10-CONTEXT.md) - no formal REQUIREMENTS.md IDs assigned
 **Depends on:** Phase 9
 **Plans:** 4/4 plans complete
 
@@ -256,7 +256,7 @@ Plans:
 ### Phase 12: UX, Accessibility & Mobile Polish
 
 **Goal:** Improve user experience, accessibility compliance, and mobile interaction quality with prioritized low-cost/high-impact features: ripple feedback, pull-to-refresh, dynamic micro-copy, offline detection, menu animation, haptic feedback, privacy toggle for balances, prefers-reduced-motion/contrast/color-scheme support, page transition animations, i18n centralization, and optimistic UI patterns.
-**Requirements**: Defined in phase context (12-CONTEXT.md) — no formal REQUIREMENTS.md IDs assigned
+**Requirements**: Defined in phase context (12-CONTEXT.md) - no formal REQUIREMENTS.md IDs assigned
 **Depends on:** Phase 10
 **Plans:** 5/5 plans complete
 
@@ -270,7 +270,7 @@ Plans:
 
 ### Phase 12.1: Add a phase for all the todos, we need to prioritize them because they impact current usability (INSERTED)
 
-**Goal:** Fix all 27 actionable TODOs that impact current usability — covering auth reliability, UX polish, i18n completeness, admin tooling, responsive layout, and voice output degradation handling.
+**Goal:** Fix all 27 actionable TODOs that impact current usability - covering auth reliability, UX polish, i18n completeness, admin tooling, responsive layout, and voice output degradation handling.
 **Requirements**: TODO-2 through TODO-28 (27 items; TODO-1 deferred to phases 13-15)
 **Depends on:** Phase 12
 **Plans:** 8/8 plans complete
@@ -286,7 +286,7 @@ Plans:
 - [x] 12.1-07-PLAN.md - Admin table UX: sort affordance + icon headers + pagination + localized category picker + settings save confirmation (#8, #9, #17, #18, #19, #20, #21)
 - [x] 12.1-08-PLAN.md - UI polish: pie chart, responsive table card layouts, TTS fallback indicator, dark-mode coaching cards (#12, #16, #22, #23)
 
-### Phase 12.1.1: fix remaining pending todos — coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (INSERTED)
+### Phase 12.1.1: fix remaining Complete todos - coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (INSERTED)
 
 **Goal:** [Urgent work - to be planned]
 **Requirements**: TBD
@@ -296,10 +296,10 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 12.1.1 to break down)
 
-### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
+### Phase 13: Crypto Identity Foundation - asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 
 **Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.
-**Requirements**: Defined in phase context (13-CONTEXT.md) — crypto identity, username generation, PII replacement
+**Requirements**: Defined in phase context (13-CONTEXT.md) - crypto identity, username generation, PII replacement
 **Depends on:** Phase 12
 **Plans:** 3/3 plans complete
 
@@ -309,12 +309,12 @@ Plans:
 - [x] 13-02-PLAN.md - Wire signup() to generate username and key pairs; update UserDTO with 3 new fields; add \_to_user_dto() helper; repository.get_user_by_username; integration tests (completed 2026-04-03)
 - [x] 13-03-PLAN.md - Replace obfuscated email with username in admin merchant map API; extend frontend User type; update user-avatar display utilities; AppShell username display (completed 2026-04-03)
 
-### Phase 14: E2E Messaging Backend — undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
+### Phase 14: E2E Messaging Backend - undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
 
 **Goal:** Build server-side E2E message routing: undelivered_messages + delivered_messages tables, pull-on-login delivery, APScheduler TTL purge, BIP-39 recovery envelope (backend only), and admin !handle claim endpoint.
-**Requirements**: Defined in phase discussion (14-DISCUSSION-LOG.md) — message routing, TTL purge, recovery envelope, admin handle
+**Requirements**: Defined in phase discussion (14-DISCUSSION-LOG.md) - message routing, TTL purge, recovery envelope, admin handle
 **Depends on:** Phase 13
-**Plans:** 0/3 plans — skipped as separate phase; all backend work absorbed into Phase 15 plans (15-01 through 15-03)
+**Plans:** 0/3 plans - skipped as separate phase; all backend work absorbed into Phase 15 plans (15-01 through 15-03)
 
 All Phase 14 deliverables were implemented during Phase 15 execution:
 - `undelivered_messages` + `delivered_messages` tables → Round 18 migration in `session.py`, models in `models.py:815-860`
@@ -323,16 +323,16 @@ All Phase 14 deliverables were implemented during Phase 15 execution:
 - BIP-39 recovery envelope → `nacl_crypto.py:255+`, `auth_service.py:126+`
 - Admin `!handle` claim → `admin.py:353`, `POST /claim-handle`
 
-Plans (not executed as standalone — absorbed into Phase 15):
+Plans (not executed as standalone - absorbed into Phase 15):
 
 - [ ] 14-01-PLAN.md - DB schema (Round 18: admin_handle + recovery envelope cols + 2 messaging tables + GIN indexes), Settings.message_ttl_days, APScheduler hourly TTL purge in lifespan.
 - [ ] 14-02-PLAN.md - BIP-39 recovery envelope: mnemonic package, nacl_crypto.py helpers, signup() extension, AuthResponseDTO.recovery_phrase (one-time), UserDTO.admin_handle.
 - [ ] 14-03-PLAN.md - Messaging API: POST /messages/send + POST /messages/poll, POST /admin/claim-handle, repository helpers, mount router, tests.
 
-### Phase 15: E2E Messaging Frontend — client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
+### Phase 15: E2E Messaging Frontend - client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
 
 **Goal:** Client-side libsodium encryption/decryption, compose and inbox UI, poll-at-login message delivery, recovery phrase interstitial, attachment handling, and admin signed-message verification.
-**Requirements**: Defined in phase context (15-CONTEXT.md) — client crypto, inbox/compose UI, attachment handling, admin verification
+**Requirements**: Defined in phase context (15-CONTEXT.md) - client crypto, inbox/compose UI, attachment handling, admin verification
 **Depends on:** Phase 14
 **Plans:** 6/6 plans complete
 
@@ -345,10 +345,10 @@ Plans:
 - [x] 15-05-PLAN.md - Compose UI + client-side encrypt + send. (completed 2026-04-05)
 - [x] 15-06-PLAN.md - Recovery phrase interstitial + attachment handling + admin verification + i18n. (completed 2026-04-05)
 
-### Phase 16: E2E Test Suite — Gestures, A11y, PWA Ergonomics & Mobile Regressions
+### Phase 16: E2E Test Suite - Gestures, A11y, PWA Ergonomics & Mobile Regressions
 
 **Goal:** Comprehensive Playwright E2E test coverage for gesture interactions, accessibility (axe-core), PWA manifest, mobile nav drawer, and coach picker regressions.
-**Requirements**: Defined in phase context (16-CONTEXT.md) — Playwright E2E coverage for gestures, a11y, PWA, mobile regressions
+**Requirements**: Defined in phase context (16-CONTEXT.md) - Playwright E2E coverage for gestures, a11y, PWA, mobile regressions
 **Depends on:** Phase 15
 **Plans:** 5/5 plans complete
 
@@ -364,7 +364,7 @@ Plans:
 
 ## Milestone 2: Quality, Intelligence & Real Testing
 
-*Added 2026-04-06 — 7 phases to fix broken features, improve coach intelligence, and build real E2E coverage.*
+*Added 2026-04-06 - 7 phases to fix broken features, improve coach intelligence, and build real E2E coverage.*
 
 ### Phase 17: MARP Real Rendering
 
@@ -393,7 +393,7 @@ Plans:
 - [ ] 18-04-PLAN.md - Receipt module + unified enrich_from_extraction() dispatcher
 - [ ] 18-05-PLAN.md - Pipeline success condition fix + full test suite
 
-### Phase 19: Financial Timeline — Real Inference + Visibility
+### Phase 19: Financial Timeline - Real Inference + Visibility
 
 **Goal:** Complete 6/6 event types, trigger timeline from non-ledger docs, inject timeline into coach prompt, improve TimelineTab visual.
 **Requirements**: Defined in 19-CONTEXT.md
@@ -407,7 +407,7 @@ Plans:
 - [ ] 19-03-PLAN.md - Coach system prompt timeline block + get_timeline_events tool
 - [ ] 19-04-PLAN.md - TimelineTab visual: date axis, Complete state CTA, notification badge
 
-### Phase 20: Coach Intelligence — Tool Suite + Structured Memory
+### Phase 20: Coach Intelligence - Tool Suite + Structured Memory
 
 **Goal:** Italy rules knowledge base, 7-tool LLM suite (transactions, profile, preferences, memory, timeline, rules, content), lean prompt architecture.
 **Requirements**: Defined in 20-CONTEXT.md

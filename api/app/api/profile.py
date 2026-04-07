@@ -196,7 +196,7 @@ def add_timeline_context(
     from app.ingestion.llm import get_llm_client
     from app.services.moderation_service import ModerationService
 
-    # Check write block (timeout/ban) — D-20
+    # Check write block (timeout/ban) - D-20
     svc = ModerationService(db, get_llm_client())
     if svc.is_user_write_blocked(current_user.id):
         raise HTTPException(status_code=403, detail="write_blocked")

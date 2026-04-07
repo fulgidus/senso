@@ -10,7 +10,7 @@ commits:
   - 048fb9d feat(15-04-03): ContactsTab + contacts.ts + nav badge + poll-at-login integration
 ---
 
-# Plan 15-04 SUMMARY — Inbox + Contacts + Poll Integration
+# Plan 15-04 SUMMARY - Inbox + Contacts + Poll Integration
 
 ## What Was Built
 
@@ -63,23 +63,23 @@ and `SendMessageRequest` back which 15-05 had removed.
 
 ### New files
 
-- `senso/src/features/messages/messagesApi.ts` — API client (task 01)
-- `senso/src/features/messages/parseMessage.ts` — decrypt + parse (task 02)
-- `senso/src/features/messages/InboxTab.tsx` — inbox tab component (task 02)
-- `senso/src/features/messages/contacts.ts` — localStorage contacts (task 03)
-- `senso/src/features/messages/ContactsTab.tsx` — contacts tab component (task 03)
-- `senso/src/features/messages/__tests__/InboxTab.test.tsx` — inbox tests (task 02)
-- `senso/src/features/messages/__tests__/ContactsTab.test.tsx` — contacts tests (task 03)
+- `senso/src/features/messages/messagesApi.ts` - API client (task 01)
+- `senso/src/features/messages/parseMessage.ts` - decrypt + parse (task 02)
+- `senso/src/features/messages/InboxTab.tsx` - inbox tab component (task 02)
+- `senso/src/features/messages/contacts.ts` - localStorage contacts (task 03)
+- `senso/src/features/messages/ContactsTab.tsx` - contacts tab component (task 03)
+- `senso/src/features/messages/__tests__/InboxTab.test.tsx` - inbox tests (task 02)
+- `senso/src/features/messages/__tests__/ContactsTab.test.tsx` - contacts tests (task 03)
 
 ### Modified files
 
-- `senso/src/features/messages/MessagesPage.tsx` — full tab + compose implementation
-- `senso/src/features/auth/AuthContext.tsx` — added pendingMessageCount + polledMessages
-- `senso/src/features/auth/useAuth.ts` — bootstrap poll + new state
-- `senso/src/components/AppShell.tsx` — /messages nav item with badge
-- `senso/src/App.tsx` — pass new context values to AuthContext.Provider
-- `senso/src/i18n/locales/it.json` — messages.\* + nav.messages i18n keys
-- `senso/src/i18n/locales/en.json` — messages.\* + nav.messages i18n keys
+- `senso/src/features/messages/MessagesPage.tsx` - full tab + compose implementation
+- `senso/src/features/auth/AuthContext.tsx` - added pendingMessageCount + polledMessages
+- `senso/src/features/auth/useAuth.ts` - bootstrap poll + new state
+- `senso/src/components/AppShell.tsx` - /messages nav item with badge
+- `senso/src/App.tsx` - pass new context values to AuthContext.Provider
+- `senso/src/i18n/locales/it.json` - messages.\* + nav.messages i18n keys
+- `senso/src/i18n/locales/en.json` - messages.\* + nav.messages i18n keys
 
 ## Self-Check: PASSED
 

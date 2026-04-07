@@ -5,7 +5,7 @@ created: "2026-04-06"
 status: ready-to-execute
 ---
 
-# Phase 20 Context — Coach Intelligence: Tool Suite + Structured Memory
+# Phase 20 Context - Coach Intelligence: Tool Suite + Structured Memory
 
 ## Why This Phase Exists
 
@@ -23,20 +23,20 @@ prompt stuffed with static profile data. This causes:
 
 ## Knowledge Buckets
 
-| Bucket | Storage | Access | Tool |
-|---|---|---|---|
-| 🌍 Global educational catalog | BM25 (existing) | Tool call | `search_content` (existing) |
-| 🇮🇹 Italy financial rules | Static JSON + BM25 | Tool call | `search_italy_rules` (new) |
-| 👤 User profile snapshot | DB | Tool call | `get_user_profile` (new) |
-| 💳 User transaction search | DB + BM25 | Tool call | `search_user_transactions` (new) |
-| 📅 User timeline | DB | Tool call | `get_timeline_events` (from Phase 19) |
-| ⚙️ User preferences | DB (new columns) | Tool call | `get_user_preferences` (new) |
-| 🧠 Coaching memory | DB (structured) | Tool call | `recall_past_insights` (new) |
+| Bucket                       | Storage            | Access    | Tool                                  |
+| ---------------------------- | ------------------ | --------- | ------------------------------------- |
+| 🌍 Global educational catalog | BM25 (existing)    | Tool call | `search_content` (existing)           |
+| 🇮🇹 Italy financial rules      | Static JSON + BM25 | Tool call | `search_italy_rules` (new)            |
+| 👤 User profile snapshot      | DB                 | Tool call | `get_user_profile` (new)              |
+| 💳 User transaction search    | DB + BM25          | Tool call | `search_user_transactions` (new)      |
+| 📅 User timeline              | DB                 | Tool call | `get_timeline_events` (from Phase 19) |
+| ⚙️ User preferences           | DB (new columns)   | Tool call | `get_user_preferences` (new)          |
+| 🧠 Coaching memory            | DB (structured)    | Tool call | `recall_past_insights` (new)          |
 
 ## What This Phase Does
 
 ### 20-01: Italy rules knowledge base
-- `api/app/content/italy_rules.json` — static JSON with IRPEF brackets, INPS thresholds,
+- `api/app/content/italy_rules.json` - static JSON with IRPEF brackets, INPS thresholds,
   bonus cultura, 730 filing dates, ISEE thresholds, TFR rules, pension contribution rates
 - BM25 index built at startup alongside content catalog
 - `search_italy_rules(topic, locale)` tool
@@ -58,13 +58,13 @@ prompt stuffed with static profile data. This causes:
 
 ### 20-04: Structured coaching memory + recall_past_insights tool
 - Redesign `coaching_insights`: each insight gets `topic`, `value`, `created_at`,
-  `expires_at` (optional), `source_session_id` — migrate from free-form list
+  `expires_at` (optional), `source_session_id` - migrate from free-form list
 - `recall_past_insights(topic)` tool: BM25 search over insight `topic`+`value` fields
 - Deduplication: before writing a new insight, check if near-identical insight exists
   (topic match + value similarity) → update `updated_at` instead of appending
 - Prune insights older than 180 days automatically
 
-### 20-05: Prompt architecture refactor — tool-first, prompt-lean
+### 20-05: Prompt architecture refactor - tool-first, prompt-lean
 - Remove static profile block from system prompt
 - System prompt becomes: persona soul + tool inventory + response schema + safety rules
 - Coach calls tools to fetch what it needs per request (lazy, relevant, not bloated)
@@ -79,13 +79,13 @@ prompt stuffed with static profile data. This causes:
 ## Scope
 
 **In scope:**
-- `api/app/content/italy_rules.json` — new knowledge base
-- `api/app/content/search.py` — Italy rules index
-- `api/app/coaching/service.py` — new tools, tool executor, prompt refactor
-- `api/app/db/models.py` + `session.py` — goals/dos/donts/insight migration
-- `api/app/services/profile_service.py` — insight dedup
+- `api/app/content/italy_rules.json` - new knowledge base
+- `api/app/content/search.py` - Italy rules index
+- `api/app/coaching/service.py` - new tools, tool executor, prompt refactor
+- `api/app/db/models.py` + `session.py` - goals/dos/donts/insight migration
+- `api/app/services/profile_service.py` - insight dedup
 - Frontend: minimal preferences UI in Settings
-- `api/tests/` — tool tests + integration
+- `api/tests/` - tool tests + integration
 
 **Not in scope:**
 - Vector embeddings / Qdrant (BM25 is sufficient for MVP)

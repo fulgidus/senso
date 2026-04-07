@@ -35,7 +35,7 @@ class ContentItemCreate(BaseModel):
 class ContentItemUpdate(BaseModel):
     """Schema for updating an existing content item (partial).
 
-    Note: ``type`` is intentionally excluded — changing an item's type
+    Note: ``type`` is intentionally excluded - changing an item's type
     (e.g. article → video) is not a meaningful operation.
     """
 

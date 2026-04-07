@@ -360,7 +360,7 @@ def claim_admin_handle(
 
     D-25: Admin-only. Validates uniqueness. Stores !-prefixed handle on user.admin_handle.
     D-26: admin_handle exposed in UserDTO (wired in Plan 14-02).
-    D-27: No settings UI in Phase 14 — Phase 15 adds the UI.
+    D-27: No settings UI in Phase 14 - Phase 15 adds the UI.
     """
     if not body.handle.startswith("!"):
         raise HTTPException(status_code=422, detail="Handle must start with '!'.")

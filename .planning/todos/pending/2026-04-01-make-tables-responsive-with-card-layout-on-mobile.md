@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-The merchant map page (and other tables throughout the app) are unusable on mobile. Wide table rows with many columns don't fit on small screens. This is a systemic issue — ALL tables in the app need a responsive strategy.
+The merchant map page (and other tables throughout the app) are unusable on mobile. Wide table rows with many columns don't fit on small screens. This is a systemic issue - ALL tables in the app need a responsive strategy.
 
 ## Solution
 

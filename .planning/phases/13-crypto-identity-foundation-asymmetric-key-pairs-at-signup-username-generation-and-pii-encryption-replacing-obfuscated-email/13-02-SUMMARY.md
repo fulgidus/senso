@@ -7,19 +7,19 @@ commit: a894732
 duration: ~20 min
 ---
 
-# Summary: 13-02 — Wire signup() + UserDTO + integration tests
+# Summary: 13-02 - Wire signup() + UserDTO + integration tests
 
 ## What Was Built
 
-**`api/app/schemas/auth.py`** — UserDTO extended with 3 new public identity fields:
+**`api/app/schemas/auth.py`** - UserDTO extended with 3 new public identity fields:
 - `username: str | None = None`
-- `public_key_b64: str | None = None` — X25519 public key (safe to expose)
-- `signing_key_b64: str | None = None` — Ed25519 verify key (safe to expose)
+- `public_key_b64: str | None = None` - X25519 public key (safe to expose)
+- `signing_key_b64: str | None = None` - Ed25519 verify key (safe to expose)
 - Private key blobs (`encrypted_x25519_private_b64`, `encrypted_ed25519_signing_b64`) are NOT in DTO
 
-**`api/app/services/auth_service.py`** — major updates:
+**`api/app/services/auth_service.py`** - major updates:
 - New imports: `nacl_crypto` (8 functions with aliases), `username_generator`, `base64`, `os`
-- `_to_user_dto(user)` helper — single source of truth for UserDTO construction
+- `_to_user_dto(user)` helper - single source of truth for UserDTO construction
 - All 3 inline `UserDTO(...)` constructions replaced with `_to_user_dto(user)`
 - `signup()` extended with full Phase 13 multi-envelope block:
   - Generates `$adjective-noun-NNNN` username (or `!admin` for admin users)
@@ -29,9 +29,9 @@ duration: ~20 min
   - Generates X25519 keypair → stores public key + encrypted private key
   - Generates Ed25519 keypair → stores verify key + encrypted signing key
 
-**`api/app/db/repository.py`** — `get_user_by_username(db, username)` added.
+**`api/app/db/repository.py`** - `get_user_by_username(db, username)` added.
 
-**`api/tests/test_auth_crypto_identity.py`** — 7 integration tests:
+**`api/tests/test_auth_crypto_identity.py`** - 7 integration tests:
 1. signup returns username in `$adj-noun-N` format
 2. signup returns public key fields
 3. private key blobs absent from DTO response
@@ -48,13 +48,13 @@ duration: ~20 min
 
 ## Key Decisions
 
-- `/auth/me` returns `{"user": user.model_dump()}` envelope — tests account for this
+- `/auth/me` returns `{"user": user.model_dump()}` envelope - tests account for this
 - Admin users get `!admin` username via `generate_admin_username()` (no special-casing needed)
 - `password` arg to signup() is used directly for PBKDF2 (not the already-hashed version)
 
 ## Files Modified
 
-- `api/app/schemas/auth.py` — 3 new UserDTO fields
-- `api/app/services/auth_service.py` — imports, _to_user_dto, signup() Phase 13 block
-- `api/app/db/repository.py` — get_user_by_username added
-- `api/tests/test_auth_crypto_identity.py` — NEW (7 tests)
+- `api/app/schemas/auth.py` - 3 new UserDTO fields
+- `api/app/services/auth_service.py` - imports, _to_user_dto, signup() Phase 13 block
+- `api/app/db/repository.py` - get_user_by_username added
+- `api/tests/test_auth_crypto_identity.py` - NEW (7 tests)

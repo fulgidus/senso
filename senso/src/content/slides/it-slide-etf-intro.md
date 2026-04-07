@@ -22,11 +22,11 @@ Compri un ETF → compri automaticamente un pezzetto di centinaia di aziende.
 
 ## ETF vs fondo attivo
 
-| | ETF (passivo) | Fondo attivo |
-|---|---|---|
-| Commissione annua | 0,07–0,30% | 1,5–2,5% |
-| Batte il mercato? | No, lo replica | Raramente |
-| Trasparenza | Alta | Variabile |
+|                   | ETF (passivo)  | Fondo attivo |
+| ----------------- | -------------- | ------------ |
+| Commissione annua | 0,07-0,30%     | 1,5-2,5%     |
+| Batte il mercato? | No, lo replica | Raramente    |
+| Trasparenza       | Alta           | Variabile    |
 
 > Su 30 anni, 1,5% di differenza nei costi può costare il 30-40% del rendimento finale.
 

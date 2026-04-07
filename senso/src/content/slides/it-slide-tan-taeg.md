@@ -16,7 +16,7 @@ Il **TAN** (Tasso Annuo Nominale) è il tasso di interesse puro sul capitale.
 
 Non include spese, commissioni o assicurazioni.
 
-> Un prestito con TAN 5% su 5.000€ ti costa ~250€/anno di interessi — ma non è tutto.
+> Un prestito con TAN 5% su 5.000€ ti costa ~250€/anno di interessi - ma non è tutto.
 
 ---
 
@@ -37,10 +37,10 @@ Il **TAEG** (Tasso Annuo Effettivo Globale) include:
 
 Prestito: **5.000€** per **36 mesi**
 
-| Offerta | TAN | TAEG | Rata mensile | Totale interessi |
-|---|---|---|---|---|
-| Banca A | 5,9% | 6,1% | 152€ | 472€ |
-| Banca B | 5,5% | 8,3% | 158€ | 688€ |
+| Offerta | TAN  | TAEG | Rata mensile | Totale interessi |
+| ------- | ---- | ---- | ------------ | ---------------- |
+| Banca A | 5,9% | 6,1% | 152€         | 472€             |
+| Banca B | 5,5% | 8,3% | 158€         | 688€             |
 
 > Banca B ha TAN più basso ma TAEG più alto: costa di più!
 

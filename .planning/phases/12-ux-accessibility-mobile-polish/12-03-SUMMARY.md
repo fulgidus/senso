@@ -31,7 +31,7 @@ key_files:
     - senso/src/features/profile/ProfileScreen.tsx
 decisions:
   - Used fmt.currency() from useLocaleFormat hook (not local formatCurrency) for BalanceMask values, consistent with plan 12-02 migration
-  - BalanceMask wraps only actual euro amounts (income, expenses, margin) — not percentages, counts, or dates
+  - BalanceMask wraps only actual euro amounts (income, expenses, margin) - not percentages, counts, or dates
   - Eye toggle placed in profile heading row alongside title/date for immediate discoverability
 metrics:
   duration: "5 min"
@@ -47,17 +47,17 @@ metrics:
 
 ## Tasks Completed
 
-| # | Task | Commit | Files |
-|---|------|--------|-------|
-| 1 | OfflineBanner component + AppShell integration | `c90c946` | OfflineBanner.tsx, AppShell.tsx |
-| 2 | BalanceMask component + ProfileScreen integration | `3e9967e` | BalanceMask.tsx, ProfileScreen.tsx |
-| 3 | Component unit tests + formatCurrency fix | `a51705b` | OfflineBanner.test.tsx, BalanceMask.test.tsx, ProfileScreen.tsx |
+| #   | Task                                              | Commit    | Files                                                           |
+| --- | ------------------------------------------------- | --------- | --------------------------------------------------------------- |
+| 1   | OfflineBanner component + AppShell integration    | `c90c946` | OfflineBanner.tsx, AppShell.tsx                                 |
+| 2   | BalanceMask component + ProfileScreen integration | `3e9967e` | BalanceMask.tsx, ProfileScreen.tsx                              |
+| 3   | Component unit tests + formatCurrency fix         | `a51705b` | OfflineBanner.test.tsx, BalanceMask.test.tsx, ProfileScreen.tsx |
 
 ## What Was Built
 
 ### OfflineBanner (`senso/src/components/OfflineBanner.tsx`)
-- Fixed bar at `top-14 left-0 right-0 z-[35]` — above header (z-30), below sidebar overlay (z-40)
-- Uses `useOnlineStatus()` hook — renders `null` when online, shows alert when offline
+- Fixed bar at `top-14 left-0 right-0 z-[35]` - above header (z-30), below sidebar overlay (z-40)
+- Uses `useOnlineStatus()` hook - renders `null` when online, shows alert when offline
 - `role="alert"` for screen reader announcement
 - `WifiOff` icon + `t("app.offlineBanner")` i18n message
 - Rendered in `AppShell` immediately after `</header>`
@@ -66,7 +66,7 @@ metrics:
 - Props: `value: string | number`, `masked: boolean`, `className?: string`
 - Shows `****` with `aria-label={t("accessibility.balanceHidden")}` when masked
 - Shows actual value in `<span>` when unmasked
-- No internal state — caller controls masking
+- No internal state - caller controls masking
 
 ### AppShell Changes
 - Import + render `<OfflineBanner />` after header
@@ -91,11 +91,11 @@ metrics:
 - **Commit:** `a51705b`
 
 **2. [Observation] i18n keys already present**
-- `app.offlineBanner`, `accessibility.balanceHidden`, `accessibility.toggleBalanceVisibility` were already added to both `it.json` and `en.json` by a prior plan execution — no changes needed.
+- `app.offlineBanner`, `accessibility.balanceHidden`, `accessibility.toggleBalanceVisibility` were already added to both `it.json` and `en.json` by a prior plan execution - no changes needed.
 
 ## Known Stubs
 
-None — all components render real data.
+None - all components render real data.
 
 ## Self-Check: PASSED
 

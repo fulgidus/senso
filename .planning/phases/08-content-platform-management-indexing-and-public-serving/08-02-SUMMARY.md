@@ -19,7 +19,7 @@ tech-stack:
   patterns:
     - "BM25 index loads from DB first, falls back to static JSON if empty/unavailable"
     - "rebuild_index() called after admin create/update/delete for live search updates"
-    - "Public API endpoints use no auth dependencies — fully open for content sharing"
+    - "Public API endpoints use no auth dependencies - fully open for content sharing"
 
 key-files:
   created:
@@ -32,13 +32,13 @@ key-files:
     - api/app/main.py (content_public_router registered)
 
 key-decisions:
-  - "BM25 index tries DB first, falls back to JSON catalogs — ensures search works during migration"
+  - "BM25 index tries DB first, falls back to JSON catalogs - ensures search works during migration"
   - "Public content API has no auth at all (not even optional) for maximum shareability"
   - "Test corpus uses 5+ diverse items per locale to avoid BM25 negative IDF with small corpora"
 
 patterns-established:
   - "DB-backed search with JSON fallback: try DB → empty check → JSON fallback"
-  - "Public API pattern: router with no Depends(get_current_user) — open endpoints"
+  - "Public API pattern: router with no Depends(get_current_user) - open endpoints"
 
 requirements-completed: [CONT-03, CONT-04]
 
@@ -79,8 +79,8 @@ completed: 2026-03-29
 - `api/tests/test_content_public.py` - 10 tests for public API endpoints
 
 ## Decisions Made
-- BM25 index tries DB first, falls back to JSON catalogs if DB is empty or unavailable — ensures smooth migration
-- Public content API has no auth dependency — fully open for content sharing and SEO
+- BM25 index tries DB first, falls back to JSON catalogs if DB is empty or unavailable - ensures smooth migration
+- Public content API has no auth dependency - fully open for content sharing and SEO
 - Test corpus uses 5+ diverse items per locale to ensure BM25 IDF scores stay positive (small corpora produce negative IDF)
 
 ## Deviations from Plan

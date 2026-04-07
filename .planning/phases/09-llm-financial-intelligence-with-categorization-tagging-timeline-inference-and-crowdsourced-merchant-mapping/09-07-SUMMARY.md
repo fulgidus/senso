@@ -27,10 +27,10 @@ key_files:
     - senso/src/i18n/locales/it.json
     - senso/src/i18n/locales/en.json
 decisions:
-  - "notificationsApi.ts placed in senso/src/api/ (new dir) not senso/src/lib/ — symmetric with plan intent, consistent with plan 09-06 profile-api.ts in lib being an extension, not a new pattern"
+  - "notificationsApi.ts placed in senso/src/api/ (new dir) not senso/src/lib/ - symmetric with plan intent, consistent with plan 09-06 profile-api.ts in lib being an extension, not a new pattern"
   - "adminMerchantApi.ts placed in senso/src/features/admin/ following adminContentApi.ts co-location pattern"
-  - "Admin nav uses t('admin.merchantMap.title') and t('admin.moderation.title') — auto-updated when i18n changes"
-  - "ModerationQueuePage revert uses inline two-step confirm (not modal) — same UX pattern as ContentAdminPage delete confirm"
+  - "Admin nav uses t('admin.merchantMap.title') and t('admin.moderation.title') - auto-updated when i18n changes"
+  - "ModerationQueuePage revert uses inline two-step confirm (not modal) - same UX pattern as ContentAdminPage delete confirm"
 metrics:
   duration: "15 min"
   completed_date: "2026-03-31"
@@ -46,21 +46,21 @@ metrics:
 
 ### Task 1: notificationsApi.ts, NotificationPanel, Bell in AppShell
 
-- **`senso/src/api/notificationsApi.ts`** — typed API client: `getNotifications(limit)`, `markNotificationRead(id)`, `markAllNotificationsRead()`. Uses `@/lib/api-client` + `getBackendBaseUrl()` + `readAccessToken()` — same pattern as `adminContentApi.ts`.
-- **`senso/src/features/notifications/NotificationPanel.tsx`** — dropdown panel. Opens when `isOpen=true`, fetches notifications. Shows type icons (AlertTriangle/Clock/ShieldOff/CheckCircle/RotateCcw/Bell per notification type), unread left-border highlight, relative time, "Segna tutto come letto" button. Closes on outside click. Loading skeleton + empty state.
-- **`senso/src/components/AppShell.tsx`** — Bell icon added immediately left of LanguageSwitcher. Polls every 30s via `setInterval`. Badge shows unread count (9+ cap). Three admin nav items added (content, merchant-map, moderation) for admin users. Imports `Bell` from lucide-react.
+- **`senso/src/api/notificationsApi.ts`** - typed API client: `getNotifications(limit)`, `markNotificationRead(id)`, `markAllNotificationsRead()`. Uses `@/lib/api-client` + `getBackendBaseUrl()` + `readAccessToken()` - same pattern as `adminContentApi.ts`.
+- **`senso/src/features/notifications/NotificationPanel.tsx`** - dropdown panel. Opens when `isOpen=true`, fetches notifications. Shows type icons (AlertTriangle/Clock/ShieldOff/CheckCircle/RotateCcw/Bell per notification type), unread left-border highlight, relative time, "Segna tutto come letto" button. Closes on outside click. Loading skeleton + empty state.
+- **`senso/src/components/AppShell.tsx`** - Bell icon added immediately left of LanguageSwitcher. Polls every 30s via `setInterval`. Badge shows unread count (9+ cap). Three admin nav items added (content, merchant-map, moderation) for admin users. Imports `Bell` from lucide-react.
 
 ### Task 2: Admin merchant map and moderation queue pages
 
-- **`senso/src/features/admin/adminMerchantApi.ts`** — typed API client: `getMerchantMap(params)`, `blacklistMerchant(id, reason)`, `unblacklistMerchant(id)`, `getModerationQueue(statusFilter)`, `confirmModerationAction(id)`, `revertModerationAction(id)`.
-- **`senso/src/features/admin/MerchantMapAdminPage.tsx`** — search input + method dropdown + blacklisted filter. Table with Description (mono), Canonical, Category (pill), Confidence (colour-coded %), Method (badge), Provider:model (mono), Contributing user, Date (relative), Actions. Blacklist: inline row expansion with textarea + destructive confirm. Blacklisted rows: `opacity-50 border-l-2 border-destructive`.
-- **`senso/src/features/admin/ModerationQueuePage.tsx`** — status filter dropdown. Table with obfuscated user + date, content type badge, violations (red pills), severity (amber/orange/red badge), action taken, confirm + inline-confirm revert buttons.
-- **`senso/src/App.tsx`** — routes `/admin/merchant-map` and `/admin/moderation` added as admin-protected routes.
-- **i18n** — `admin.merchantMap.*` and `admin.moderation.*` keys added to both `it.json` and `en.json`.
+- **`senso/src/features/admin/adminMerchantApi.ts`** - typed API client: `getMerchantMap(params)`, `blacklistMerchant(id, reason)`, `unblacklistMerchant(id)`, `getModerationQueue(statusFilter)`, `confirmModerationAction(id)`, `revertModerationAction(id)`.
+- **`senso/src/features/admin/MerchantMapAdminPage.tsx`** - search input + method dropdown + blacklisted filter. Table with Description (mono), Canonical, Category (pill), Confidence (colour-coded %), Method (badge), Provider:model (mono), Contributing user, Date (relative), Actions. Blacklist: inline row expansion with textarea + destructive confirm. Blacklisted rows: `opacity-50 border-l-2 border-destructive`.
+- **`senso/src/features/admin/ModerationQueuePage.tsx`** - status filter dropdown. Table with obfuscated user + date, content type badge, violations (red pills), severity (amber/orange/red badge), action taken, confirm + inline-confirm revert buttons.
+- **`senso/src/App.tsx`** - routes `/admin/merchant-map` and `/admin/moderation` added as admin-protected routes.
+- **i18n** - `admin.merchantMap.*` and `admin.moderation.*` keys added to both `it.json` and `en.json`.
 
 ## Deviations from Plan
 
-### Import Path Corrections (Rule 3 — Auto-fix)
+### Import Path Corrections (Rule 3 - Auto-fix)
 
 **1. [Rule 3 - Blocking] Used `@/lib/api-client` instead of `@/api/api-client`**
 - **Found during:** Task 1 pre-read of adminContentApi.ts

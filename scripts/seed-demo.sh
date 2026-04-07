@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# seed-demo.sh — Create demo user + seed profile via questionnaire (fast path)
+# seed-demo.sh - Create demo user + seed profile via questionnaire (fast path)
 # Optional: also upload the Revolut CSV for transaction-based tests.
 #
 # Usage:
@@ -51,7 +51,7 @@ SIGNUP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$API_URL/auth/si
   -d "{\"email\": \"$DEMO_EMAIL\", \"password\": \"$DEMO_PASSWORD\"}") || true
 
 if [ "$SIGNUP_STATUS" = "201" ]; then
-  ok "Demo user created — logging in..."
+  ok "Demo user created - logging in..."
 fi
 
 LOGIN_RESP=$(curl -sf -X POST "$API_URL/auth/login" \
@@ -77,7 +77,7 @@ curl -sf -X PATCH "$API_URL/auth/me" \
   && ok "Name set: Demo User" \
   || warn "Could not set name (non-fatal)"
 
-# ── Step 3: Submit questionnaire (fast path — no LLM, sets confirmed=true) ──
+# ── Step 3: Submit questionnaire (fast path - no LLM, sets confirmed=true) ──
 echo ""
 echo "Submitting financial questionnaire ..."
 
@@ -119,7 +119,7 @@ QUIZ_RESP=$(curl -sf -X POST "$API_URL/profile/questionnaire" \
   || fail "Questionnaire submission failed. Check API logs: docker compose logs api"
 
 QUIZ_STATUS=$(echo "$QUIZ_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','?'))" 2>/dev/null || echo "?")
-ok "Questionnaire submitted (status: $QUIZ_STATUS) — profile is now confirmed"
+ok "Questionnaire submitted (status: $QUIZ_STATUS) - profile is now confirmed"
 
 # ── Step 4 (optional): Upload Revolut CSV ────────────────────────────────────
 if [ "$WITH_CSV" = true ]; then
@@ -129,7 +129,7 @@ if [ "$WITH_CSV" = true ]; then
   REVOLUT_CSV="$SAMPLES_DIR/revolut_it/RevolutIT_account-statement_2026-02-01_2026-03-24_en-us_4700b8.csv"
 
   if [ ! -f "$REVOLUT_CSV" ]; then
-    warn "Revolut CSV not found at $REVOLUT_CSV — skipping"
+    warn "Revolut CSV not found at $REVOLUT_CSV - skipping"
   else
     echo -n "  Uploading $(basename "$REVOLUT_CSV") ... "
     UPLOAD_RESP=$(curl -sf -X POST "$API_URL/ingestion/upload" \
@@ -142,11 +142,11 @@ if [ "$WITH_CSV" = true ]; then
       [ -n "$UPLOAD_ID" ] && echo "OK (id: $UPLOAD_ID)" || echo "FAILED (no id)"
     fi
 
-    # Confirm uploads (triggers profile enrichment in background — non-blocking)
+    # Confirm uploads (triggers profile enrichment in background - non-blocking)
     echo "  Confirming uploads ..."
     curl -sf -X POST "$API_URL/ingestion/confirm-all" \
       -H "$AUTH_HEADER" > /dev/null \
-      && ok "CSV confirmed — transaction data enrichment queued (background)" \
+      && ok "CSV confirmed - transaction data enrichment queued (background)" \
       || warn "confirm-all failed (non-fatal for quiz-seeded profile)"
   fi
 fi

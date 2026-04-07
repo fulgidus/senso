@@ -5,7 +5,7 @@ status: complete
 completed_at: "2026-04-05"
 ---
 
-# Summary: 16-04 — Accessibility Tests (axe-core + keyboard + aria-live)
+# Summary: 16-04 - Accessibility Tests (axe-core + keyboard + aria-live)
 
 ## What was built
 

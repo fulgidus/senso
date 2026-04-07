@@ -109,7 +109,7 @@ def nuke_all(
     (uploads, extracted_documents, chat_messages, transactions,
     user_profiles, notifications, etc.).
 
-    The calling admin's own account is also deleted — they will
+    The calling admin's own account is also deleted - they will
     need to re-register after this operation.
     """
     count = db.query(User).count()

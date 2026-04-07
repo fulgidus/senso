@@ -1,7 +1,7 @@
 """
 NaCl / libsodium crypto helpers for Phase 13 crypto-identity foundation.
 
-Key model — multi-envelope architecture:
+Key model - multi-envelope architecture:
   Each user has:
     - nacl_master_key: 32-byte random KEK (never stored in plaintext)
     - nacl_pbkdf2_salt: 32-byte random salt for login-envelope PBKDF2
@@ -14,13 +14,13 @@ Key model — multi-envelope architecture:
         encrypted_ed25519_signing_b64 → AES-GCM(nacl_master_key, ed25519_signing_key_bytes)
 
   AES-GCM storage format: base64(nonce_12bytes + ciphertext_with_tag)
-  — identical to crypto.py pattern.
+  - identical to crypto.py pattern.
 
   Recovery envelopes (word list, passkey) are Phase 14+ scope.
 
 Algorithms:
-  - X25519 (curve25519): nacl.public.PrivateKey / PublicKey — DH key agreement
-  - Ed25519: nacl.signing.SigningKey / VerifyKey — message signatures
+  - X25519 (curve25519): nacl.public.PrivateKey / PublicKey - DH key agreement
+  - Ed25519: nacl.signing.SigningKey / VerifyKey - message signatures
   - AES-256-GCM: envelope and private-key blob encryption (cryptography library)
   - PBKDF2-SHA256, 600_000 iter: login wrap key derivation (matches crypto.py)
 """
@@ -55,7 +55,7 @@ def generate_x25519_keypair() -> tuple[nacl.public.PrivateKey, nacl.public.Publi
     """Generate a fresh X25519 (curve25519) key pair for Diffie-Hellman.
 
     Returns:
-        (private_key, public_key) — nacl.public objects.
+        (private_key, public_key) - nacl.public objects.
         Serialise with public_key_b64() / private_key_b64().
     """
     private_key = nacl.public.PrivateKey.generate()
@@ -78,7 +78,7 @@ def generate_ed25519_keypair() -> tuple[nacl.signing.SigningKey, nacl.signing.Ve
     """Generate a fresh Ed25519 key pair for message signing.
 
     Returns:
-        (signing_key, verify_key) — nacl.signing objects, both 32 bytes in PyNaCl.
+        (signing_key, verify_key) - nacl.signing objects, both 32 bytes in PyNaCl.
     """
     signing_key = nacl.signing.SigningKey.generate()
     return signing_key, signing_key.verify_key
@@ -126,7 +126,7 @@ def verify_signature(message: bytes, signature_b64: str, vk_b64: str) -> bool:
 
 
 # ── AES-GCM helpers (internal) ────────────────────────────────────────────────
-# Format: base64(nonce_12bytes + ciphertext_with_tag) — identical to crypto.py
+# Format: base64(nonce_12bytes + ciphertext_with_tag) - identical to crypto.py
 
 def _aesgcm_encrypt(key_32: bytes, plaintext: bytes) -> str:
     """AES-256-GCM encrypt plaintext with a 32-byte key.
@@ -153,7 +153,7 @@ def _aesgcm_decrypt(key_32: bytes, blob_b64: str) -> bytes:
 def generate_nacl_master_key() -> bytes:
     """Generate a random 32-byte NaCl master key (KEK for private key blobs).
 
-    Never stored in plaintext — always wrapped by an envelope key before persisting.
+    Never stored in plaintext - always wrapped by an envelope key before persisting.
     """
     return os.urandom(32)
 
@@ -194,7 +194,7 @@ def wrap_nacl_master_key(master_key: bytes, wrap_key: bytes) -> str:
         wrap_key: 32-byte wrap key (from derive_nacl_login_wrap_key()).
 
     Returns:
-        Base64 envelope string (nonce + ciphertext) — safe to store in DB.
+        Base64 envelope string (nonce + ciphertext) - safe to store in DB.
     """
     return _aesgcm_encrypt(wrap_key, master_key)
 
@@ -228,7 +228,7 @@ def encrypt_nacl_private_key(private_key_bytes: bytes, master_key: bytes) -> str
         master_key: 32-byte nacl_master_key.
 
     Returns:
-        Base64 blob (nonce + ciphertext) — safe to store in DB.
+        Base64 blob (nonce + ciphertext) - safe to store in DB.
     """
     return _aesgcm_encrypt(master_key, private_key_bytes)
 

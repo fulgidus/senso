@@ -456,8 +456,8 @@ import hashlib as _hashlib
 def compute_recipient_hash(username: str) -> str:
     """Return sha256($username) hex digest for zero-knowledge recipient routing.
 
-    D-01: Hash input is sha256($username) — include the ``$`` prefix verbatim.
-    D-02: Deterministic — same hash always for a given username.
+    D-01: Hash input is sha256($username) - include the ``$`` prefix verbatim.
+    D-02: Deterministic - same hash always for a given username.
     D-03: Admin !handle usernames are NOT hashed (use cleartext routing).
 
     Args:

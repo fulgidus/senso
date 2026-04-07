@@ -4,7 +4,7 @@ created: "2026-04-05"
 status: ready-to-execute
 ---
 
-# Phase 16 Context — E2E Test Suite: Gestures, A11y, PWA & Mobile Regressions
+# Phase 16 Context - E2E Test Suite: Gestures, A11y, PWA & Mobile Regressions
 
 ## Why This Phase Exists
 
@@ -22,16 +22,16 @@ The app has no automated coverage for:
 - `overscroll-none` on ChatScreen message list suppresses native rubber-band at
   bottom; feels broken to users on iOS.
 - Pull-to-refresh fires mid-content (not guarded to top-of-list only in all paths).
-- No service worker — PWA manifest exists but app is not installable as standalone.
+- No service worker - PWA manifest exists but app is not installable as standalone.
 
 ## Playwright Setup
 
 - **Framework**: `@playwright/test` ^1.59.1 (already installed)
 - **New dependency**: `@axe-core/playwright` for automated a11y scanning
 - **Projects**:
-  - `chromium` — Desktop Chrome 1280×800 (existing)
-  - `mobile-chrome` — Pixel 5 emulation 393×851, touch events enabled (new)
-  - `mobile-safari` — iPhone 14 emulation 390×844 (new, webkit)
+  - `chromium` - Desktop Chrome 1280×800 (existing)
+  - `mobile-chrome` - Pixel 5 emulation 393×851, touch events enabled (new)
+  - `mobile-safari` - iPhone 14 emulation 390×844 (new, webkit)
 - **Base URL**: `http://localhost:4173` (Vite preview, same as existing)
 - **Mock strategy**: all API calls mocked via `page.route()` (no live backend)
 - **Touch simulation**: `page.touchscreen.*` for gesture tests
@@ -59,13 +59,13 @@ The app has no automated coverage for:
 ```
 senso/e2e/
   support/
-    api-mocks.ts           (existing — extended with messages + coach mocks)
-    fixtures.ts            (new — shared setup helpers)
-    touch-helpers.ts       (new — swipe simulation utilities)
-  gestures.spec.ts         (new — swipe-up, pull-to-refresh zone)
-  nav-drawer.spec.ts       (new — hamburger, drawer, focus trap)
-  a11y.spec.ts             (new — axe, keyboard, aria-live, skip link)
-  pwa.spec.ts              (new — manifest, SW, offline)
-  ergonomics.spec.ts       (new — tap targets, layout, overflow)
-  coach-picker.spec.ts     (new — persona switch regression)
+    api-mocks.ts           (existing - extended with messages + coach mocks)
+    fixtures.ts            (new - shared setup helpers)
+    touch-helpers.ts       (new - swipe simulation utilities)
+  gestures.spec.ts         (new - swipe-up, pull-to-refresh zone)
+  nav-drawer.spec.ts       (new - hamburger, drawer, focus trap)
+  a11y.spec.ts             (new - axe, keyboard, aria-live, skip link)
+  pwa.spec.ts              (new - manifest, SW, offline)
+  ergonomics.spec.ts       (new - tap targets, layout, overflow)
+  coach-picker.spec.ts     (new - persona switch regression)
 ```

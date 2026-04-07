@@ -68,78 +68,78 @@ must_haves:
 
 ### Observable Truths
 
-| # | Truth | Status | Evidence |
-|---|-------|--------|----------|
-| 1 | SSE streaming delivers token-by-token with graceful full-response fallback | VERIFIED | `POST /coaching/chat/stream` returns `StreamingResponse` with `text/event-stream`. Frontend `sendMessageStream()` parses `meta/delta/final/done` events. `ChatScreen.tsx` wraps in try/catch, falls back to `sendMessage()`. |
-| 2 | Persona picker UI with cross-session persistence | VERIFIED | `SettingsScreen.tsx` has default coach selector with persona rows/accent styling. `ChatScreen.tsx` has `PersonaSwitcher` component. `User.default_persona_id` column persisted via `updateMe()`. New conversations reset to saved default. |
-| 3 | Conversation history persisted in DB and loaded on return | VERIFIED | `ChatSession` + `ChatMessage` models in `models.py`. Messages persisted in `_prepare_chat_result()`. `GET /coaching/sessions` + `GET /coaching/sessions/{id}/messages` endpoints. Frontend loads + restores newest session on mount with toast. |
-| 4 | `own_pii_unsolicited` safety check uses full profile cross-check | VERIFIED | `sanitize_unsolicited_profile_details()` takes 4 params: `response, user_message, current_user, profile_snapshot`. `_flatten_profile_candidates()` extracts email, names, income, expenses, margin, categories, insights, questionnaire data from live profile. `service.py` calls `_load_current_user_snapshot()` to get live DB data before calling safety. |
+| #   | Truth                                                                      | Status   | Evidence                                                                                                                                                                                                                                                                                                                                                      |
+| --- | -------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | SSE streaming delivers token-by-token with graceful full-response fallback | VERIFIED | `POST /coaching/chat/stream` returns `StreamingResponse` with `text/event-stream`. Frontend `sendMessageStream()` parses `meta/delta/final/done` events. `ChatScreen.tsx` wraps in try/catch, falls back to `sendMessage()`.                                                                                                                                  |
+| 2   | Persona picker UI with cross-session persistence                           | VERIFIED | `SettingsScreen.tsx` has default coach selector with persona rows/accent styling. `ChatScreen.tsx` has `PersonaSwitcher` component. `User.default_persona_id` column persisted via `updateMe()`. New conversations reset to saved default.                                                                                                                    |
+| 3   | Conversation history persisted in DB and loaded on return                  | VERIFIED | `ChatSession` + `ChatMessage` models in `models.py`. Messages persisted in `_prepare_chat_result()`. `GET /coaching/sessions` + `GET /coaching/sessions/{id}/messages` endpoints. Frontend loads + restores newest session on mount with toast.                                                                                                               |
+| 4   | `own_pii_unsolicited` safety check uses full profile cross-check           | VERIFIED | `sanitize_unsolicited_profile_details()` takes 4 params: `response, user_message, current_user, profile_snapshot`. `_flatten_profile_candidates()` extracts email, names, income, expenses, margin, categories, insights, questionnaire data from live profile. `service.py` calls `_load_current_user_snapshot()` to get live DB data before calling safety. |
 
 **Score:** 4/4 truths verified
 
 ### Required Artifacts
 
-| Artifact | Expected | Status | Details |
-|----------|----------|--------|---------|
-| `api/app/api/coaching.py` | SSE streaming endpoint | VERIFIED | `POST /coaching/chat/stream` (line 291) with `StreamingResponse`, `_sse_event()` helper, `_chunk_message_text()` for simulated streaming. Non-stream `POST /coaching/chat` preserved as fallback. |
-| `api/app/coaching/safety.py` | Full profile cross-check PII sanitization | VERIFIED | `sanitize_unsolicited_profile_details()` (line 306) with 4-param signature. `_flatten_profile_candidates()` (line 213) extracts real user fields from both `current_user` and `profile_snapshot`. |
-| `api/app/coaching/service.py` | Service wiring for PII + streaming | VERIFIED | `_sanitize_own_pii_unsolicited()` (line 421) delegates to safety module with live data. `_load_current_user_snapshot()` (line 409) queries DB for real user fields. |
-| `api/app/db/models.py` | User.default_persona_id, ChatSession, ChatMessage | VERIFIED | `default_persona_id` column (line 43-45). `ChatSession` and `ChatMessage` models with proper relationships and fields. |
-| `api/app/schemas/auth.py` | DTO support for default_persona_id | VERIFIED | `UserDTO.default_persona_id` and `UpdateMeRequest.default_persona_id` both present. |
-| `api/app/personas/config.json` | Persona theme metadata | VERIFIED | All 4 personas (lucia, marco, elena, roberto) have `theme` objects with `accent`, `bubble_bg`, `bubble_border`, `badge_bg`, `badge_text`. |
-| `senso/src/features/coaching/coachingApi.ts` | SSE client + Persona type | VERIFIED | `sendMessageStream()` (line 225) with fetch-based SSE. `splitSseBlocks()`, `parseSseBlock()` helpers. `Persona` type includes `theme` object. |
-| `senso/src/features/coaching/ChatScreen.tsx` | Streaming bubble, PersonaSwitcher, restore, theming | VERIFIED | `StreamingBubble` component, `PersonaSwitcher` (lines 481-548), session restore on mount (lines 1048-1093), themed bubble borders from persona config. |
-| `senso/src/features/settings/SettingsScreen.tsx` | Default coach selector | VERIFIED | Persona rows (lines 164-204) with accent styling, checkmark for active selection, `updateMe()` call on change. |
-| `senso/src/features/auth/session.ts` | Auth round-trip for default_persona_id | VERIFIED | `parseUser()` reads `default_persona_id` from API response. `updateMe()` sends `defaultPersonaId` back. |
-| `senso/src/features/auth/types.ts` | User.defaultPersonaId field | VERIFIED | `defaultPersonaId` property on User type. |
+| Artifact                                         | Expected                                            | Status   | Details                                                                                                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/app/api/coaching.py`                        | SSE streaming endpoint                              | VERIFIED | `POST /coaching/chat/stream` (line 291) with `StreamingResponse`, `_sse_event()` helper, `_chunk_message_text()` for simulated streaming. Non-stream `POST /coaching/chat` preserved as fallback. |
+| `api/app/coaching/safety.py`                     | Full profile cross-check PII sanitization           | VERIFIED | `sanitize_unsolicited_profile_details()` (line 306) with 4-param signature. `_flatten_profile_candidates()` (line 213) extracts real user fields from both `current_user` and `profile_snapshot`. |
+| `api/app/coaching/service.py`                    | Service wiring for PII + streaming                  | VERIFIED | `_sanitize_own_pii_unsolicited()` (line 421) delegates to safety module with live data. `_load_current_user_snapshot()` (line 409) queries DB for real user fields.                               |
+| `api/app/db/models.py`                           | User.default_persona_id, ChatSession, ChatMessage   | VERIFIED | `default_persona_id` column (line 43-45). `ChatSession` and `ChatMessage` models with proper relationships and fields.                                                                            |
+| `api/app/schemas/auth.py`                        | DTO support for default_persona_id                  | VERIFIED | `UserDTO.default_persona_id` and `UpdateMeRequest.default_persona_id` both present.                                                                                                               |
+| `api/app/personas/config.json`                   | Persona theme metadata                              | VERIFIED | All 4 personas (lucia, marco, elena, roberto) have `theme` objects with `accent`, `bubble_bg`, `bubble_border`, `badge_bg`, `badge_text`.                                                         |
+| `senso/src/features/coaching/coachingApi.ts`     | SSE client + Persona type                           | VERIFIED | `sendMessageStream()` (line 225) with fetch-based SSE. `splitSseBlocks()`, `parseSseBlock()` helpers. `Persona` type includes `theme` object.                                                     |
+| `senso/src/features/coaching/ChatScreen.tsx`     | Streaming bubble, PersonaSwitcher, restore, theming | VERIFIED | `StreamingBubble` component, `PersonaSwitcher` (lines 481-548), session restore on mount (lines 1048-1093), themed bubble borders from persona config.                                            |
+| `senso/src/features/settings/SettingsScreen.tsx` | Default coach selector                              | VERIFIED | Persona rows (lines 164-204) with accent styling, checkmark for active selection, `updateMe()` call on change.                                                                                    |
+| `senso/src/features/auth/session.ts`             | Auth round-trip for default_persona_id              | VERIFIED | `parseUser()` reads `default_persona_id` from API response. `updateMe()` sends `defaultPersonaId` back.                                                                                           |
+| `senso/src/features/auth/types.ts`               | User.defaultPersonaId field                         | VERIFIED | `defaultPersonaId` property on User type.                                                                                                                                                         |
 
 ### Key Link Verification
 
-| From | To | Via | Status | Details |
-|------|----|-----|--------|---------|
-| `ChatScreen.tsx` | `coachingApi.ts` | `sendMessageStream()` call | WIRED | `sendMessageStream` imported and called in streaming path (lines 1249-1275). SSE events drive `setStreamingText` state updates. |
-| `coachingApi.ts` | `/coaching/chat/stream` | fetch POST to SSE endpoint | WIRED | `sendMessageStream()` calls `fetch(url('/coaching/chat/stream'))` with POST method and session headers. |
-| `ChatScreen.tsx` | `sendMessage()` | Fallback in catch block | WIRED | `catch` block after streaming attempt calls `sendMessage()` (non-streaming), providing silent degradation. |
-| `service.py` | `safety.py` | `sanitize_unsolicited_profile_details()` | WIRED | `_sanitize_own_pii_unsolicited()` in service.py imports and calls `sanitize_unsolicited_profile_details(response, user_message, current_user, profile_snapshot)`. |
-| `SettingsScreen.tsx` | `session.ts` | `updateMe({ defaultPersonaId })` | WIRED | Settings calls `updateMe()` on persona selection change, persisting choice to backend. |
-| `ChatScreen.tsx` | `config.json` | `persona.theme.bubble_border` | WIRED | Active persona's theme properties used for styled bubble borders and PersonaSwitcher accent colors. |
-| `coaching.py` | `service.py` | `service.chat()` | WIRED | Both `POST /coaching/chat` and `POST /coaching/chat/stream` call `service.chat()` for core LLM logic. Stream endpoint then chunks the result. |
+| From                 | To                      | Via                                      | Status | Details                                                                                                                                                           |
+| -------------------- | ----------------------- | ---------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ChatScreen.tsx`     | `coachingApi.ts`        | `sendMessageStream()` call               | WIRED  | `sendMessageStream` imported and called in streaming path (lines 1249-1275). SSE events drive `setStreamingText` state updates.                                   |
+| `coachingApi.ts`     | `/coaching/chat/stream` | fetch POST to SSE endpoint               | WIRED  | `sendMessageStream()` calls `fetch(url('/coaching/chat/stream'))` with POST method and session headers.                                                           |
+| `ChatScreen.tsx`     | `sendMessage()`         | Fallback in catch block                  | WIRED  | `catch` block after streaming attempt calls `sendMessage()` (non-streaming), providing silent degradation.                                                        |
+| `service.py`         | `safety.py`             | `sanitize_unsolicited_profile_details()` | WIRED  | `_sanitize_own_pii_unsolicited()` in service.py imports and calls `sanitize_unsolicited_profile_details(response, user_message, current_user, profile_snapshot)`. |
+| `SettingsScreen.tsx` | `session.ts`            | `updateMe({ defaultPersonaId })`         | WIRED  | Settings calls `updateMe()` on persona selection change, persisting choice to backend.                                                                            |
+| `ChatScreen.tsx`     | `config.json`           | `persona.theme.bubble_border`            | WIRED  | Active persona's theme properties used for styled bubble borders and PersonaSwitcher accent colors.                                                               |
+| `coaching.py`        | `service.py`            | `service.chat()`                         | WIRED  | Both `POST /coaching/chat` and `POST /coaching/chat/stream` call `service.chat()` for core LLM logic. Stream endpoint then chunks the result.                     |
 
 ### Data-Flow Trace (Level 4)
 
-| Artifact | Data Variable | Source | Produces Real Data | Status |
-|----------|--------------|--------|-------------------|--------|
-| `ChatScreen.tsx` (streaming) | `streamingText` | `sendMessageStream()` SSE events | Yes - backend chunks real LLM response into SSE `delta` events | FLOWING |
-| `ChatScreen.tsx` (history) | `messages` | `GET /coaching/sessions/{id}/messages` | Yes - queries `ChatMessage` table via `session.messages` relationship | FLOWING |
-| `ChatScreen.tsx` (personas) | `personas` | `GET /coaching/personas` | Yes - reads from `config.json` with theme metadata | FLOWING |
-| `SettingsScreen.tsx` (default persona) | `user.defaultPersonaId` | `GET /auth/me` → `parseUser()` | Yes - reads `User.default_persona_id` column from DB | FLOWING |
-| `safety.py` (PII check) | `current_user` + `profile_snapshot` | `_load_current_user_snapshot()` + `profile_dto.model_dump()` | Yes - live DB query for user fields + full profile dump | FLOWING |
+| Artifact                               | Data Variable                       | Source                                                       | Produces Real Data                                                    | Status  |
+| -------------------------------------- | ----------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- | ------- |
+| `ChatScreen.tsx` (streaming)           | `streamingText`                     | `sendMessageStream()` SSE events                             | Yes - backend chunks real LLM response into SSE `delta` events        | FLOWING |
+| `ChatScreen.tsx` (history)             | `messages`                          | `GET /coaching/sessions/{id}/messages`                       | Yes - queries `ChatMessage` table via `session.messages` relationship | FLOWING |
+| `ChatScreen.tsx` (personas)            | `personas`                          | `GET /coaching/personas`                                     | Yes - reads from `config.json` with theme metadata                    | FLOWING |
+| `SettingsScreen.tsx` (default persona) | `user.defaultPersonaId`             | `GET /auth/me` → `parseUser()`                               | Yes - reads `User.default_persona_id` column from DB                  | FLOWING |
+| `safety.py` (PII check)                | `current_user` + `profile_snapshot` | `_load_current_user_snapshot()` + `profile_dto.model_dump()` | Yes - live DB query for user fields + full profile dump               | FLOWING |
 
 ### Behavioral Spot-Checks
 
-| Behavior | Command | Result | Status |
-|----------|---------|--------|--------|
-| Coaching router imports cleanly | `docker compose run --rm api python -c "from app.api.coaching import router; print('OK')"` | `coaching router OK` | PASS |
-| SSE stream route registered | Route listing from coaching router | `{'POST'} /coaching/chat/stream` present alongside 9 other routes | PASS |
-| Safety module 4-param signature | `inspect.signature(sanitize_unsolicited_profile_details)` | `['response', 'user_message', 'current_user', 'profile_snapshot']` | PASS |
-| `_flatten_profile_candidates` signature | `inspect.signature(_flatten_profile_candidates)` | `['current_user', 'profile_snapshot']` | PASS |
-| Frontend builds without errors | `docker compose run --rm frontend pnpm build` | `2570 modules transformed`, `built in 5.14s`, zero errors | PASS |
+| Behavior                                | Command                                                                                    | Result                                                             | Status |
+| --------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------ |
+| Coaching router imports cleanly         | `docker compose run --rm api python -c "from app.api.coaching import router; print('OK')"` | `coaching router OK`                                               | PASS   |
+| SSE stream route registered             | Route listing from coaching router                                                         | `{'POST'} /coaching/chat/stream` present alongside 9 other routes  | PASS   |
+| Safety module 4-param signature         | `inspect.signature(sanitize_unsolicited_profile_details)`                                  | `['response', 'user_message', 'current_user', 'profile_snapshot']` | PASS   |
+| `_flatten_profile_candidates` signature | `inspect.signature(_flatten_profile_candidates)`                                           | `['current_user', 'profile_snapshot']`                             | PASS   |
+| Frontend builds without errors          | `docker compose run --rm frontend pnpm build`                                              | `2570 modules transformed`, `built in 5.14s`, zero errors          | PASS   |
 
 ### Requirements Coverage
 
-| Requirement | Source Plan | Description | Status | Evidence |
-|-------------|------------|-------------|--------|----------|
-| COCH-05 | 07-01, 07-03, 07-04 | Follow-up clarification and conversation continuity | SATISFIED | Streaming preserves session context. Persistent history enables follow-up across visits. Persona picker retains user preference across sessions. All three enhance follow-up experience. |
-| SAFE-01 | 07-02 | Persona-independent safety boundaries | SATISFIED | `sanitize_unsolicited_profile_details()` uses full profile cross-check with live DB data (email, names, income, expenses, margin, categories, insights, questionnaire) instead of pattern-only regex. Safety logic is persona-independent — same function called regardless of active persona. |
+| Requirement | Source Plan         | Description                                         | Status    | Evidence                                                                                                                                                                                                                                                                                       |
+| ----------- | ------------------- | --------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| COCH-05     | 07-01, 07-03, 07-04 | Follow-up clarification and conversation continuity | SATISFIED | Streaming preserves session context. Persistent history enables follow-up across visits. Persona picker retains user preference across sessions. All three enhance follow-up experience.                                                                                                       |
+| SAFE-01     | 07-02               | Persona-independent safety boundaries               | SATISFIED | `sanitize_unsolicited_profile_details()` uses full profile cross-check with live DB data (email, names, income, expenses, margin, categories, insights, questionnaire) instead of pattern-only regex. Safety logic is persona-independent - same function called regardless of active persona. |
 
 ### Anti-Patterns Found
 
-| File | Line | Pattern | Severity | Impact |
-|------|------|---------|----------|--------|
-| (none) | - | - | - | No TODO/FIXME/placeholder/stub patterns found in any phase-modified files |
+| File   | Line | Pattern | Severity | Impact                                                                    |
+| ------ | ---- | ------- | -------- | ------------------------------------------------------------------------- |
+| (none) | -    | -       | -        | No TODO/FIXME/placeholder/stub patterns found in any phase-modified files |
 
 **Notes on `service.py` grep hits:**
-- `return {}` (line 414): Legitimate guard clause — returns empty dict when user not found in `_load_current_user_snapshot()`. Not a stub.
+- `return {}` (line 414): Legitimate guard clause - returns empty dict when user not found in `_load_current_user_snapshot()`. Not a stub.
 - `pass` (lines 471, 503, 511): Exception swallowing in non-critical logging/debug paths (DB rollback after insight persist failure, debug payload serialization). Acceptable defensive code, not stubs.
 
 ### Human Verification Required
@@ -173,7 +173,7 @@ must_haves:
 
 No gaps found. All 4 success criteria are fully met:
 
-1. **SSE Streaming**: Backend `POST /coaching/chat/stream` endpoint delivers chunked SSE events. Frontend `sendMessageStream()` parses them and renders via `StreamingBubble`. Fallback to `sendMessage()` on failure. *(Note: Streaming is simulated — backend chunks the complete LLM response into 4-word groups rather than using provider-native token streaming. This is by design per the plan.)*
+1. **SSE Streaming**: Backend `POST /coaching/chat/stream` endpoint delivers chunked SSE events. Frontend `sendMessageStream()` parses them and renders via `StreamingBubble`. Fallback to `sendMessage()` on failure. *(Note: Streaming is simulated - backend chunks the complete LLM response into 4-word groups rather than using provider-native token streaming. This is by design per the plan.)*
 
 2. **Persona Picker + Persistence**: Settings screen has default coach selector. Chat screen has in-conversation `PersonaSwitcher`. `User.default_persona_id` persisted via API round-trip. New conversations initialize from saved preference.
 

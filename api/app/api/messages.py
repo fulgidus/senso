@@ -1,14 +1,14 @@
 """
-E2E Messaging API — Phase 14
+E2E Messaging API - Phase 14
 
 Endpoints:
-  POST /messages/send — store encrypted blob for recipient hashes
-  POST /messages/poll — pull and deliver pending messages for authenticated user
+  POST /messages/send - store encrypted blob for recipient hashes
+  POST /messages/poll - pull and deliver pending messages for authenticated user
 
 Zero-knowledge design:
-  - Recipient identity is anchored to sha256($username) — no user_id FK in messaging tables
+  - Recipient identity is anchored to sha256($username) - no user_id FK in messaging tables
   - Server computes the caller's hash from their authenticated username (never from client input)
-  - Payload content is not inspected — server handles encrypted blobs only
+  - Payload content is not inspected - server handles encrypted blobs only
 """
 
 from __future__ import annotations
@@ -117,7 +117,7 @@ def send_message(
     - A !handle cleartext string matching a known admin_handle.
 
     Returns 422 if any hash/handle is unknown.
-    Payload size is computed server-side — no client-supplied value is trusted.
+    Payload size is computed server-side - no client-supplied value is trusted.
     """
     known_hashes = get_all_recipient_hashes(db)
     known_handles = get_admin_handles(db)
@@ -167,7 +167,7 @@ def poll_messages(
 ) -> list[PolledMessage]:
     """Pull and deliver all pending messages for the authenticated user.
 
-    Server computes sha256($caller_username) internally — client sends nothing extra.
+    Server computes sha256($caller_username) internally - client sends nothing extra.
 
     Delivery loop (D-08):
     1. Find undelivered_messages WHERE caller_hash = ANY(recipient_hashes)

@@ -1,4 +1,4 @@
-"""Tests for messaging API repository helpers — Phase 14."""
+"""Tests for messaging API repository helpers - Phase 14."""
 from __future__ import annotations
 
 import hashlib

@@ -276,7 +276,7 @@ export type UserProfile = {
     confirmed: boolean
     profileGeneratedAt: string | null
     updatedAt: string
-    /** TODO-7: income range fields — null when income is fixed (min == max) */
+    /** TODO-7: income range fields - null when income is fixed (min == max) */
     incomeMin?: number | null
     /** Upper bound of the monthly income range (e.g. base + variable parts). */
     incomeMax?: number | null

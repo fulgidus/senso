@@ -16,8 +16,8 @@ Research covers four technical domains: `StringEncryptedType`/AesGcmEngine API, 
 
 ### Key Findings
 
-- `EncryptedType` is **deprecated since 0.36.6** — use `StringEncryptedType` instead.
-- `sqlalchemy-utils` is **NOT** in `api/pyproject.toml` — must be added as a dependency.
+- `EncryptedType` is **deprecated since 0.36.6** - use `StringEncryptedType` instead.
+- `sqlalchemy-utils` is **NOT** in `api/pyproject.toml` - must be added as a dependency.
 - `cryptography` library (already a transitive dep via other packages, but should be explicit) is required.
 
 ### Correct Import + Usage
@@ -26,16 +26,16 @@ Research covers four technical domains: `StringEncryptedType`/AesGcmEngine API, 
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesGcmEngine
 
-# T2 — server-wide key (static callable or string)
+# T2 - server-wide key (static callable or string)
 description = Column(StringEncryptedType(String(1024), lambda: get_settings().encryption_key, AesGcmEngine))
 
-# T1/T3 — per-user key (callable injected at query time via column_property)
+# T1/T3 - per-user key (callable injected at query time via column_property)
 raw_text = Column(StringEncryptedType(Text, _get_user_key, AesGcmEngine))
 ```
 
 ### Critical Constraint: Per-User Keys with SQLAlchemy ORM
 
-`StringEncryptedType` accepts a **callable** for `key`. However, this callable is **not request-scoped** — it is called at column processing time without FastAPI context.
+`StringEncryptedType` accepts a **callable** for `key`. However, this callable is **not request-scoped** - it is called at column processing time without FastAPI context.
 
 **Recommended approach for T1/T3:** Use a **module-level context variable** (Python `contextvars.ContextVar`) to hold the unwrapped user key for the duration of a request:
 
@@ -63,11 +63,11 @@ Then `StringEncryptedType(Text, get_user_key, AesGcmEngine)` will call `get_user
 ```
 base64(iv_12_bytes + tag_16_bytes + ciphertext_N_bytes)
 ```
-Random IV per encrypt call. No search possible on encrypted columns (acceptable — no searches on T1/T3 fields).
+Random IV per encrypt call. No search possible on encrypted columns (acceptable - no searches on T1/T3 fields).
 
 ### sqlalchemy-utils JSON column support
 
-`StringEncryptedType(JSONType, key, AesGcmEngine)` — encrypts JSON columns (for `insight_cards`, `income_summary`, etc.). The `JSONType` is also from `sqlalchemy_utils`.
+`StringEncryptedType(JSONType, key, AesGcmEngine)` - encrypts JSON columns (for `insight_cards`, `income_summary`, etc.). The `JSONType` is also from `sqlalchemy_utils`.
 
 ### Dependencies to Add
 
@@ -127,7 +127,7 @@ user_data_key = aesgcm2.decrypt(nonce2, ct, None)  # raises InvalidTag if wrong 
 
 ### OAuth Users (no password)
 
-For Google OAuth users: wrap with `PBKDF2(server_secret + user_id)` — effectively server-held key. Same interface, falls back gracefully when user has no password.
+For Google OAuth users: wrap with `PBKDF2(server_secret + user_id)` - effectively server-held key. Same interface, falls back gracefully when user has no password.
 
 ```python
 server_wrapping_material = (settings.jwt_secret + user.id).encode()
@@ -138,7 +138,7 @@ server_wrapping_material = (settings.jwt_secret + user.id).encode()
 **Pattern for `_add_missing_columns()`:**
 1. Add new columns (`encrypted_user_key`, `pbkdf2_salt`, `strict_privacy_mode`) with `IF NOT EXISTS`
 2. For existing rows without `encrypted_user_key`: generate a fresh data key, wrap with server secret fallback (same as OAuth path), store. This leaves existing **data columns** as plaintext.
-3. Plaintext → ciphertext column migration: requires reading each row, encrypting values, writing back. For MVP, **defer the column migration** — new writes will be encrypted; existing plaintext reads should be gracefully handled (detect non-base64 format → return as-is).
+3. Plaintext → ciphertext column migration: requires reading each row, encrypting values, writing back. For MVP, **defer the column migration** - new writes will be encrypted; existing plaintext reads should be gracefully handled (detect non-base64 format → return as-is).
 
 ---
 
@@ -154,7 +154,7 @@ kwargs_init["default_headers"] = {"openai-beta": "no-store"}
 
 This tells OpenAI not to store the request for training/improvement. Documented in OpenAI API policies.
 
-### OpenRouter — ZDR (Zero Data Retention)
+### OpenRouter - ZDR (Zero Data Retention)
 
 **OpenRouter does NOT use HTTP headers for ZDR.** The correct mechanism is a `provider` parameter in the request body:
 
@@ -164,8 +164,8 @@ call_kwargs["extra_body"] = {"provider": {"zdr": True}}
 
 Using the OpenAI Python SDK with `base_url="https://openrouter.ai/api/v1"`:
 - `client.chat.completions.create(**call_kwargs, extra_body={"provider": {"zdr": True}})` routes only to ZDR-compliant endpoints.
-- **Warning:** When `zdr=True`, some models/endpoints may be excluded from the eligible pool. For strict mode only — do not set globally.
-- For **standard mode** (best-effort): OpenRouter `default_headers` can include `X-Title` and `HTTP-Referer` (app attribution), but there is no best-effort no-retention header — the `openai-beta: no-store` header does **not** apply to OpenRouter.
+- **Warning:** When `zdr=True`, some models/endpoints may be excluded from the eligible pool. For strict mode only - do not set globally.
+- For **standard mode** (best-effort): OpenRouter `default_headers` can include `X-Title` and `HTTP-Referer` (app attribution), but there is no best-effort no-retention header - the `openai-beta: no-store` header does **not** apply to OpenRouter.
 
 ### Gemini
 
@@ -234,42 +234,42 @@ The following validation tests should be created as part of implementation:
 
 ### Backend Tests
 
-| Test | File | What It Checks |
-| ---- | ---- | -------------- |
-| T2 encrypt roundtrip | `api/tests/test_encryption.py` | `StringEncryptedType(JSONType, key, AesGcmEngine)` encrypts and decrypts `insight_cards` correctly |
-| T1 encrypt roundtrip | `api/tests/test_encryption.py` | Manual AES-GCM encrypt/decrypt for `raw_text` with per-user key |
-| PBKDF2 wrap/unwrap | `api/tests/test_crypto.py` | `wrap_user_key(password, salt) → unwrap_user_key(password, salt) == original_key` |
-| No-retention header | `api/tests/test_llm_noretention.py` | OpenAI client constructed with `default_headers["openai-beta"] == "no-store"` |
-| Strict mode ZDR | `api/tests/test_llm_noretention.py` | `extra_body["provider"]["zdr"] == True` injected for openrouter in strict mode |
-| `strict_privacy_mode` schema | `api/tests/test_auth.py` | `PATCH /auth/me` with `strict_privacy_mode=true` persists correctly |
-| Column migration idempotent | `api/tests/test_session.py` | `_add_missing_columns()` runs twice without error |
+| Test                         | File                                | What It Checks                                                                                     |
+| ---------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| T2 encrypt roundtrip         | `api/tests/test_encryption.py`      | `StringEncryptedType(JSONType, key, AesGcmEngine)` encrypts and decrypts `insight_cards` correctly |
+| T1 encrypt roundtrip         | `api/tests/test_encryption.py`      | Manual AES-GCM encrypt/decrypt for `raw_text` with per-user key                                    |
+| PBKDF2 wrap/unwrap           | `api/tests/test_crypto.py`          | `wrap_user_key(password, salt) → unwrap_user_key(password, salt) == original_key`                  |
+| No-retention header          | `api/tests/test_llm_noretention.py` | OpenAI client constructed with `default_headers["openai-beta"] == "no-store"`                      |
+| Strict mode ZDR              | `api/tests/test_llm_noretention.py` | `extra_body["provider"]["zdr"] == True` injected for openrouter in strict mode                     |
+| `strict_privacy_mode` schema | `api/tests/test_auth.py`            | `PATCH /auth/me` with `strict_privacy_mode=true` persists correctly                                |
+| Column migration idempotent  | `api/tests/test_session.py`         | `_add_missing_columns()` runs twice without error                                                  |
 
 ### Frontend Tests
 
-| Test | What It Checks |
-| ---- | -------------- |
-| `/about` renders without auth | `AboutPage` loads with i18n content, no 401 |
-| Privacy toggle in Settings | `strict_privacy_mode` toggle calls `PATCH /auth/me` |
+| Test                          | What It Checks                                      |
+| ----------------------------- | --------------------------------------------------- |
+| `/about` renders without auth | `AboutPage` loads with i18n content, no 401         |
+| Privacy toggle in Settings    | `strict_privacy_mode` toggle calls `PATCH /auth/me` |
 
 ---
 
 ## Common Pitfalls
 
-1. **`EncryptedType` is deprecated** — always use `StringEncryptedType` from `sqlalchemy_utils`.
+1. **`EncryptedType` is deprecated** - always use `StringEncryptedType` from `sqlalchemy_utils`.
 2. **JSON columns need `JSONType`** from `sqlalchemy_utils` as the inner type, not `sa.JSON`.
-3. **No header for OpenRouter ZDR** — use `extra_body={"provider": {"zdr": True}}` in `call_kwargs`, not in `kwargs_init`.
-4. **`openai-beta: no-store` only applies to OpenAI direct** — OpenRouter ignores this header.
-5. **PBKDF2 iterations minimum 600,000** for SHA-256 (OWASP 2024) — not 100,000 (old default).
-6. **Don't hold ORM session + DDL on same table** — `_add_missing_columns()` uses raw `engine.connect()` with `sa.text()`, then session-level ORM for data reads. Never mix.
-7. **`frozen=True` dataclass** — `Settings` cannot be mutated; `encryption_key` field must be in `get_settings()` factory, not injected post-construction.
-8. **`AesGcmEngine` stores as String** — underlying `impl = String`. Column type in Postgres is `TEXT`. Existing `Text` columns stay `Text`, just with new encrypted values written.
+3. **No header for OpenRouter ZDR** - use `extra_body={"provider": {"zdr": True}}` in `call_kwargs`, not in `kwargs_init`.
+4. **`openai-beta: no-store` only applies to OpenAI direct** - OpenRouter ignores this header.
+5. **PBKDF2 iterations minimum 600,000** for SHA-256 (OWASP 2024) - not 100,000 (old default).
+6. **Don't hold ORM session + DDL on same table** - `_add_missing_columns()` uses raw `engine.connect()` with `sa.text()`, then session-level ORM for data reads. Never mix.
+7. **`frozen=True` dataclass** - `Settings` cannot be mutated; `encryption_key` field must be in `get_settings()` factory, not injected post-construction.
+8. **`AesGcmEngine` stores as String** - underlying `impl = String`. Column type in Postgres is `TEXT`. Existing `Text` columns stay `Text`, just with new encrypted values written.
 
 ---
 
 ## Dependencies Summary
 
 ```toml
-# api/pyproject.toml — new additions
+# api/pyproject.toml - new additions
 "sqlalchemy-utils>=0.41.2",
 "cryptography>=42.0.0",
 ```

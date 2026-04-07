@@ -8,7 +8,7 @@ files: []
 
 ## Problem
 
-The mentor/coach can render different and weird content surfaces beyond text that are being misused. The set of renderable content types needs to be rationalized — there are too many different surfaces, and the LLM sometimes generates content for surfaces that don't render well or aren't appropriate for the context.
+The mentor/coach can render different and weird content surfaces beyond text that are being misused. The set of renderable content types needs to be rationalized - there are too many different surfaces, and the LLM sometimes generates content for surfaces that don't render well or aren't appropriate for the context.
 
 ## Solution
 

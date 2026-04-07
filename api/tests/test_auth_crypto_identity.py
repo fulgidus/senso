@@ -1,4 +1,4 @@
-"""Integration tests — Phase 13 crypto identity fields at signup."""
+"""Integration tests - Phase 13 crypto identity fields at signup."""
 import base64
 import re
 import pytest
@@ -41,7 +41,7 @@ def test_signup_returns_public_keys(client):
 def test_private_key_blobs_in_dto(client):
     """Phase 15: Encrypted private key blobs ARE returned in UserDTO so the
     client can perform client-side decryption. The blobs are only decryptable
-    by the user with their password — safe to return to the authenticated user."""
+    by the user with their password - safe to return to the authenticated user."""
     resp = _signup(client, "p13_user3@example.com")
     assert resp.status_code in (200, 201)
     user = resp.json()["user"]

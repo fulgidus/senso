@@ -16,13 +16,13 @@ created: 2026-03-31
 
 ## Design System
 
-| Property          | Value                                                            |
-| ----------------- | ---------------------------------------------------------------- |
-| Tool              | shadcn (radix-vega style)                                        |
-| Preset            | `style: radix-vega`, `baseColor: olive`, `cssVariables: true`   |
-| Component library | radix-ui (via shadcn)                                            |
-| Icon library      | lucide-react                                                     |
-| Font              | Geist Variable (`@fontsource-variable/geist`)                    |
+| Property          | Value                                                         |
+| ----------------- | ------------------------------------------------------------- |
+| Tool              | shadcn (radix-vega style)                                     |
+| Preset            | `style: radix-vega`, `baseColor: olive`, `cssVariables: true` |
+| Component library | radix-ui (via shadcn)                                         |
+| Icon library      | lucide-react                                                  |
+| Font              | Geist Variable (`@fontsource-variable/geist`)                 |
 
 > Source: `senso/components.json` + `senso/src/index.css` (confirmed via `npx shadcn info`)
 
@@ -34,18 +34,18 @@ Declared values (must be multiples of 4):
 
 | Token | Value | Usage                                                                 |
 | ----- | ----- | --------------------------------------------------------------------- |
-| xs    | 4px   | Icon gaps, inline badges, tight label offsets                        |
-| sm    | 8px   | Compact element spacing, section header gaps                         |
-| md    | 16px  | Default element spacing, card content padding baseline               |
-| lg    | 24px  | Card internal padding (`p-6`), section vertical rhythm               |
-| xl    | 32px  | Page vertical gap between card sections (`space-y-8`)                |
-| 2xl   | 48px  | Top/bottom page padding (`py-10` on Settings screen → 40px, round up)|
-| 3xl   | 64px  | Reserved for major layout breaks (not used in this phase)            |
+| xs    | 4px   | Icon gaps, inline badges, tight label offsets                         |
+| sm    | 8px   | Compact element spacing, section header gaps                          |
+| md    | 16px  | Default element spacing, card content padding baseline                |
+| lg    | 24px  | Card internal padding (`p-6`), section vertical rhythm                |
+| xl    | 32px  | Page vertical gap between card sections (`space-y-8`)                 |
+| 2xl   | 48px  | Top/bottom page padding (`py-10` on Settings screen → 40px, round up) |
+| 3xl   | 64px  | Reserved for major layout breaks (not used in this phase)             |
 
 **Exceptions:**
-- Toggle switches (privacy mode, voice auto-listen): `h-6 w-11` (24×44px) — touch target exception for switch thumb; matches the existing auto-listen toggle pattern from SettingsScreen.
-- Privacy badge in chat header: `px-2 py-1` (8×4px) — intentionally compact inline badge.
-- Settings page max-width container: `max-w-2xl` (672px) — inherits from `SettingsScreen` pattern.
+- Toggle switches (privacy mode, voice auto-listen): `h-6 w-11` (24×44px) - touch target exception for switch thumb; matches the existing auto-listen toggle pattern from SettingsScreen.
+- Privacy badge in chat header: `px-2 py-1` (8×4px) - intentionally compact inline badge.
+- Settings page max-width container: `max-w-2xl` (672px) - inherits from `SettingsScreen` pattern.
 
 > Source: `SettingsScreen.tsx` + `index.css` analyzed patterns.
 
@@ -53,20 +53,20 @@ Declared values (must be multiples of 4):
 
 ## Typography
 
-| Role    | Size  | Weight          | Line Height |
-| ------- | ----- | --------------- | ----------- |
-| Body    | 16px  | 400 (regular)   | 1.5         |
-| Label   | 14px  | 400 (regular)   | 1.5         |
-| Heading | 20px  | 600 (semibold)  | 1.2         |
-| Display | 24px  | 600 (semibold)  | 1.2         |
+| Role    | Size | Weight         | Line Height |
+| ------- | ---- | -------------- | ----------- |
+| Body    | 16px | 400 (regular)  | 1.5         |
+| Label   | 14px | 400 (regular)  | 1.5         |
+| Heading | 20px | 600 (semibold) | 1.2         |
+| Display | 24px | 600 (semibold) | 1.2         |
 
 **Notes:**
 - Body 16px / 400 / 1.5 is set globally in `index.css` (`body { font-size: 16px; line-height: 1.5 }`). Do not override.
-- Page title (About page `<h1>` and Settings section `<h1>`) uses Display: `text-2xl font-semibold` — size difference (24px vs 20px) provides hierarchy without a third weight tier.
-- Section headings (`<h2>` inside cards) use Heading: `text-xl font-semibold` — exact match to SettingsScreen card headers.
-- Sub-body descriptions and legal disclaimers use Label: `text-sm text-muted-foreground` — matches the `settings.subtitle` + card body patterns; muted color provides sufficient visual de-emphasis without a 5th size tier.
+- Page title (About page `<h1>` and Settings section `<h1>`) uses Display: `text-2xl font-semibold` - size difference (24px vs 20px) provides hierarchy without a third weight tier.
+- Section headings (`<h2>` inside cards) use Heading: `text-xl font-semibold` - exact match to SettingsScreen card headers.
+- Sub-body descriptions and legal disclaimers use Label: `text-sm text-muted-foreground` - matches the `settings.subtitle` + card body patterns; muted color provides sufficient visual de-emphasis without a 5th size tier.
 
-> Source: `SettingsScreen.tsx` line 94–95, `index.css` lines 128–131.
+> Source: `SettingsScreen.tsx` line 94-95, `index.css` lines 128-131.
 
 ---
 
@@ -74,26 +74,26 @@ Declared values (must be multiples of 4):
 
 Light mode palette extracted from `senso/src/index.css`:
 
-| Role            | Value (light / dark)          | Usage                                                       |
-| --------------- | ----------------------------- | ----------------------------------------------------------- |
-| Dominant (60%)  | `#F9F7F7` / `#112D4E`         | Page background, card backgrounds, primary surfaces         |
-| Secondary (30%) | `#DBE2EF` / `#1a3a5c`         | Card backgrounds (`--card`), borders, inputs, sidebar       |
-| Accent (10%)    | `#3F72AF` / `#5B9BD5`         | Reserved for: Primary CTA button, toggle-on state (privacy mode switch), active nav links, privacy badge background, focus ring |
-| Destructive     | `#112D4E` (lgt) / `oklch(0.704 0.191 22.216)` (dark) | Sign-out section background tint, destructive-only confirm buttons |
+| Role            | Value (light / dark)                                 | Usage                                                                                                                           |
+| --------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Dominant (60%)  | `#F9F7F7` / `#112D4E`                                | Page background, card backgrounds, primary surfaces                                                                             |
+| Secondary (30%) | `#DBE2EF` / `#1a3a5c`                                | Card backgrounds (`--card`), borders, inputs, sidebar                                                                           |
+| Accent (10%)    | `#3F72AF` / `#5B9BD5`                                | Reserved for: Primary CTA button, toggle-on state (privacy mode switch), active nav links, privacy badge background, focus ring |
+| Destructive     | `#112D4E` (lgt) / `oklch(0.704 0.191 22.216)` (dark) | Sign-out section background tint, destructive-only confirm buttons                                                              |
 
 **Accent reserved for specific elements (Phase 10):**
-1. "Attiva modalità privacy" / "Abilita Strict Privacy Mode" — primary button fill
+1. "Attiva modalità privacy" / "Abilita Strict Privacy Mode" - primary button fill
 2. Privacy mode toggle switch thumb when `checked=true` (`bg-primary`)
 3. Privacy badge in ChatScreen header when strict mode is active
 4. Section heading link color in About page (if any interactive anchor)
 5. Focus rings on all interactive elements (`focus:ring-primary`)
 
 **Semantic colors for this phase:**
-- Privacy badge: use `bg-primary text-primary-foreground` — inherits accent
-- Privacy active state notification text: `text-primary` (same as "save success" green fallback is not used here — privacy confirmation uses primary, not green)
-- Warning/info for disabled TTS in strict mode: `text-muted-foreground` with `bg-muted` pill — no new semantic color introduced
+- Privacy badge: use `bg-primary text-primary-foreground` - inherits accent
+- Privacy active state notification text: `text-primary` (same as "save success" green fallback is not used here - privacy confirmation uses primary, not green)
+- Warning/info for disabled TTS in strict mode: `text-muted-foreground` with `bg-muted` pill - no new semantic color introduced
 
-> Source: `index.css` lines 51–121. No new CSS variables introduced in this phase — all color references use existing tokens.
+> Source: `index.css` lines 51-121. No new CSS variables introduced in this phase - all color references use existing tokens.
 
 ---
 
@@ -106,20 +106,20 @@ Light mode palette extracted from `senso/src/index.css`:
 - Layout: `PublicShell` wrapper (reuse from `AppShell.tsx`)
 - Structure: single scrollable column, `max-w-2xl mx-auto px-6 py-10`
 - Content sections (6 cards, each `rounded-2xl border border-border bg-card p-6 space-y-3`):
-  1. **Cos'è S.E.N.S.O.** — icon + heading + 2-3 sentence body
-  2. **Come funziona** — numbered step list (upload → profilo → chiedi → risposta → impara/agisci), each step uses `text-sm`
-  3. **Cosa conserviamo** — 3-tier table or bullet list describing data tiers in plain language (NO technical encryption jargon — just "tuoi documenti", "le tue conversazioni", "dati anonimi aggregati")
-  4. **Come usiamo l'AI** — plain statement, no provider names. Forward-looking RAG note per D-03.
-  5. **Sicurezza & limiti** — persona governance, what AI won't do (no investment picking, no financial advice)
-  6. **Disclaimer legale** — educational only, not financial advice, `text-xs text-muted-foreground`
+  1. **Cos'è S.E.N.S.O.** - icon + heading + 2-3 sentence body
+  2. **Come funziona** - numbered step list (upload → profilo → chiedi → risposta → impara/agisci), each step uses `text-sm`
+  3. **Cosa conserviamo** - 3-tier table or bullet list describing data tiers in plain language (NO technical encryption jargon - just "tuoi documenti", "le tue conversazioni", "dati anonimi aggregati")
+  4. **Come usiamo l'AI** - plain statement, no provider names. Forward-looking RAG note per D-03.
+  5. **Sicurezza & limiti** - persona governance, what AI won't do (no investment picking, no financial advice)
+  6. **Disclaimer legale** - educational only, not financial advice, `text-xs text-muted-foreground`
 - NO API calls. All strings from `it.json` / `en.json` under `about.*` keys.
 
 #### 2. Settings > Privacy Section (extend `SettingsScreen.tsx`)
 - New `<section>` card inserted BEFORE the "App info" card and AFTER "Appearance"
 - Card: `rounded-2xl border border-border bg-card p-6 space-y-4`
 - Contains:
-  - Section heading: `<h2 className="text-base font-semibold">` — "Privacy"
-  - Description paragraph: `text-sm text-muted-foreground` — plain-language tradeoff explanation (TTS disabled, provider restriction)
+  - Section heading: `<h2 className="text-base font-semibold">` - "Privacy"
+  - Description paragraph: `text-sm text-muted-foreground` - plain-language tradeoff explanation (TTS disabled, provider restriction)
   - Toggle row: label + hint on left, switch on right (identical HTML pattern to `voiceAutoListen` toggle)
   - When toggle is ON: show a `text-xs text-primary` confirmation note ("Modalità privacy attiva. Funzionalità vocali disabilitate.")
   - Settings > About subsection: simple link card with `<h2>` + description + `<a>` or `<Link to="/about">` with `text-sm font-medium text-primary` styling
@@ -127,8 +127,8 @@ Light mode palette extracted from `senso/src/index.css`:
 #### 3. Privacy Badge in `ChatScreen`
 - Appears in chat header area when `strict_privacy_mode = true`
 - Inline badge: `inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs font-medium px-2 py-1`
-- Uses `ShieldCheck` icon from lucide-react (h-3 w-3) — already imported in `AppShell.tsx`
-- Copy: "Modalità privacy" (it) / "Privacy mode" (en) — short label only in header; tooltip/popover with full explanation on hover/click (optional, implementation agent's discretion)
+- Uses `ShieldCheck` icon from lucide-react (h-3 w-3) - already imported in `AppShell.tsx`
+- Copy: "Modalità privacy" (it) / "Privacy mode" (en) - short label only in header; tooltip/popover with full explanation on hover/click (optional, implementation agent's discretion)
 
 #### 4. TTS Disabled Notice (inside `ChatScreen` voice area)
 - When `strict_privacy_mode = true` and user taps the mic/play button:
@@ -137,10 +137,10 @@ Light mode palette extracted from `senso/src/index.css`:
 - Copy per CONTEXT.md D-13 specifics (see Copywriting Contract below)
 
 ### Reused Components (unchanged)
-- `Button` (shadcn) — primary variant for Save, outline for secondary CTAs
-- `PublicShell` — wraps `/about` public route
-- `AppShell` — wraps in-app Settings > About access
-- Toggle switch pattern from `SettingsScreen.tsx` (inline `<button role="switch">` — no new shadcn switch component needed)
+- `Button` (shadcn) - primary variant for Save, outline for secondary CTAs
+- `PublicShell` - wraps `/about` public route
+- `AppShell` - wraps in-app Settings > About access
+- Toggle switch pattern from `SettingsScreen.tsx` (inline `<button role="switch">` - no new shadcn switch component needed)
 - `ShieldCheck` from lucide-react (already imported)
 
 ---
@@ -155,27 +155,27 @@ PublicShell (sticky header: logo + lang switcher + login CTA)
     └── div.mx-auto.w-full.max-w-2xl.px-6.py-10.space-y-8
         ├── section (page header): h1 (Display) + subtitle (Label)
         ├── section.card (Cos'è S.E.N.S.O.)
-        ├── section.card (Come funziona — step list)
-        ├── section.card (Cosa conserviamo — data tiers)
+        ├── section.card (Come funziona - step list)
+        ├── section.card (Cosa conserviamo - data tiers)
         ├── section.card (Come usiamo l'AI)
         ├── section.card (Sicurezza & limiti)
-        └── section.card (Disclaimer legale — bg-muted/5 or plain bg-card, text-xs)
+        └── section.card (Disclaimer legale - bg-muted/5 or plain bg-card, text-xs)
 ```
 
 ### `Settings > Privacy` (new section in SettingsScreen)
 
 ```
 div.mx-auto.w-full.max-w-2xl.px-6.py-10.space-y-8 (existing container)
-    ├── section (Account) — existing
-    ├── section (Voice / Coach) — existing
-    ├── section (Appearance) — existing
+    ├── section (Account) - existing
+    ├── section (Voice / Coach) - existing
+    ├── section (Appearance) - existing
     ├── section.card (Privacy) ← NEW
     │   ├── h2 "Privacy"
     │   ├── p (description of tradeoffs)
     │   ├── toggle row (Strict Privacy Mode)
-    │   └── active-state note (conditional — shown when ON)
+    │   └── active-state note (conditional - shown when ON)
     ├── section.card (Informazioni > link to /about) ← NEW sub-section inside existing "App info" OR separate card
-    └── section (Sign out) — existing
+    └── section (Sign out) - existing
 ```
 
 ---
@@ -185,45 +185,45 @@ div.mx-auto.w-full.max-w-2xl.px-6.py-10.space-y-8 (existing container)
 All copy delivered in Italian first (`it.json`). English mirrors in `en.json`.
 i18n keys use dot notation under top-level `about.*` and extended `settings.*`.
 
-| Element                        | Italian Copy (i18n key)                                                                                                   |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| About page `<h1>`              | `about.pageTitle` → "Come funziona S.E.N.S.O."                                                                           |
-| About page subtitle            | `about.pageSubtitle` → "Trasparenza, dati e intelligenza artificiale — spiegati semplicemente."                           |
-| Section 1 heading              | `about.whatTitle` → "Cos'è S.E.N.S.O.?"                                                                                  |
-| Section 1 body                 | `about.whatBody` → "S.E.N.S.O. è un assistente educativo per aiutarti a prendere decisioni finanziarie più consapevoli. Non è un consulente finanziario." |
-| Section 2 heading              | `about.howTitle` → "Come funziona"                                                                                        |
-| Section 2 step 1               | `about.howStep1` → "Carica i tuoi documenti finanziari (estratti conto, buste paga)"                                     |
-| Section 2 step 2               | `about.howStep2` → "Il sistema costruisce il tuo profilo finanziario personale"                                          |
-| Section 2 step 3               | `about.howStep3` → "Fai una domanda — anche in voce"                                                                     |
-| Section 2 step 4               | `about.howStep4` → "Ricevi una risposta basata sui tuoi numeri reali"                                                    |
-| Section 2 step 5               | `about.howStep5` → "Esplora risorse educative e azioni concrete"                                                         |
-| Section 3 heading              | `about.dataTitle` → "Cosa conserviamo"                                                                                   |
-| Section 3 tier 1               | `about.dataTier1` → "I tuoi documenti e le tue conversazioni — conservati in modo cifrato, accessibili solo a te"        |
-| Section 3 tier 2               | `about.dataTier2` → "I dati di utilizzo aggregati (categorie di spesa, statistiche) — usati per migliorare il servizio"  |
-| Section 3 tier 3               | `about.dataTier3` → "I tuoi dati identificativi (nome, email) — conservati in modo cifrato"                              |
-| Section 4 heading              | `about.aiTitle` → "Come usiamo l'intelligenza artificiale"                                                               |
+| Element                        | Italian Copy (i18n key)                                                                                                                                                                                                                                                                                          |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| About page `<h1>`              | `about.pageTitle` → "Come funziona S.E.N.S.O."                                                                                                                                                                                                                                                                   |
+| About page subtitle            | `about.pageSubtitle` → "Trasparenza, dati e intelligenza artificiale - spiegati semplicemente."                                                                                                                                                                                                                  |
+| Section 1 heading              | `about.whatTitle` → "Cos'è S.E.N.S.O.?"                                                                                                                                                                                                                                                                          |
+| Section 1 body                 | `about.whatBody` → "S.E.N.S.O. è un assistente educativo per aiutarti a prendere decisioni finanziarie più consapevoli. Non è un consulente finanziario."                                                                                                                                                        |
+| Section 2 heading              | `about.howTitle` → "Come funziona"                                                                                                                                                                                                                                                                               |
+| Section 2 step 1               | `about.howStep1` → "Carica i tuoi documenti finanziari (estratti conto, buste paga)"                                                                                                                                                                                                                             |
+| Section 2 step 2               | `about.howStep2` → "Il sistema costruisce il tuo profilo finanziario personale"                                                                                                                                                                                                                                  |
+| Section 2 step 3               | `about.howStep3` → "Fai una domanda - anche in voce"                                                                                                                                                                                                                                                             |
+| Section 2 step 4               | `about.howStep4` → "Ricevi una risposta basata sui tuoi numeri reali"                                                                                                                                                                                                                                            |
+| Section 2 step 5               | `about.howStep5` → "Esplora risorse educative e azioni concrete"                                                                                                                                                                                                                                                 |
+| Section 3 heading              | `about.dataTitle` → "Cosa conserviamo"                                                                                                                                                                                                                                                                           |
+| Section 3 tier 1               | `about.dataTier1` → "I tuoi documenti e le tue conversazioni - conservati in modo cifrato, accessibili solo a te"                                                                                                                                                                                                |
+| Section 3 tier 2               | `about.dataTier2` → "I dati di utilizzo aggregati (categorie di spesa, statistiche) - usati per migliorare il servizio"                                                                                                                                                                                          |
+| Section 3 tier 3               | `about.dataTier3` → "I tuoi dati identificativi (nome, email) - conservati in modo cifrato"                                                                                                                                                                                                                      |
+| Section 4 heading              | `about.aiTitle` → "Come usiamo l'intelligenza artificiale"                                                                                                                                                                                                                                                       |
 | Section 4 body                 | `about.aiBody` → "Usiamo tecnologia AI per analizzare i tuoi documenti e generare risposte personalizzate. Non condividiamo i tuoi dati con i fornitori AI per l'addestramento dei modelli. Puoi attivare la Modalità privacy nelle Impostazioni per limitare l'AI solo ai fornitori con garanzia contrattuale." |
-| Section 4 future note          | `about.aiFootnote` → "Nelle versioni future, prevediamo di introdurre tecniche di recupero intelligente (RAG) per garantire un'elaborazione ancora più sicura e isolata per utente." |
-| Section 5 heading              | `about.safetyTitle` → "Sicurezza e limiti"                                                                               |
-| Section 5 body                 | `about.safetyBody` → "Il coach non fornisce consigli di investimento, non gestisce denaro e non conosce i mercati finanziari. È un educatore, non un broker." |
-| Section 5 no-data-retention    | `about.safetyRetention` → "Chiediamo ai fornitori AI di non usare i tuoi dati per addestrare i propri modelli. Alcuni fornitori lo garantiscono contrattualmente." |
-| Section 6 heading              | `about.legalTitle` → "Avviso legale"                                                                                     |
-| Section 6 body                 | `about.legalBody` → "S.E.N.S.O. è uno strumento educativo. Non fornisce consulenza finanziaria professionale, fiscale o legale. Le decisioni finanziarie sono di esclusiva responsabilità dell'utente." |
-| Settings Privacy section h2    | `settings.privacyTitle` → "Privacy"                                                                                      |
-| Settings Privacy description   | `settings.privacyDescription` → "La Modalità privacy restringe l'AI ai soli fornitori con garanzia di non utilizzo dei dati per l'addestramento. Le funzionalità vocali (ElevenLabs) vengono disabilitate."  |
-| Privacy toggle label           | `settings.strictPrivacyMode` → "Modalità privacy"                                                                        |
-| Privacy toggle hint            | `settings.strictPrivacyModeHint` → "Limita l'AI ai fornitori verificati. Disabilita la voce ElevenLabs."                 |
-| Privacy ON confirmation note   | `settings.strictPrivacyModeActive` → "Modalità privacy attiva. Le funzionalità vocali sono disabilitate."                |
-| Settings About link label      | `settings.aboutTitle` → "Informazioni e trasparenza"                                                                     |
-| Settings About link hint       | `settings.aboutHint` → "Scopri come funziona S.E.N.S.O., cosa conserviamo e come usiamo l'AI."                           |
-| Settings About link CTA        | `settings.aboutCta` → "Leggi come funziona"                                                                              |
-| Chat privacy badge label       | `chat.privacyBadge` → "Modalità privacy"                                                                                 |
-| TTS disabled notice            | `chat.ttsDisabledStrict` → "Modalità privacy attiva — le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce." |
-| Primary CTA (About from nav)   | `nav.about` → "Informazioni"                                                                                             |
-| Error: settings save fails     | Reuse existing `settings.saveError` → "Errore durante il salvataggio. Riprova."                                          |
-| Error: strict mode fetch fails | `settings.strictPrivacyLoadError` → "Impossibile caricare le preferenze privacy. Riprova."                               |
+| Section 4 future note          | `about.aiFootnote` → "Nelle versioni future, prevediamo di introdurre tecniche di recupero intelligente (RAG) per garantire un'elaborazione ancora più sicura e isolata per utente."                                                                                                                             |
+| Section 5 heading              | `about.safetyTitle` → "Sicurezza e limiti"                                                                                                                                                                                                                                                                       |
+| Section 5 body                 | `about.safetyBody` → "Il coach non fornisce consigli di investimento, non gestisce denaro e non conosce i mercati finanziari. È un educatore, non un broker."                                                                                                                                                    |
+| Section 5 no-data-retention    | `about.safetyRetention` → "Chiediamo ai fornitori AI di non usare i tuoi dati per addestrare i propri modelli. Alcuni fornitori lo garantiscono contrattualmente."                                                                                                                                               |
+| Section 6 heading              | `about.legalTitle` → "Avviso legale"                                                                                                                                                                                                                                                                             |
+| Section 6 body                 | `about.legalBody` → "S.E.N.S.O. è uno strumento educativo. Non fornisce consulenza finanziaria professionale, fiscale o legale. Le decisioni finanziarie sono di esclusiva responsabilità dell'utente."                                                                                                          |
+| Settings Privacy section h2    | `settings.privacyTitle` → "Privacy"                                                                                                                                                                                                                                                                              |
+| Settings Privacy description   | `settings.privacyDescription` → "La Modalità privacy restringe l'AI ai soli fornitori con garanzia di non utilizzo dei dati per l'addestramento. Le funzionalità vocali (ElevenLabs) vengono disabilitate."                                                                                                      |
+| Privacy toggle label           | `settings.strictPrivacyMode` → "Modalità privacy"                                                                                                                                                                                                                                                                |
+| Privacy toggle hint            | `settings.strictPrivacyModeHint` → "Limita l'AI ai fornitori verificati. Disabilita la voce ElevenLabs."                                                                                                                                                                                                         |
+| Privacy ON confirmation note   | `settings.strictPrivacyModeActive` → "Modalità privacy attiva. Le funzionalità vocali sono disabilitate."                                                                                                                                                                                                        |
+| Settings About link label      | `settings.aboutTitle` → "Informazioni e trasparenza"                                                                                                                                                                                                                                                             |
+| Settings About link hint       | `settings.aboutHint` → "Scopri come funziona S.E.N.S.O., cosa conserviamo e come usiamo l'AI."                                                                                                                                                                                                                   |
+| Settings About link CTA        | `settings.aboutCta` → "Leggi come funziona"                                                                                                                                                                                                                                                                      |
+| Chat privacy badge label       | `chat.privacyBadge` → "Modalità privacy"                                                                                                                                                                                                                                                                         |
+| TTS disabled notice            | `chat.ttsDisabledStrict` → "Modalità privacy attiva - le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce."                                                             |
+| Primary CTA (About from nav)   | `nav.about` → "Informazioni"                                                                                                                                                                                                                                                                                     |
+| Error: settings save fails     | Reuse existing `settings.saveError` → "Errore durante il salvataggio. Riprova."                                                                                                                                                                                                                                  |
+| Error: strict mode fetch fails | `settings.strictPrivacyLoadError` → "Impossibile caricare le preferenze privacy. Riprova."                                                                                                                                                                                                                       |
 
-**No destructive actions in this phase.** The privacy toggle is a reversible preference — no confirmation dialog required.
+**No destructive actions in this phase.** The privacy toggle is a reversible preference - no confirmation dialog required.
 
 ---
 
@@ -239,12 +239,12 @@ i18n keys use dot notation under top-level `about.*` and extended `settings.*`.
 - Shown **inline** in the chat voice area (not a modal, not a toast)
 - Triggered when user taps mic button or play button AND `strict_privacy_mode = true`
 - Dismissible with an `×` icon button (aria-label: "Chiudi avviso")
-- NOT shown repeatedly — dismissed state persists for the session (sessionStorage key: `senso:ttsNoticeDismissed`)
+- NOT shown repeatedly - dismissed state persists for the session (sessionStorage key: `senso:ttsNoticeDismissed`)
 
 ### About Page Navigation
-- Public entry: `/about` — `PublicShell` wrapper, login CTA in header
+- Public entry: `/about` - `PublicShell` wrapper, login CTA in header
 - In-app entry: Settings > "Informazioni e trasparenza" → `<Link to="/about">` opens the same route (in-app AppShell wraps it when authenticated)
-- No back button needed — browser back / header logo handle navigation
+- No back button needed - browser back / header logo handle navigation
 
 ### Settings > Privacy Section
 - Inserted as the 4th section (after Appearance, before App info)
@@ -256,37 +256,37 @@ i18n keys use dot notation under top-level `about.*` and extended `settings.*`.
 
 ## States to Implement
 
-| Screen              | State            | What to Show                                                         |
-| ------------------- | ---------------- | -------------------------------------------------------------------- |
-| Settings > Privacy  | default (OFF)    | Toggle unchecked, no confirmation note, description paragraph        |
-| Settings > Privacy  | ON               | Toggle checked, confirmation note in `text-xs text-primary`, description paragraph |
-| Settings > Privacy  | saving           | Toggle disabled during PATCH call (`opacity-50 pointer-events-none`) |
-| Settings > Privacy  | save error       | Toast `settings.saveError`, toggle reverts to previous state         |
-| Chat                | strict mode ON   | Privacy badge in header; TTS play/mic triggers inline notice         |
-| Chat                | TTS notice shown | Inline muted pill with ShieldOff icon and notice copy                |
-| Chat                | TTS notice dismissed | Notice hidden, session flag set                                   |
-| About page          | default          | All 6 sections visible, full static content                          |
-| About page (public) | unauthenticated  | PublicShell header (logo + lang + login CTA), no user menu           |
+| Screen              | State                | What to Show                                                                       |
+| ------------------- | -------------------- | ---------------------------------------------------------------------------------- |
+| Settings > Privacy  | default (OFF)        | Toggle unchecked, no confirmation note, description paragraph                      |
+| Settings > Privacy  | ON                   | Toggle checked, confirmation note in `text-xs text-primary`, description paragraph |
+| Settings > Privacy  | saving               | Toggle disabled during PATCH call (`opacity-50 pointer-events-none`)               |
+| Settings > Privacy  | save error           | Toast `settings.saveError`, toggle reverts to previous state                       |
+| Chat                | strict mode ON       | Privacy badge in header; TTS play/mic triggers inline notice                       |
+| Chat                | TTS notice shown     | Inline muted pill with ShieldOff icon and notice copy                              |
+| Chat                | TTS notice dismissed | Notice hidden, session flag set                                                    |
+| About page          | default              | All 6 sections visible, full static content                                        |
+| About page (public) | unauthenticated      | PublicShell header (logo + lang + login CTA), no user menu                         |
 
 ---
 
 ## Registry Safety
 
-| Registry        | Blocks Used              | Safety Gate                                |
-| --------------- | ------------------------ | ------------------------------------------ |
-| shadcn official | button (existing), chart (existing) | not required                  |
-| No third-party  | none                     | not applicable — `"registries": {}` in `components.json` (confirmed 2026-03-31) |
+| Registry        | Blocks Used                         | Safety Gate                                                                     |
+| --------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| shadcn official | button (existing), chart (existing) | not required                                                                    |
+| No third-party  | none                                | not applicable - `"registries": {}` in `components.json` (confirmed 2026-03-31) |
 
 No new shadcn components need to be installed for this phase. All UI can be built from:
 - Existing `Button` component
 - Native HTML elements with Tailwind CSS tokens (matching existing patterns in `SettingsScreen.tsx`)
-- Lucide icons already in use (`ShieldCheck`, `Shield`, `ShieldOff` — all available in lucide-react)
+- Lucide icons already in use (`ShieldCheck`, `Shield`, `ShieldOff` - all available in lucide-react)
 
 ---
 
 ## Accessibility Notes
 
-- Privacy mode toggle: `role="switch"` + `aria-checked={strictPrivacyMode}` — matches existing auto-listen toggle pattern exactly
+- Privacy mode toggle: `role="switch"` + `aria-checked={strictPrivacyMode}` - matches existing auto-listen toggle pattern exactly
 - TTS disabled notice: `role="alert"` so screen readers announce it when it appears
 - About page sections: use `<section>` with implicit ARIA landmark + visible `<h2>` headings for each card
 - Privacy badge in chat: `aria-label="Modalità privacy attiva"` on the badge container
@@ -299,8 +299,8 @@ No new shadcn components need to be installed for this phase. All UI can be buil
 - All new settings strings extend the existing `"settings": { ... }` object
 - Chat strings go in existing `"chat": { ... }` or equivalent namespace
 - Nav string `"about"` goes in `"nav": { ... }`
-- English mirror in `senso/src/i18n/locales/en.json` — every key has an `en` counterpart
-- NO Italian strings hardcoded in TSX source files — all via `t()` per CONVENTIONS.md
+- English mirror in `senso/src/i18n/locales/en.json` - every key has an `en` counterpart
+- NO Italian strings hardcoded in TSX source files - all via `t()` per CONVENTIONS.md
 
 ---
 

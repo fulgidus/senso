@@ -112,7 +112,7 @@ class ModerationService:
                     "severity": parsed.get("severity", "clean"),
                 }
             except (LLMError, json.JSONDecodeError, Exception) as e:
-                logger.warning("TOS check failed: %s — defaulting to clean", e)
+                logger.warning("TOS check failed: %s - defaulting to clean", e)
             finally:
                 done.set()
 
@@ -132,7 +132,7 @@ class ModerationService:
                 route="text:generation:sm",
             ).strip()
         except Exception as e:
-            logger.warning("Distillation failed: %s — using raw text", e)
+            logger.warning("Distillation failed: %s - using raw text", e)
             return text[:200]  # fallback: truncated raw text
 
     def _enforce(self, user_id: str, severity: str, content_ref_id: str) -> str:
@@ -206,7 +206,7 @@ class ModerationService:
             banned_until = row[0]
             if isinstance(banned_until, datetime):
                 return banned_until > datetime.now(UTC)
-            # Postgres may return naive datetime — treat as UTC
+            # Postgres may return naive datetime - treat as UTC
             from datetime import timezone
 
             if banned_until.tzinfo is None:
