@@ -1,31 +1,50 @@
-import { useState, useEffect, useRef, useCallback } from "react"
-import { NavLink, useNavigate, Link } from "react-router-dom"
-import { User, MessageCircle, Settings, LogOut, X, Menu, Globe, ChevronDown, ShieldCheck, BookOpen, Bell, FileText, MapPin, Flag, Bug } from "lucide-react"
-import { useTranslation } from "react-i18next"
-import { useAuthContext } from "@/features/auth/AuthContext"
-import { UserAvatar } from "@/components/UserAvatar"
-import { getDisplayName } from "@/lib/user-avatar"
-import { NotificationPanel } from "@/features/notifications/NotificationPanel"
-import { getNotifications } from "@/api/notificationsApi"
-import { OfflineBanner } from "@/components/OfflineBanner"
-import { PageTransition } from "@/components/PageTransition"
+import {
+  Bell,
+  BookOpen,
+  Bug,
+  ChevronDown,
+  FileText,
+  Flag,
+  Globe,
+  LogOut,
+  Mail,
+  MapPin,
+  Menu,
+  MessageCircle,
+  Settings,
+  ShieldCheck,
+  User,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { getNotifications } from "@/api/notificationsApi";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { PageTransition } from "@/components/PageTransition";
+import { UserAvatar } from "@/components/UserAvatar";
+import { useAuthContext } from "@/features/auth/AuthContext";
+import { NotificationPanel } from "@/features/notifications/NotificationPanel";
+import { getDisplayName, stripUsernamePrefix } from "@/lib/user-avatar";
 
 // ── Topbar-buttons preference (localStorage, no backend needed) ───────────────
 
-const TOPBAR_STORAGE_KEY = "senso:topbarButtons"
+const TOPBAR_STORAGE_KEY = "senso:topbarButtons";
 
 export function readTopbarButtons(): boolean {
   try {
-    return localStorage.getItem(TOPBAR_STORAGE_KEY) !== "false"
+    return localStorage.getItem(TOPBAR_STORAGE_KEY) !== "false";
   } catch {
-    return true
+    return true;
   }
 }
 
 export function writeTopbarButtons(value: boolean) {
   try {
-    localStorage.setItem(TOPBAR_STORAGE_KEY, value ? "true" : "false")
-  } catch { /* ignore */ }
+    localStorage.setItem(TOPBAR_STORAGE_KEY, value ? "true" : "false");
+  } catch {
+    /* ignore */
+  }
 }
 
 // ── SensoLogo ─────────────────────────────────────────────────────────────────
@@ -33,8 +52,8 @@ export function writeTopbarButtons(value: boolean) {
 // Falls back to text if both fail.
 
 function SensoLogo() {
-  const [lightFailed, setLightFailed] = useState(false)
-  const [darkFailed, setDarkFailed] = useState(false)
+  const [lightFailed, setLightFailed] = useState(false);
+  const [darkFailed, setDarkFailed] = useState(false);
 
   return (
     <>
@@ -43,7 +62,7 @@ function SensoLogo() {
         <img
           src="/assets/logo-light.svg"
           alt="S.E.N.S.O."
-          className="h-7 w-auto block dark:hidden"
+          className="block h-7 w-auto dark:hidden"
           onError={() => setLightFailed(true)}
         />
       )}
@@ -52,25 +71,25 @@ function SensoLogo() {
         <img
           src="/assets/logo-dark.svg"
           alt="S.E.N.S.O."
-          className="h-7 w-auto hidden dark:block"
+          className="hidden h-7 w-auto dark:block"
           onError={() => setDarkFailed(true)}
         />
       )}
       {/* text fallback — only shows if both images fail */}
-      {(lightFailed && darkFailed) && (
+      {lightFailed && darkFailed && (
         <span className="font-bold tracking-tight text-foreground">S.E.N.S.O.</span>
       )}
     </>
-  )
+  );
 }
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 type NavItem = {
-  to: string
-  label: string
-  icon: React.ReactNode
-}
+  to: string;
+  label: string;
+  icon: React.ReactNode;
+};
 
 function NavItemLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   return (
@@ -90,7 +109,7 @@ function NavItemLink({ item, onClick }: { item: NavItem; onClick?: () => void })
       {item.icon}
       <span>{item.label}</span>
     </NavLink>
-  )
+  );
 }
 
 // Compact top-bar link (icon + label)
@@ -101,7 +120,7 @@ function TopBarNavLink({ item }: { item: NavItem }) {
       end={item.to === "/"}
       className={({ isActive }) =>
         [
-          "ripple-target flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors whitespace-nowrap",
+          "ripple-target flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
           isActive
             ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -111,31 +130,31 @@ function TopBarNavLink({ item }: { item: NavItem }) {
       {item.icon}
       <span>{item.label}</span>
     </NavLink>
-  )
+  );
 }
 
 // ── LanguageSwitcher ──────────────────────────────────────────────────────────
 
 function LanguageSwitcher() {
-  const { t, i18n } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const { t, i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   // Build the list dynamically from loaded resources: each locale labels itself
   const langs = Object.keys(i18n.store.data).map((code) => ({
     code,
-    label: i18n.getResourceBundle(code, "translation")?.nav?.languageFullName as string ?? code,
-  }))
+    label: (i18n.getResourceBundle(code, "translation")?.nav?.languageFullName as string) ?? code,
+  }));
 
   // Close on outside click
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    document.addEventListener("mousedown", handle)
-    return () => document.removeEventListener("mousedown", handle)
-  }, [open])
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
 
   return (
     <div ref={ref} className="relative">
@@ -144,26 +163,31 @@ function LanguageSwitcher() {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+        className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <Globe className="h-4 w-4" />
-        <span className="text-xs font-medium uppercase hidden sm:inline">{i18n.language.slice(0, 2)}</span>
+        <span className="hidden text-xs font-medium uppercase sm:inline">
+          {i18n.language.slice(0, 2)}
+        </span>
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-1 z-50 min-w-[120px] rounded-xl border border-border bg-background shadow-lg py-1"
+          className="absolute top-full right-0 z-50 mt-1 min-w-[120px] rounded-xl border border-border bg-background py-1 shadow-lg"
         >
           {langs.map((lang) => (
             <button
               key={lang.code}
               role="menuitem"
-              onClick={() => { void i18n.changeLanguage(lang.code); setOpen(false) }}
+              onClick={() => {
+                void i18n.changeLanguage(lang.code);
+                setOpen(false);
+              }}
               className={[
-                "w-full text-left px-4 py-2 text-sm transition-colors",
+                "w-full px-4 py-2 text-left text-sm transition-colors",
                 i18n.language.startsWith(lang.code)
-                  ? "text-foreground font-semibold bg-accent"
+                  ? "bg-accent font-semibold text-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               ].join(" ")}
             >
@@ -173,42 +197,42 @@ function LanguageSwitcher() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // ── UserMenu ──────────────────────────────────────────────────────────────────
 // Dropdown from avatar: Settings + Logout
 
 type UserMenuProps = {
-  showEmail?: boolean
-}
+  showEmail?: boolean;
+};
 
 function UserMenu({ showEmail = false }: UserMenuProps) {
-  const { user, signOut } = useAuthContext()
-  const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
+  const { user, signOut } = useAuthContext();
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Close on outside click
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    document.addEventListener("mousedown", handle)
-    return () => document.removeEventListener("mousedown", handle)
-  }, [open])
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
 
   const handleSignOut = useCallback(async () => {
-    setOpen(false)
-    await signOut()
-  }, [signOut])
+    setOpen(false);
+    await signOut();
+  }, [signOut]);
 
   const handleSettings = useCallback(() => {
-    setOpen(false)
-    void navigate("/settings")
-  }, [navigate])
+    setOpen(false);
+    void navigate("/settings");
+  }, [navigate]);
 
   return (
     <div ref={ref} className="relative">
@@ -217,35 +241,35 @@ function UserMenu({ showEmail = false }: UserMenuProps) {
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-lg p-1 hover:bg-accent transition-colors"
+        className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-accent"
       >
         {showEmail ? (
-          <div className="hidden md:flex flex-col items-end min-w-0">
-            <span className="text-xs font-medium text-foreground leading-tight truncate max-w-[160px]">
+          <div className="hidden min-w-0 flex-col items-end md:flex">
+            <span className="max-w-[160px] truncate text-xs leading-tight font-medium text-foreground">
               {getDisplayName(user)}
             </span>
-            <span className="text-[10px] text-muted-foreground leading-tight truncate max-w-[160px]">
-              {user.email}
+            <span className="max-w-[160px] truncate text-[10px] leading-tight text-muted-foreground">
+              {user.username ? stripUsernamePrefix(user.username) : user.email}
             </span>
           </div>
         ) : (
-          <span className="hidden sm:block text-xs text-muted-foreground truncate max-w-[120px]">
+          <span className="hidden max-w-[120px] truncate text-xs text-muted-foreground sm:block">
             {getDisplayName(user)}
           </span>
         )}
         <UserAvatar user={user} size="sm" />
-        <ChevronDown className="h-3 w-3 text-muted-foreground hidden sm:block" />
+        <ChevronDown className="hidden h-3 w-3 text-muted-foreground sm:block" />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-1 z-50 min-w-[160px] rounded-xl border border-border bg-background shadow-lg py-1"
+          className="absolute top-full right-0 z-50 mt-1 min-w-[160px] rounded-xl border border-border bg-background py-1 shadow-lg"
         >
           <button
             role="menuitem"
             onClick={handleSettings}
-            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <Settings className="h-4 w-4 shrink-0" />
             {t("nav.settings")}
@@ -254,7 +278,7 @@ function UserMenu({ showEmail = false }: UserMenuProps) {
           <button
             role="menuitem"
             onClick={() => void handleSignOut()}
-            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             {t("nav.logout")}
@@ -262,90 +286,115 @@ function UserMenu({ showEmail = false }: UserMenuProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // ── AppShell ──────────────────────────────────────────────────────────────────
 
 type AppShellProps = {
-  children: React.ReactNode
-}
+  children: React.ReactNode;
+};
 
 export function AppShell({ children }: AppShellProps) {
-  const { user, signOut } = useAuthContext()
-  const { t } = useTranslation()
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons)
-  const [adminOpen, setAdminOpen] = useState(false)
-  const sidebarRef = useRef<HTMLDivElement>(null)
+  const { user, signOut, pendingMessageCount } = useAuthContext();
+  const { t } = useTranslation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // ── Notification bell state ──
-  const [notifOpen, setNotifOpen] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchUnread = useCallback(() => {
     getNotifications(1)
       .then((r) => setUnreadCount(r.unread_count))
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
-    fetchUnread()
-    const interval = setInterval(fetchUnread, 30_000)
-    return () => clearInterval(interval)
-  }, [fetchUnread])
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchUnread]);
 
   // Expose setter so SettingsScreen can update it live
-  ;(window as unknown as Record<string, unknown>)["__sensoSetTopbarButtons"] = (v: boolean) => {
-    writeTopbarButtons(v)
-    setTopbarButtons(v)
-  }
+  (window as unknown as Record<string, unknown>)["__sensoSetTopbarButtons"] = (v: boolean) => {
+    writeTopbarButtons(v);
+    setTopbarButtons(v);
+  };
 
   const NAV_ITEMS: NavItem[] = [
-    { to: "/profile", label: t("nav.profile"), icon: <User className="h-5 w-5" /> },
-    { to: "/chat", label: t("nav.coach"), icon: <MessageCircle className="h-5 w-5" /> },
-    { to: "/learn", label: t("nav.learn"), icon: <BookOpen className="h-5 w-5" /> },
-  ]
+    {
+      to: "/profile",
+      label: t("nav.profile"),
+      icon: <User className="h-5 w-5" />,
+    },
+    {
+      to: "/chat",
+      label: t("nav.coach"),
+      icon: <MessageCircle className="h-5 w-5" />,
+    },
+    {
+      to: "/messages",
+      label: t("nav.messages"),
+      icon: (
+        <span className="relative">
+          <Mail className="h-5 w-5" />
+          {pendingMessageCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              {pendingMessageCount > 9 ? "9+" : pendingMessageCount}
+            </span>
+          )}
+        </span>
+      ),
+    },
+    {
+      to: "/learn",
+      label: t("nav.learn"),
+      icon: <BookOpen className="h-5 w-5" />,
+    },
+  ];
 
   // Close drawer on outside click
   useEffect(() => {
-    if (!drawerOpen) return
+    if (!drawerOpen) return;
     function handleClick(e: MouseEvent) {
       if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
-        setDrawerOpen(false)
+        setDrawerOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [drawerOpen])
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [drawerOpen]);
 
   // Close drawer on Escape
   useEffect(() => {
-    if (!drawerOpen) return
+    if (!drawerOpen) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setDrawerOpen(false)
+      if (e.key === "Escape") setDrawerOpen(false);
     }
-    document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [drawerOpen])
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [drawerOpen]);
 
   const handleSignOut = useCallback(async () => {
-    setDrawerOpen(false)
-    await signOut()
-  }, [signOut])
+    setDrawerOpen(false);
+    await signOut();
+  }, [signOut]);
 
   // Hamburger is shown:
   //   - always on mobile (< md)
   //   - on desktop only when topbarButtons is OFF
   const hamburgerClass = topbarButtons
     ? "flex md:hidden shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-    : "flex shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+    : "flex shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors";
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background px-4 gap-2">
-
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4">
         {/* Hamburger */}
         <button
           aria-label={t("nav.openMenu")}
@@ -356,18 +405,13 @@ export function AppShell({ children }: AppShellProps) {
         </button>
 
         {/* Logo — clickable, goes to / */}
-        <NavLink
-          to="/"
-          end
-          aria-label="S.E.N.S.O. — Home"
-          className="shrink-0 flex items-center"
-        >
+        <NavLink to="/" end aria-label="S.E.N.S.O. — Home" className="flex shrink-0 items-center">
           <SensoLogo />
         </NavLink>
 
         {/* Inline nav — only on md+ when topbarButtons is ON */}
         {topbarButtons && (
-          <nav className="hidden md:flex items-center gap-1 ml-4">
+          <nav className="ml-4 hidden items-center gap-1 md:flex">
             {NAV_ITEMS.map((item) => (
               <TopBarNavLink key={item.to} item={item} />
             ))}
@@ -375,21 +419,23 @@ export function AppShell({ children }: AppShellProps) {
         )}
 
         {/* Right side */}
-        <div className="ml-auto flex items-center gap-2 shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           {/* Notification bell */}
           <div className="relative">
             <button
               aria-label={
                 unreadCount > 0
-                  ? t("notifications.bellAriaLabel_other", { count: unreadCount })
+                  ? t("notifications.bellAriaLabel_other", {
+                      count: unreadCount,
+                    })
                   : t("notifications.bellAriaLabel_zero")
               }
               onClick={() => setNotifOpen((o) => !o)}
-              className="relative p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-accent-foreground"
+              className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -411,7 +457,7 @@ export function AppShell({ children }: AppShellProps) {
       <div
         className={[
           "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200",
-          drawerOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+          drawerOpen ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
         aria-hidden="true"
       />
@@ -420,10 +466,16 @@ export function AppShell({ children }: AppShellProps) {
       <div
         ref={sidebarRef}
         className={[
-          "fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-background border-r border-border shadow-xl transition-transform duration-200 ease-out",
+          "fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-r border-border bg-background shadow-xl transition-transform duration-200 ease-out",
           drawerOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
-        {...(drawerOpen ? { role: "dialog", "aria-modal": "true", "aria-label": t("nav.menuLabel") } : {})}
+        {...(drawerOpen
+          ? {
+              role: "dialog",
+              "aria-modal": "true",
+              "aria-label": t("nav.menuLabel"),
+            }
+          : {})}
       >
         {/* Sidebar header */}
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
@@ -431,28 +483,35 @@ export function AppShell({ children }: AppShellProps) {
           <button
             aria-label={t("nav.closeMenu")}
             onClick={() => setDrawerOpen(false)}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* User badge */}
-        <div className="px-4 py-4 border-b border-border">
+        <div className="border-b border-border px-4 py-4">
           <div className="flex items-center gap-3">
             <UserAvatar user={user} size="md" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">
-                {getDisplayName(user)}
+              <p className="truncate text-sm font-medium text-foreground">{getDisplayName(user)}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {user.username ? stripUsernamePrefix(user.username) : user.email}
               </p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
         </div>
 
         {/* Nav items (all routes including Settings) */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {[...NAV_ITEMS, { to: "/settings", label: t("nav.settings"), icon: <Settings className="h-5 w-5" /> }].map((item) => (
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          {[
+            ...NAV_ITEMS,
+            {
+              to: "/settings",
+              label: t("nav.settings"),
+              icon: <Settings className="h-5 w-5" />,
+            },
+          ].map((item) => (
             <NavItemLink key={item.to} item={item} onClick={() => setDrawerOpen(false)} />
           ))}
 
@@ -462,19 +521,51 @@ export function AppShell({ children }: AppShellProps) {
               <button
                 type="button"
                 onClick={() => setAdminOpen((o) => !o)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 aria-expanded={adminOpen}
               >
                 <ShieldCheck className="h-5 w-5 shrink-0" />
                 <span className="flex-1 text-left">{t("nav.adminSection")}</span>
-                <ChevronDown className={["h-4 w-4 transition-transform", adminOpen ? "rotate-180" : ""].join(" ")} />
+                <ChevronDown
+                  className={["h-4 w-4 transition-transform", adminOpen ? "rotate-180" : ""].join(
+                    " ",
+                  )}
+                />
               </button>
               {adminOpen && (
-                <div className="pl-4 mt-1 space-y-1">
-                  <NavItemLink item={{ to: "/admin/content", label: t("nav.adminContent"), icon: <FileText className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
-                  <NavItemLink item={{ to: "/admin/merchant-map", label: t("admin.merchantMap.title"), icon: <MapPin className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
-                  <NavItemLink item={{ to: "/admin/moderation", label: t("admin.moderation.title"), icon: <Flag className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
-                  <NavItemLink item={{ to: "/debug", label: t("nav.debug"), icon: <Bug className="h-4 w-4" /> }} onClick={() => setDrawerOpen(false)} />
+                <div className="mt-1 space-y-1 pl-4">
+                  <NavItemLink
+                    item={{
+                      to: "/admin/content",
+                      label: t("nav.adminContent"),
+                      icon: <FileText className="h-4 w-4" />,
+                    }}
+                    onClick={() => setDrawerOpen(false)}
+                  />
+                  <NavItemLink
+                    item={{
+                      to: "/admin/merchant-map",
+                      label: t("admin.merchantMap.title"),
+                      icon: <MapPin className="h-4 w-4" />,
+                    }}
+                    onClick={() => setDrawerOpen(false)}
+                  />
+                  <NavItemLink
+                    item={{
+                      to: "/admin/moderation",
+                      label: t("admin.moderation.title"),
+                      icon: <Flag className="h-4 w-4" />,
+                    }}
+                    onClick={() => setDrawerOpen(false)}
+                  />
+                  <NavItemLink
+                    item={{
+                      to: "/debug",
+                      label: t("nav.debug"),
+                      icon: <Bug className="h-4 w-4" />,
+                    }}
+                    onClick={() => setDrawerOpen(false)}
+                  />
                 </div>
               )}
             </div>
@@ -485,7 +576,7 @@ export function AppShell({ children }: AppShellProps) {
         <div className="border-t border-border px-3 py-4">
           <button
             onClick={() => void handleSignOut()}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-5 w-5" />
             <span>{t("nav.logout")}</span>
@@ -495,12 +586,10 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Page content */}
       <div className="flex-1 overflow-y-auto">
-        <PageTransition>
-          {children}
-        </PageTransition>
+        <PageTransition>{children}</PageTransition>
       </div>
     </div>
-  )
+  );
 }
 
 // ── PublicShell ───────────────────────────────────────────────────────────────
@@ -508,27 +597,23 @@ export function AppShell({ children }: AppShellProps) {
 // Shows: logo + language switcher + login CTA. No sidebar, no user menu.
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background px-4 gap-2">
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4">
         {/* Logo — clickable, goes to /learn for public visitors */}
-        <NavLink
-          to="/learn"
-          aria-label="S.E.N.S.O. — Learn"
-          className="shrink-0 flex items-center"
-        >
+        <NavLink to="/learn" aria-label="S.E.N.S.O. — Learn" className="flex shrink-0 items-center">
           <SensoLogo />
         </NavLink>
 
         {/* Right side */}
-        <div className="ml-auto flex items-center gap-3 shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           <LanguageSwitcher />
           <Link
             to="/"
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {t("nav.loginCta")}
           </Link>
@@ -536,9 +621,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Page content */}
-      <div className="flex-1 overflow-y-auto">
-        {children}
-      </div>
+      <div className="flex-1 overflow-y-auto">{children}</div>
     </div>
-  )
+  );
 }

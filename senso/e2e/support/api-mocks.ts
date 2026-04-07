@@ -367,3 +367,99 @@ export async function setupAdminSession(page: Page): Promise<void> {
   mockAuthRefresh(page)
   mockNotifications(page)
 }
+
+// ── Messages endpoints ────────────────────────────────────────────────────────
+
+/** Mock POST /messages/poll — returns empty inbox (no pending messages) */
+export function mockMessages(page: Page): void {
+  page.route("**/messages/poll", (route: Route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([]),
+    })
+  })
+  // Also mock the public keys endpoint to avoid 404s
+  page.route(/\/messages\/users\/.*\/public-keys/, (route: Route) => {
+    route.fulfill({ status: 404, body: JSON.stringify({ detail: "Not found" }) })
+  })
+}
+
+// ── Multi-persona mocks ───────────────────────────────────────────────────────
+
+const FAKE_PERSONAS = [
+  {
+    persona_id: "mentore-saggio",
+    name: "Mentore Saggio",
+    description: "Wise financial mentor",
+    default_gender: "masculine",
+    theme: { primary: "#3F72AF" },
+  },
+  {
+    persona_id: "amico-pratico",
+    name: "Amico Pratico",
+    description: "Practical friend",
+    default_gender: "neutral",
+    theme: { primary: "#27AE60" },
+  },
+  {
+    persona_id: "esperto-tecnico",
+    name: "Esperto Tecnico",
+    description: "Technical expert",
+    default_gender: "masculine",
+    theme: { primary: "#8E44AD" },
+  },
+]
+
+/**
+ * Mock GET /coaching/personas with multiple coaches.
+ * count: how many to return (default: all 3)
+ */
+export function mockMultiPersonas(page: Page, count = 3): void {
+  page.route("**/coaching/personas", (route: Route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ personas: FAKE_PERSONAS.slice(0, count) }),
+    })
+  })
+}
+
+/**
+ * Mock the full coach-switch flow:
+ *   PATCH /auth/me (save defaultPersonaId)
+ *   POST /coaching/sessions (create new session with new coach)
+ *   GET /coaching/sessions/:id/messages (empty new session)
+ */
+export function mockCoachSwitch(page: Page, newPersonaId: string): void {
+  // Save persona preference
+  page.route("**/auth/me", (route: Route) => {
+    if (route.request().method() === "PATCH") {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          user: { ...FAKE_USER, default_persona_id: newPersonaId },
+        }),
+      })
+    } else {
+      route.continue()
+    }
+  })
+  // New session after switch
+  page.route("**/coaching/sessions", (route: Route) => {
+    if (route.request().method() === "POST") {
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...FAKE_SESSION,
+          id: "session-new-coach-456",
+          persona_id: newPersonaId,
+        }),
+      })
+    } else {
+      route.continue()
+    }
+  })
+}

@@ -7,7 +7,7 @@ import { defineConfig, devices } from "@playwright/test"
  *  - Tests run against a local Vite preview server (or dev server).
  *  - All external HTTP calls (FastAPI backend) are intercepted with
  *    `page.route()` mocks inside each test — no real backend required.
- *  - CI uses chromium only; extend to webkit/firefox as a separate job.
+ *  - CI uses chromium only; mobile projects run specs tagged @mobile.
  *
  * Usage:
  *   pnpm test:e2e           # headless
@@ -49,6 +49,24 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile-chrome",
+      use: {
+        ...devices["Pixel 5"],
+        // Pixel 5: 393×851, hasTouch: true, userAgent includes Android
+        locale: "en-US",
+      },
+      // Only run specs that opt in with @mobile tag
+      grep: /@mobile/,
+    },
+    {
+      name: "mobile-safari",
+      use: {
+        ...devices["iPhone 14"],
+        locale: "en-US",
+      },
+      grep: /@mobile/,
     },
   ],
 

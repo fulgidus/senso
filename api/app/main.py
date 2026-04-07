@@ -1,19 +1,23 @@
 from contextlib import asynccontextmanager
 import json as _json
 import logging
+from datetime import UTC, datetime, timedelta
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.api.admin import router as admin_router
+from app.api.attachments import attachments_router
 from app.api.auth import router as auth_router
 from app.api.coaching import router as coaching_router
 from app.api.content_admin import router as content_admin_router
 from app.api.content_public import router as content_public_router
 from app.api.debug import router as debug_router
 from app.api.ingestion import router as ingestion_router
+from app.api.messages import messages_router
 from app.api.notifications import router as notifications_router
 from app.api.profile import router as profile_router
 from app.core.config import get_settings
@@ -75,7 +79,40 @@ class CatchAllExceptionMiddleware:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_tables()
-    yield
+
+    settings = get_settings()
+    scheduler = BackgroundScheduler()
+
+    def _purge_expired_messages() -> None:
+        """Delete undelivered_messages older than MESSAGE_TTL_DAYS. Idempotent."""
+        from app.db.session import SessionLocal  # noqa: PLC0415
+        from app.db.models import UndeliveredMessage  # noqa: PLC0415
+
+        db = SessionLocal()
+        try:
+            cutoff = datetime.now(UTC) - timedelta(days=settings.message_ttl_days)
+            deleted = (
+                db.query(UndeliveredMessage)
+                .filter(UndeliveredMessage.created_at < cutoff)
+                .delete(synchronize_session=False)
+            )
+            db.commit()
+            if deleted:
+                logging.getLogger(__name__).info(
+                    "TTL purge: deleted %d expired undelivered messages", deleted
+                )
+        except Exception as exc:  # noqa: BLE001
+            db.rollback()
+            logging.getLogger(__name__).error("TTL purge failed: %s", exc)
+        finally:
+            db.close()
+
+    scheduler.add_job(_purge_expired_messages, "interval", hours=1)
+    scheduler.start()
+    try:
+        yield
+    finally:
+        scheduler.shutdown(wait=False)
 
 
 def create_app() -> FastAPI:
@@ -107,6 +144,8 @@ def create_app() -> FastAPI:
     app.include_router(
         notifications_router, prefix="/notifications", tags=["notifications"]
     )
+    app.include_router(messages_router, prefix="/messages", tags=["messages"])
+    app.include_router(attachments_router, prefix="/attachments", tags=["attachments"])
     app.include_router(debug_router)
 
     @app.get("/health")

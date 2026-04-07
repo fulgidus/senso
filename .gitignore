@@ -7,9 +7,16 @@ __pycache__/
 *.env
 *.env.*
 !.env.example
+!.env.*.example
 
 # SQLite test databases
 api/test.db
+
+# Ants worktrees
+worktrees/
+
+# Ruff cache
+.ruff_cache/
 
 # Frontend artifacts
 node_modules/
@@ -17,6 +24,7 @@ dist/
 dist-ssr/
 *.local
 senso/node_modules/
+senso/.pnpm-store
 senso/dist/
 senso/dist-ssr/
 
@@ -25,3 +33,4 @@ e2e/report/
 e2e/artifacts/
 playwright-report/
 test-results/
+.pi/gsd
