@@ -119,12 +119,12 @@ export async function sendMessage(
  */
 export async function pollMessages(): Promise<PolledMessageDTO[]> {
   const token = requireToken();
-  const res = await apiRequest<{ messages: PolledMessageDTO[] }>(API_BASE(), "/messages/poll", {
+  const res = await apiRequest<{ messages?: PolledMessageDTO[] }>(API_BASE(), "/messages/poll", {
     method: "POST",
     token,
     body: {},
   });
-  return res.messages;
+  return res.messages ?? [];
 }
 
 /**

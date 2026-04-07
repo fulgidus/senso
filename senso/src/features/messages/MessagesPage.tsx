@@ -29,7 +29,7 @@ type Tab = "inbox" | "contacts";
 export function MessagesPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { cryptoKeys, polledMessages, isPolling } = useAuthContext();
+  const { cryptoKeys, polledMessages = [], isPolling } = useAuthContext();
 
   const tab: Tab = (searchParams.get("tab") as Tab) ?? "inbox";
 

@@ -160,8 +160,9 @@ export function useAuth() {
         setIsPolling(true);
         pollMessages()
           .then((msgs) => {
-            setPolledMessages(msgs);
-            setPendingMessageCount(msgs.length);
+            const safe = Array.isArray(msgs) ? msgs : [];
+            setPolledMessages(safe);
+            setPendingMessageCount(safe.length);
           })
           .catch(() => {
             // Silent — badge stays 0, inbox shows empty state
