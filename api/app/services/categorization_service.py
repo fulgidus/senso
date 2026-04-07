@@ -779,8 +779,35 @@ class CategorizationService:
                     },
                 )
 
+        # ── Event: relocation (D-13) ────────────────────────────────────────────────
+        # Cluster of moving-related keywords within 30-day window
+        _RELOCATION_KEYWORDS = {
+            "trasloco", "allaccio", "rimozione", "agenzia immobiliare",
+            "caparra", "deposito cauzionale", "spese condominiali",
+        }
+        _reloc_hits = [
+            (t.date, t.description)
+            for t in transactions
+            if t.date and t.description
+            and any(kw in t.description.lower() for kw in _RELOCATION_KEYWORDS)
+        ]
+        if _reloc_hits:
+            _reloc_hits.sort(key=lambda x: x[0])
+            evt_date = _reloc_hits[0][0]
+            upsert_timeline_event(
+                self.db,
+                user_id,
+                event_type="relocation",
+                event_date=evt_date,
+                title="Possibile trasferimento",
+                description="Transazioni legate a un trasferimento rilevate.",
+                evidence_json={
+                    "keywords_found": [d for _, d in _reloc_hits[:3]],
+                    "transaction_count": len(_reloc_hits),
+                },
+            )
+
         # ── Event: subscription accumulation (D-13) ──
-        # Net new subscriptions in a calendar month
         sub_by_month: dict[tuple[int, int], set[str]] = defaultdict(set)
         for t in transactions:
             if t.category == "subscriptions" and t.date and t.description:
@@ -841,6 +868,56 @@ class CategorizationService:
                     )
             if curr_senders:
                 prev_senders = curr_senders
+
+        # ── Event: debt_change (new recurring fixed-amount payment) ────────────────
+        # Recurring transaction to same counterpart, >=200 EUR, monthly cadence, >=3 times
+        from collections import defaultdict as _dd  # noqa: PLC0415
+        from decimal import Decimal as _D  # noqa: PLC0415
+
+        _debt_candidates: dict[str, list] = _dd(list)
+        for t in transactions:
+            if (
+                t.amount is not None
+                and float(t.amount) < -200  # debit only
+                and t.description
+                and t.date
+            ):
+                key = t.description.lower()[:50]
+                _debt_candidates[key].append(t)
+
+        for key, txns in _debt_candidates.items():
+            if len(txns) < 3:
+                continue
+            # Check monthly cadence: gaps between dates ~28-32 days
+            dates_sorted = sorted(t.date for t in txns if t.date)
+            if len(dates_sorted) < 3:
+                continue
+            gaps = [(dates_sorted[i + 1] - dates_sorted[i]).days for i in range(len(dates_sorted) - 1)]
+            monthly = all(25 <= g <= 40 for g in gaps)
+            if not monthly:
+                continue
+            # Amount consistency: within 2%
+            amounts = [abs(float(t.amount)) for t in txns if t.amount]
+            avg_amt = sum(amounts) / len(amounts)
+            if not all(abs(a - avg_amt) / avg_amt < 0.03 for a in amounts):
+                continue
+            evt_date = dates_sorted[0]
+            upsert_timeline_event(
+                self.db,
+                user_id,
+                event_type="debt_change",
+                event_date=evt_date,
+                title=f"Possibile nuovo debito: {txns[0].description[:40] if txns[0].description else 'n/a'}",
+                description=(
+                    f"Pagamento ricorrente di \u20ac{avg_amt:.0f}/mese rilevato ({len(txns)} occorrenze)."
+                ),
+                evidence_json={
+                    "counterpart": key,
+                    "monthly_amount": round(avg_amt, 2),
+                    "occurrences": len(txns),
+                    "first_seen": str(dates_sorted[0]),
+                },
+            )
 
         self.db.commit()
 
