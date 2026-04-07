@@ -627,7 +627,11 @@ class CoachingService:
         return sanitized
 
     def _persist_coaching_insight(self, user_id: str, new_insight: dict) -> None:
-        """Append a new_insight emitted by the coach to user_profiles.coaching_insights.
+        """Persist a coaching insight with topic-based dedup.
+
+        Phase 20: if new_insight has a `topic` field, upsert by topic (update existing
+        entry rather than appending a duplicate). Falls back to append-only for
+        legacy insights without `topic`.
 
         Non-fatal: logs and swallows any DB error so a failed write does not
         block the chat response.
@@ -640,10 +644,38 @@ class CoachingService:
             if profile is None:
                 return
             existing: list = list(profile.coaching_insights or [])
-            existing.append(
-                {**new_insight, "captured_at": datetime.now(UTC).isoformat()}
-            )
-            profile.coaching_insights = existing
+            now_iso = datetime.now(UTC).isoformat()
+            topic = new_insight.get("topic")
+
+            if topic:
+                # Phase 20: dedup by topic — update existing entry if found
+                for i, ci in enumerate(existing):
+                    if ci.get("topic") == topic:
+                        existing[i] = {
+                            **new_insight,
+                            "created_at": ci.get("created_at", ci.get("captured_at", now_iso)),
+                            "updated_at": now_iso,
+                        }
+                        break
+                else:
+                    existing.append({**new_insight, "created_at": now_iso, "updated_at": now_iso})
+            else:
+                # Legacy format: append-only
+                existing.append({**new_insight, "captured_at": now_iso})
+
+            # Prune insights older than 180 days
+            cutoff = (datetime.now(UTC).timestamp()) - (180 * 86400)
+            pruned = []
+            for ci in existing:
+                ts_str = ci.get("created_at") or ci.get("captured_at") or ""
+                try:
+                    ts = datetime.fromisoformat(ts_str).timestamp()
+                    if ts >= cutoff:
+                        pruned.append(ci)
+                except (ValueError, TypeError):
+                    pruned.append(ci)  # keep if unparseable
+
+            profile.coaching_insights = pruned
             profile.updated_at = datetime.now(UTC)
             self.db.commit()
         except Exception as exc:

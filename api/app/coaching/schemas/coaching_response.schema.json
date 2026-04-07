@@ -127,16 +127,19 @@
         { "type": "null" },
         {
           "type": "object",
-          "required": ["headline", "data_point", "educational_framing"],
+          "required": ["topic", "value"],
           "additionalProperties": false,
           "properties": {
-            "headline": { "type": "string", "description": "Short insight title in the response locale, e.g. 'Spendi il 40% in abbonamenti'" },
+            "topic": { "type": "string", "maxLength": 50, "description": "Short topic label (e.g. 'savings_rate', 'rent_budget', 'emergency_fund')" },
+            "value": { "type": "string", "maxLength": 200, "description": "Human-readable insight fact (e.g. 'risparmia circa il 12% del reddito mensile')" },
+            "headline": { "type": "string", "description": "Short insight title in the response locale" },
             "data_point": { "type": "string", "description": "The specific number or fact that triggered this insight" },
-            "educational_framing": { "type": "string", "description": "One sentence explaining why this matters financially" }
+            "educational_framing": { "type": "string", "description": "One sentence explaining why this matters financially" },
+            "expires_days": { "type": "integer", "description": "Optional: days until this insight expires" }
           }
         }
       ],
-      "description": "Emit when the conversation reveals a new pattern or insight about the user's finances not already captured in their profile insights. Null if nothing new emerged."
+      "description": "Emit when the conversation reveals a new pattern or insight about the user's finances. Use topic+value for structured recall. headline/data_point/educational_framing for backward compat display. Null if nothing new emerged."
     }
   }
 }
