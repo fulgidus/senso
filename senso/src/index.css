@@ -134,7 +134,7 @@
   }
 }
 
-/* ── MARP Slide Viewer ───────────────────────────────────────────────────── */
+/* ── MARP Slide Viewer - Phase 17 ── */
 
 .marp-viewer {
   outline: none;
@@ -142,107 +142,30 @@
   flex-direction: column;
 }
 
-.marp-inline {
-  min-height: 220px;
-}
-
-.marp-fullscreen-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.marp-fullscreen {
-  width: min(90vw, 800px);
-  min-height: 450px;
-  border-radius: 0.75rem;
-  overflow: hidden;
-}
-
-/* Slide content area */
-.marp-slide {
-  flex: 1;
-  padding: 1.5rem 1.75rem;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  overflow-y: auto;
-}
-
-.marp-slide h1 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-.marp-slide h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-  margin-top: 1rem;
-}
-.marp-slide h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
-  margin-top: 0.8rem;
-}
-.marp-slide p {
-  margin-bottom: 0.6rem;
-}
-.marp-slide ul,
-.marp-slide ol {
-  margin-left: 1.2rem;
-  margin-bottom: 0.6rem;
-}
-.marp-slide li {
-  margin-bottom: 0.2rem;
-}
-.marp-slide blockquote {
-  border-left: 3px solid var(--primary);
-  padding-left: 0.8rem;
-  margin: 0.6rem 0;
-  font-style: italic;
-  color: var(--muted-foreground);
-}
-.marp-slide code {
-  font-family: monospace;
-  font-size: 0.8em;
-  background: var(--muted);
-  padding: 0.1em 0.3em;
-  border-radius: 3px;
-}
-.marp-slide pre {
-  background: var(--muted);
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  overflow-x: auto;
-  margin-bottom: 0.6rem;
-}
-.marp-slide pre code {
-  background: none;
-  padding: 0;
-}
-.marp-slide table {
+/* Inline viewer: fixed 16:9 aspect ratio in chat */
+.marp-inline .marp-slide-canvas {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.82rem;
-  margin-bottom: 0.6rem;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  /* Inline SVG inside scales natively to this container via viewBox */
 }
-.marp-slide th,
-.marp-slide td {
-  border: 1px solid var(--border);
-  padding: 0.3rem 0.5rem;
-  text-align: left;
+
+.marp-slide-canvas {
+  flex: 1;
+  display: flex;
 }
-.marp-slide th {
-  background: var(--muted);
-  font-weight: 600;
+
+/* marpit is MARP's default CSS scope container - fill the canvas */
+.marp-slide-canvas .marpit {
+  width: 100%;
+  flex: 1;
 }
-.marp-slide strong {
-  font-weight: 700;
+
+.marp-slide-canvas .marpit svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* Navigation bar */
@@ -270,10 +193,7 @@
   background: var(--accent);
   color: var(--accent-foreground);
 }
-.marp-nav-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
+.marp-nav-btn:disabled { opacity: 0.35; cursor: default; }
 
 .marp-nav-counter {
   font-size: 0.78rem;
@@ -282,32 +202,11 @@
   text-align: center;
 }
 
-.marp-fullscreen-btn {
-  margin-left: auto;
-}
+.marp-fullscreen-btn { margin-left: auto; }
 
-/* senso-light theme */
-.marp-viewer.senso-light .marp-slide {
-  background: #f9f7f7;
-  color: #112d4e;
-}
-.marp-viewer.senso-light .marp-slide h1,
-.marp-viewer.senso-light .marp-slide h2 {
-  color: #3f72af;
-}
-
-/* senso-dark theme */
-.marp-viewer.senso-dark .marp-slide {
-  background: #1a3a5c;
-  color: #f9f7f7;
-}
-.marp-viewer.senso-dark .marp-slide h1,
-.marp-viewer.senso-dark .marp-slide h2 {
-  color: #5b9bd5;
-}
-.marp-viewer.senso-dark .marp-nav {
-  background: #112d4e;
-  border-color: #1e4472;
+/* Fullscreen (portal styles added in Plan 17-02) */
+.marp-fullscreen {
+  flex: 1;
 }
 
 /* ── Phase 12: Accessibility media query overrides ── */
