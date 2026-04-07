@@ -6,8 +6,8 @@ All endpoints are scoped to the current user and require require_tester.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.admin import require_tester
-from app.db.models import ChatMessage, ExtractedDocument, Upload
+from app.api.admin import require_admin, require_tester
+from app.db.models import ChatMessage, ExtractedDocument, Upload, User
 from app.db.session import get_db
 from app.schemas.auth import UserDTO
 
@@ -96,3 +96,23 @@ def nuke(
 
     db.commit()
     return {"nuked": True, "user_id": current_user.id}
+
+
+@router.delete("/nuke-all")
+def nuke_all(
+    current_user: UserDTO = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Delete ALL users and their data. Admin only.
+
+    Uses FK CASCADE on the users table to delete all child rows
+    (uploads, extracted_documents, chat_messages, transactions,
+    user_profiles, notifications, etc.).
+
+    The calling admin's own account is also deleted — they will
+    need to re-register after this operation.
+    """
+    count = db.query(User).count()
+    db.query(User).delete(synchronize_session=False)
+    db.commit()
+    return {"nuked_all": True, "users_deleted": count}
