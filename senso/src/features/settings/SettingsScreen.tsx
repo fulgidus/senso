@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { Link } from "react-router-dom"
-import { LogOut, Save, Shield, AtSign } from "lucide-react"
+import { LogOut, Save, Shield, AtSign, Target } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { useTheme } from "@/components/theme-provider"
@@ -24,6 +24,96 @@ const VOICE_GENDER_OPTIONS: { value: VoiceGender; labelKey: string }[] = [
     { value: "feminine", labelKey: "settings.voiceGenderFeminine" },
     { value: "neutral", labelKey: "settings.voiceGenderNeutral" },
 ]
+
+function TagInput({ items, onChange, placeholder }: {
+    items: string[]; onChange: (v: string[]) => void; placeholder: string
+}) {
+    const [input, setInput] = useState("")
+    return (
+        <div>
+            <div className="flex flex-wrap gap-1 mb-1">
+                {items.map((item) => (
+                    <span key={item} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {item}
+                        <button type="button" onClick={() => onChange(items.filter(i => i !== item))} className="text-primary/60 hover:text-primary" aria-label="Remove">×</button>
+                    </span>
+                ))}
+            </div>
+            <input
+                className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={placeholder}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && input.trim()) {
+                        e.preventDefault()
+                        if (!items.includes(input.trim())) {
+                            onChange([...items, input.trim()])
+                        }
+                        setInput("")
+                    }
+                }}
+            />
+        </div>
+    )
+}
+
+function PreferencesSection() {
+    const { t } = useTranslation()
+    const [goals, setGoals] = useState<string[]>([])
+    const [dos, setDos] = useState<string[]>([])
+    const [donts, setDonts] = useState<string[]>([])
+    const [loaded, setLoaded] = useState(false)
+    const [saved, setSaved] = useState(false)
+    const token = readAccessToken() || ""
+
+    useEffect(() => {
+        if (!token) return
+        fetch("/api/profile/preferences", { headers: { Authorization: `Bearer ${token}` } })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data) { setGoals(data.goals || []); setDos(data.dos || []); setDonts(data.donts || []) }
+                setLoaded(true)
+            })
+            .catch(() => setLoaded(true))
+    }, [token])
+
+    const save = useCallback((g: string[], d: string[], dn: string[]) => {
+        if (!token) return
+        fetch("/api/profile/preferences", {
+            method: "PATCH",
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ goals: g, dos: d, donts: dn }),
+        }).then(() => { setSaved(true); setTimeout(() => setSaved(false), 2000) }).catch(() => {})
+    }, [token])
+
+    if (!loaded) return null
+
+    return (
+        <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
+            <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                <h2 className="text-base font-semibold">{t("preferences.sectionTitle")}</h2>
+                {saved && <span className="text-xs text-primary ml-auto">{t("preferences.saved")}</span>}
+            </div>
+            <div className="space-y-3">
+                <div>
+                    <label className="text-sm font-medium text-muted-foreground">{t("preferences.goalsLabel")}</label>
+                    <TagInput items={goals} onChange={v => { setGoals(v); save(v, dos, donts) }} placeholder={t("preferences.goalsPlaceholder")} />
+                </div>
+                <div>
+                    <label className="text-sm font-medium text-muted-foreground">{t("preferences.dosLabel")}</label>
+                    <TagInput items={dos} onChange={v => { setDos(v); save(goals, v, donts) }} placeholder={t("preferences.dosPlaceholder")} />
+                </div>
+                <div>
+                    <label className="text-sm font-medium text-muted-foreground">{t("preferences.dontsLabel")}</label>
+                    <TagInput items={donts} onChange={v => { setDonts(v); save(goals, dos, v) }} placeholder={t("preferences.dontsPlaceholder")} />
+                </div>
+                <p className="text-xs text-muted-foreground">{t("preferences.addHint")}</p>
+            </div>
+        </section>
+    )
+}
 
 export function SettingsScreen() {
     const { user, signOut, updateUser } = useAuthContext()
@@ -381,6 +471,9 @@ export function SettingsScreen() {
                     </div>
                 </div>
             </section>
+
+            {/* Financial Preferences section - Phase 20 */}
+            <PreferencesSection />
 
             {/* Privacy section */}
             <section className="rounded-2xl border border-border bg-card p-6 space-y-4">

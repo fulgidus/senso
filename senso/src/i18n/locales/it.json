@@ -840,5 +840,16 @@
             "savedCheckbox": "Ho salvato la mia frase di recupero in un luogo sicuro.",
             "continueButton": "Continua"
         }
+    },
+    "preferences": {
+        "sectionTitle": "Preferenze finanziarie",
+        "goalsLabel": "Obiettivi",
+        "goalsPlaceholder": "es. risparmiare per la casa",
+        "dosLabel": "Buone abitudini",
+        "dosPlaceholder": "es. investire 10% del reddito",
+        "dontsLabel": "Da evitare",
+        "dontsPlaceholder": "es. abbonamenti oltre 50€/mese",
+        "addHint": "Premi Invio per aggiungere",
+        "saved": "Salvato"
     }
 }

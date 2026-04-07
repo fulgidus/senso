@@ -840,5 +840,16 @@
             "savedCheckbox": "I have saved my recovery phrase in a safe place.",
             "continueButton": "Continue"
         }
+    },
+    "preferences": {
+        "sectionTitle": "Financial Preferences",
+        "goalsLabel": "Goals",
+        "goalsPlaceholder": "e.g. save for a house",
+        "dosLabel": "Good habits",
+        "dosPlaceholder": "e.g. invest 10% of income",
+        "dontsLabel": "Avoid",
+        "dontsPlaceholder": "e.g. subscriptions over €50/month",
+        "addHint": "Press Enter to add",
+        "saved": "Saved"
     }
 }
