@@ -1,0 +1,186 @@
+[
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": true,
+        "title": "IRPEF 2025 - Scaglioni e aliquote",
+        "ui_description": "Aliquote IRPEF 2025 rese permanenti dalla Legge di Bilancio 2025 (L. 207/2024): 3 scaglioni.",
+        "context_nugget": "IRPEF 2025 tax brackets (permanent per L.207/2024): ≤€28,000 → 23%; €28,001-€50,000 → 35%; >€50,000 → 43%. No-tax area: ≤€8,500 (employees), ≤€5,500 (pensioners), ≤€4,000 (others). Employee tax credit scales between €8,500 and €55,000.",
+        "topics": [
+            "irpef",
+            "tasse",
+            "reddito",
+            "aliquote",
+            "fisco"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": true,
+        "title": "INPS Contributi 2025 - Dipendenti e Gestione Separata",
+        "ui_description": "Aliquote contributive INPS 2025 per lavoratori dipendenti privati e freelance con Gestione Separata.",
+        "context_nugget": "INPS 2025: Private employees: 9.19% (worker) + 23.81% (employer) = 33% total. Pension ceiling: €55,448. Gestione Separata (freelancers/VAT numbers): 26.07% (25% IVS + 1.07%). Minimum contributory threshold GS: €18,555. Co.co.co: 35.03% (1/3 worker, 2/3 client).",
+        "topics": [
+            "inps",
+            "contributi",
+            "previdenza",
+            "freelance",
+            "partita iva",
+            "dipendente"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Regime Forfettario 2025",
+        "ui_description": "Regime fiscale agevolato per partite IVA con ricavi fino a €85.000. Aliquota flat al 15% (5% per nuove attività).",
+        "context_nugget": "Regime Forfettario 2025: Revenue cap €85,000. Tax rate: 15% flat (5% for first 5 years of new activity). Taxable income = Revenue × ATECO coefficient (professionals/consultants: 78%). INPS Gestione Separata 26.07% on taxable income (deducted before tax). Key 2025 change: excluded if employee income >€35,000 (was €30K). Not applicable if: exceeds €85K, holds SRL control, employees >€20K costs.",
+        "topics": [
+            "regime forfettario",
+            "partita iva",
+            "freelance",
+            "flat tax",
+            "fisco",
+            "p.iva"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "TFR - Trattamento di Fine Rapporto",
+        "ui_description": "Come funziona il TFR: calcolo, rivalutazione, tassazione separata e scelta fondo pensione vs liquidazione diretta.",
+        "context_nugget": "TFR (severance pay) 2025: Accrual formula: gross annual salary ÷ 13.5 per year worked. Annual revaluation: 1.5% fixed + 75% of ISTAT inflation index. Paid at end of employment for any reason. Advance: after 8 years (max 70% of accrued, specific reasons only). Special taxation: average IRPEF rate of last 5 years (not standard brackets). Choice: pension fund (deductible up to €5,164.57/year) vs direct company retention.",
+        "topics": [
+            "tfr",
+            "liquidazione",
+            "fine rapporto",
+            "pensione",
+            "fondo pensione",
+            "lavoro"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "730 e Dichiarazione Redditi 2025 (per redditi 2024)",
+        "ui_description": "Scadenze per la dichiarazione dei redditi 2025: 730 precompilato e Modello Redditi PF per partite IVA.",
+        "context_nugget": "Tax returns 2025 (for 2024 income): Precompiled 730: deadline September 30, 2025. Modello Redditi PF (VAT numbers): deadline November 30, 2025. Available online from April 30, 2025. Employees and retirees can use 730; VAT numbers must use Modello Redditi.",
+        "topics": [
+            "730",
+            "dichiarazione redditi",
+            "fisco",
+            "scadenze",
+            "partita iva",
+            "irpef"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "ISEE 2025 - Indicatore della Situazione Economica Equivalente",
+        "ui_description": "Come funziona l'ISEE e le soglie rilevanti per i bonus 2025.",
+        "context_nugget": "ISEE 2025: DSU (Dichiarazione Sostitutiva Unica) submitted to CAF or INPS online. Valid 12 months from submission. Key thresholds for young adults: ≤€15K (max bonus psicologo), ≤€35K (carta cultura), ≤€50K (bonus psicologo access). Precompiled ISEE available online. ISEE corrente available for those who lost work during the year.",
+        "topics": [
+            "isee",
+            "bonus",
+            "agevolazioni",
+            "dsu",
+            "caf",
+            "reddito"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Bonus Cultura Giovani 2025 (Carta della Cultura)",
+        "ui_description": "€500 (o €1.000 con diploma 100/100) per i nati nel 2006 con ISEE familiare ≤€35.000.",
+        "context_nugget": "Bonus Cultura 2025 (Carta della Cultura Giovani): €500 for those born in 2006 + family ISEE ≤€35,000. Additional €500 (total €1,000) if also has 2024 high school diploma with grade 100/100. Application: January 31 → June 30, 2025. Usage deadline: December 31, 2025.",
+        "topics": [
+            "bonus cultura",
+            "giovani",
+            "isee",
+            "cultura",
+            "libri",
+            "agevolazioni"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Bonus Psicologo 2025",
+        "ui_description": "Contributo per sedute di psicoterapia con professionisti iscritti all'albo. Importo in base all'ISEE.",
+        "context_nugget": "Bonus Psicologo 2025: ISEE <€15,000 → max €1,500. ISEE €15K-€30K → max €1,000. ISEE €30K-€50K → max €500. Max €50 per session. Applications: September 15 - November 14, 2025.",
+        "topics": [
+            "bonus psicologo",
+            "salute mentale",
+            "psicoterapia",
+            "isee",
+            "agevolazioni"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Bonus Affitti Giovani Under 31 2025",
+        "ui_description": "Detrazione del 20% sul canone annuo per giovani under 31 con reddito ≤€15.493,71.",
+        "context_nugget": "Young renters bonus under 31 (2025): 20% of annual rent. Min €991.60, max €2,000. Income requirement: ≤€15,493.71. Duration: 4 years from contract start. New contracts after June 30, 2025: regulations in transition - verify with Agenzia delle Entrate.",
+        "topics": [
+            "affitto",
+            "bonus affitto",
+            "giovani",
+            "under 31",
+            "casa",
+            "agevolazioni"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Affitti - Cedolare Secca e Detrazioni Inquilino 2025",
+        "ui_description": "Aliquote cedolare secca per proprietari e detrazioni per inquilini nel 2025.",
+        "context_nugget": "Rental taxation 2025: Cedolare secca free market: 21%. Agreed rate (canone concordato): 10%. Short-term rentals (>1 property): 26%. Tenant deductions free market: €300 (income ≤€15,493.71) / €150 (€15K-€30,987.41). Agreed rate tenant deduction: €495.80 / €247.90.",
+        "topics": [
+            "affitto",
+            "cedolare secca",
+            "casa",
+            "proprietario",
+            "inquilino",
+            "tasse"
+        ]
+    },
+    {
+        "nation": "IT",
+        "status": "confirmed",
+        "origin": "seed-file",
+        "always_injected": false,
+        "title": "Bonus Mobili 2025",
+        "ui_description": "Detrazione 50% su acquisto mobili ed elettrodomestici per chi ha ristrutturato. Max €2.500 di risparmio.",
+        "context_nugget": "Bonus Mobili 2025: 50% deduction on max €5,000 spend = max €2,500 savings. Split over 10 annual tax returns. Requires renovation of same property started from January 1, 2024. Deadline: December 31, 2025. Likely not extended to 2026.",
+        "topics": [
+            "bonus mobili",
+            "ristrutturazione",
+            "casa",
+            "elettrodomestici",
+            "detrazione"
+        ]
+    }
+]

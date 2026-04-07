@@ -24,7 +24,7 @@ from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 
 from app.coaching.safety import SafetyScanner
-from app.content.search import search_content
+from app.content.search import search_content, search_regional_knowledge, get_always_injected_knowledge
 from app.db.models import WelcomeCache
 from app.ingestion.llm import LLMClient, LLMError
 from app.services.profile_service import ProfileError, ProfileService
@@ -53,7 +53,7 @@ _SEARCH_CONTENT_TOOL: dict = {
                 "locale": {
                     "type": "string",
                     "enum": ["it", "en"],
-                    "description": "Locale to search in — must match the response locale.",
+                    "description": "Locale to search in - must match the response locale.",
                 },
                 "top_k": {
                     "type": "integer",
@@ -70,6 +70,34 @@ _SEARCH_CONTENT_TOOL: dict = {
                 },
             },
             "required": ["query", "locale"],
+            "additionalProperties": False,
+        },
+    },
+}
+
+_SEARCH_REGIONAL_KNOWLEDGE_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "search_regional_knowledge",
+        "description": (
+            "Search country/region-specific financial rules, tax brackets, bonuses, and regulations. "
+            "Use when the user asks about taxes, contributions, government benefits, or local financial rules. "
+            "Automatically filtered to the user's registered nations."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Keywords describing the rule or topic (e.g. 'IRPEF scaglioni', 'regime forfettario', 'bonus affitto').",
+                },
+                "top_k": {
+                    "type": "integer",
+                    "description": "Maximum results to return (default 3).",
+                    "default": 3,
+                },
+            },
+            "required": ["query"],
             "additionalProperties": False,
         },
     },
@@ -205,7 +233,7 @@ class CoachingService:
 
         Cache strategy: Postgres `welcome_cache` table, keyed on a SHA3-256
         digest of (first_name, voice_gender, persona_id, locale, soul_hash).
-        The key is content-addressed — it changes only when personalisation
+        The key is content-addressed - it changes only when personalisation
         inputs or the soul file change, not on every container restart.
 
         `user_id` is intentionally NOT part of the key: two users with the
@@ -314,22 +342,39 @@ class CoachingService:
         profile_service = ProfileService(self.db)
         profile_dto = profile_service.get_profile(user_id)
 
+        # Load user nationalities for regional knowledge injection
+        from app.db.repository import get_user_by_id  # noqa: PLC0415
+        _user_row = get_user_by_id(self.db, user_id)
+        _nationalities: list[str] = (
+            (_user_row.nationalities if _user_row and _user_row.nationalities else None)
+            or ["IT"]
+        )
+
+        # Build always_injected regional context block
+        _always_injected = get_always_injected_knowledge(_nationalities)
+        _regional_context = ""
+        if _always_injected:
+            nuggets = "\n".join(
+                f"- [{r['title']}] {r['context_nugget']}" for r in _always_injected
+            )
+            _regional_context = f"\n\n### Regional Financial Rules ({', '.join(_nationalities)})\n{nuggets}"
+
         # Render templates
         system_prompt = self._render_system(soul_text, locale)
-        context_block = self._render_context(profile_dto)
+        context_block = self._render_context(profile_dto) + _regional_context
         response_format = self._render_response_format()
 
         # Build conversation prompt
         prompt = self._build_prompt(messages, context_block, response_format)
 
-        # Call LLM with tool-calling support for content search
+        # Call LLM with tool-calling support for content + regional knowledge search
         raw: str = ""
         try:
             raw = self.llm.complete_with_tools(
                 prompt=prompt,
                 system=system_prompt,
-                tools=[_SEARCH_CONTENT_TOOL],
-                tool_executor=self._tool_executor(locale),
+                tools=[_SEARCH_CONTENT_TOOL, _SEARCH_REGIONAL_KNOWLEDGE_TOOL],
+                tool_executor=self._tool_executor(locale, _nationalities),
                 response_schema=self._response_schema,
                 timeout=60.0,
             )
@@ -470,8 +515,9 @@ class CoachingService:
             except Exception:
                 pass
 
-    def _tool_executor(self, locale: str):
+    def _tool_executor(self, locale: str, nationalities: list[str] | None = None):
         """Return a closure that executes LLM tool calls for this coaching request."""
+        _nations = nationalities or ["IT"]
 
         def execute(name: str, arguments: dict):
             if name == "search_content":
@@ -480,6 +526,10 @@ class CoachingService:
                 top_k = int(arguments.get("top_k", 5))
                 content_types = arguments.get("content_types") or None
                 return search_content(query, req_locale, top_k, content_types)
+            if name == "search_regional_knowledge":
+                query = arguments.get("query", "")
+                top_k = int(arguments.get("top_k", 3))
+                return search_regional_knowledge(query, nations=_nations, top_k=top_k)
             raise ValueError(f"Unknown tool: {name!r}")
 
         return execute
@@ -614,11 +664,11 @@ class CoachingService:
         If the LLM returned empty resource_cards or action_cards after a coaching
         response (not a blocked response), inject sensible defaults from the catalog.
         Called only when the response is non-empty (has a message).
-        This is a safety net — the prompt should prevent empty cards on financial questions.
+        This is a safety net - the prompt should prevent empty cards on financial questions.
 
         Trigger condition (skip if ANY of these is true):
-          - message is very short (< 15 chars) — pure greetings, one-word replies
-          - affordability_verdict is absent/null — response is conversational, not financial
+          - message is very short (< 15 chars) - pure greetings, one-word replies
+          - affordability_verdict is absent/null - response is conversational, not financial
         This avoids injecting cards into short natural Italian questions like
         "Posso comprarlo?" (16 chars) that ARE financial decisions.
         """

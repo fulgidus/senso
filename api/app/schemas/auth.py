@@ -24,6 +24,7 @@ class UserDTO(BaseModel):
     nacl_key_login_envelope_b64: str | None = None  # Phase 13: wrapped nacl_master_key
     encrypted_x25519_private_b64: str | None = None # Phase 13: AES-GCM encrypted X25519 private key
     encrypted_ed25519_signing_b64: str | None = None # Phase 13: AES-GCM encrypted Ed25519 signing seed
+    nationalities: list[str] = ["IT"]  # Phase 20: ISO 3166-1/2 codes
 
 
 class UpdateMeRequest(BaseModel):

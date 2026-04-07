@@ -97,13 +97,13 @@ def _add_missing_columns() -> None:
           END IF;
         END$$
         """,
-        # welcome_cache.cache_key was VARCHAR(64) but the value is 69 chars — widen it
+        # welcome_cache.cache_key was VARCHAR(64) but the value is 69 chars - widen it
         "ALTER TABLE welcome_cache ALTER COLUMN cache_key TYPE VARCHAR(72)",
         # Truncate any existing oversized keys (none should exist, but be safe)
         "DELETE FROM welcome_cache WHERE length(cache_key) > 72",
         # ── Round 5: rename creator_id → owner_id with CASCADE ───────────────
         # Safe to run on both old DBs (has creator_id) and new DBs (already
-        # named owner_id — each statement is guarded and will SAVEPOINT-skip).
+        # named owner_id - each statement is guarded and will SAVEPOINT-skip).
         """
         DO $$
         BEGIN
@@ -115,7 +115,7 @@ def _add_missing_columns() -> None:
           END IF;
         END$$
         """,
-        # Drop old SET NULL FK (may not exist on fresh DBs — skip via SAVEPOINT)
+        # Drop old SET NULL FK (may not exist on fresh DBs - skip via SAVEPOINT)
         "ALTER TABLE chat_sessions DROP CONSTRAINT IF EXISTS chat_sessions_creator_id_fkey",
         # Add new CASCADE FK (idempotent DO$$ guard)
         """
@@ -136,7 +136,7 @@ def _add_missing_columns() -> None:
         "CREATE INDEX IF NOT EXISTS ix_chat_sessions_owner_id ON chat_sessions(owner_id)",
         # ── Round 4: new tables (create_all handles these on fresh DBs) ───────
         # session_participants, audio_cache, orphaned_s3_objects are created by
-        # Base.metadata.create_all() — the DO$$ blocks below make them idempotent
+        # Base.metadata.create_all() - the DO$$ blocks below make them idempotent
         # for environments where create_all already ran without the new models.
         """
         CREATE TABLE IF NOT EXISTS session_participants (
@@ -279,13 +279,13 @@ def _add_missing_columns() -> None:
         # ── Round 12: Phase 9 user penalty columns ────────────────────────────
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS violation_count INT NOT NULL DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_until TIMESTAMPTZ",
-        # ── Round 13: Phase 10 — encryption columns ───────────────────────────
+        # ── Round 13: Phase 10 - encryption columns ───────────────────────────
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_user_key TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS pbkdf2_salt VARCHAR(64)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS strict_privacy_mode BOOLEAN NOT NULL DEFAULT FALSE",
-        # ── Round 14: Phase 10 — convert T2 JSON/JSONB columns to TEXT ────────
+        # ── Round 14: Phase 10 - convert T2 JSON/JSONB columns to TEXT ────────
         # EncryptedJSON TypeDecorator stores AES-GCM ciphertext as TEXT.
-        # Existing columns are JSON or JSONB — PostgreSQL refuses ciphertext writes.
+        # Existing columns are JSON or JSONB - PostgreSQL refuses ciphertext writes.
         # USING clause casts existing JSON values to TEXT (valid JSON strings are
         # accepted by the TEXT type). Idempotent: already-TEXT columns are no-ops.
         """
@@ -344,11 +344,11 @@ def _add_missing_columns() -> None:
           END IF;
         END$$
         """,
-        # ── Round 15: Phase 11 — RBAC role column ─────────────────────────────────
+        # ── Round 15: Phase 11 - RBAC role column ─────────────────────────────────
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(16) NOT NULL DEFAULT 'user'",
         # Backfill: existing admins (is_admin=TRUE) get role='admin'
         "UPDATE users SET role = 'admin' WHERE is_admin = TRUE AND (role = 'user' OR role IS NULL)",
-        # ── Round 16: Phase 11 — ingestion pipeline traces ────────────────────────
+        # ── Round 16: Phase 11 - ingestion pipeline traces ────────────────────────
         """
         CREATE TABLE IF NOT EXISTS ingestion_traces (
             id VARCHAR(36) PRIMARY KEY,
@@ -365,7 +365,7 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_ingestion_traces_upload_id ON ingestion_traces (upload_id)",
-        # ── Round 17: Phase 13 — crypto identity (username + NaCl key columns) ──
+        # ── Round 17: Phase 13 - crypto identity (username + NaCl key columns) ──
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(64) UNIQUE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS public_key_b64 TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS signing_key_b64 TEXT",
@@ -374,7 +374,7 @@ def _add_missing_columns() -> None:
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_x25519_private_b64 TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS encrypted_ed25519_signing_b64 TEXT",
         "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username) WHERE username IS NOT NULL",
-        # ── Round 18: Phase 14 — E2E messaging schema ──────────────────────────────
+        # ── Round 18: Phase 14 - E2E messaging schema ──────────────────────────────
         # New user columns
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS admin_handle VARCHAR(64) UNIQUE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS nacl_key_recovery_envelope_b64 TEXT",
@@ -402,6 +402,43 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_delivered_messages_recipient_hashes ON delivered_messages USING GIN (recipient_hashes)",
+        # ── Round 19: Phase 20 - Regional knowledge + User memory + nationalities ────────
+        # users.nationalities: JSON array of ISO 3166-1 alpha-2 (+ optional ISO 3166-2) codes
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS nationalities JSONB NOT NULL DEFAULT '[\"IT\"]'::JSONB",
+        # regional_knowledge table
+        """
+        CREATE TABLE IF NOT EXISTS regional_knowledge (
+            id              VARCHAR(36) PRIMARY KEY,
+            nation          VARCHAR(2)  NOT NULL,
+            subdivision     VARCHAR(8),
+            created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            valid_from      DATE,
+            valid_until     DATE,
+            status          VARCHAR(16) NOT NULL DEFAULT 'unconfirmed',
+            origin          VARCHAR(32) NOT NULL DEFAULT 'admin-insertion',
+            title           VARCHAR(256) NOT NULL,
+            ui_description  TEXT,
+            context_nugget  TEXT NOT NULL,
+            always_injected BOOLEAN NOT NULL DEFAULT FALSE,
+            topics          JSONB NOT NULL DEFAULT '[]'::JSONB
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_regional_knowledge_nation ON regional_knowledge(nation)",
+        "CREATE INDEX IF NOT EXISTS ix_regional_knowledge_status ON regional_knowledge(status)",
+        # user_memory table (no FK - owner_hash = SHA-256($username))
+        """
+        CREATE TABLE IF NOT EXISTS user_memory (
+            id          VARCHAR(36) PRIMARY KEY,
+            owner_hash  VARCHAR(64) NOT NULL,
+            category    VARCHAR(32) NOT NULL DEFAULT 'fact',
+            content     TEXT        NOT NULL,
+            created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            valid_from  TIMESTAMP WITH TIME ZONE,
+            expires_at  TIMESTAMP WITH TIME ZONE,
+            source      VARCHAR(16) NOT NULL DEFAULT 'user'
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS ix_user_memory_owner_hash ON user_memory(owner_hash)",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
@@ -422,7 +459,7 @@ def _backfill_content_slugs() -> None:
 
     Uses slugify(title) with slugify(id) as fallback. Appends a numeric suffix
     on collision to guarantee uniqueness. Then creates a unique index if missing.
-    Idempotent — skips rows that already have slugs. Skips for SQLite (tests).
+    Idempotent - skips rows that already have slugs. Skips for SQLite (tests).
     """
     if DATABASE_URL.startswith("sqlite"):
         return

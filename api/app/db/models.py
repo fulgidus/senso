@@ -45,7 +45,7 @@ class EncryptedJSON(TypeDecorator):
     because psycopg2 pre-parses JSON columns into Python objects.  When
     ``StringEncryptedType`` decrypts the ciphertext and passes the plain
     JSON *string* to ``JSONType.process_result_value`` on Postgres, the
-    string is returned as-is instead of being parsed — causing downstream
+    string is returned as-is instead of being parsed - causing downstream
     ``dict()`` / ``list`` operations to crash.
 
     This decorator stores values as AES-GCM-encrypted TEXT and handles
@@ -119,9 +119,9 @@ class User(Base):
     encrypted_user_key: str | None = Column(Text, nullable=True, default=None)
     pbkdf2_salt: str | None = Column(String(64), nullable=True, default=None)
     strict_privacy_mode: bool = Column(Boolean, nullable=False, default=False)
-    # Phase 11: RBAC role column — "user" | "tester" | "moderator" | "admin"
+    # Phase 11: RBAC role column - "user" | "tester" | "moderator" | "admin"
     role: str = Column(String(16), nullable=False, default="user")
-    # Phase 13: crypto identity — username + NaCl key columns
+    # Phase 13: crypto identity - username + NaCl key columns
     username: str | None = Column(String(64), unique=True, nullable=True, default=None)
     public_key_b64: str | None = Column(Text, nullable=True, default=None)       # X25519 public key
     signing_key_b64: str | None = Column(Text, nullable=True, default=None)      # Ed25519 verify key
@@ -132,6 +132,7 @@ class User(Base):
     # Phase 14: admin handle + BIP-39 recovery envelope
     admin_handle: str | None = Column(String(64), unique=True, nullable=True, default=None)
     nacl_key_recovery_envelope_b64: str | None = Column(Text, nullable=True, default=None)
+    nationalities: list = Column(JSON, nullable=False, default=lambda: ["IT"])  # ISO 3166-1/2 codes
 
     # Relationships
     chat_sessions_participated = relationship(
@@ -560,7 +561,7 @@ class OrphanedS3Object(Base):
 class WelcomeCache(Base):
     __tablename__ = "welcome_cache"
 
-    # "SHA3:" (5 chars) + sha3_256 hex (64 chars) = 69 chars — use 72 for headroom
+    # "SHA3:" (5 chars) + sha3_256 hex (64 chars) = 69 chars - use 72 for headroom
     cache_key: str = Column(String(72), primary_key=True)
     text: str = Column(Text, nullable=False)
     created_at: datetime = Column(
@@ -604,12 +605,12 @@ def _audio_cache_after_delete(mapper, connection, target: AudioCache) -> None:
         )
     except Exception as exc:
         log.warning(
-            "AudioCache: failed to delete s3://%s/%s — recording orphan. Error: %s",
+            "AudioCache: failed to delete s3://%s/%s - recording orphan. Error: %s",
             target.minio_bucket,
             target.minio_key,
             exc,
         )
-        # Record for cleanup job — use a raw INSERT to stay out of the ORM session
+        # Record for cleanup job - use a raw INSERT to stay out of the ORM session
         # that is mid-delete.
         try:
             from sqlalchemy import text as sa_text
@@ -800,7 +801,7 @@ class IngestionTrace(Base):
 
 # ── Phase 14: E2E Messaging ────────────────────────────────────────────────
 
-# In tests, DATABASE_URL is sqlite — ARRAY is Postgres-only.
+# In tests, DATABASE_URL is sqlite - ARRAY is Postgres-only.
 # Use JSON as fallback so create_all() doesn't explode in SQLite test env.
 import os as _os
 _IS_SQLITE = _os.getenv("DATABASE_URL", "sqlite").startswith("sqlite")
@@ -815,7 +816,7 @@ except ImportError:
 class UndeliveredMessage(Base):
     """Routing table for E2E encrypted messages awaiting delivery.
 
-    Zero-knowledge design: no user_id FK — recipient identity is anchored
+    Zero-knowledge design: no user_id FK - recipient identity is anchored
     solely to sha256($username) stored in recipient_hashes[].
     Row is deleted when recipient_hashes becomes empty after full delivery.
     Purged by APScheduler TTL job after MESSAGE_TTL_DAYS days.
@@ -838,7 +839,7 @@ class DeliveredMessage(Base):
     One row per message (shared across all recipients). Multiple recipients
     get individual entries appended to delivered_at[].
     created_at reflects the ORIGINAL message creation time, not the row insert time.
-    No user_id FK — recipient identity is solely the hash.
+    No user_id FK - recipient identity is solely the hash.
     """
 
     __tablename__ = "delivered_messages"
@@ -857,4 +858,89 @@ class DeliveredMessage(Base):
     )  # [{hash: str, at: ISO datetime str}]
     source_message_id: str | None = Column(
         String(36), nullable=True, default=None
-    )  # nullable — original undelivered_messages.id (may be null after TTL purge)
+    )  # nullable - original undelivered_messages.id (may be null after TTL purge)
+
+
+# ── Phase 20: Regional Knowledge ──────────────────────────────────────────
+
+class RegionalKnowledge(Base):
+    """Country/region-specific financial rules and context nuggets.
+
+    Entries are injected into coaching context either always (always_injected=True)
+    or on-demand via the search_regional_knowledge LLM tool.
+
+    origin values:
+        seed-file         - loaded from regional_knowledge.json at startup
+        admin-insertion   - created by an admin via the admin API
+        coach-deduction   - inferred by the LLM during coaching (unconfirmed)
+        user-chat         - surfaced from user conversation
+        user-document     - extracted from an uploaded document
+    """
+
+    __tablename__ = "regional_knowledge"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    nation: str = Column(String(2), nullable=False)       # ISO 3166-1 alpha-2: "IT"
+    subdivision: str | None = Column(String(8), nullable=True)  # ISO 3166-2: "IT-MI"
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    valid_from: date | None = Column(Date, nullable=True)
+    valid_until: date | None = Column(Date, nullable=True)
+    status: str = Column(
+        String(16), nullable=False, default="unconfirmed"
+    )  # "unconfirmed" | "confirmed"
+    origin: str = Column(
+        String(32), nullable=False, default="admin-insertion"
+    )  # see docstring
+    title: str = Column(String(256), nullable=False)
+    ui_description: str | None = Column(Text, nullable=True)  # localized (IT → Italian)
+    context_nugget: str = Column(Text, nullable=False)        # English, LLM-optimized
+    always_injected: bool = Column(Boolean, nullable=False, default=False)
+    topics: list = Column(JSON, nullable=False, default=list)  # for BM25 topic matching
+
+
+# ── Phase 20: User Memory ─────────────────────────────────────────────────────
+
+class UserMemory(Base):
+    """Atomic user preferences and memories, decoupled from user_id for privacy.
+
+    owner_hash = SHA-256(users.username) hex digest.
+    No FK constraint - linkability requires knowing the original $username.
+    Content is encrypted at rest with the server key (same pattern as EncryptedJSON).
+
+    category values:
+        goal       - long-term aspiration ("voglio comprare casa")
+        habit_do   - positive habit to reinforce ("risparmiare 10% ogni mese")
+        habit_dont - behaviour to avoid ("niente acquisti impulsivi")
+        fact       - stable personal fact ("sono freelance con P.IVA")
+
+    source values:
+        user   - user entered this directly in the UI
+        coach  - the LLM inferred this during a coaching session
+    """
+
+    __tablename__ = "user_memory"
+
+    id: str = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    owner_hash: str = Column(
+        String(64), nullable=False, index=True
+    )  # SHA-256($username) hex - no FK
+    category: str = Column(
+        String(32), nullable=False, default="fact"
+    )  # goal | habit_do | habit_dont | fact
+    content: str = Column(
+        StringEncryptedType(Text, _server_key, AesGcmEngine), nullable=False
+    )
+    created_at: datetime = Column(
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
+    )
+    valid_from: datetime | None = Column(
+        DateTime(timezone=True), nullable=True
+    )  # for future events; LLM sees this as upcoming
+    expires_at: datetime | None = Column(
+        DateTime(timezone=True), nullable=True
+    )  # optional TTL
+    source: str = Column(
+        String(16), nullable=False, default="user"
+    )  # user | coach

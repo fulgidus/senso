@@ -4,14 +4,14 @@ Content search using in-process BM25 (rank_bm25).
 Loads content from the database (ContentItem table). Falls back to static JSON
 catalog files if the DB is empty or unavailable.
 
-Locale filtering is applied BEFORE BM25 scoring — the LLM always gets
+Locale filtering is applied BEFORE BM25 scoring - the LLM always gets
 locale-matched results only.
 
 Search syntax keywords (English only, no i18n):
-    tag:budget          — filter results to items containing topic "budget"
-    type:video          — filter results to items of type "video"
-    from:2026-01-01     — filter results to items created on or after date
-    to:2026-03-31       — filter results to items created on or before date
+    tag:budget          - filter results to items containing topic "budget"
+    type:video          - filter results to items of type "video"
+    from:2026-01-01     - filter results to items created on or after date
+    to:2026-03-31       - filter results to items created on or before date
 
 Keywords are extracted before BM25 scoring.  Remaining free text is scored
 by BM25.  If no free text remains after extraction, all items matching
@@ -355,7 +355,7 @@ class ContentIndex:
         Supports structured syntax: ``tag:``, ``type:``, ``from:``, ``to:``.
         Free text after syntax extraction is scored by BM25.
 
-        The ``content_types`` parameter is a legacy filter — if the parsed query
+        The ``content_types`` parameter is a legacy filter - if the parsed query
         also contains ``type:`` keywords, both are merged (union).
         """
         parsed = parse_search_query(query)
@@ -374,7 +374,7 @@ class ContentIndex:
         if parsed.free_text:
             tokens = _tokenize(parsed.free_text)
             if not tokens:
-                # All free text was stop words / too short — fall through
+                # All free text was stop words / too short - fall through
                 # to filter-only path
                 return self._filter_only(items, parsed, top_k)
 
@@ -394,7 +394,7 @@ class ContentIndex:
                     break
             return results
 
-        # No free text — return all items matching structured filters
+        # No free text - return all items matching structured filters
         return self._filter_only(items, parsed, top_k)
 
     def _filter_only(
@@ -547,3 +547,197 @@ def suggest_content(
 def get_all_tags(locale: str | None = None) -> list[str]:
     """Return all unique topic tags from the index."""
     return get_index().get_all_tags(locale)
+
+
+# ── Regional Knowledge BM25 ───────────────────────────────────────────────────
+
+_rk_items: list[dict[str, Any]] = []
+_rk_index: "BM25Okapi | None" = None
+
+
+def _load_regional_knowledge_from_db() -> list[dict[str, Any]]:
+    """Load confirmed regional knowledge from DB."""
+    from app.db.session import SessionLocal  # noqa: PLC0415
+    from app.db.models import RegionalKnowledge  # noqa: PLC0415
+    from datetime import date as _date  # noqa: PLC0415
+
+    db = SessionLocal()
+    try:
+        today = _date.today()
+        rows = (
+            db.query(RegionalKnowledge)
+            .filter(RegionalKnowledge.status == "confirmed")
+            .filter(
+                (RegionalKnowledge.valid_until == None)  # noqa: E711
+                | (RegionalKnowledge.valid_until >= today)
+            )
+            .all()
+        )
+        return [
+            {
+                "id": r.id,
+                "nation": r.nation,
+                "subdivision": r.subdivision,
+                "title": r.title,
+                "context_nugget": r.context_nugget,
+                "ui_description": r.ui_description,
+                "always_injected": r.always_injected,
+                "topics": r.topics or [],
+                "valid_from": r.valid_from.isoformat() if r.valid_from else None,
+                "valid_until": r.valid_until.isoformat() if r.valid_until else None,
+                "status": r.status,
+                "origin": r.origin,
+            }
+            for r in rows
+        ]
+    finally:
+        db.close()
+
+
+def _load_regional_knowledge_from_json() -> list[dict[str, Any]]:
+    """Fallback: load from seed file."""
+    path = _CONTENT_DIR / "regional_knowledge.json"
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_regional_knowledge_index() -> None:
+    """Build (or rebuild) the in-process BM25 index over confirmed regional knowledge."""
+    global _rk_items, _rk_index
+    try:
+        items = _load_regional_knowledge_from_db()
+    except Exception:
+        logger.debug("DB unavailable for regional knowledge, falling back to JSON.")
+        items = []
+    if not items:
+        items = _load_regional_knowledge_from_json()
+    _rk_items = items
+    if not items:
+        _rk_index = None
+        return
+    corpus = [
+        _tokenize(f"{r['title']} {r.get('context_nugget','')} {' '.join(r.get('topics',[]))}")
+        for r in items
+    ]
+    _rk_index = BM25Okapi(corpus)
+    logger.info("Regional knowledge index built: %d entries.", len(items))
+
+
+def seed_regional_knowledge_from_json() -> None:
+    """Seed regional_knowledge table from JSON file if table is empty.
+
+    Idempotent - only runs when the table has zero rows.
+    Sets status='confirmed', origin='seed-file' for all seeded entries.
+    """
+    from uuid import uuid4  # noqa: PLC0415
+    from datetime import date as _date  # noqa: PLC0415
+
+    from app.db.session import SessionLocal  # noqa: PLC0415
+    from app.db.models import RegionalKnowledge  # noqa: PLC0415
+
+    path = _CONTENT_DIR / "regional_knowledge.json"
+    if not path.exists():
+        return
+
+    db = SessionLocal()
+    try:
+        if db.query(RegionalKnowledge).count() > 0:
+            return  # already seeded
+        entries = json.loads(path.read_text(encoding="utf-8"))
+        for entry in entries:
+            row = RegionalKnowledge(
+                id=str(uuid4()),
+                nation=entry["nation"],
+                subdivision=entry.get("subdivision"),
+                status="confirmed",
+                origin="seed-file",
+                title=entry["title"],
+                ui_description=entry.get("ui_description"),
+                context_nugget=entry["context_nugget"],
+                always_injected=entry.get("always_injected", False),
+                topics=entry.get("topics", []),
+                valid_from=_date.fromisoformat(entry["valid_from"]) if entry.get("valid_from") else None,
+                valid_until=_date.fromisoformat(entry["valid_until"]) if entry.get("valid_until") else None,
+            )
+            db.add(row)
+        db.commit()
+        logger.info("Seeded %d regional knowledge entries from JSON.", len(entries))
+    except Exception as exc:
+        db.rollback()
+        logger.error("Regional knowledge seeding failed: %s", exc)
+    finally:
+        db.close()
+
+
+def search_regional_knowledge(
+    query: str,
+    nations: list[str] | None = None,
+    top_k: int = 5,
+    include_always_injected: bool = True,
+) -> list[dict[str, Any]]:
+    """Search regional knowledge by query and optional nation filter.
+
+    Returns context_nugget + metadata suitable for LLM tool injection.
+    nations: list of ISO 3166-1/2 codes to filter by (e.g. ["IT", "DE-BY"]).
+             If None, no nation filter applied.
+    """
+    if not _rk_items or _rk_index is None:
+        return []
+
+    candidates = _rk_items
+    if nations:
+        nation_set = {n.upper() for n in nations}
+        candidates = [
+            r for r in candidates
+            if r["nation"].upper() in nation_set
+            or (r.get("subdivision") and r["subdivision"].upper() in nation_set)
+        ]
+
+    if not candidates:
+        return []
+
+    # Filter to candidates that are in the index
+    candidate_ids = {r["id"] for r in candidates}
+    # Rebuild a local index for the candidate subset
+    corpus = [
+        _tokenize(f"{r['title']} {r.get('context_nugget','')} {' '.join(r.get('topics',[]))}")
+        for r in candidates
+    ]
+    local_index = BM25Okapi(corpus)
+    tokens = _tokenize(query)
+    if not tokens:
+        subset = candidates[:top_k]
+    else:
+        scores = local_index.get_scores(tokens)
+        ranked = sorted(zip(scores, candidates), key=lambda x: x[0], reverse=True)
+        subset = [item for score, item in ranked if score > 0][:top_k]
+        if not subset:
+            subset = candidates[:top_k]
+
+    return [
+        {
+            "id": r["id"],
+            "nation": r["nation"],
+            "title": r["title"],
+            "context_nugget": r["context_nugget"],
+            "always_injected": r["always_injected"],
+            "valid_from": r.get("valid_from"),
+            "valid_until": r.get("valid_until"),
+        }
+        for r in subset
+    ]
+
+
+def get_always_injected_knowledge(nations: list[str]) -> list[dict[str, Any]]:
+    """Return all always_injected=True confirmed entries for the given nations.
+
+    Called at the start of every coaching request to build the static context block.
+    """
+    if not _rk_items:
+        return []
+    nation_set = {n.upper() for n in nations}
+    return [
+        r for r in _rk_items
+        if r.get("always_injected") and r["nation"].upper() in nation_set
+    ]

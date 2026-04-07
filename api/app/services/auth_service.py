@@ -64,6 +64,7 @@ def _to_user_dto(user: User) -> UserDTO:
         nacl_key_login_envelope_b64=user.nacl_key_login_envelope_b64,
         encrypted_x25519_private_b64=user.encrypted_x25519_private_b64,
         encrypted_ed25519_signing_b64=user.encrypted_ed25519_signing_b64,
+        nationalities=user.nationalities or ["IT"],
     )
 
 

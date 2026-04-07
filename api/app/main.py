@@ -80,7 +80,16 @@ class CatchAllExceptionMiddleware:
 async def lifespan(app: FastAPI):
     create_tables()
 
-    settings = get_settings()
+    # Build BM25 content + regional knowledge indexes and seed from JSON if needed
+    from app.content.search import (  # noqa: PLC0415
+        rebuild_index as _rebuild_content_index,
+        seed_regional_knowledge_from_json,
+        build_regional_knowledge_index,
+    )
+    _rebuild_content_index()
+    seed_regional_knowledge_from_json()  # idempotent - skips if DB already has rows
+    build_regional_knowledge_index()
+
     scheduler = BackgroundScheduler()
 
     def _purge_expired_messages() -> None:
@@ -120,8 +129,8 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     # Middleware stack order (outermost → innermost):
-    #   1. CORSMiddleware              — adds Access-Control-* headers to ALL responses
-    #   2. CatchAllExceptionMiddleware — catches crashes → structured 500 JSON
+    #   1. CORSMiddleware              - adds Access-Control-* headers to ALL responses
+    #   2. CatchAllExceptionMiddleware - catches crashes → structured 500 JSON
     #
     # add_middleware() PREPENDS (makes outermost), so we add the inner one
     # first, then the outer one.
