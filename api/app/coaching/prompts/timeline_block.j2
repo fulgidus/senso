@@ -1,0 +1,7 @@
+{% if timeline_events %}
+
+## Recent Financial Life Events
+{% for event in timeline_events %}
+- **{{ event.event_type | replace("_", " ") | title }}** ({{ event.event_date }}): {{ event.title }}{% if event.description %} — {{ event.description }}{% endif %}
+{% endfor %}
+{% endif %}

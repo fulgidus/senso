@@ -115,6 +115,41 @@ _SEARCH_REGIONAL_KNOWLEDGE_TOOL: dict = {
 # Invalidated only when the process restarts (file changes require a redeploy anyway).
 _soul_hash_cache: dict[str, str] = {}
 
+# Phase 19: get_timeline_events tool
+_GET_TIMELINE_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "get_timeline_events",
+        "description": (
+            "Fetch the user's financial life events (income changes, relocations, "
+            "debt changes, major purchases, subscriptions). Use when the user asks "
+            "about their financial history or life events."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "types": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "income_shift",
+                            "major_purchase",
+                            "subscription_accumulation",
+                            "extraordinary_income",
+                            "relocation",
+                            "debt_change",
+                        ],
+                    },
+                    "description": "Event types to fetch. Empty array = all types.",
+                },
+            },
+            "required": [],
+            "additionalProperties": False,
+        },
+    },
+}
+
 COACHING_DIR = Path(__file__).parent
 PERSONAS_DIR = COACHING_DIR.parent / "personas"
 SCHEMAS_DIR = COACHING_DIR / "schemas"
@@ -369,7 +404,7 @@ class CoachingService:
 
         # Render templates
         system_prompt = self._render_system(soul_text, locale)
-        context_block = self._render_context(profile_dto) + _regional_context
+        context_block = self._render_context(profile_dto, user_id=user_id) + _regional_context
         response_format = self._render_response_format()
 
         # Build conversation prompt
@@ -381,8 +416,8 @@ class CoachingService:
             raw = self.llm.complete_with_tools(
                 prompt=prompt,
                 system=system_prompt,
-                tools=[_SEARCH_CONTENT_TOOL, _SEARCH_REGIONAL_KNOWLEDGE_TOOL],
-                tool_executor=self._tool_executor(locale, _nationalities),
+                tools=[_SEARCH_CONTENT_TOOL, _SEARCH_REGIONAL_KNOWLEDGE_TOOL, _GET_TIMELINE_TOOL],
+                tool_executor=self._tool_executor(locale, _nationalities, user_id=user_id),
                 response_schema=self._response_schema,
                 timeout=60.0,
             )
@@ -523,7 +558,9 @@ class CoachingService:
             except Exception:
                 pass
 
-    def _tool_executor(self, locale: str, nationalities: list[str] | None = None):
+    def _tool_executor(
+        self, locale: str, nationalities: list[str] | None = None, user_id: str | None = None
+    ):
         """Return a closure that executes LLM tool calls for this coaching request."""
         _nations = nationalities or ["IT"]
 
@@ -541,6 +578,25 @@ class CoachingService:
                 explicit_nation = arguments.get("nation")
                 nations = [explicit_nation.upper()] if explicit_nation else _nations
                 return search_regional_knowledge(query, nations=nations, top_k=top_k)
+            if name == "get_timeline_events":
+                if not user_id:
+                    return []
+                from app.db.repository import get_timeline_events as _get_evts  # noqa: PLC0415
+                types_filter = arguments.get("types") or []
+                events = _get_evts(self.db, user_id, include_dismissed=False)
+                results = []
+                for e in events:
+                    if not e.is_user_dismissed:
+                        if types_filter and e.event_type not in types_filter:
+                            continue
+                        results.append({
+                            "event_type": e.event_type,
+                            "event_date": str(e.event_date),
+                            "title": e.title,
+                            "description": e.description,
+                            "evidence": e.evidence_json,
+                        })
+                return results
             raise ValueError(f"Unknown tool: {name!r}")
 
         return execute
@@ -607,7 +663,7 @@ class CoachingService:
             locale=locale,
         )
 
-    def _render_context(self, profile_dto) -> str:
+    def _render_context(self, profile_dto, user_id: str | None = None) -> str:
         tmpl = self._jinja_env.get_template("context_block.j2")
         # UserProfileDTO uses aliases but also supports snake_case via populate_by_name
         income_summary = getattr(profile_dto, "income_summary", None)
@@ -625,7 +681,7 @@ class CoachingService:
             or questionnaire_answers.get("income_sources")
             or []
         )
-        return tmpl.render(
+        context = tmpl.render(
             income_summary=income_summary,
             monthly_expenses=monthly_expenses,
             monthly_margin=monthly_margin,
@@ -634,6 +690,32 @@ class CoachingService:
             coaching_insights=coaching_insights or [],
             income_sources=income_sources,
         )
+        # Phase 19: inject timeline block when events exist
+        if user_id:
+            try:
+                from app.db.repository import get_timeline_events  # noqa: PLC0415
+                events = get_timeline_events(self.db, user_id, include_dismissed=False)
+                recent_events = [
+                    e for e in events
+                    if not e.is_user_dismissed
+                ][:3]
+                if recent_events:
+                    timeline_tmpl = self._jinja_env.get_template("timeline_block.j2")
+                    timeline_block = timeline_tmpl.render(
+                        timeline_events=[
+                            {
+                                "event_type": e.event_type,
+                                "event_date": str(e.event_date),
+                                "title": e.title or e.event_type,
+                                "description": e.description,
+                            }
+                            for e in recent_events
+                        ]
+                    )
+                    context += timeline_block
+            except Exception:
+                pass  # Timeline injection is best-effort
+        return context
 
     def _render_response_format(self) -> str:
         tmpl = self._jinja_env.get_template("response_format.j2")
