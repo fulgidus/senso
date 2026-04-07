@@ -275,7 +275,36 @@ class ProfileService:
         profile.updated_at = datetime.now(_UTC)
         self.db.commit()
 
-    def enrich_from_utility_bill(self, user_id: str, extraction) -> None:
+        # Phase 19: trigger income_shift timeline event if salary changed >5%
+        try:
+            if len(sources) >= 2:
+                prev_net = sources[-2].get("net_income")
+                curr_net = sources[-1].get("net_income")
+                if prev_net and curr_net and prev_net > 0:
+                    change_pct = (curr_net - prev_net) / prev_net
+                    if abs(change_pct) > 0.05:
+                        from datetime import date as _date  # noqa: PLC0415
+                        from app.db.repository import upsert_timeline_event  # noqa: PLC0415
+                        direction = "increase" if curr_net > prev_net else "decrease"
+                        upsert_timeline_event(
+                            self.db,
+                            user_id,
+                            event_type="income_shift",
+                            event_date=_date.today(),
+                            title="Variazione stipendio" if direction == "increase" else "Riduzione stipendio",
+                            description=f"Stipendio netto {'+' if direction == 'increase' else ''}{change_pct*100:.1f}%",
+                            evidence_json={
+                                "prev_net": prev_net,
+                                "curr_net": curr_net,
+                                "change_pct": round(change_pct * 100, 1),
+                                "direction": direction,
+                                "source": "payslip",
+                            },
+                        )
+                        self.db.commit()
+        except Exception as _exc:
+            import logging as _log  # noqa: PLC0415
+            _log.getLogger(__name__).warning("Timeline trigger (payslip) failed: %s", _exc)
         """Upsert utility bill into fixed_expenses (keyed by provider+service_type)."""
         from datetime import datetime, UTC as _UTC
 
@@ -311,6 +340,41 @@ class ProfileService:
         profile.fixed_expenses = expenses
         profile.updated_at = datetime.now(_UTC)
         self.db.commit()
+
+        # Phase 19: trigger subscription_accumulation when new provider added or >10% increase
+        try:
+            expenses_before_total = sum(
+                e.get("monthly_amount") or 0
+                for e in (list(profile.fixed_expenses or []) if not updated else expenses[:-1])
+            )
+            expenses_after_total = sum(
+                e.get("monthly_amount") or 0 for e in profile.fixed_expenses or []
+            )
+            is_new_provider = not updated
+            if is_new_provider or (
+                expenses_before_total > 0
+                and expenses_after_total > expenses_before_total * 1.10
+            ):
+                from datetime import date as _date  # noqa: PLC0415
+                from app.db.repository import upsert_timeline_event  # noqa: PLC0415
+                upsert_timeline_event(
+                    self.db,
+                    user_id,
+                    event_type="subscription_accumulation",
+                    event_date=_date.today(),
+                    title="Nuova spesa fissa rilevata",
+                    description=f"Bolletta {provider} ({service}) aggiunta alle spese fisse.",
+                    evidence_json={
+                        "new_provider": provider,
+                        "service_type": service,
+                        "monthly_amount": float(extraction.total_due) if extraction.total_due else None,
+                        "total_fixed_expenses": round(expenses_after_total, 2),
+                    },
+                )
+                self.db.commit()
+        except Exception as _exc:
+            import logging as _log  # noqa: PLC0415
+            _log.getLogger(__name__).warning("Timeline trigger (utility) failed: %s", _exc)
 
     def enrich_from_invoice(self, user_id: str, extraction) -> None:
         """Append invoice to one_off_expenses."""
