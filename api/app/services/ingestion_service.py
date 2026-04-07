@@ -66,6 +66,21 @@ class IngestionService:
                 "file_too_large", "File exceeds 20 MB limit", status_code=413
             )
 
+        # Dedup: reject if this exact file was already uploaded by this user
+        import hashlib
+        content_hash = hashlib.sha256(file_bytes).hexdigest()
+        existing = (
+            self.db.query(Upload)
+            .filter(Upload.user_id == user_id, Upload.content_hash == content_hash)
+            .first()
+        )
+        if existing:
+            raise IngestionError(
+                "duplicate_file",
+                "This file has already been uploaded.",
+                status_code=409,
+            )
+
         upload_id = str(uuid4())
         minio_key = f"{user_id}/{upload_id}/{filename}"
 
@@ -89,6 +104,7 @@ class IngestionService:
             size_bytes=len(file_bytes),
             extraction_queued_at=datetime.now(UTC),
             extraction_status="pending",
+            content_hash=content_hash,
         )
         self.db.add(upload)
         self.db.commit()

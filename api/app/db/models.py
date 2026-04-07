@@ -209,6 +209,7 @@ class Upload(Base):
     module_source: str | None = Column(String(32), nullable=True, default=None)
     confirmed: bool = Column(Boolean, nullable=False, default=False)
     report_flagged: bool = Column(Boolean, nullable=False, default=False)
+    content_hash: str | None = Column(String(64), nullable=True, index=True)
 
     user = relationship("User", back_populates="uploads")
     extracted_document = relationship(

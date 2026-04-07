@@ -402,7 +402,13 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_delivered_messages_recipient_hashes ON delivered_messages USING GIN (recipient_hashes)",
-        # ── Round 19: Phase 20 - Regional knowledge + User memory + nationalities ────────
+        # ── Round 20: Phase 18 - Ingestion reliability + non-ledger document support ──────
+        "ALTER TABLE uploads ADD COLUMN IF NOT EXISTS content_hash VARCHAR(64)",
+        "CREATE INDEX IF NOT EXISTS ix_uploads_content_hash ON uploads (content_hash)",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS verified_income_sources JSONB NOT NULL DEFAULT '[]'::JSONB",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS fixed_expenses JSONB NOT NULL DEFAULT '[]'::JSONB",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS one_off_expenses JSONB NOT NULL DEFAULT '[]'::JSONB",
+        # ── Round 21 (formerly Round 19): Phase 20 - Regional knowledge + User memory + nationalities - Regional knowledge + User memory + nationalities ────────
         # users.nationalities: JSON array of ISO 3166-1 alpha-2 (+ optional ISO 3166-2) codes
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS nationalities JSONB NOT NULL DEFAULT '[\"IT\"]'::JSONB",
         # regional_knowledge table
