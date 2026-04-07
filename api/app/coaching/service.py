@@ -82,14 +82,22 @@ _SEARCH_REGIONAL_KNOWLEDGE_TOOL: dict = {
         "description": (
             "Search country/region-specific financial rules, tax brackets, bonuses, and regulations. "
             "Use when the user asks about taxes, contributions, government benefits, or local financial rules. "
-            "Automatically filtered to the user's registered nations."
+            "Defaults to the user's registered nations. Pass 'nation' explicitly when the user asks about a specific country."
         ),
         "parameters": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "Keywords describing the rule or topic (e.g. 'IRPEF scaglioni', 'regime forfettario', 'bonus affitto').",
+                    "description": "Keywords describing the rule or topic (e.g. 'IRPEF scaglioni', 'income tax brackets', 'bonus affitto').",
+                },
+                "nation": {
+                    "type": "string",
+                    "description": (
+                        "ISO 3166-1 alpha-2 country code to search (e.g. 'IT', 'DE', 'FR', 'US'). "
+                        "Optional — omit to search the user's registered nations. "
+                        "Provide when the user explicitly asks about a different country."
+                    ),
                 },
                 "top_k": {
                     "type": "integer",
@@ -529,7 +537,10 @@ class CoachingService:
             if name == "search_regional_knowledge":
                 query = arguments.get("query", "")
                 top_k = int(arguments.get("top_k", 3))
-                return search_regional_knowledge(query, nations=_nations, top_k=top_k)
+                # Explicit nation overrides user default; None searches all nations in DB
+                explicit_nation = arguments.get("nation")
+                nations = [explicit_nation.upper()] if explicit_nation else _nations
+                return search_regional_knowledge(query, nations=nations, top_k=top_k)
             raise ValueError(f"Unknown tool: {name!r}")
 
         return execute
