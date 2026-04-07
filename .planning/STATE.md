@@ -252,6 +252,7 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
+- Phase 12.1.1 inserted after Phase 12.1: fix remaining pending todos — coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (URGENT)
 - Phase 12.1 inserted after Phase 12: Add a phase for all the todos, we need to prioritize them because they impact current usability (URGENT)
 - Phase 8 added: Content platform management, indexing & public serving (articles, MARPs, curated links)
 - Phase 9 added: LLM financial intelligence with categorization, tagging, timeline inference & crowdsourced merchant mapping

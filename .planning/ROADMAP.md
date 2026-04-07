@@ -246,6 +246,16 @@ Plans:
 - [x] 12.1-07-PLAN.md - Admin table UX: sort affordance + icon headers + pagination + localized category picker + settings save confirmation (#8, #9, #17, #18, #19, #20, #21)
 - [x] 12.1-08-PLAN.md - UI polish: pie chart, responsive table card layouts, TTS fallback indicator, dark-mode coaching cards (#12, #16, #22, #23)
 
+### Phase 12.1.1: fix remaining pending todos — coach picker bug, TTS voice output, manual categorization, content management polish, and 22 other UX fixes (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 12.1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12.1.1 to break down)
+
 ### Phase 13: Crypto Identity Foundation — asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 
 **Goal:** Every new user receives a pseudonymous `$adjective-noun-NNNN` username and an NaCl (libsodium) X25519+Ed25519 key pair at signup; public keys are stored on the user row; the one remaining obfuscated-email exposure (admin merchant map) is replaced with the username; and the frontend User type exposes all new identity fields.
