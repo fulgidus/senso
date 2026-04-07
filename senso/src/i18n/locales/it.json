@@ -487,7 +487,13 @@
     "aboutCta": "Leggi come funziona",
     "devToolsTitle": "Strumenti sviluppatore",
     "devToolsHint": "Controlli per tester e amministratori.",
-    "devToolsCta": "Apri strumenti sviluppatore"
+    "devToolsCta": "Apri strumenti sviluppatore",
+    "adminHandleTitle": "Handle admin (!handle)",
+    "adminHandleHint": "Il tuo handle pubblico per messaggi ufficiali. Visibile agli utenti. Usa solo lettere minuscole, numeri e trattini.",
+    "adminHandleClaim": "Salva handle",
+    "adminHandleClaimed": "attivo",
+    "adminHandleSuccess": "Handle impostato con successo.",
+    "adminHandleError": "Impossibile salvare l'handle. Forse è già in uso."
   },
   "about": {
     "pageTitle": "Come funziona S.E.N.S.O.",

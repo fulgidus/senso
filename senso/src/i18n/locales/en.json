@@ -487,7 +487,13 @@
     "aboutCta": "Read how it works",
     "devToolsTitle": "Developer tools",
     "devToolsHint": "Controls for testers and administrators.",
-    "devToolsCta": "Open developer tools"
+    "devToolsCta": "Open developer tools",
+    "adminHandleTitle": "Admin handle (!handle)",
+    "adminHandleHint": "Your public handle for official messages. Visible to users. Lowercase letters, numbers, and hyphens only.",
+    "adminHandleClaim": "Save handle",
+    "adminHandleClaimed": "active",
+    "adminHandleSuccess": "Handle set successfully.",
+    "adminHandleError": "Could not save handle. It may already be taken."
   },
   "about": {
     "pageTitle": "How S.E.N.S.O. works",

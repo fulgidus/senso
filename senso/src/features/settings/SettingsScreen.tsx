@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { Link } from "react-router-dom"
-import { LogOut, Save, Shield } from "lucide-react"
+import { LogOut, Save, Shield, AtSign } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { useTheme } from "@/components/theme-provider"
@@ -44,6 +44,36 @@ export function SettingsScreen() {
   const [strictPrivacyMode, setStrictPrivacyMode] = useState(user.strictPrivacyMode ?? false)
   const [privacySaving, setPrivacySaving] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [handleInput, setHandleInput] = useState(user.adminHandle?.replace(/^!/, "") ?? "")
+  const [handleSaving, setHandleSaving] = useState(false)
+  const [handleError, setHandleError] = useState<string | null>(null)
+  const [handleSuccess, setHandleSuccess] = useState(false)
+  const isAdmin = user.isAdmin || user.role === "admin"
+
+  const handleClaimHandle = useCallback(async () => {
+    const raw = handleInput.trim().replace(/^!/, "")
+    if (!raw) return
+    const token = readAccessToken()
+    if (!token) return
+    setHandleSaving(true)
+    setHandleError(null)
+    setHandleSuccess(false)
+    try {
+      const { apiRequest } = await import("@/lib/api-client")
+      const { getBackendBaseUrl } = await import("@/lib/config")
+      const res = await apiRequest<{ admin_handle: string }>(getBackendBaseUrl(), "/admin/claim-handle", {
+        method: "POST",
+        token,
+        body: { adminHandle: `!${raw}` },
+      })
+      updateUser({ adminHandle: res.admin_handle })
+      setHandleSuccess(true)
+    } catch {
+      setHandleError(t("settings.handleError"))
+    } finally {
+      setHandleSaving(false)
+    }
+  }, [handleInput, t, updateUser])
 
   useEffect(() => {
     void getPersonas().then(setPersonas).catch(() => setPersonas([]))
@@ -411,6 +441,43 @@ export function SettingsScreen() {
             >
               {t("settings.devToolsCta")} →
             </Link>
+          </div>
+        )}
+
+        {/* Admin handle claim — admin only */}
+        {isAdmin && (
+          <div className="pt-4 border-t border-border">
+            <div className="flex items-center gap-2 mb-1">
+              <AtSign className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium text-foreground">{t("settings.adminHandleTitle")}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">{t("settings.adminHandleHint")}</p>
+            {user.adminHandle ? (
+              <p className="text-sm font-mono text-primary">
+                {user.adminHandle} &mdash; {t("settings.adminHandleClaimed")}
+              </p>
+            ) : (
+              <div className="flex gap-2 items-center">
+                <span className="text-sm font-mono text-muted-foreground select-none">!</span>
+                <input
+                  type="text"
+                  value={handleInput}
+                  onChange={(e) => { setHandleInput(e.target.value.replace(/[^a-z0-9-]/g, "")); setHandleSuccess(false); setHandleError(null) }}
+                  placeholder="admin"
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+                  maxLength={32}
+                />
+                <button
+                  onClick={() => void handleClaimHandle()}
+                  disabled={handleSaving || !handleInput.trim()}
+                  className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {handleSaving ? "…" : t("settings.adminHandleClaim")}
+                </button>
+              </div>
+            )}
+            {handleError && <p className="mt-1 text-xs text-destructive">{handleError}</p>}
+            {handleSuccess && <p className="mt-1 text-xs text-primary">{t("settings.adminHandleSuccess")}</p>}
           </div>
         )}
       </section>
