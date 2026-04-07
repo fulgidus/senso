@@ -1,0 +1,126 @@
+/* @theme senso */
+
+/*
+ * Senso MARP theme - minimal educational style.
+ * Automatically adapts to light/dark via the app's CSS custom properties.
+ * Requires Geist Variable font (loaded globally by index.css).
+ * Compatible with slides that declare `theme: senso` in front-matter.
+ */
+
+section {
+  /* Canvas dimensions: static px REQUIRED (CSS vars not allowed here) */
+  width: 1280px;
+  height: 720px;
+
+  background-color: var(--background);
+  color: var(--foreground);
+
+  font-family: 'Geist Variable', system-ui, sans-serif;
+  font-size: 32px;
+  line-height: 1.5;
+  padding: 80px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  /* Prevent overflow bleed */
+  overflow: hidden;
+}
+
+/* lead class: centered content slide (used by `class: lead` directive in front-matter) */
+section.lead {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 0 0 0.4em;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+}
+
+h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+  margin: 0.6em 0 0.25em;
+}
+
+p {
+  margin: 0 0 0.5em;
+}
+
+ul, ol {
+  padding-left: 1.4em;
+  margin: 0 0 0.5em;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+strong {
+  font-weight: 700;
+}
+
+code {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.78em;
+  background: var(--muted);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--muted);
+  padding: 1em;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 0 0.5em;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82em;
+  margin: 0 0 0.5em;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.35em 0.55em;
+  text-align: left;
+}
+
+th {
+  background: var(--muted);
+  font-weight: 600;
+}
+
+blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1em;
+  margin: 0.6em 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* Pagination counter (shown when `paginate: true` directive is used) */
+section::after {
+  color: var(--muted-foreground);
+  font-size: 0.45em;
+}
