@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/features/auth/useAuth";
 import { AuthContext } from "@/features/auth/AuthContext";
@@ -18,8 +18,13 @@ import type { User } from "@/features/auth/types";
 import { AboutPage } from "@/features/about/AboutPage";
 import { DebugScreen } from "@/features/debug/DebugScreen";
 import { SodiumProvider } from "@/providers/SodiumProvider";
-import { MessagesPage } from "@/features/messages/MessagesPage";
 import { RecoveryPhraseInterstitial } from "@/features/messages/RecoveryPhraseInterstitial";
+
+// Lazy-loaded: MessagesPage pulls in crypto.ts → argon2-browser (WASM).
+// Code-splitting keeps the WASM dependency out of the main bundle.
+const MessagesPage = React.lazy(
+  () => import("@/features/messages/MessagesPage").then(m => ({ default: m.MessagesPage })),
+);
 
 // Route modules
 import { LoginPage } from "@/routes/LoginPage";
@@ -252,7 +257,9 @@ function AppRoutes() {
             path="/messages"
             element={
               <ProtectedRoute>
-                <MessagesPage />
+                <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" /></div>}>
+                  <MessagesPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />

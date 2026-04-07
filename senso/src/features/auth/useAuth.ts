@@ -13,13 +13,6 @@ import {
 import { ApiClientError } from "@/lib/api-client";
 import type { User, CryptoKeyMaterial } from "@/features/auth/types";
 import { pollMessages, type PolledMessageDTO } from "@/features/messages/messagesApi";
-import {
-  deriveArgon2idWrapKey,
-  derivePbkdf2WrapKey,
-  unwrapLoginEnvelope,
-  decryptPrivateKey,
-  expandEd25519Seed,
-} from "@/features/messages/crypto";
 
 type AuthMode = "signup" | "login";
 
@@ -77,6 +70,19 @@ async function deriveCryptoKeys(password: string, user: User): Promise<CryptoKey
     return null;
   }
   try {
+    // Lazy-load crypto module: argon2-browser ships a .wasm binary that must be
+    // fetched at runtime.  Importing it eagerly at the top of useAuth.ts would
+    // block the *entire* app if the WASM file isn't served with the correct
+    // MIME type (e.g. nginx SPA fallback returning text/html).  Dynamic import
+    // defers loading until a user actually logs in with a Phase-13+ account.
+    const {
+      deriveArgon2idWrapKey,
+      derivePbkdf2WrapKey,
+      unwrapLoginEnvelope,
+      decryptPrivateKey,
+      expandEd25519Seed,
+    } = await import("@/features/messages/crypto");
+
     const envelope = user.naclKeyLoginEnvelopeB64;
     let naclMasterKey: Uint8Array;
 

@@ -24,8 +24,23 @@
  */
 
 import sodium from "libsodium-wrappers";
-import argon2 from "argon2-browser";
-import { ArgonType } from "argon2-browser";
+
+// ── Lazy argon2-browser loader ──────────────────────────────────────────────
+// argon2-browser ships a .wasm binary loaded at runtime via fetch().
+// Static import would block the entire app if the WASM file isn't served with
+// application/wasm MIME type (e.g. nginx SPA fallback returning text/html).
+// We lazy-load the module and set globalThis.argon2WasmPath BEFORE import so
+// the library fetches from our public/wasm/ copy instead of node_modules.
+let _argon2: Awaited<typeof import("argon2-browser")>["default"] | null = null;
+
+async function getArgon2() {
+  if (!_argon2) {
+    (globalThis as Record<string, unknown>).argon2WasmPath = "/wasm/argon2.wasm";
+    const mod = await import("argon2-browser");
+    _argon2 = mod.default;
+  }
+  return _argon2;
+}
 
 // ── Cross-realm safe conversion ─────────────────────────────────────────────
 /**
@@ -53,8 +68,8 @@ export const ARGON2ID_PARAMS = {
   mem: 65536, // 64 MiB in KiB
   parallelism: 4,
   hashLen: 32,
-  type: ArgonType.Argon2id,
-} as const;
+  type: 2 as const, // ArgonType.Argon2id — inlined to avoid static import of argon2-browser
+};
 
 // ── AES-GCM helpers (v1 envelope format) ─────────────────────────────────────
 /**
@@ -148,6 +163,7 @@ export async function deriveArgon2idWrapKey(
   password: string,
   saltB64: string,
 ): Promise<Uint8Array> {
+  const argon2 = await getArgon2();
   const salt = base64ToBytes(saltB64);
   const result = await argon2.hash({
     pass: password,
