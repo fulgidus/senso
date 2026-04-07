@@ -359,6 +359,10 @@ class UserProfile(Base):
     updated_at: datetime = Column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
+    # Non-ledger document enrichment (Phase 18)
+    verified_income_sources: list = Column(JSON, nullable=False, default=list)
+    fixed_expenses: list = Column(JSON, nullable=False, default=list)
+    one_off_expenses: list = Column(JSON, nullable=False, default=list)
 
     user = relationship("User", back_populates="profile")
 

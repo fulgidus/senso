@@ -224,3 +224,125 @@ class ProfileService:
             extraordinaryIncomeTotal=profile.extraordinary_income_total,
             monthsCovered=profile.months_covered,
         )
+
+    # ── Phase 18: Non-ledger document profile enrichment ─────────────────────
+
+    def enrich_from_extraction(self, user_id: str, extraction) -> None:
+        """Unified dispatcher: routes to the correct enrichment method by document_type."""
+        dispatch = {
+            "payslip": self.enrich_from_payslip,
+            "utility_bill": self.enrich_from_utility_bill,
+            "invoice": self.enrich_from_invoice,
+            "receipt": self.enrich_from_receipt,
+        }
+        fn = dispatch.get(getattr(extraction, "document_type", None))
+        if fn:
+            fn(user_id, extraction)
+        # bank_statement and unknown: no enrichment (transactions handled separately)
+
+    def enrich_from_payslip(self, user_id: str, extraction) -> None:
+        """Append payslip data to verified_income_sources and update income range."""
+        from datetime import datetime, UTC as _UTC
+
+        profile = self.db.query(UserProfile).filter_by(user_id=user_id).first()
+        if profile is None:
+            return
+
+        sources = list(profile.verified_income_sources or [])
+        entry = {
+            "net_income": float(extraction.net_income) if extraction.net_income else None,
+            "gross_income": float(extraction.gross_income) if extraction.gross_income else None,
+            "employer": extraction.employer,
+            "verified_at": datetime.now(_UTC).isoformat(),
+        }
+        sources.append(entry)
+        profile.verified_income_sources = sources
+
+        # Update monthly_income min/max from income_summary if net_income is available
+        net = extraction.net_income
+        if net is not None:
+            summary = dict(profile.income_summary or {})
+            current_min = summary.get("income_min")
+            current_max = summary.get("income_max")
+            net_f = float(net)
+            if current_min is None or net_f < current_min:
+                summary["income_min"] = net_f
+            if current_max is None or net_f > current_max:
+                summary["income_max"] = net_f
+            profile.income_summary = summary
+
+        profile.updated_at = datetime.now(_UTC)
+        self.db.commit()
+
+    def enrich_from_utility_bill(self, user_id: str, extraction) -> None:
+        """Upsert utility bill into fixed_expenses (keyed by provider+service_type)."""
+        from datetime import datetime, UTC as _UTC
+
+        profile = self.db.query(UserProfile).filter_by(user_id=user_id).first()
+        if profile is None:
+            return
+
+        expenses = list(profile.fixed_expenses or [])
+        provider = extraction.provider or "Unknown"
+        service = extraction.service_type or "utility"
+
+        # Upsert: update existing entry for same provider+service, else append
+        key = f"{provider}:{service}".lower()
+        updated = False
+        for i, exp in enumerate(expenses):
+            if f"{exp.get('provider','')}:{exp.get('service_type','')}".lower() == key:
+                expenses[i] = {
+                    "provider": provider,
+                    "service_type": service,
+                    "monthly_amount": float(extraction.total_due) if extraction.total_due else None,
+                    "updated_at": datetime.now(_UTC).isoformat(),
+                }
+                updated = True
+                break
+        if not updated:
+            expenses.append({
+                "provider": provider,
+                "service_type": service,
+                "monthly_amount": float(extraction.total_due) if extraction.total_due else None,
+                "added_at": datetime.now(_UTC).isoformat(),
+            })
+
+        profile.fixed_expenses = expenses
+        profile.updated_at = datetime.now(_UTC)
+        self.db.commit()
+
+    def enrich_from_invoice(self, user_id: str, extraction) -> None:
+        """Append invoice to one_off_expenses."""
+        from datetime import datetime, UTC as _UTC
+
+        profile = self.db.query(UserProfile).filter_by(user_id=user_id).first()
+        if profile is None:
+            return
+
+        expenses = list(profile.one_off_expenses or [])
+        expenses.append({
+            "vendor": getattr(extraction, "vendor", None) or getattr(extraction, "merchant", None),
+            "total_amount": float(extraction.total_amount) if extraction.total_amount else None,
+            "added_at": datetime.now(_UTC).isoformat(),
+        })
+        profile.one_off_expenses = expenses
+        profile.updated_at = datetime.now(_UTC)
+        self.db.commit()
+
+    def enrich_from_receipt(self, user_id: str, extraction) -> None:
+        """Append receipt to one_off_expenses."""
+        from datetime import datetime, UTC as _UTC
+
+        profile = self.db.query(UserProfile).filter_by(user_id=user_id).first()
+        if profile is None:
+            return
+
+        expenses = list(profile.one_off_expenses or [])
+        expenses.append({
+            "merchant": extraction.merchant,
+            "total_amount": float(extraction.total_amount) if extraction.total_amount else None,
+            "added_at": datetime.now(_UTC).isoformat(),
+        })
+        profile.one_off_expenses = expenses
+        profile.updated_at = datetime.now(_UTC)
+        self.db.commit()
