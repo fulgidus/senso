@@ -44,6 +44,9 @@ class Settings:
     coaching_cap_goal_progress: int
     # Phase 21: Tool-usage bubble granularity: "granular" | "grouped" | "hidden"
     tool_usage_granularity: str
+    # Phase 23: E2E test reset guards (disabled by default - only enabled via docker-compose.test.yml)
+    allow_test_reset: bool
+    internal_token: str
 
     @property
     def google_enabled(self) -> bool:
@@ -148,4 +151,6 @@ def get_settings() -> Settings:
         coaching_cap_evidence_rows=int(os.getenv("COACHING_CAP_EVIDENCE_ROWS", "5")),
         coaching_cap_goal_progress=int(os.getenv("COACHING_CAP_GOAL_PROGRESS", "1")),
         tool_usage_granularity=os.getenv("TOOL_USAGE_GRANULARITY", "granular"),
+        allow_test_reset=os.getenv("ALLOW_TEST_RESET", "false").lower() == "true",
+        internal_token=os.getenv("INTERNAL_TOKEN", ""),
     )

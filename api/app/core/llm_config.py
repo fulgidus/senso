@@ -145,7 +145,11 @@ def _load() -> LLMConfig:
     providers = tuple(
         ProviderConfig(
             name=p["name"],
-            base_url=p.get("base_url"),
+            # Allow env var override: LLM_{PROVIDER_NAME_UPPER}_BASE_URL
+            # e.g. LLM_OPENROUTER_BASE_URL=http://llm-stub:4010/v1 in test env
+            base_url=os.getenv(
+                f"LLM_{p['name'].upper()}_BASE_URL", p.get("base_url")
+            ),
             env_key=p["env_key"],
             priority=int(p.get("priority", 99)),
         )
