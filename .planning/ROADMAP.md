@@ -423,19 +423,20 @@ Plans:
 - [ ] 20-05-PLAN.md - Prompt refactor: remove static profile blob, wire all 7 tools
 - [ ] 20-06-PLAN.md - Integration tests + tool call verification + Italy rules coverage
 
-### Phase 21: Coach Output Rationalization
+### Phase 21: Coach Output Rationalization ✓ Complete (2026-04-08)
 
-**Goal:** Purchase intent classifier, conditional schema selection, remove fallback injection, surface caps (resource_cards ≤2, a2ui ≥2 rows), correct chat rendering hierarchy.
+**Goal:** Unified enrichment system: content_cards/interactive_cards, conditional gating, tool-usage SSE bubbles, transaction_evidence, goal_progress, admin-tunable caps, intent classifier.
 **Requirements**: Defined in 21-CONTEXT.md
 **Depends on:** Phase 20
-**Plans:** 4/4 plans written (ready to execute)
+**Plans:** 5/5 plans complete
 
 Plans:
 
-- [ ] 21-01-PLAN.md - Purchase intent classifier + conditional schema selection
-- [ ] 21-02-PLAN.md - Remove fallback injection + surface caps
-- [ ] 21-03-PLAN.md - details_a2ui quality gate
-- [ ] 21-04-PLAN.md - Chat UI rendering hierarchy
+- [x] 21-01-PLAN.md - Response schema redesign + admin config + intent classifier
+- [x] 21-02-PLAN.md - Tool-usage SSE streaming infrastructure
+- [x] 21-03-PLAN.md - Service enrichment pipeline rewrite + prompt updates
+- [x] 21-04-PLAN.md - Frontend types + rendering hierarchy + new components + i18n
+- [x] 21-05-PLAN.md - Integration tests + build verification + seeding
 
 ### Phase 22: Mobile-First UI Overhaul
 
