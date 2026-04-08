@@ -533,7 +533,7 @@ function PersonaSwitcher({
                                     onSelect(persona.id)
                                     onClose()
                                 }}
-                                className="w-full min-h-12 rounded-xl border px-3 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full min-h-12 rounded-xl border bg-card px-3 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                                 style={{
                                     borderColor: selected ? theme?.bubble_border ?? "var(--primary)" : undefined,
                                     backgroundColor: selected ? theme?.bubble_bg ?? undefined : undefined,

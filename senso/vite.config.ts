@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite-plus";
 import wasm from "vite-plugin-wasm";
+import { VitePWA } from "vite-plugin-pwa";
 
 const rootConfigPath = path.resolve(__dirname, "../config.json");
 const rootConfig = fs.existsSync(rootConfigPath)
@@ -14,7 +15,29 @@ const backendUrl =
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react(), tailwindcss(), wasm()],
+    plugins: [
+        react(),
+        tailwindcss(),
+        wasm(),
+        VitePWA({
+            registerType: "autoUpdate",
+            // Use injectManifest to keep our existing manifest.webmanifest
+            // Use generateSW for zero-config service worker
+            strategies: "generateSW",
+            workbox: {
+                globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
+                navigateFallback: "index.html",
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+                // Exclude argon2 wasm from precaching to avoid build errors
+                globIgnores: ["**/*.wasm"],
+            },
+            manifest: false, // use existing public/manifest.webmanifest
+            manifestFilename: "manifest.webmanifest",
+            devOptions: {
+                enabled: false, // disable in dev to avoid caching issues
+            },
+        }),
+    ],
     define: {
         "import.meta.env.VITE_BACKEND_URL": JSON.stringify(backendUrl),
     },
