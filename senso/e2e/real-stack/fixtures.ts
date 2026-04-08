@@ -4,13 +4,16 @@ import { test as base, expect } from "@playwright/test"
  * Real-stack Playwright fixtures.
  *
  * account (worker-scoped):
- *   Creates a real user account via the API before tests run and deletes it
- *   after. Worker-scoped means one account per Playwright worker, so parallel
- *   workers don't share state and don't interfere.
+ *   Creates a real user account via the API before tests run, sets first_name
+ *   so the user skips /setup, and deletes it after. Worker-scoped means one
+ *   account per Playwright worker — no cross-worker state bleed.
  *
  * Usage:
- *   import { test } from "./fixtures"
- *   test("my test", async ({ page, account }) => { ... })
+ *   import { test, loginAs } from "./fixtures"
+ *   test("my test", async ({ page, account }) => {
+ *     await loginAs(page, account)
+ *     ...
+ *   })
  */
 
 type Account = {
@@ -53,6 +56,12 @@ export const test = base.extend<Record<string, never>, WorkerFixtures>({
 
             expect(userId, "signup response missing user.id").toBeTruthy()
 
+            // Set first_name so the user skips /setup on first login
+            await api.patch("/auth/me", {
+                data: { first_name: "E2E", last_name: "Test" },
+                headers: { Authorization: `Bearer ${accessToken}` },
+            })
+
             await use({ email, password, userId, accessToken })
 
             // Teardown: delete the test user (cascade removes all related data)
@@ -66,3 +75,21 @@ export const test = base.extend<Record<string, never>, WorkerFixtures>({
 })
 
 export { expect } from "@playwright/test"
+
+/**
+ * Helper: drive the browser through the login form with real account credentials.
+ * Waits for redirect away from /login.
+ */
+export async function loginAs(
+    page: import("@playwright/test").Page,
+    account: Account
+): Promise<void> {
+    await page.goto("/login")
+    await page.getByLabel("Email").fill(account.email)
+    await page.getByLabel("Password").fill(account.password)
+    await page.getByRole("button", { name: "Accedi" }).click()
+    // Wait for redirect away from /login (to /onboarding, /chat, /setup, etc.)
+    await page.waitForURL((url) => !url.pathname.includes("/login"), {
+        timeout: 15_000,
+    })
+}

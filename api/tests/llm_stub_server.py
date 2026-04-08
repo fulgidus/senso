@@ -6,12 +6,14 @@ openrouter provider (which uses OpenAI SDK with base_url override) hits this
 instead of the real OpenRouter during Playwright tests.
 
 Fixture responses are matched by substring in the serialised request body.
-Named triggers: "search_italy_rules", "get_user_profile".
+Named triggers: "search_italy_rules", "get_user_profile", "__SLOW_RESPONSE_TEST__".
 Default: valid coaching_response with message + reasoning_used, all optional fields null.
 
 Tool-call flow (plan 23-03):
   Round 1: if trigger found in request → return tool_calls response
   Round 2: request contains "tool" role messages → return final coaching JSON
+
+"__SLOW_RESPONSE_TEST__" trigger: sleeps 90s to simulate LLM timeout (plan 23-04).
 
 Usage:
     uvicorn llm_stub_server:app --host 0.0.0.0 --port 4010
@@ -19,6 +21,7 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 
@@ -166,6 +169,11 @@ async def chat_completions(request: Request) -> JSONResponse:
 
     body_str = json.dumps(body)
     logger.debug("LLM stub received: %s", body_str[:500])
+
+    # Slow response trigger: 90s sleep to simulate LLM timeout (plan 23-04)
+    if "__SLOW_RESPONSE_TEST__" in body_str:
+        await asyncio.sleep(90)
+        return JSONResponse(_make_chat_response(_DEFAULT_COACHING))
 
     # Detect second round of a tool-call flow: messages contain a "tool" role
     messages = body.get("messages", [])
