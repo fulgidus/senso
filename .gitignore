@@ -34,3 +34,7 @@ e2e/artifacts/
 playwright-report/
 test-results/
 .pi/gsd
+
+api/test_phase*.db
+entities.json
+mempalace.yaml
