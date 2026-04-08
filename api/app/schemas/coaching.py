@@ -39,7 +39,22 @@ class ReasoningStep(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class ActionCard(BaseModel):
+class ContentCard(BaseModel):
+    title: str
+    card_type: str
+    summary: Optional[str] = None
+    url: Optional[str] = None
+    estimated_read_minutes: Optional[int] = None
+    video_id: Optional[str] = None
+    slide_id: Optional[str] = None
+    concept: Optional[str] = None
+    plain_explanation: Optional[str] = None
+    example: Optional[str] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class InteractiveCard(BaseModel):
     title: str
     description: str
     action_type: str
@@ -49,20 +64,38 @@ class ActionCard(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-class ResourceCard(BaseModel):
-    title: str
-    summary: str
-    resource_type: str
-    url: Optional[str] = None
-    estimated_read_minutes: Optional[int] = None
+class AffordabilityKeyFigure(BaseModel):
+    label: str
+    value: str
 
     model_config = {"populate_by_name": True}
 
 
-class LearnCard(BaseModel):
-    concept: str
-    plain_explanation: str
-    example: Optional[str] = None
+class AffordabilityVerdict(BaseModel):
+    verdict: str
+    key_figures: list[AffordabilityKeyFigure] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
+
+
+class TransactionEvidenceRow(BaseModel):
+    date: Optional[str] = None
+    description: str
+    amount: float
+
+    model_config = {"populate_by_name": True}
+
+
+class TransactionEvidence(BaseModel):
+    transactions: list[TransactionEvidenceRow] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
+
+
+class GoalProgress(BaseModel):
+    goal_name: str
+    estimated_pct: int
+    subtitle: str
 
     model_config = {"populate_by_name": True}
 
@@ -70,10 +103,12 @@ class LearnCard(BaseModel):
 class CoachingResponseDTO(BaseModel):
     message: str
     reasoning_used: list[ReasoningStep] = Field(default_factory=list)
-    action_cards: list[ActionCard] = Field(default_factory=list)
-    resource_cards: list[ResourceCard] = Field(default_factory=list)
-    learn_cards: list[LearnCard] = Field(default_factory=list)
+    content_cards: list[ContentCard] = Field(default_factory=list)
+    interactive_cards: list[InteractiveCard] = Field(default_factory=list)
     details_a2ui: Optional[str] = None
+    affordability_verdict: Optional[AffordabilityVerdict] = None
+    transaction_evidence: Optional[TransactionEvidence] = None
+    goal_progress: Optional[GoalProgress] = None
     session_id: str  # always returned - new or existing session
     debug: Optional[dict] = None  # only populated when LLM_DEBUG=true
 

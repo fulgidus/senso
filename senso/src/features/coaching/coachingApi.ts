@@ -11,28 +11,25 @@ export interface ReasoningStep {
   detail: string
 }
 
-export interface ActionCard {
+export interface ContentCard {
   title: string
-  description: string
-  action_type: "calculator" | "funnel" | "comparison" | "reminder" | "external_link" | string
-  cta_label?: string
-  payload?: Record<string, unknown>
-}
-
-export interface ResourceCard {
-  title: string
-  summary: string
-  resource_type: string
+  summary?: string
+  card_type: "article" | "video" | "slide_deck" | "partner_offer" | "learn"
   url?: string | null
   estimated_read_minutes?: number
   video_id?: string | null
   slide_id?: string | null
+  concept?: string | null
+  plain_explanation?: string | null
+  example?: string | null
 }
 
-export interface LearnCard {
-  concept: string
-  plain_explanation: string
-  example?: string
+export interface InteractiveCard {
+  title: string
+  description: string
+  action_type: "reminder"
+  cta_label?: string
+  payload?: Record<string, unknown>
 }
 
 export interface AffordabilityKeyFigure {
@@ -49,6 +46,22 @@ export interface NewInsight {
   headline: string
   data_point: string
   educational_framing: string
+}
+
+export interface TransactionEvidenceRow {
+  date: string | null
+  description: string
+  amount: number
+}
+
+export interface TransactionEvidence {
+  transactions: TransactionEvidenceRow[]
+}
+
+export interface GoalProgress {
+  goal_name: string
+  estimated_pct: number
+  subtitle: string
 }
 
 export interface LLMCallTrace {
@@ -79,12 +92,13 @@ export interface CoachingResponse {
   session_id: string
   message: string
   reasoning_used: ReasoningStep[]
-  action_cards: ActionCard[]
-  resource_cards: ResourceCard[]
-  learn_cards: LearnCard[]
+  content_cards: ContentCard[]
+  interactive_cards: InteractiveCard[]
   details_a2ui?: string | null
   affordability_verdict?: AffordabilityVerdict | null
   new_insight?: NewInsight | null
+  transaction_evidence?: TransactionEvidence | null
+  goal_progress?: GoalProgress | null
   debug?: DebugPayload
 }
 
@@ -116,8 +130,18 @@ export interface StreamMetaEvent {
   persona_id: string
 }
 
+export interface StreamToolUseEvent {
+  tool_name: string
+}
+
+export interface StreamToolsCompleteEvent {
+  tools_used: string[]
+}
+
 export interface StreamCallbacks {
   onMeta?: (meta: StreamMetaEvent) => void
+  onToolUse?: (event: StreamToolUseEvent) => void
+  onToolsComplete?: (event: StreamToolsCompleteEvent) => void
   onDelta?: (chunk: string) => void
   onFinal?: (response: CoachingResponse) => void
 }
@@ -277,6 +301,10 @@ export async function sendMessageStream(
 
       if (parsed.event === "meta") {
         callbacks.onMeta?.(JSON.parse(parsed.data) as StreamMetaEvent)
+      } else if (parsed.event === "tool_use") {
+        callbacks.onToolUse?.(JSON.parse(parsed.data) as StreamToolUseEvent)
+      } else if (parsed.event === "tools_complete") {
+        callbacks.onToolsComplete?.(JSON.parse(parsed.data) as StreamToolsCompleteEvent)
       } else if (parsed.event === "delta") {
         const payload = JSON.parse(parsed.data) as { text?: string }
         callbacks.onDelta?.(payload.text ?? "")

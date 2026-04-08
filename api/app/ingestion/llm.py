@@ -243,6 +243,7 @@ class LLMClient:
         system: str = "",
         tools: list[dict] | None = None,
         tool_executor: Callable[[str, dict], Any] | None = None,
+        tool_call_callback: Callable[[str, dict], None] | None = None,
         response_schema: dict | None = None,
         timeout: float | None = None,
         route: str = "text:generation:md",
@@ -358,6 +359,7 @@ class LLMClient:
                     system=system,
                     tools=tools or [],
                     tool_executor=tool_executor,
+                    tool_call_callback=tool_call_callback,
                     response_schema=response_schema,
                     timeout=effective_timeout,
                     strict_mode=strict_mode,
@@ -571,6 +573,7 @@ class LLMClient:
         system: str,
         tools: list[dict],
         tool_executor: Callable[[str, dict], Any] | None,
+        tool_call_callback: Callable[[str, dict], None] | None,
         response_schema: dict | None,
         timeout: float,
         strict_mode: bool = False,
@@ -646,6 +649,13 @@ class LLMClient:
                     fn_args = json.loads(tc.function.arguments or "{}")
                 except json.JSONDecodeError:
                     fn_args = {}
+
+                # Notify callback before execution (Phase 21 D-06)
+                if tool_call_callback is not None:
+                    try:
+                        tool_call_callback(fn_name, fn_args)
+                    except Exception:
+                        pass  # Never let callback errors break LLM flow
 
                 tool_result: Any = {}
                 if tool_executor is not None:

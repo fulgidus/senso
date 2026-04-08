@@ -263,10 +263,12 @@ def _coaching_response_dto(result: dict, session: ChatSession) -> CoachingRespon
     return CoachingResponseDTO(
         message=result.get("message", ""),
         reasoning_used=result.get("reasoning_used", []),
-        action_cards=result.get("action_cards", []),
-        resource_cards=result.get("resource_cards", []),
-        learn_cards=result.get("learn_cards", []),
+        content_cards=result.get("content_cards", []),
+        interactive_cards=result.get("interactive_cards", []),
         details_a2ui=result.get("details_a2ui"),
+        affordability_verdict=result.get("affordability_verdict"),
+        transaction_evidence=result.get("transaction_evidence"),
+        goal_progress=result.get("goal_progress"),
         session_id=session.id,
         debug=result.get("_debug") if settings.llm_debug else None,
     )

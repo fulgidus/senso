@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "coaching_response",
   "title": "CoachingResponse",
-  "description": "Full colloquial coaching response with message, reasoning, and optional cards.",
+  "description": "Full colloquial coaching response with message, reasoning, and optional enrichment surfaces.",
   "type": "object",
   "required": ["message", "reasoning_used"],
   "additionalProperties": false,
@@ -31,9 +31,35 @@
       },
       "minItems": 1
     },
-    "action_cards": {
+    "content_cards": {
       "type": "array",
-      "description": "Suggested immediate actions the user can take. May be empty.",
+      "description": "Unified content cards: articles, videos, slides, partner offers, and microlearning snippets from the content catalog. Only populate from search_content tool results.",
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["title", "card_type"],
+        "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "card_type": {
+            "type": "string",
+            "enum": ["article", "video", "slide_deck", "partner_offer", "learn"]
+          },
+          "url": { "type": ["string", "null"] },
+          "estimated_read_minutes": { "type": "integer", "minimum": 1 },
+          "video_id": { "type": ["string", "null"] },
+          "slide_id": { "type": ["string", "null"] },
+          "concept": { "type": ["string", "null"], "description": "For card_type=learn: the financial concept name" },
+          "plain_explanation": { "type": ["string", "null"], "description": "For card_type=learn: jargon-free 1-2 sentence explanation" },
+          "example": { "type": ["string", "null"], "description": "For card_type=learn: concrete example" }
+        }
+      }
+    },
+    "interactive_cards": {
+      "type": "array",
+      "description": "Interactive action cards. Currently only 'reminder' type is supported.",
+      "maxItems": 1,
       "items": {
         "type": "object",
         "required": ["title", "description", "action_type"],
@@ -43,47 +69,55 @@
           "description": { "type": "string" },
           "action_type": {
             "type": "string",
-            "enum": ["funnel", "comparison", "calculator", "reminder", "external_link"]
+            "enum": ["reminder"]
           },
           "cta_label": { "type": "string" },
           "payload": { "type": "object", "additionalProperties": true }
         }
       }
     },
-    "resource_cards": {
-      "type": "array",
-      "description": "Relevant educational articles, videos, slide decks, or partner offers from the content catalog.",
-      "items": {
-        "type": "object",
-        "required": ["title", "summary", "resource_type"],
-        "additionalProperties": false,
-        "properties": {
-          "title": { "type": "string" },
-          "summary": { "type": "string" },
-          "resource_type": {
-            "type": "string",
-            "enum": ["article", "tutorial", "video", "slide_deck", "partner_offer", "tool"]
-          },
-          "url": { "type": ["string", "null"] },
-          "estimated_read_minutes": { "type": "integer", "minimum": 1 },
-          "video_id": { "type": ["string", "null"], "description": "YouTube video_id for resource_type=video" },
-          "slide_id": { "type": ["string", "null"], "description": "Slide deck id for resource_type=slide_deck" }
+    "transaction_evidence": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["transactions"],
+          "additionalProperties": false,
+          "properties": {
+            "transactions": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "required": ["date", "description", "amount"],
+                "additionalProperties": false,
+                "properties": {
+                  "date": { "type": ["string", "null"] },
+                  "description": { "type": "string" },
+                  "amount": { "type": "number" }
+                }
+              }
+            }
+          }
         }
-      }
+      ],
+      "description": "Mini-table of actual user transactions backing the advice. Populated only when the coach cites specific transactions from search_user_transactions results. Null otherwise."
     },
-    "learn_cards": {
-      "type": "array",
-      "description": "Short educational microlearning cards on the financial concept involved.",
-      "items": {
-        "type": "object",
-        "required": ["concept", "plain_explanation"],
-        "additionalProperties": false,
-        "properties": {
-          "concept": { "type": "string", "description": "Name of the financial concept" },
-          "plain_explanation": { "type": "string", "description": "1-2 sentences, jargon-free" },
-          "example": { "type": "string" }
+    "goal_progress": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["goal_name", "estimated_pct", "subtitle"],
+          "additionalProperties": false,
+          "properties": {
+            "goal_name": { "type": "string", "description": "Name of the user's goal" },
+            "estimated_pct": { "type": "integer", "minimum": 0, "maximum": 100, "description": "LLM-estimated progress percentage" },
+            "subtitle": { "type": "string", "description": "Brief explanation of how progress was estimated" }
+          }
         }
-      }
+      ],
+      "description": "Progress toward a stated user goal. LLM-estimated from profile + transactions + margin. Fires only when conversation context is relevant to a stated goal. Null otherwise."
     },
     "details_a2ui": {
       "type": ["string", "null"],
@@ -139,7 +173,7 @@
           }
         }
       ],
-      "description": "Emit when the conversation reveals a new pattern or insight about the user's finances. Use topic+value for structured recall. headline/data_point/educational_framing for backward compat display. Null if nothing new emerged."
+      "description": "Emit when the conversation reveals a new pattern or insight about the user's finances. Persisted silently — NOT rendered as a visible card. Null if nothing new emerged."
     }
   }
 }

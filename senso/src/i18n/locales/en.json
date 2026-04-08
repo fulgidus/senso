@@ -351,7 +351,35 @@
         "ttsDisabledStrict": "Privacy mode active - voice features require AI providers that cannot currently guarantee no data retention. Disable Privacy mode in Settings to re-enable voice.",
         "greetingMorning": "Good morning! How can I help you today?",
         "greetingAfternoon": "Good afternoon! How can I help you?",
-        "greetingEvening": "Good evening! How can I help you tonight?"
+        "greetingEvening": "Good evening! How can I help you tonight?",
+        "showDetails": "Show details",
+        "hideDetails": "Hide",
+        "reminder": {
+            "defaultCta": "Set reminder"
+        },
+        "toolUsage": {
+            "search_user_transactions": "Searching your transactions…",
+            "get_user_profile": "Loading your profile…",
+            "search_content": "Searching educational content…",
+            "get_user_preferences": "Checking your preferences…",
+            "recall_past_insights": "Recalling past conversations…",
+            "search_regional_knowledge": "Checking regulations…",
+            "get_timeline_events": "Checking your timeline…",
+            "_grouped": "The coach is analyzing your data…"
+        },
+        "evidence": {
+            "title": "Cited transactions",
+            "date": "Date",
+            "description": "Description",
+            "amount": "Amount"
+        },
+        "cardType": {
+            "article": "Article",
+            "video": "Video",
+            "slide_deck": "Presentation",
+            "partner_offer": "Partner",
+            "learn": "Concept"
+        }
     },
     "calculator": {
         "amount": "Amount",
