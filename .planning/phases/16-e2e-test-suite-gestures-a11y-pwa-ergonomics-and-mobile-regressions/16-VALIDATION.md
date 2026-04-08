@@ -1,8 +1,8 @@
 ---
 phase: "16"
 slug: e2e-test-suite-gestures-a11y-pwa-ergonomics-and-mobile-regressions
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 created: 2026-04-05
 ---
 

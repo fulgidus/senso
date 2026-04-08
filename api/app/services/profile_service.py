@@ -305,6 +305,8 @@ class ProfileService:
         except Exception as _exc:
             import logging as _log  # noqa: PLC0415
             _log.getLogger(__name__).warning("Timeline trigger (payslip) failed: %s", _exc)
+
+    def enrich_from_utility_bill(self, user_id: str, extraction) -> None:
         """Upsert utility bill into fixed_expenses (keyed by provider+service_type)."""
         from datetime import datetime, UTC as _UTC
 

@@ -6,10 +6,11 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
-from app.db.models import Upload
+from app.db.models import Upload, User
 from app.db.session import SessionLocal
 from app.services.ingestion_service import IngestionService, IngestionError
 from app.core.config import get_settings
@@ -22,6 +23,19 @@ def _make_service(db):
     return IngestionService(db=db, settings=settings, minio_client=minio)
 
 
+def _create_user(db, user_id: str) -> User:
+    """Create a minimal user row required by FK constraints."""
+    user = User(
+        id=user_id,
+        email=f"{user_id[:8]}@test.invalid",
+        password_hash="x",
+        is_admin=False,
+    )
+    db.add(user)
+    db.flush()
+    return user
+
+
 # ---------------------------------------------------------------------------
 # Dedup tests
 # ---------------------------------------------------------------------------
@@ -29,16 +43,19 @@ def _make_service(db):
 def test_first_upload_succeeds(reset_db):
     db = SessionLocal()
     try:
+        user_id = str(uuid4())
+        _create_user(db, user_id)
+        db.commit()
         svc = _make_service(db)
         file_bytes = b"dummy bank statement content unique 123"
         result = svc.upload_file(
-            user_id="user-001",
+            user_id=user_id,
             filename="statement.csv",
             content_type="text/csv",
             file_bytes=file_bytes,
         )
         assert "upload_id" in result
-        upload = db.query(Upload).filter_by(user_id="user-001").first()
+        upload = db.query(Upload).filter_by(user_id=user_id).first()
         assert upload is not None
         assert upload.content_hash == hashlib.sha256(file_bytes).hexdigest()
     finally:
@@ -48,17 +65,20 @@ def test_first_upload_succeeds(reset_db):
 def test_duplicate_rejected(reset_db):
     db = SessionLocal()
     try:
+        user_id = str(uuid4())
+        _create_user(db, user_id)
+        db.commit()
         svc = _make_service(db)
         file_bytes = b"duplicate file content abc"
         svc.upload_file(
-            user_id="user-001",
+            user_id=user_id,
             filename="file.pdf",
             content_type="application/pdf",
             file_bytes=file_bytes,
         )
         with pytest.raises(IngestionError) as exc_info:
             svc.upload_file(
-                user_id="user-001",
+                user_id=user_id,
                 filename="file_copy.pdf",
                 content_type="application/pdf",
                 file_bytes=file_bytes,
@@ -72,17 +92,22 @@ def test_duplicate_rejected(reset_db):
 def test_same_bytes_different_user_not_duplicate(reset_db):
     db = SessionLocal()
     try:
+        user_id_a = str(uuid4())
+        user_id_b = str(uuid4())
+        _create_user(db, user_id_a)
+        _create_user(db, user_id_b)
+        db.commit()
         svc = _make_service(db)
         file_bytes = b"same content for different users"
         svc.upload_file(
-            user_id="user-001",
+            user_id=user_id_a,
             filename="file.pdf",
             content_type="application/pdf",
             file_bytes=file_bytes,
         )
         # Different user → should succeed
         result = svc.upload_file(
-            user_id="user-002",
+            user_id=user_id_b,
             filename="file.pdf",
             content_type="application/pdf",
             file_bytes=file_bytes,

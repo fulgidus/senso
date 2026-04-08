@@ -30,7 +30,7 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 - [x] **COCH-01**: User can ask a purchase/decision question by text input.
 - [x] **COCH-02**: User can ask a purchase/decision question by voice input.
 - [x] **COCH-03**: AI response is personalized using the user financial profile and relevant retrieved context.
-- [ ] **COCH-04**: AI response includes explicit reasoning with user-specific numbers used in the recommendation.
+- [x] **COCH-04**: AI response includes explicit reasoning with user-specific numbers used in the recommendation.
 - [x] **COCH-05**: User can ask follow-up clarification questions and receive coherent contextual responses.
 
 ### Voice Experience
@@ -41,8 +41,8 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 ### Learn and Act
 
 - [x] **ACTN-01**: Each coaching response can include at least one educational resource card (article or video) relevant to the question.
-- [ ] **ACTN-02**: Each coaching response can include at least one actionable service card (bank or partner) relevant to user context.
-- [ ] **ACTN-03**: User can open educational and action cards from the same response context.
+- [x] **ACTN-02**: Each coaching response can include at least one actionable service card (bank or partner) relevant to user context.
+- [x] **ACTN-03**: User can open educational and action cards from the same response context.
 
 ### Content Platform
 
@@ -61,8 +61,8 @@ Requirements for initial release. Scope is aligned to Punkathon rules: concrete,
 
 ### Demo Readiness
 
-- [ ] **DEMO-01**: Team can complete an end-to-end scripted demo flow in under 90 seconds.
-- [ ] **DEMO-02**: Demo flow includes upload -> profile summary -> voice question -> grounded spoken recommendation -> learning/action cards.
+- [x] **DEMO-01**: Team can complete an end-to-end scripted demo flow in under 90 seconds.
+- [x] **DEMO-02**: Demo flow includes upload -> profile summary -> voice question -> grounded spoken recommendation -> learning/action cards.
 - [x] **DEMO-03**: Product can run locally through a reproducible setup suitable for hackathon judging.
 
 ## v2 Requirements
@@ -105,18 +105,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COCH-01 | Phase 4 | Complete |
 | COCH-02 | Phase 5 | Complete |
 | COCH-03 | Phase 4 | Complete |
-| COCH-04 | Phase 4 | Pending |
+| COCH-04 | Phase 4 | Complete |
 | COCH-05 | Phase 4 | Complete |
 | VOIC-01 | Phase 5 | Complete |
 | VOIC-02 | Phase 5 | Complete |
 | ACTN-01 | Phase 6 | Complete |
-| ACTN-02 | Phase 6 | Pending |
-| ACTN-03 | Phase 6 | Pending |
+| ACTN-02 | Phase 6 | Complete |
+| ACTN-03 | Phase 6 | Complete |
 | SAFE-01 | Phase 4 | Complete |
 | SAFE-02 | Phase 4 | Complete |
 | SAFE-03 | Phase 4 | Complete |
-| DEMO-01 | Phase 6 | Pending |
-| DEMO-02 | Phase 6 | Pending |
+| DEMO-01 | Phase 6 | Complete |
+| DEMO-02 | Phase 6 | Complete |
 | DEMO-03 | Phase 1 | Complete |
 | CONT-01 | Phase 8 | Complete |
 | CONT-02 | Phase 8 | Complete |
