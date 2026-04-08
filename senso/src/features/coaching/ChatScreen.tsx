@@ -31,7 +31,8 @@ import {
     type SessionSummary,
     type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, Presentation } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, Presentation, ChevronsDown } from "lucide-react"
+import { useKeyboardHeight } from "@/hooks/useKeyboardHeight"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -1006,6 +1007,11 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         [personas, activePersonaId],
     )
 
+    // Keyboard height for iOS input visibility
+    const keyboardHeight = useKeyboardHeight()
+    // Scroll-to-bottom button visibility
+    const [showScrollBtn, setShowScrollBtn] = useState(false)
+
     // Message state
     const [messages, setMessages] = useState<DisplayMessage[]>([])
     const [inputText, setInputText] = useState("")
@@ -1093,6 +1099,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         if (!container) return
         const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
         shouldStickToBottomRef.current = distanceFromBottom <= 120
+        setShowScrollBtn(distanceFromBottom > 100)
     }, [])
 
     // On mount: load sessions, restore specific session or last, or fetch welcome for empty new session
@@ -1672,11 +1679,12 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             {restoreToast.visible && <RestoreToast text={restoreToast.text} />}
 
             {/* Message list */}
-            <div
-                ref={mergedListRef}
-                className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-none"
-                onScroll={updateStickiness}
-            >
+            <div className="relative flex-1">
+                <div
+                    ref={mergedListRef}
+                    className="h-full overflow-y-auto px-4 py-4 space-y-4 overscroll-contain"
+                    onScroll={updateStickiness}
+                >
                 {(loadingHistory || welcomeLoading) && (
                     <div className="flex items-start gap-2">
                         <SensoAvatar />
@@ -1727,6 +1735,18 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                 ))}
 
                 <div ref={listEndRef} />
+                </div>
+
+                {/* Scroll-to-bottom button */}
+                {showScrollBtn && (
+                    <button
+                        onClick={() => listEndRef.current?.scrollIntoView({ behavior: "smooth" })}
+                        className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors"
+                        aria-label={t("coaching.scrollToBottom")}
+                    >
+                        <ChevronsDown className="h-4 w-4" />
+                    </button>
+                )}
             </div>
 
             {/* Error banner - only for non-retryable errors (retryable ones show inline retry on the message) */}
@@ -1744,8 +1764,11 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                 </div>
             )}
 
-            {/* Input area */}
-            <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0">
+            {/* Input area - uses keyboardHeight for iOS safe-area handling */}
+            <div
+                className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0"
+                style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : undefined }}
+            >
                 {user.strictPrivacyMode && !ttsNoticeDismissed && (
                     <div
                         role="alert"
