@@ -99,7 +99,7 @@ function NavItemLink({ item, onClick }: { item: NavItem; onClick?: () => void })
             onClick={onClick}
             className={({ isActive }) =>
                 [
-                    "ripple-target flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "ripple-target flex items-center gap-3 rounded-lg px-3 py-2 min-h-[44px] text-sm font-medium transition-colors",
                     isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",

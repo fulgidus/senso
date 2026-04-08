@@ -341,7 +341,60 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             </div>
 
             {/* Tab bar */}
-            <div className="mb-6 flex gap-2 flex-wrap">
+            {/* Mobile: 2-column grid for 320px accessibility; Desktop: horizontal strip */}
+            <div className="sm:hidden grid grid-cols-2 gap-1 mb-4">
+                <button
+                    onClick={() => setActiveTab("summary")}
+                    className={`rounded-lg px-3 py-2.5 text-sm font-medium min-h-[44px] transition-colors ${activeTab === "summary"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                >
+                    {t("profile.heading")}
+                </button>
+                <button
+                    onClick={() => setActiveTab("charts")}
+                    className={`rounded-lg px-3 py-2.5 text-sm font-medium min-h-[44px] transition-colors ${activeTab === "charts"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                >
+                    {t("profile.spendingBreakdown")}
+                </button>
+                <button
+                    onClick={() => { setActiveTab("timeline"); setHasNewTimelineEvents(false) }}
+                    className={`relative rounded-lg px-3 py-2.5 text-sm font-medium min-h-[44px] transition-colors ${activeTab === "timeline"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                >
+                    {t("timeline.tabLabel")}
+                    {hasNewTimelineEvents && activeTab !== "timeline" && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
+                    )}
+                </button>
+                <button
+                    onClick={() => setActiveTab("files")}
+                    className={`rounded-lg px-3 py-2.5 text-sm font-medium min-h-[44px] transition-colors ${activeTab === "files"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                >
+                    {t("files.tabLabel")}
+                </button>
+                <button
+                    onClick={() => setActiveTab("connectors")}
+                    className={`rounded-lg px-3 py-2.5 text-sm font-medium min-h-[44px] transition-colors ${activeTab === "connectors"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                >
+                    {t("connectors.tabLabel")}
+                </button>
+            </div>
+
+            {/* Desktop: horizontal tab strip */}
+            <div className="hidden sm:flex mb-6 gap-2 flex-wrap">
                 <button
                     onClick={() => setActiveTab("summary")}
                     className={`rounded-full px-4 py-1.5 text-sm font-medium ${activeTab === "summary"
