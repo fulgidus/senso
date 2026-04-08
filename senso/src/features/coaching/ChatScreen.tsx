@@ -31,7 +31,9 @@ import {
     type SessionSummary,
     type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, ChevronsDown } from "lucide-react"
+import { useKeyboardHeight } from "@/hooks/useKeyboardHeight"
+import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -531,7 +533,7 @@ function PersonaSwitcher({
                                     onSelect(persona.id)
                                     onClose()
                                 }}
-                                className="w-full min-h-12 rounded-xl border px-3 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full min-h-12 rounded-xl border bg-card px-3 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                                 style={{
                                     borderColor: selected ? theme?.bubble_border ?? "var(--primary)" : undefined,
                                     backgroundColor: selected ? theme?.bubble_bg ?? undefined : undefined,
@@ -571,7 +573,7 @@ function VoicePlayButton({
     ttsConfig: TTSConfig
 }) {
     const { t } = useTranslation()
-    const { canPlay, isPlaying, isGenerating, hasFallenBack, play, stop } = useTTS(ttsConfig)
+    const { canPlay, isPlaying, isGenerating, hasFallenBack, autoplayBlocked, resumeAfterBlock, play, stop } = useTTS(ttsConfig)
     if (!canPlay) return null
     const busy = isGenerating || isPlaying
     // hasFallenBack persists once ElevenLabs has failed at least once, or is
@@ -580,7 +582,7 @@ function VoicePlayButton({
     // only true during active fallback playback).
     const showFallbackBadge = hasFallenBack
     return (
-        <div className="relative inline-flex items-center">
+        <div className="relative inline-flex items-center gap-1">
             <Button
                 type="button"
                 variant="ghost"
@@ -604,6 +606,19 @@ function VoicePlayButton({
                     <Volume2 className="h-3 w-3" />
                 )}
             </Button>
+            {/* Manual play button when autoplay policy blocks automatic playback */}
+            {autoplayBlocked && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs px-2"
+                    onClick={resumeAfterBlock}
+                    aria-label={t("coaching.ttsPlay")}
+                >
+                    ▶ {t("coaching.ttsPlayShort")}
+                </Button>
+            )}
             {showFallbackBadge && (
                 <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
             )}
@@ -1006,6 +1021,11 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         [personas, activePersonaId],
     )
 
+    // Keyboard height for iOS input visibility
+    const keyboardHeight = useKeyboardHeight()
+    // Scroll-to-bottom button visibility
+    const [showScrollBtn, setShowScrollBtn] = useState(false)
+
     // Message state
     const [messages, setMessages] = useState<DisplayMessage[]>([])
     const [inputText, setInputText] = useState("")
@@ -1026,12 +1046,26 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const shouldStickToBottomRef = useRef(true)
 
-    // Simple ref for the message list (scroll tracking only - no pull-to-refresh on chat)
+    // Pull-to-refresh: reload current session messages on pull-down
+    const handleChatRefresh = useCallback(async () => {
+        if (sessionId) {
+            await loadSessionHistory(sessionId)
+        }
+    }, [sessionId, loadSessionHistory])
+
+    const ptr = usePullToRefresh({
+        onRefresh: handleChatRefresh,
+        disabled: isLoading || loadingHistory,
+    })
+
+    // Merged ref: assign to listRef (scroll tracking) AND PTR containerRef
     const mergedListRef = useCallback(
         (el: HTMLDivElement | null) => {
             listRef.current = el
+            ptr.containerRef(el)
         },
-        [],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [ptr.containerRef],
     )
 
     // Wrapper that auto-dismisses transient errors after 8 seconds.
@@ -1093,6 +1127,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         if (!container) return
         const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight
         shouldStickToBottomRef.current = distanceFromBottom <= 120
+        setShowScrollBtn(distanceFromBottom > 100)
     }, [])
 
     // On mount: load sessions, restore specific session or last, or fetch welcome for empty new session
@@ -1679,11 +1714,23 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             {restoreToast.visible && <RestoreToast text={restoreToast.text} />}
 
             {/* Message list */}
-            <div
-                ref={mergedListRef}
-                className="flex-1 overflow-y-auto px-4 py-4 space-y-4 overscroll-none"
-                onScroll={updateStickiness}
-            >
+            <div className="relative flex-1">
+                <div
+                    ref={mergedListRef}
+                    className="h-full overflow-y-auto px-4 py-4 space-y-4 overscroll-contain"
+                    onScroll={updateStickiness}
+                >
+                {/* Pull-to-refresh visual indicator */}
+                {(ptr.isPulling || ptr.isRefreshing) && (
+                    <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
+                        {ptr.isRefreshing ? (
+                            <><Loader2 className="animate-spin mr-1 h-4 w-4" />{t("common.updating")}</>
+                        ) : (
+                            <span>{t("common.pullToRefresh")}</span>
+                        )}
+                    </div>
+                )}
+
                 {(loadingHistory || welcomeLoading) && (
                     <div className="flex items-start gap-2">
                         <SensoAvatar />
@@ -1743,6 +1790,18 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                 })}
 
                 <div ref={listEndRef} />
+                </div>
+
+                {/* Scroll-to-bottom button */}
+                {showScrollBtn && (
+                    <button
+                        onClick={() => listEndRef.current?.scrollIntoView({ behavior: "smooth" })}
+                        className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors"
+                        aria-label={t("coaching.scrollToBottom")}
+                    >
+                        <ChevronsDown className="h-4 w-4" />
+                    </button>
+                )}
             </div>
 
             {/* Error banner - only for non-retryable errors (retryable ones show inline retry on the message) */}
@@ -1760,8 +1819,11 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                 </div>
             )}
 
-            {/* Input area */}
-            <div className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0">
+            {/* Input area - uses keyboardHeight for iOS safe-area handling */}
+            <div
+                className="sticky bottom-0 bg-background border-t border-border px-4 py-3 shrink-0"
+                style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : undefined }}
+            >
                 {user.strictPrivacyMode && !ttsNoticeDismissed && (
                     <div
                         role="alert"

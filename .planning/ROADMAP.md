@@ -185,6 +185,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 14. E2E Messaging Backend                                            | 0/0            | Skipped  | -          |
 | 15. E2E Messaging Frontend                                           | 6/6            | Complete | 2026-04-05 |
 | 16. E2E Test Suite & Mobile Regressions                              | 5/5            | Complete | 2026-04-05 |
+| 17. MARP Real Rendering                                               | 2/2            | Complete | 2026-04-07 |
+| 18. Ingestion Reliability + Non-Ledger Support                        | 4/4            | Complete | 2026-04-07 |
+| 19. Financial Timeline - Real Inference + Visibility                  | 4/4            | Complete | 2026-04-07 |
+| 20. Coach Intelligence - Tool Suite + Structured Memory               | 4/4            | Complete | 2026-04-08 |
+| 21. Coach Output Rationalization                                      | 4/4            | Complete | 2026-04-08 |
+| 22. Mobile-First UI Overhaul                                          | 6/6            | Complete | 2026-04-08 |
+| 23. E2E Real Stack Test Suite                                         | 5/5            | Complete | 2026-04-08 |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -423,26 +430,27 @@ Plans:
 - [ ] 20-05-PLAN.md - Prompt refactor: remove static profile blob, wire all 7 tools
 - [ ] 20-06-PLAN.md - Integration tests + tool call verification + Italy rules coverage
 
-### Phase 21: Coach Output Rationalization
+### Phase 21: Coach Output Rationalization ✓ Complete (2026-04-08)
 
-**Goal:** Purchase intent classifier, conditional schema selection, remove fallback injection, surface caps (resource_cards ≤2, a2ui ≥2 rows), correct chat rendering hierarchy.
+**Goal:** Unified enrichment system: content_cards/interactive_cards, conditional gating, tool-usage SSE bubbles, transaction_evidence, goal_progress, admin-tunable caps, intent classifier.
 **Requirements**: Defined in 21-CONTEXT.md
 **Depends on:** Phase 20
-**Plans:** 4/4 plans written (ready to execute)
+**Plans:** 5/5 plans complete
 
 Plans:
 
-- [ ] 21-01-PLAN.md - Purchase intent classifier + conditional schema selection
-- [ ] 21-02-PLAN.md - Remove fallback injection + surface caps
-- [ ] 21-03-PLAN.md - details_a2ui quality gate
-- [ ] 21-04-PLAN.md - Chat UI rendering hierarchy
+- [x] 21-01-PLAN.md - Response schema redesign + admin config + intent classifier
+- [x] 21-02-PLAN.md - Tool-usage SSE streaming infrastructure
+- [x] 21-03-PLAN.md - Service enrichment pipeline rewrite + prompt updates
+- [x] 21-04-PLAN.md - Frontend types + rendering hierarchy + new components + i18n
+- [x] 21-05-PLAN.md - Integration tests + build verification + seeding
 
 ### Phase 22: Mobile-First UI Overhaul
 
 **Goal:** Fix ChatScreen keyboard/safe area, pull-to-refresh, all tables → cards on mobile, profile tab layout, PWA standalone, coach picker dark mode + session bug, TTS fix.
 **Requirements**: Defined in 22-CONTEXT.md
 **Depends on:** Phase 21
-**Plans:** 6/6 plans written (ready to execute) · RESEARCH.md added (iOS visualViewport, vite-plugin-pwa, PTR)
+**Plans:** 6/6 plans complete
 
 Plans:
 
@@ -453,18 +461,18 @@ Plans:
 - [ ] 22-05-PLAN.md - PWA standalone (vite-plugin-pwa) + coach picker dark mode + session fix
 - [ ] 22-06-PLAN.md - TTS fix (blob URL lifecycle) + voice UX + STT Chromium
 
-### Phase 23: E2E Real Stack Test Suite
+### Phase 23: E2E Real Stack Test Suite ✓ Complete (2026-04-08)
 
 **Goal:** Playwright tests against real Docker Compose stack (no mocks). Full user journey, tool call verification, error paths, mobile viewport.
 **Requirements**: Defined in 23-CONTEXT.md
 **RESEARCH.md added** (Project Dependencies pattern, Docker Compose healthchecks, FastAPI LLM stub, real account fixture)
 **Depends on:** Phase 22
-**Plans:** 5/5 plans written (ready to execute)
+**Plans:** 5/5 plans complete
 
 Plans:
 
-- [ ] 23-01-PLAN.md - Real stack infrastructure: LLM stub + docker-compose.test.yml + fixtures
-- [ ] 23-02-PLAN.md - Full user journey E2E: register → upload → profile → coach
-- [ ] 23-03-PLAN.md - Coach tool call E2E: real DB data through tool executor
-- [ ] 23-04-PLAN.md - Error path E2E: token expiry, bad file, LLM timeout, offline
-- [ ] 23-05-PLAN.md - Mobile E2E: full journey on iPhone 14 viewport
+- [x] 23-01-PLAN.md - Real stack infrastructure: LLM stub + docker-compose.test.yml + fixtures
+- [x] 23-02-PLAN.md - Full user journey E2E: register → upload → profile → coach
+- [x] 23-03-PLAN.md - Coach tool call E2E: real DB data through tool executor
+- [x] 23-04-PLAN.md - Error path E2E: token expiry, bad file, LLM timeout, offline
+- [x] 23-05-PLAN.md - Mobile E2E: full journey on iPhone 14 viewport

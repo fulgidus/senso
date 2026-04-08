@@ -1,0 +1,57 @@
+# docker-compose.test.yml - overrides for E2E real-stack tests
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+#   npx playwright test --project=real-stack
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml down -v
+#
+# ⚠ Always redeclare full healthcheck blocks in override files -
+#   partial overrides silently drop the `test:` field (Docker bug #10188).
+
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: senso_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-senso} -d senso_test"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-senso}:${POSTGRES_PASSWORD:-senso}@postgres:5432/senso_test"
+      LLM_OPENROUTER_BASE_URL: "http://llm-stub:4010/v1"
+      LLM_OPENROUTER_API_KEY: "stub-key"
+      ALLOW_TEST_RESET: "true"
+      INTERNAL_TOKEN: "${INTERNAL_TOKEN:-test-internal-token}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      llm-stub:
+        condition: service_healthy
+
+  llm-stub:
+    build:
+      context: api/tests
+      dockerfile: Dockerfile.llm-stub
+    ports:
+      - "4010:4010"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4010/health')"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  frontend:
+    depends_on:
+      api:
+        condition: service_healthy

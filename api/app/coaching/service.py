@@ -41,7 +41,7 @@ _SEARCH_CONTENT_TOOL: dict = {
             "Search the educational content and partner offer catalog. "
             "Returns a ranked list of articles, videos, slide decks, and partner offers "
             "matching the query in the specified locale. "
-            "Always call this before populating resource_cards or recommending partner offers."
+            "Always call this before populating content_cards or recommending partner offers."
         ),
         "parameters": {
             "type": "object",

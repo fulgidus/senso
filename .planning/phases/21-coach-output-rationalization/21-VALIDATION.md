@@ -1,8 +1,8 @@
 ---
 phase: "21"
 slug: coach-output-rationalization
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 created: "2026-04-06"
 ---
 

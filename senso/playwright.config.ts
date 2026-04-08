@@ -68,6 +68,35 @@ export default defineConfig({
             },
             grep: /@mobile/,
         },
+        // ── Real-stack projects (require docker-compose.test.yml stack) ──────────
+        {
+            name: "real-stack-setup",
+            testMatch: /real-stack\/global\.setup\.ts/,
+            teardown: "real-stack-teardown",
+        },
+        {
+            name: "real-stack-teardown",
+            testMatch: /real-stack\/global\.teardown\.ts/,
+        },
+        {
+            name: "real-stack",
+            testDir: "./e2e/real-stack",
+            use: {
+                baseURL: process.env.FRONTEND_URL ?? "http://localhost:3001",
+                locale: "it-IT",
+            },
+            dependencies: ["real-stack-setup"],
+        },
+        {
+            name: "real-stack-mobile",
+            testDir: "./e2e/real-stack",
+            use: {
+                ...devices["iPhone 14"],
+                baseURL: process.env.FRONTEND_URL ?? "http://localhost:3001",
+                locale: "it-IT",
+            },
+            dependencies: ["real-stack-setup"],
+        },
     ],
 
     /* Spin up Vite preview before tests - skip if PLAYWRIGHT_BASE_URL is set */

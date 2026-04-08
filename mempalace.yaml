@@ -1,0 +1,18 @@
+wing: senso
+rooms:
+- name: backend
+  description: Files from api/
+- name: scripts
+  description: Files from scripts/
+- name: senso
+  description: Files from senso/
+- name: documentation
+  description: Files from docs/
+- name: lore
+  description: Files from lore/
+- name: research
+  description: Files from research/
+- name: testing
+  description: Files from tests/
+- name: general
+  description: Files that don't fit other rooms

@@ -1,8 +1,8 @@
 ---
 phase: "18"
 slug: ingestion-reliability-and-non-ledger-document-support
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 created: "2026-04-06"
 ---
 
