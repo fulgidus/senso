@@ -31,7 +31,7 @@ import {
     type SessionSummary,
     type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, Presentation } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -54,7 +54,7 @@ interface ChatScreenProps {
 }
 
 interface DisplayMessage {
-    role: "user" | "assistant"
+    role: "user" | "assistant" | "tool"
     content: string
     response?: CoachingResponse
     isWelcome?: boolean
@@ -62,6 +62,7 @@ interface DisplayMessage {
     personaId?: string | null
     showPersonaCue?: boolean
     status?: "sent" | "failed"
+    toolName?: string
 }
 
 type RestoreToastState = {
@@ -201,7 +202,6 @@ function GoalProgressBar({ progress }: { progress: GoalProgress }) {
 }
 
 function ContentCardStrip({ cards }: { cards: ContentCard[] }) {
-    const { t } = useTranslation()
     if (cards.length === 0) return null
 
     return (
@@ -1284,6 +1284,13 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                             setSessionId(meta.session_id)
                         }
                     },
+                    onToolUse: (event) => {
+                        setMessages(prev => [...prev, {
+                            role: "tool" as const,
+                            content: "",
+                            toolName: event.tool_name,
+                        }])
+                    },
                     onDelta: (chunk) => {
                         setMessages((prev) => {
                             const next = [...prev]
@@ -1686,7 +1693,15 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                     </div>
                 )}
 
-                {messages.map((msg, i) => (
+                {messages.map((msg, i) => {
+                    if (msg.role === "tool" && msg.toolName) {
+                        return (
+                            <div key={i} className="flex justify-start">
+                                <ToolUsagePill toolName={msg.toolName} />
+                            </div>
+                        )
+                    }
+                    return (
                     <div
                         key={i}
                         className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -1724,7 +1739,8 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                             />
                         )}
                     </div>
-                ))}
+                    )
+                })}
 
                 <div ref={listEndRef} />
             </div>
