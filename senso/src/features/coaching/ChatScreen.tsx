@@ -33,6 +33,7 @@ import {
 } from "./coachingApi"
 import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, Presentation, ChevronsDown } from "lucide-react"
 import { useKeyboardHeight } from "@/hooks/useKeyboardHeight"
+import { usePullToRefresh } from "@/hooks/usePullToRefresh"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -1032,12 +1033,26 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const shouldStickToBottomRef = useRef(true)
 
-    // Simple ref for the message list (scroll tracking only - no pull-to-refresh on chat)
+    // Pull-to-refresh: reload current session messages on pull-down
+    const handleChatRefresh = useCallback(async () => {
+        if (sessionId) {
+            await loadSessionHistory(sessionId)
+        }
+    }, [sessionId, loadSessionHistory])
+
+    const ptr = usePullToRefresh({
+        onRefresh: handleChatRefresh,
+        disabled: isLoading || loadingHistory,
+    })
+
+    // Merged ref: assign to listRef (scroll tracking) AND PTR containerRef
     const mergedListRef = useCallback(
         (el: HTMLDivElement | null) => {
             listRef.current = el
+            ptr.containerRef(el)
         },
-        [],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [ptr.containerRef],
     )
 
     // Wrapper that auto-dismisses transient errors after 8 seconds.
@@ -1685,6 +1700,17 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                     className="h-full overflow-y-auto px-4 py-4 space-y-4 overscroll-contain"
                     onScroll={updateStickiness}
                 >
+                {/* Pull-to-refresh visual indicator */}
+                {(ptr.isPulling || ptr.isRefreshing) && (
+                    <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
+                        {ptr.isRefreshing ? (
+                            <><Loader2 className="animate-spin mr-1 h-4 w-4" />{t("common.updating")}</>
+                        ) : (
+                            <span>{t("common.pullToRefresh")}</span>
+                        )}
+                    </div>
+                )}
+
                 {(loadingHistory || welcomeLoading) && (
                     <div className="flex items-start gap-2">
                         <SensoAvatar />
