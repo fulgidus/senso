@@ -258,9 +258,8 @@ _ALLOWED_PERSONAS = {
 _BLOCKED_RESPONSE_TEMPLATE = {
     "message": "Non riesco a rispondere a questa richiesta.",
     "reasoning_used": [],
-    "action_cards": [],
-    "resource_cards": [],
-    "learn_cards": [],
+    "content_cards": [],
+    "interactive_cards": [],
     "details_a2ui": None,
     "_blocked": True,
 }
@@ -442,6 +441,7 @@ class CoachingService:
         locale: str = _DEFAULT_LOCALE,
         persona_id: str = _DEFAULT_PERSONA_ID,
         debug: bool = False,
+        tool_call_callback=None,
     ) -> dict:
         """
         Core coaching interaction.
@@ -501,6 +501,7 @@ class CoachingService:
 
         # Call LLM with tool-calling support for content + regional knowledge search
         raw: str = ""
+        executor_fn, tools_called = self._tool_executor(locale, _nationalities, user_id=user_id)
         try:
             raw = self.llm.complete_with_tools(
                 prompt=prompt,
@@ -514,7 +515,8 @@ class CoachingService:
                     _GET_USER_PREFERENCES_TOOL,
                     _RECALL_INSIGHTS_TOOL,
                 ],
-                tool_executor=self._tool_executor(locale, _nationalities, user_id=user_id),
+                tool_executor=executor_fn,
+                tool_call_callback=tool_call_callback,
                 response_schema=self._response_schema,
                 timeout=60.0,
             )
@@ -545,8 +547,14 @@ class CoachingService:
 
         # Always repair: ensure required array fields exist (idempotent)
         response_data = self._repair_response(response_data)
-        # Safety-net: inject fallback cards if LLM skipped tool call on financial questions
-        self._inject_fallback_cards(response_data, locale)
+
+        # Phase 21: Enrichment gating pipeline
+        response_data = self._gate_enrichments(
+            response_data,
+            tools_called=tools_called,
+            user_message=messages[-1].get("content", "") if messages else "",
+            user_id=user_id,
+        )
 
         # Persist new_insight to user_profiles.coaching_insights if present
         new_insight = response_data.get("new_insight")
@@ -689,11 +697,13 @@ class CoachingService:
 
     def _tool_executor(
         self, locale: str, nationalities: list[str] | None = None, user_id: str | None = None
-    ):
-        """Return a closure that executes LLM tool calls for this coaching request."""
+    ) -> tuple:
+        """Return (executor_closure, tools_called_set). The set tracks which tools were invoked."""
         _nations = nationalities or ["IT"]
+        tools_called: set[str] = set()
 
         def execute(name: str, arguments: dict):
+            tools_called.add(name)
             if name == "search_content":
                 query = arguments.get("query", "")
                 req_locale = arguments.get("locale", locale)
@@ -819,7 +829,7 @@ class CoachingService:
                     return []
             raise ValueError(f"Unknown tool: {name!r}")
 
-        return execute
+        return execute, tools_called
 
     def _build_debug_payload(
         self,
@@ -961,91 +971,99 @@ class CoachingService:
         return "\n".join(parts)
 
     def _repair_response(self, data: dict) -> dict:
-        """Ensure required fields exist; fill defaults if missing."""
+        """Ensure required fields exist with new schema names; fill defaults if missing."""
         data.setdefault("message", "")
         if not data.get("reasoning_used"):
             data["reasoning_used"] = [
                 {"step": "Analisi", "detail": "Risposta generata."}
             ]
-        data.setdefault("action_cards", [])
-        data.setdefault("resource_cards", [])
-        data.setdefault("learn_cards", [])
+        data.setdefault("content_cards", [])
+        data.setdefault("interactive_cards", [])
+        # New enrichment surfaces default to null (not empty)
+        data.setdefault("transaction_evidence", None)
+        data.setdefault("goal_progress", None)
         return data
 
-    def _inject_fallback_cards(self, data: dict, locale: str) -> None:
+    def _gate_enrichments(
+        self,
+        data: dict,
+        tools_called: set,
+        user_message: str,
+        user_id: str | None = None,
+    ) -> dict:
         """
-        If the LLM returned empty resource_cards or action_cards after a coaching
-        response (not a blocked response), inject sensible defaults from the catalog.
-        Called only when the response is non-empty (has a message).
-        This is a safety net - the prompt should prevent empty cards on financial questions.
-
-        Trigger condition (skip if ANY of these is true):
-          - message is very short (< 15 chars) - pure greetings, one-word replies
-          - affordability_verdict is absent/null - response is conversational, not financial
-        This avoids injecting cards into short natural Italian questions like
-        "Posso comprarlo?" (16 chars) that ARE financial decisions.
+        Post-LLM enrichment gating: conditional visibility, caps, quality gates.
+        Phase 21 decisions D-03, D-04, D-07, D-08, D-09, D-10.
         """
-        message = data.get("message", "")
-        verdict = data.get("affordability_verdict")
-        # Skip for very short messages (greetings / one-liners under 15 chars)
-        if len(message) < 15:
-            return
-        # Skip for conversational responses that have no affordability verdict
-        # (these are informational answers, not financial decisions)
-        if verdict is None:
-            return
+        from app.coaching.intent import classify_purchase_intent
+        from app.core.config import get_settings
 
-        if not data.get("resource_cards"):
-            # Inject top-1 article or video from catalog in the correct locale
-            results = search_content(
-                "educazione finanziaria risparmio budget", locale, top_k=2
-            )
-            if results:
-                top = results[0]
-                card: dict = {
-                    "title": top["title"],
-                    "summary": top["summary"],
-                    "resource_type": top["type"]
-                    if top["type"] in ("article", "video", "slide_deck")
-                    else "article",
-                    "url": top.get("url"),
-                }
-                if top.get("video_id"):
-                    card["video_id"] = top["video_id"]
-                    card["resource_type"] = "video"
-                if top.get("slide_count"):
-                    card["slide_id"] = top["id"]
-                    card["resource_type"] = "slide_deck"
-                data["resource_cards"] = [card]
-                logger.debug("fallback resource_card injected: %s", top["id"])
+        settings = get_settings()
 
-        if not data.get("action_cards"):
-            # Inject a generic partner funnel card from the catalog
-            partner_results = search_content(
-                "conto corrente risparmio",
-                locale,
-                top_k=1,
-                content_types=["partner_offer"],
-            )
-            if partner_results:
-                partner = partner_results[0]
-                data["action_cards"] = [
-                    {
-                        "title": partner["title"],
-                        "description": partner["summary"],
-                        "action_type": "funnel",
-                        "cta_label": "Scopri" if locale == "it" else "Discover",
-                        "payload": {
-                            "funnel_id": partner["id"],
-                            "partner_name": partner.get(
-                                "partner_name", partner["title"]
-                            ),
-                            "offer_type": partner.get("offer_type", "conto_corrente"),
-                            "cta_url": partner.get("url"),
-                        },
-                    }
-                ]
-                logger.debug("fallback action_card injected: %s", partner["id"])
+        # D-03: Nullify affordability_verdict on non-purchase intent
+        if not classify_purchase_intent(user_message):
+            data["affordability_verdict"] = None
+
+        # D-09 + conditional gating: strip content_cards if search_content was not called
+        if "search_content" not in tools_called:
+            data["content_cards"] = []
+
+        # D-07: Strip transaction_evidence if search_user_transactions was not called
+        if "search_user_transactions" not in tools_called:
+            data["transaction_evidence"] = None
+
+        # D-08: Strip goal_progress if get_user_preferences was not called
+        if "get_user_preferences" not in tools_called:
+            data["goal_progress"] = None
+
+        # D-10: Apply caps
+        if len(data.get("content_cards", [])) > settings.coaching_cap_content_cards:
+            data["content_cards"] = data["content_cards"][:settings.coaching_cap_content_cards]
+
+        if len(data.get("interactive_cards", [])) > settings.coaching_cap_interactive_cards:
+            data["interactive_cards"] = data["interactive_cards"][:settings.coaching_cap_interactive_cards]
+
+        # Cap transaction_evidence rows
+        te = data.get("transaction_evidence")
+        if te and isinstance(te, dict):
+            txns = te.get("transactions", [])
+            if len(txns) > settings.coaching_cap_evidence_rows:
+                te["transactions"] = txns[:settings.coaching_cap_evidence_rows]
+
+        # D-04: details_a2ui quality gate — strip panels with < 2 data rows
+        data = self._validate_a2ui(data)
+
+        # Strip transient metadata before returning
+        data.pop("_tools_called", None)
+
+        return data
+
+    def _validate_a2ui(self, data: dict) -> dict:
+        """
+        Quality gate for details_a2ui: strip if panel has < 2 data rows.
+        Phase 21 decision D-04.
+        """
+        a2ui = data.get("details_a2ui")
+        if not a2ui or not isinstance(a2ui, str):
+            return data
+
+        import json as _json
+        lines = [l.strip() for l in a2ui.strip().split("\n") if l.strip()]
+        data_rows = 0
+        for line in lines:
+            try:
+                msg = _json.loads(line)
+                if msg.get("type") == "dataModelUpdate":
+                    updates = msg.get("updates", [])
+                    data_rows += len(updates)
+            except _json.JSONDecodeError:
+                continue
+
+        if data_rows < 2:
+            data["details_a2ui"] = None
+            logger.debug("details_a2ui stripped: only %d data rows", data_rows)
+
+        return data
 
 
 def get_coaching_service(

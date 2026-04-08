@@ -144,7 +144,7 @@ class TestOutputBoundaryVerification:
     ]
 
     CLEAN_OUTPUTS = [
-        '{"message": "Sì, puoi permetterti questa spesa.", "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}], "action_cards": [], "resource_cards": [], "learn_cards": []}',
+        '{"message": "Sì, puoi permetterti questa spesa.", "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}], "content_cards": [], "interactive_cards": []}',
         "Basandomi sul tuo reddito di 1800 EUR e spese di 1100 EUR, hai un margine di 700 EUR al mese.",
         "Il tuo margine mensile è positivo: €550. Questo significa che puoi permetterti questa spesa.",
         "Le tue spese per food_delivery sono aumentate del 15% rispetto al mese scorso.",
@@ -204,9 +204,8 @@ class TestOwnPiiRewrite:
             "reasoning_used": [
                 {"step": "Margine", "detail": "Hai un margine mensile di 700 EUR."}
             ],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
             "details_a2ui": '{"kind":"comparison","value":"700 EUR"}',
             "affordability_verdict": {
                 "verdict": "no",
@@ -255,9 +254,8 @@ class TestOwnPiiRewrite:
             "reasoning_used": [
                 {"step": "Margine", "detail": "Hai 700 EUR di margine mensile."}
             ],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
             "details_a2ui": None,
             "affordability_verdict": {
                 "verdict": "yes",
@@ -300,9 +298,8 @@ class TestSchemaValidation:
                     "detail": "Hai 550 EUR disponibili questo mese.",
                 }
             ],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         jsonschema.validate(instance=valid, schema=schema)  # Should not raise
 
@@ -310,9 +307,8 @@ class TestSchemaValidation:
         schema = self._load_schema()
         invalid = {
             "reasoning_used": [{"step": "Test", "detail": "Test detail."}],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(instance=invalid, schema=schema)
@@ -321,9 +317,8 @@ class TestSchemaValidation:
         schema = self._load_schema()
         invalid = {
             "message": "test",
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(instance=invalid, schema=schema)
@@ -334,9 +329,8 @@ class TestSchemaValidation:
         invalid = {
             "message": "test",
             "reasoning_used": [],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(instance=invalid, schema=schema)
@@ -346,9 +340,8 @@ class TestSchemaValidation:
         invalid = {
             "message": "test",
             "reasoning_used": [{"step": "Test"}],  # missing "detail"
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         with pytest.raises(jsonschema.ValidationError):
             jsonschema.validate(instance=invalid, schema=schema)
@@ -362,9 +355,9 @@ class TestSchemaValidation:
         repaired = svc._repair_response({"message": "test"})
         assert "reasoning_used" in repaired
         assert len(repaired["reasoning_used"]) >= 1
-        assert "action_cards" in repaired
-        assert "resource_cards" in repaired
-        assert "learn_cards" in repaired
+        assert "content_cards" in repaired
+        assert "interactive_cards" in repaired
+        # learn_cards removed in Phase 21
 
     def test_repair_response_preserves_existing_message(self):
         from app.coaching.service import CoachingService

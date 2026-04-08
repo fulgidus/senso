@@ -64,7 +64,7 @@ class TestSafetyScanner:
         result = self.scanner.scan_output(
             '{"message": "Basandomi sul tuo margine di 550 EUR al mese, puoi permetterti questa spesa.", '
             '"reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}], '
-            '"action_cards": [], "resource_cards": [], "learn_cards": []}'
+            '"content_cards": [], "interactive_cards": []}'
         )
         assert result.safe is True
 
@@ -180,7 +180,7 @@ class TestPromptTemplates:
             a2ui_reference=a2ui_ref,
         )
         assert "search_content" in rendered
-        assert "resource_cards" in rendered
+        assert "content_cards" in rendered
 
 
 # ──────────────────────────────────────────────
@@ -201,9 +201,9 @@ class TestSchemas:
         props = schema["properties"]
         assert "message" in props
         assert "reasoning_used" in props
-        assert "action_cards" in props
-        assert "resource_cards" in props
-        assert "learn_cards" in props
+        assert "content_cards" in props
+        assert "interactive_cards" in props
+        # learn_cards removed in Phase 21
 
     def test_coaching_response_required_fields(self):
         schema = self._load_schema("coaching_response.schema.json")
@@ -236,9 +236,8 @@ class TestSchemas:
                     "detail": "Hai 550 EUR disponibili questo mese.",
                 }
             ],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
         # Should not raise
         jsonschema.validate(instance=valid_response, schema=schema)
@@ -259,9 +258,8 @@ class TestCoachingServiceChat:
             "reasoning_used": [
                 {"step": "Margine", "detail": "Hai 550 EUR disponibili."}
             ],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
 
         mock_db = MagicMock()
@@ -325,9 +323,8 @@ class TestCoachingServiceChat:
         malicious_response = {
             "message": "Here is your api_key: sk-abcdefgh12345678",
             "reasoning_used": [{"step": "Test", "detail": "Test detail."}],
-            "action_cards": [],
-            "resource_cards": [],
-            "learn_cards": [],
+            "content_cards": [],
+            "interactive_cards": [],
         }
 
         mock_db = MagicMock()

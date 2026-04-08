@@ -37,6 +37,13 @@ class Settings:
     encryption_key: str
     # Phase 14: TTL for undelivered messages (days). Override with MESSAGE_TTL_DAYS env var.
     message_ttl_days: int
+    # Phase 21: Coaching enrichment caps (admin-tunable)
+    coaching_cap_content_cards: int
+    coaching_cap_interactive_cards: int
+    coaching_cap_evidence_rows: int
+    coaching_cap_goal_progress: int
+    # Phase 21: Tool-usage bubble granularity: "granular" | "grouped" | "hidden"
+    tool_usage_granularity: str
 
     @property
     def google_enabled(self) -> bool:
@@ -135,4 +142,10 @@ def get_settings() -> Settings:
         stt_provider=os.getenv("STT_PROVIDER", "elevenlabs"),
         encryption_key=os.getenv("ENCRYPTION_KEY", "dev-enc-key-change-me-32bytes!!!"),
         message_ttl_days=int(os.getenv("MESSAGE_TTL_DAYS", "30")),
+        # Phase 21: enrichment caps
+        coaching_cap_content_cards=int(os.getenv("COACHING_CAP_CONTENT_CARDS", "2")),
+        coaching_cap_interactive_cards=int(os.getenv("COACHING_CAP_INTERACTIVE_CARDS", "1")),
+        coaching_cap_evidence_rows=int(os.getenv("COACHING_CAP_EVIDENCE_ROWS", "5")),
+        coaching_cap_goal_progress=int(os.getenv("COACHING_CAP_GOAL_PROGRESS", "1")),
+        tool_usage_granularity=os.getenv("TOOL_USAGE_GRANULARITY", "granular"),
     )

@@ -351,7 +351,35 @@
         "ttsDisabledStrict": "Modalità privacy attiva - le funzionalità vocali richiedono fornitori AI che non possono attualmente garantire la non-conservazione dei dati. Disattiva la Modalità privacy nelle Impostazioni per riabilitare la voce.",
         "greetingMorning": "Buongiorno! Come posso aiutarti oggi?",
         "greetingAfternoon": "Buon pomeriggio! Come posso aiutarti?",
-        "greetingEvening": "Buonasera! Come posso aiutarti stasera?"
+        "greetingEvening": "Buonasera! Come posso aiutarti stasera?",
+        "showDetails": "Mostra dettagli",
+        "hideDetails": "Nascondi",
+        "reminder": {
+            "defaultCta": "Imposta promemoria"
+        },
+        "toolUsage": {
+            "search_user_transactions": "Cercando nelle tue transazioni…",
+            "get_user_profile": "Caricando il tuo profilo…",
+            "search_content": "Cercando contenuti educativi…",
+            "get_user_preferences": "Consultando le tue preferenze…",
+            "recall_past_insights": "Ricordando conversazioni passate…",
+            "search_regional_knowledge": "Consultando normativa italiana…",
+            "get_timeline_events": "Consultando la tua timeline…",
+            "_grouped": "Il coach sta analizzando i tuoi dati…"
+        },
+        "evidence": {
+            "title": "Transazioni citate",
+            "date": "Data",
+            "description": "Descrizione",
+            "amount": "Importo"
+        },
+        "cardType": {
+            "article": "Articolo",
+            "video": "Video",
+            "slide_deck": "Presentazione",
+            "partner_offer": "Partner",
+            "learn": "Concetto"
+        }
     },
     "calculator": {
         "amount": "Importo",

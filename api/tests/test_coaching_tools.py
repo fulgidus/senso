@@ -81,7 +81,7 @@ def test_get_user_profile_returns_dict_without_user(reset_db):
     db = SessionLocal()
     try:
         svc = CoachingService(db=db, llm_client=MagicMock())
-        executor = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
+        executor, _tc = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
         result = executor("get_user_profile", {})
         assert result == {}
     finally:
@@ -97,7 +97,7 @@ def test_search_user_transactions_returns_list_without_user(reset_db):
     db = SessionLocal()
     try:
         svc = CoachingService(db=db, llm_client=MagicMock())
-        executor = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
+        executor, _tc = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
         result = executor("search_user_transactions", {"query": "cibo"})
         assert result == []
     finally:
@@ -113,7 +113,7 @@ def test_get_user_preferences_returns_defaults_without_user(reset_db):
     db = SessionLocal()
     try:
         svc = CoachingService(db=db, llm_client=MagicMock())
-        executor = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
+        executor, _tc = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
         result = executor("get_user_preferences", {})
         assert result == {"goals": [], "dos": [], "donts": []}
     finally:
@@ -129,7 +129,7 @@ def test_recall_past_insights_returns_list_without_user(reset_db):
     db = SessionLocal()
     try:
         svc = CoachingService(db=db, llm_client=MagicMock())
-        executor = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
+        executor, _tc = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
         result = executor("recall_past_insights", {"topic": "risparmio"})
         assert result == []
     finally:
@@ -145,7 +145,7 @@ def test_unknown_tool_raises_valueerror(reset_db):
     db = SessionLocal()
     try:
         svc = CoachingService(db=db, llm_client=MagicMock())
-        executor = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
+        executor, _tc = svc._tool_executor(locale="it", nationalities=["IT"], user_id=None)
         with pytest.raises(ValueError, match="Unknown tool"):
             executor("nonexistent_tool", {})
     finally:

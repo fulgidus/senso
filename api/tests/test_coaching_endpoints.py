@@ -26,9 +26,9 @@ def _make_mock_service(session_id: str = "test-session-id"):
     mock_response = {
         "message": "Sì, puoi permetterti questa spesa.",
         "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
     mock_session = MagicMock()
     mock_session.id = session_id
@@ -178,9 +178,9 @@ def test_post_chat_creates_new_session(client):
     mock_response = {
         "message": "Sì, puoi permetterti questa spesa.",
         "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
@@ -209,9 +209,9 @@ def test_post_chat_continues_existing_session(client):
     mock_response = {
         "message": "Sì, puoi permetterti questa spesa.",
         "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     # First message - creates session
@@ -236,9 +236,9 @@ def test_post_chat_continues_existing_session(client):
         "reasoning_used": [
             {"step": "Costi fissi", "detail": "Hai 800 EUR di costi fissi."}
         ],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
@@ -270,9 +270,9 @@ def test_post_chat_stream_returns_sse_events_and_final_payload(client):
     mock_response = {
         "message": "Sì, puoi permetterti questa spesa senza compromettere il margine.",
         "reasoning_used": [{"step": "Margine", "detail": "Hai 550 EUR disponibili."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
         "details_a2ui": None,
     }
 
@@ -309,9 +309,9 @@ def test_post_chat_stream_persists_messages_once(client):
         "reasoning_used": [
             {"step": "Margine", "detail": "Il margine è troppo stretto."}
         ],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
         "details_a2ui": None,
     }
 
@@ -371,9 +371,9 @@ def test_get_sessions_returns_session_after_chat(client):
     mock_response = {
         "message": "Sì, puoi.",
         "reasoning_used": [{"step": "Check", "detail": "OK."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
@@ -410,9 +410,9 @@ def test_get_session_messages_returns_history(client):
     mock_response = {
         "message": "Sì, puoi.",
         "reasoning_used": [{"step": "Check", "detail": "OK."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     with patch("app.api.coaching.get_coaching_service") as mock_factory:
@@ -460,9 +460,9 @@ def test_get_session_messages_other_user_returns_404(client):
     mock_response = {
         "message": "Sì, puoi.",
         "reasoning_used": [{"step": "Check", "detail": "OK."}],
-        "action_cards": [],
-        "resource_cards": [],
-        "learn_cards": [],
+        "content_cards": [], "interactive_cards": [],
+        
+        
     }
 
     # User1 creates a session

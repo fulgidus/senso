@@ -21,16 +21,17 @@ import {
     CoachingApiError,
     type CoachingResponse,
     type ReasoningStep,
-    type ActionCard,
-    type ResourceCard,
-    type LearnCard,
+    type ContentCard,
+    type InteractiveCard,
+    type TransactionEvidence,
+    type GoalProgress,
     type AffordabilityVerdict,
     type DebugPayload,
     type Persona,
     type SessionSummary,
     type SessionMessage,
 } from "./coachingApi"
-import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff } from "lucide-react"
+import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, Presentation } from "lucide-react"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -104,245 +105,242 @@ function ReasoningCard({ steps }: { steps: ReasoningStep[] }) {
     )
 }
 
-// ── Action cards ──────────────────────────────────────────────────────────────
+// ── Phase 21: New rendering components ────────────────────────────────────────
 
-function LoanCalculatorCard({ card }: { card: ActionCard }) {
+const TOOL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+    search_user_transactions: Search,
+    get_user_profile: BarChart3,
+    search_content: BookOpen,
+    get_user_preferences: SettingsIcon,
+    recall_past_insights: Brain,
+    search_regional_knowledge: Scale,
+    get_timeline_events: Calendar,
+    _grouped: Loader2,
+}
+
+function ToolUsagePill({ toolName }: { toolName: string }) {
+    const { t } = useTranslation()
+    const IconComponent = TOOL_ICONS[toolName] ?? Search
+    const label = t(`coaching.toolUsage.${toolName}`, toolName)
+
+    return (
+        <div className="flex justify-start px-4 py-0.5">
+            <div className="inline-flex items-center gap-2 px-2 py-1 rounded-full">
+                <IconComponent className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{label}</span>
+            </div>
+        </div>
+    )
+}
+
+function TransactionEvidenceTable({ evidence }: { evidence: TransactionEvidence }) {
     const { t } = useTranslation()
     const fmt = useLocaleFormat()
-    const payload = card.payload ?? {}
-    const defaultAmount = Number(payload.amount ?? 5000)
-    const defaultMonths = Number(payload.months ?? 24)
-    const defaultTan = Number(payload.tan ?? 8)
-
-    const [amount, setAmount] = useState(defaultAmount)
-    const [months, setMonths] = useState(defaultMonths)
-    const [tan, setTan] = useState(defaultTan)
-
-    // French amortization: monthly payment = P * r / (1 - (1+r)^-n)
-    const r = tan / 100 / 12
-    const monthlyPayment =
-        r === 0
-            ? amount / months
-            : (amount * r) / (1 - Math.pow(1 + r, -months))
-    const totalRepayable = monthlyPayment * months
-    const totalInterest = totalRepayable - amount
 
     return (
-        <div className="border border-border rounded-xl bg-background overflow-hidden text-sm">
-            <div className="px-3 py-2 bg-muted/50 font-semibold text-sm">{card.title}</div>
-            <div className="px-3 py-3 space-y-3">
-                <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>{t("calculator.amount")}</span>
-                        <span className="font-semibold text-foreground">€{fmt.number(amount)}</span>
+        <div className="mt-3 rounded-lg border border-border overflow-hidden">
+            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">
+                {t("coaching.evidence.title")}
+            </div>
+            <div className="hidden sm:block">
+                <table className="w-full">
+                    <thead>
+                        <tr className="bg-muted text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            <th className="px-3 py-2 text-left">{t("coaching.evidence.date")}</th>
+                            <th className="px-3 py-2 text-left">{t("coaching.evidence.description")}</th>
+                            <th className="px-3 py-2 text-right">{t("coaching.evidence.amount")}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {evidence.transactions.map((tx, i) => (
+                            <tr key={i} className="border-t border-border">
+                                <td className="px-3 py-2 text-sm">{tx.date ?? "—"}</td>
+                                <td className="px-3 py-2 text-sm">{tx.description}</td>
+                                <td className="px-3 py-2 text-sm font-semibold tabular-nums text-right">
+                                    {fmt.currency(tx.amount)}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="sm:hidden space-y-2 p-2">
+                {evidence.transactions.map((tx, i) => (
+                    <div key={i} className="bg-card rounded-lg border border-border p-3 space-y-1">
+                        <div className="text-sm font-semibold">{tx.description}</div>
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                            <span>{tx.date ?? "—"}</span>
+                            <span className="font-semibold tabular-nums">{fmt.currency(tx.amount)}</span>
+                        </div>
                     </div>
-                    <input
-                        type="range"
-                        min={500} max={50000} step={500}
-                        value={amount}
-                        onChange={(e) => setAmount(Number(e.target.value))}
-                        className="w-full accent-primary"
-                    />
-                </div>
-                <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>{t("calculator.months")}</span>
-                        <span className="font-semibold text-foreground">{months} mesi</span>
-                    </div>
-                    <input
-                        type="range"
-                        min={6} max={84} step={6}
-                        value={months}
-                        onChange={(e) => setMonths(Number(e.target.value))}
-                        className="w-full accent-primary"
-                    />
-                </div>
-                <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                        <span>{t("calculator.tan")}</span>
-                        <span className="font-semibold text-foreground">{tan.toFixed(1)}%</span>
-                    </div>
-                    <input
-                        type="range"
-                        min={1} max={24} step={0.5}
-                        value={tan}
-                        onChange={(e) => setTan(Number(e.target.value))}
-                        className="w-full accent-primary"
-                    />
-                </div>
-                <div className="border-t pt-2 space-y-1">
-                    <div className="flex justify-between font-semibold">
-                        <span>{t("calculator.monthlyPayment")}</span>
-                        <span className="text-primary">€{monthlyPayment.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{t("calculator.totalInterest")}</span>
-                        <span>€{totalInterest.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{t("calculator.totalRepayable")}</span>
-                        <span>€{totalRepayable.toFixed(2)}</span>
-                    </div>
-                </div>
+                ))}
             </div>
         </div>
     )
 }
 
-function PartnerOfferCard({ card }: { card: ActionCard }) {
-    const payload = card.payload ?? {}
-    const funnelId = String(payload.funnel_id ?? "")
-    const offerType = String(payload.offer_type ?? "")
-    const partnerName = String(payload.partner_name ?? card.title)
-    const ctaUrl = payload.cta_url ? String(payload.cta_url) : null
-
-    const colorMap: Record<string, string> = {
-        conto_corrente: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800",
-        prestito: "bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-800",
-        investimento: "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800",
-        assicurazione: "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800",
-    }
-    const colorClass = colorMap[offerType] ?? "bg-muted/30 border-border"
-
+function GoalProgressBar({ progress }: { progress: GoalProgress }) {
     return (
-        <div className={`border rounded-xl overflow-hidden text-sm ${colorClass}`}>
-            <div className="px-3 py-2 flex items-center justify-between">
-                <div>
-                    <div className="font-semibold">{partnerName}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{card.description}</div>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center text-sm font-bold shrink-0 ml-2">
-                    {partnerName.charAt(0).toUpperCase()}
-                </div>
+        <div className="mt-3 rounded-lg border border-border p-3">
+            <div className="flex items-center gap-2">
+                <span>🎯</span>
+                <span className="text-sm font-semibold text-foreground">{progress.goal_name}</span>
             </div>
-            {ctaUrl ? (
-                <a
-                    href={ctaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between px-3 py-2 bg-background/60 hover:bg-background/80 transition-colors font-medium text-xs text-primary border-t"
-                    data-funnel-id={funnelId}
-                >
-                    <span>{card.cta_label ?? "Scopri l'offerta"}</span>
-                    <ExternalLink className="h-3 w-3" />
-                </a>
-            ) : (
-                <div className="px-3 py-2 bg-background/60 text-xs text-muted-foreground border-t">
-                    {card.cta_label ?? "Scopri l'offerta"}
-                </div>
-            )}
-        </div>
-    )
-}
-
-function GenericActionCard({ card }: { card: ActionCard }) {
-    return (
-        <div className="border border-border rounded-md px-3 py-2 bg-background text-sm">
-            <div className="font-semibold">{card.title}</div>
-            <div className="text-muted-foreground mt-0.5">{card.description}</div>
-            {card.cta_label && (
-                <span className="inline-block mt-1 text-xs font-medium text-primary">
-                    {card.cta_label} →
-                </span>
-            )}
-        </div>
-    )
-}
-
-function ActionCardRouter({ card }: { card: ActionCard }) {
-    if (card.action_type === "calculator") return <LoanCalculatorCard card={card} />
-    if (card.action_type === "funnel") return <PartnerOfferCard card={card} />
-    return <GenericActionCard card={card} />
-}
-
-// ── Resource cards ────────────────────────────────────────────────────────────
-
-function VideoCard({ card }: { card: ResourceCard }) {
-    const [expanded, setExpanded] = useState(false)
-    const videoId = card.video_id
-    if (!videoId) return <ArticleCard card={card} />
-    return (
-        <div className="border border-border rounded-xl overflow-hidden text-sm bg-background">
-            {expanded ? (
-                <div className="aspect-video w-full">
-                    <iframe
-                        src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
-                        title={card.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full"
+            <div className="flex items-center gap-2 mt-2">
+                <div className="flex-1 bg-muted rounded-full h-2">
+                    <div
+                        className="bg-primary rounded-full h-2 transition-all"
+                        style={{ width: `${Math.min(100, Math.max(0, progress.estimated_pct))}%` }}
                     />
                 </div>
-            ) : (
-                <button
-                    onClick={() => setExpanded(true)}
-                    className="w-full relative aspect-video bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
-                    aria-label={`Riproduci: ${card.title}`}
-                >
-                    <img
-                        src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-                        alt={card.title}
-                        className="absolute inset-0 w-full h-full object-cover opacity-80"
-                    />
-                    <span className="relative z-10 h-12 w-12 rounded-full bg-black/70 flex items-center justify-center">
-                        <svg viewBox="0 0 24 24" fill="white" className="h-6 w-6 ml-0.5">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                    </span>
-                </button>
-            )}
-            <div className="px-3 py-2">
-                <div className="font-semibold">{card.title}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{card.summary}</div>
+                <span className="text-sm font-semibold text-foreground">~{progress.estimated_pct}%</span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">{progress.subtitle}</p>
         </div>
     )
 }
 
-function ArticleCard({ card }: { card: ResourceCard }) {
+function ContentCardStrip({ cards }: { cards: ContentCard[] }) {
     const { t } = useTranslation()
-    const inner = (
-        <div className={`border border-border rounded-md px-3 py-2 bg-background text-sm ${card.url ? "hover:border-primary/50 transition-colors" : ""}`}>
-            <div className="font-semibold">{card.title}</div>
-            <div className="text-muted-foreground mt-0.5">{card.summary}</div>
-            {card.estimated_read_minutes && (
-                <span className="text-xs text-muted-foreground mt-1 block">
-                    {t("coaching.readingMinutes", { minutes: card.estimated_read_minutes })}
-                </span>
-            )}
-            {card.url && (
-                <span className="flex items-center gap-1 text-xs text-primary mt-1">
-                    <ExternalLink className="h-3 w-3" /> {t("coaching.readMore")}
-                </span>
-            )}
+    if (cards.length === 0) return null
+
+    return (
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory">
+            {cards.map((card, i) => (
+                <ContentCardItem key={i} card={card} />
+            ))}
         </div>
     )
-    if (card.url) {
+}
+
+function ContentCardItem({ card }: { card: ContentCard }) {
+    const { t } = useTranslation()
+    const [videoExpanded, setVideoExpanded] = useState(false)
+    const typeLabel = t(`coaching.cardType.${card.card_type}`, card.card_type)
+
+    // Video card with expandable player
+    if (card.card_type === "video" && card.video_id) {
         return (
-            <a href={card.url} target="_blank" rel="noopener noreferrer">
-                {inner}
-            </a>
+            <div className="snap-start shrink-0 w-64 border border-border rounded-lg overflow-hidden bg-card">
+                {videoExpanded ? (
+                    <div className="aspect-video w-full">
+                        <iframe
+                            src={`https://www.youtube.com/embed/${card.video_id}?autoplay=1`}
+                            title={card.title}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full"
+                        />
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setVideoExpanded(true)}
+                        className="w-full relative aspect-video bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+                    >
+                        <img
+                            src={`https://img.youtube.com/vi/${card.video_id}/mqdefault.jpg`}
+                            alt={card.title}
+                            className="absolute inset-0 w-full h-full object-cover opacity-80"
+                        />
+                        <span className="relative z-10 h-10 w-10 rounded-full bg-black/70 flex items-center justify-center">
+                            <svg viewBox="0 0 24 24" fill="white" className="h-5 w-5 ml-0.5"><path d="M8 5v14l11-7z" /></svg>
+                        </span>
+                    </button>
+                )}
+                <div className="px-3 py-2">
+                    <p className="text-sm font-semibold line-clamp-2">{card.title}</p>
+                    {card.summary && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{card.summary}</p>}
+                </div>
+            </div>
         )
+    }
+
+    // Slide deck card
+    if (card.card_type === "slide_deck" && card.slide_id) {
+        return <MarpSlideViewer slideId={card.slide_id} title={card.title} />
+    }
+
+    // Learn card (microlearning)
+    if (card.card_type === "learn") {
+        return (
+            <div className="snap-start shrink-0 w-56 border border-primary/30 rounded-lg overflow-hidden bg-primary/5">
+                <div className="px-3 py-2 flex items-center gap-1.5 text-xs text-primary bg-primary/10">
+                    <Lightbulb className="h-3 w-3" />
+                    <span>{typeLabel}</span>
+                </div>
+                <div className="px-3 py-2">
+                    <p className="text-sm font-semibold line-clamp-2">{card.concept ?? card.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{card.plain_explanation ?? card.summary}</p>
+                    {card.example && <p className="text-xs text-muted-foreground italic mt-1 line-clamp-2">{card.example}</p>}
+                </div>
+            </div>
+        )
+    }
+
+    // Article / partner_offer - clickable cards
+    const isClickable = !!card.url
+    const inner = (
+        <div className={`snap-start shrink-0 w-56 border border-border rounded-lg overflow-hidden bg-card ${isClickable ? "hover:border-primary/30 transition-colors" : ""}`}>
+            <div className="px-3 py-2 flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50">
+                <BookOpen className="h-3 w-3" />
+                <span>{typeLabel}</span>
+            </div>
+            <div className="px-3 py-2">
+                <p className="text-sm font-semibold line-clamp-2">{card.title}</p>
+                {card.summary && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{card.summary}</p>}
+                {isClickable && (
+                    <span className="flex items-center gap-1 text-xs text-primary mt-1">
+                        <ExternalLink className="h-3 w-3" /> {t("coaching.readMore")}
+                    </span>
+                )}
+            </div>
+        </div>
+    )
+
+    if (isClickable) {
+        return <a href={card.url!} target="_blank" rel="noopener noreferrer">{inner}</a>
     }
     return inner
 }
 
-function ResourceCardRouter({ card }: { card: ResourceCard }) {
-    if (card.resource_type === "video") return <VideoCard card={card} />
-    if (card.resource_type === "slide_deck" && card.slide_id) {
-        return <MarpSlideViewer slideId={card.slide_id} title={card.title} />
-    }
-    return <ArticleCard card={card} />
-}
-
-function LearnCardStub({ card }: { card: LearnCard }) {
+function InteractiveCardComponent({ card }: { card: InteractiveCard }) {
     const { t } = useTranslation()
     return (
-        <div className="border border-primary/30 rounded-md px-3 py-2 bg-primary/5 text-sm">
-            <div className="font-semibold text-primary">{card.concept}</div>
-            <div className="text-foreground mt-0.5">{card.plain_explanation}</div>
-            {card.example && (
-                <div className="text-muted-foreground text-xs mt-1 italic">{t("coaching.examplePrefix")} {card.example}</div>
+        <div className="mt-3 bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-start gap-3">
+            <Bell className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className="flex-1">
+                <p className="text-sm font-semibold">{card.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{card.description}</p>
+            </div>
+            <Button size="sm" variant="outline">
+                {card.cta_label ?? t("coaching.reminder.defaultCta")}
+            </Button>
+        </div>
+    )
+}
+
+function DetailsToggle({ a2ui }: { a2ui: string }) {
+    const [expanded, setExpanded] = useState(false)
+    const { t } = useTranslation()
+
+    return (
+        <div className="mt-2">
+            <button
+                onClick={() => setExpanded(!expanded)}
+                className="text-sm text-muted-foreground flex items-center gap-1"
+            >
+                {expanded ? t("coaching.hideDetails") : t("coaching.showDetails")}
+                <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
+            </button>
+            {expanded && (
+                <div className="mt-2">
+                    <A2UISurface
+                        jsonl={a2ui}
+                        onAction={(action) => {
+                            window.dispatchEvent(new CustomEvent("senso:a2ui-action", { detail: { action } }))
+                        }}
+                    />
+                </div>
             )}
         </div>
     )
@@ -670,36 +668,45 @@ function AssistantBubble({
                 )}
                 {resp && (
                     <div className="animate-in fade-in duration-200 slide-in-from-bottom-1 motion-reduce:animate-none">
-                        {SHOW_REASONING && <ReasoningCard steps={resp.reasoning_used} />}
-                        {resp.action_cards.length > 0 && (
-                            <div className="mt-2 flex flex-col gap-2">
-                                {resp.action_cards.map((c, i) => <ActionCardRouter key={i} card={c} />)}
-                            </div>
-                        )}
-                        {resp.resource_cards.length > 0 && (
-                            <div className="mt-2 flex flex-col gap-2">
-                                {resp.resource_cards.map((c, i) => <ResourceCardRouter key={i} card={c} />)}
-                            </div>
-                        )}
-                        {resp.learn_cards.length > 0 && (
-                            <div className="mt-2 flex flex-col gap-2">
-                                {resp.learn_cards.map((c, i) => <LearnCardStub key={i} card={c} />)}
-                            </div>
-                        )}
+                        {/* 1. Affordability verdict (top position) */}
                         {resp.affordability_verdict && (
                             <AffordabilityVerdictCard verdict={resp.affordability_verdict} />
                         )}
-                        {resp.details_a2ui && (
-                            <div className="mt-2">
-                                <A2UISurface
-                                    jsonl={resp.details_a2ui}
-                                    onAction={(action) => {
-                                        // Dispatch to the page so other components (calculator, funnel) can react
-                                        window.dispatchEvent(new CustomEvent("senso:a2ui-action", { detail: { action } }))
-                                    }}
-                                />
+
+                        {/* 2. Reasoning (if debug enabled) */}
+                        {SHOW_REASONING && <ReasoningCard steps={resp.reasoning_used} />}
+
+                        {/* 3. Transaction evidence */}
+                        {resp.transaction_evidence && resp.transaction_evidence.transactions.length > 0 && (
+                            <TransactionEvidenceTable evidence={resp.transaction_evidence} />
+                        )}
+
+                        {/* 4. Goal progress */}
+                        {resp.goal_progress && (
+                            <GoalProgressBar progress={resp.goal_progress} />
+                        )}
+
+                        {/* 5. Content cards (horizontal strip) */}
+                        {resp.content_cards.length > 0 && (
+                            <ContentCardStrip cards={resp.content_cards} />
+                        )}
+
+                        {/* 6. Interactive cards (reminder) */}
+                        {resp.interactive_cards.length > 0 && (
+                            <div className="mt-2 flex flex-col gap-2">
+                                {resp.interactive_cards.map((c, i) => (
+                                    <InteractiveCardComponent key={i} card={c} />
+                                ))}
                             </div>
                         )}
+
+                        {/* 7. Details panel — collapsed toggle */}
+                        {resp.details_a2ui && (
+                            <DetailsToggle a2ui={resp.details_a2ui} />
+                        )}
+
+                        {/* D-05: new_insight NOT rendered — persistence is backend-only */}
+
                         {LLM_DEBUG && resp.debug && <DebugPanel debug={resp.debug} />}
                     </div>
                 )}
