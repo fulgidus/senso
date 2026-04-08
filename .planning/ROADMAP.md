@@ -443,7 +443,7 @@ Plans:
 **Goal:** Fix ChatScreen keyboard/safe area, pull-to-refresh, all tables → cards on mobile, profile tab layout, PWA standalone, coach picker dark mode + session bug, TTS fix.
 **Requirements**: Defined in 22-CONTEXT.md
 **Depends on:** Phase 21
-**Plans:** 6/6 plans written (ready to execute) · RESEARCH.md added (iOS visualViewport, vite-plugin-pwa, PTR)
+**Plans:** 6/6 plans complete
 
 Plans:
 
