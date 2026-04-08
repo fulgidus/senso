@@ -11,10 +11,12 @@ GET  /coaching/personas       - list available personas
 """
 
 import json
+import queue
+import threading
 from datetime import UTC, datetime
 from pathlib import Path
 from itertools import count
-from typing import Literal
+from typing import Callable, Literal
 from uuid import uuid4
 
 import uuid_utils as uuid_utils_lib
@@ -161,6 +163,7 @@ def _prepare_chat_result(
     body: ChatRequest,
     current_user: UserDTO,
     db: Session,
+    tool_call_callback: Callable | None = None,
 ) -> tuple[dict, ChatSession]:
     # Layer 1: Input safety check
     safe, reason = check_coaching_input(body.message)
@@ -212,6 +215,7 @@ def _prepare_chat_result(
             locale=body.locale,
             persona_id=body.persona_id,
             debug=settings.llm_debug,
+            tool_call_callback=tool_call_callback,
         )
     except ProfileError as exc:
         db.rollback()
@@ -298,17 +302,77 @@ def coaching_chat_stream(
     current_user: UserDTO = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    result, session = _prepare_chat_result(body, current_user, db)
-    dto = _coaching_response_dto(result, session)
+    settings = get_settings()
+    granularity = settings.tool_usage_granularity
+
+    # Queue for inter-thread communication
+    event_queue: queue.Queue = queue.Queue()
+
+    def tool_callback(tool_name: str, tool_args: dict) -> None:
+        """Called from LLM thread when a tool is invoked."""
+        if granularity == "hidden":
+            return
+        event_queue.put(("tool_use", {"tool_name": tool_name, "args": tool_args}))
+
+    def run_chat():
+        """Execute coaching chat in background thread, push result to queue."""
+        try:
+            result, session = _prepare_chat_result(
+                body,
+                current_user,
+                db,
+                tool_call_callback=tool_callback if granularity != "hidden" else None,
+            )
+            dto = _coaching_response_dto(result, session)
+            event_queue.put(("result", dto))
+        except Exception as exc:
+            event_queue.put(("error", str(exc)))
+
+    # Start LLM processing in background thread
+    thread = threading.Thread(target=run_chat, daemon=True)
+    thread.start()
 
     def event_stream():
-        yield _sse_event(
-            "meta", {"session_id": session.id, "persona_id": body.persona_id}
-        )
-        for chunk in _chunk_message_text(dto.message):
-            yield _sse_event("delta", {"text": chunk})
-        yield _sse_event("final", dto.model_dump())
-        yield _sse_event("done", {"session_id": session.id})
+        tool_names_seen: list[str] = []
+        grouped_emitted = False
+
+        while True:
+            try:
+                event_type, data = event_queue.get(timeout=120)
+            except queue.Empty:
+                yield _sse_event("error", {"message": "timeout"})
+                return
+
+            if event_type == "tool_use":
+                tool_names_seen.append(data["tool_name"])
+                if granularity == "granular":
+                    yield _sse_event("tool_use", {"tool_name": data["tool_name"]})
+                elif granularity == "grouped" and not grouped_emitted:
+                    yield _sse_event("tool_use", {"tool_name": "_grouped"})
+                    grouped_emitted = True
+                # "hidden" — already filtered in callback, but safety net
+                continue
+
+            if event_type == "result":
+                dto = data
+                # Emit meta
+                yield _sse_event(
+                    "meta", {"session_id": dto.session_id, "persona_id": body.persona_id}
+                )
+                # Emit tool summary (list of tools used) for frontend to collapse pills
+                if tool_names_seen:
+                    yield _sse_event("tools_complete", {"tools_used": tool_names_seen})
+                # Emit text chunks
+                for chunk in _chunk_message_text(dto.message):
+                    yield _sse_event("delta", {"text": chunk})
+                # Emit final structured response
+                yield _sse_event("final", dto.model_dump())
+                yield _sse_event("done", {"session_id": dto.session_id})
+                return
+
+            if event_type == "error":
+                yield _sse_event("error", {"message": data})
+                return
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
