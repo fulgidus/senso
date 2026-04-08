@@ -573,7 +573,7 @@ function VoicePlayButton({
     ttsConfig: TTSConfig
 }) {
     const { t } = useTranslation()
-    const { canPlay, isPlaying, isGenerating, hasFallenBack, play, stop } = useTTS(ttsConfig)
+    const { canPlay, isPlaying, isGenerating, hasFallenBack, autoplayBlocked, resumeAfterBlock, play, stop } = useTTS(ttsConfig)
     if (!canPlay) return null
     const busy = isGenerating || isPlaying
     // hasFallenBack persists once ElevenLabs has failed at least once, or is
@@ -582,7 +582,7 @@ function VoicePlayButton({
     // only true during active fallback playback).
     const showFallbackBadge = hasFallenBack
     return (
-        <div className="relative inline-flex items-center">
+        <div className="relative inline-flex items-center gap-1">
             <Button
                 type="button"
                 variant="ghost"
@@ -606,6 +606,19 @@ function VoicePlayButton({
                     <Volume2 className="h-3 w-3" />
                 )}
             </Button>
+            {/* Manual play button when autoplay policy blocks automatic playback */}
+            {autoplayBlocked && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs px-2"
+                    onClick={resumeAfterBlock}
+                    aria-label={t("coaching.ttsPlay")}
+                >
+                    ▶ {t("coaching.ttsPlayShort")}
+                </Button>
+            )}
             {showFallbackBadge && (
                 <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
             )}

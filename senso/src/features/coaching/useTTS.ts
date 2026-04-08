@@ -31,6 +31,10 @@ interface UseTTSResult {
      *  on browsers without SpeechRecognition (Firefox/Librewolf). Used to keep
      *  the amber "browser TTS" badge visible between plays. */
     hasFallenBack: boolean
+    /** True when browser autoplay policy blocked audio.play() - show manual play button */
+    autoplayBlocked: boolean
+    /** Call this when user manually taps the play button after autoplay was blocked */
+    resumeAfterBlock: () => void
     play: (text: string, locale: "it" | "en") => Promise<void>
     stop: () => void
 }
@@ -40,6 +44,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
     const [isGenerating, setIsGenerating] = useState(false)
     const [ttsError, setTtsError] = useState<string | null>(null)
     const [usingFallback, setUsingFallback] = useState(false)
+    const [autoplayBlocked, setAutoplayBlocked] = useState(false)
     // hasFallenBack persists once ElevenLabs fails, so the badge remains visible
     // between plays and is also pre-set on browsers without SpeechRecognition
     // (Firefox/Librewolf), which signals browser-only TTS environment.
@@ -109,6 +114,7 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
                 objectUrlRef.current = null
                 audioRef.current = null
                 setIsPlaying(false)
+                setAutoplayBlocked(false)
             }
             audio.onerror = () => {
                 // Audio element error after we already have the blob - rare, don't fallback to
@@ -117,8 +123,24 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
                 objectUrlRef.current = null
                 audioRef.current = null
                 setIsPlaying(false)
+                setAutoplayBlocked(false)
             }
-            await audio.play()
+            try {
+                await audio.play()
+            } catch (playErr) {
+                // NotAllowedError = browser autoplay policy blocked playback.
+                // Keep the audio loaded - expose autoplayBlocked so UI can show a manual play button.
+                if (playErr instanceof DOMException && playErr.name === "NotAllowedError") {
+                    setAutoplayBlocked(true)
+                    // Don't fall back to speechSynthesis - audio is ready, just needs user gesture
+                } else {
+                    // Other play() error - clean up
+                    URL.revokeObjectURL(url)
+                    objectUrlRef.current = null
+                    audioRef.current = null
+                    setIsPlaying(false)
+                }
+            }
         } catch (err) {
             // fetchTTSAudio threw (503 or network) - fall back to speechSynthesis only when
             // explicitly permitted by config.
@@ -154,7 +176,25 @@ export function useTTS(config: TTSConfig = DEFAULT_TTS_CONFIG): UseTTSResult {
         }
     }, [])
 
-    return { canPlay, isPlaying, isGenerating, ttsError, usingFallback, hasFallenBack, play, stop }
+    // resumeAfterBlock: call this when user manually taps the play button after autoplay was blocked
+    const resumeAfterBlock = useCallback(() => {
+        if (!autoplayBlocked || !audioRef.current) return
+        setAutoplayBlocked(false)
+        audioRef.current.play().catch(() => {
+            // If still blocked (unlikely after user gesture), just clean up
+            if (audioRef.current) {
+                audioRef.current.pause()
+                audioRef.current = null
+            }
+            if (objectUrlRef.current) {
+                URL.revokeObjectURL(objectUrlRef.current)
+                objectUrlRef.current = null
+            }
+            setIsPlaying(false)
+        })
+    }, [autoplayBlocked])
+
+    return { canPlay, isPlaying, isGenerating, ttsError, usingFallback, hasFallenBack, autoplayBlocked, resumeAfterBlock, play, stop }
 }
 
 function _fallbackSpeak(text: string, locale: "it" | "en", onEnd: () => void): void {

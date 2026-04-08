@@ -301,9 +301,10 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
     // ── Unified interface ────────────────────────────────────────────────────
 
     const startRecording = useCallback(() => {
+        if (isRecording) return // guard: already recording - no-op
         if (backend === "web-speech") startWebSpeech()
         else if (backend === "media-recorder") startMediaRecorder()
-    }, [backend, startWebSpeech, startMediaRecorder])
+    }, [backend, isRecording, startWebSpeech, startMediaRecorder])
 
     const stopRecording = useCallback(() => {
         if (backend === "web-speech") stopWebSpeech()
