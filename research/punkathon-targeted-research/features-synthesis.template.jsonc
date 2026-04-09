@@ -1,0 +1,72 @@
+{
+    "feature-slug-kebab-case": {
+        "name": "Feature Name in Title Case",
+        "details": "A brief description of the feature, its purpose, and its benefits.",
+        "category": "category-name", // e.g., "logging", "security", "performance", etc.
+        "tags": [
+            "tag1",
+            "tag2",
+            "tag3"
+        ], // Optional tags for additional categorization
+        "importance": 6.6, // 0.0-10.0 overall importance of the feature (considering all perspectives)
+        "risk": 6.6, // 0.0-10.0 overall risk associated with the feature (considering all needed steps to implement, potential downsides, etc.)
+        "estimated-effort": { // Estimated effort to implement the feature (hours, ai-assisted, rounded to nearest 0.5 h)
+            "min": 6.0,
+            "max": 6.5
+        },
+        "hackathon-advantage": 6.6, // 0.0-10.0 how much of a hackathon advantage this feature provides (how closer to winning the hackathon this feature gets me)
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Step Name",
+                    "details": "A brief description of the implementation step/risk/problem/item, how it works, its benefits, etc.",
+                    "src": [ // Resources to understand or implement, tools, tech, languages, etc.
+                        "https://link-to-implementation-step-details.com", // Optional links to documentation, code, etc.
+                        "internal/folder/path/file.ext:line-number-start[`-${line-number-end}`]" // Optional references to specific files/lines in the codebase
+                    ]
+                }
+            ],
+            "risks": [
+                { /* basically the same as $.*.implementation-details.steps[].* */}
+            ],
+            "alternatives": [
+                {
+                    "alternative-1": {
+                        "mitigations": [
+                            "Mitigation strategy 1 for this alternative.",
+                            "Mitigation strategy 2 for this alternative."
+                        ],
+                        "steps": [
+                            { /* basically the same as $.*.implementation-details.steps[].* */}
+                        ],
+                        "risks": [
+                            { /* basically the same as $.*.implementation-details.steps[].* */}
+                        ]
+                    }
+                }
+            ]
+        },
+        "problems-solved": [ // What sparked the idea for this feature, what problem it solves, and why it matters
+            { /* basically the same as $.*.implementation-details.steps[].* */}
+        ],
+        "importance-by-pov": {
+            "users": 6.6, // End-users, customers, clients, etc.
+            "dev": 6.6, // Developers, engineers, architects, etc.
+            "stackeholder": 6.6, // BancaBanca Territori del Monviso (BTM)
+            "technical-jury": 6.6, // Devpunks devs
+            "coolness": 6.6, // Cool, trendy, buzzworthy, etc.
+            "innovation-ai": 6.6, // AI capabilities, machine learning, etc.
+            "innovation-approach": 6.6, // Novelty of the solution, unique approach, etc.
+            "innovation-scalability": 6.6, // Ability to scale, handle large workloads, etc.
+            "innovation-ha": 6.6, // High availability, reliability, etc.
+            "innovation-flexibility": 6.6, // Flexibility, adaptability, etc.
+            "innovation-efficiency": 6.6, // Performance, resource efficiency, etc.
+            "privacy": 6.6, // Data privacy, user control over data, etc.
+            "banking-features": 6.6, // Features relevant to banking, finance, etc.
+            "banking-compliance": 6.6, // Compliance with banking regulations, standards, etc.
+            "education": 6.6, // Educational value, learning opportunities, etc.
+            "community": 6.6, // Community engagement, open source contributions, etc.
+            "goodness": 6.6 // Ethically good, socially responsible, environmentally friendly, etc.
+        }
+    }
+}
