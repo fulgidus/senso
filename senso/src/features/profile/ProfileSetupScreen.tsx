@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { updateMe } from "@/features/auth/session"
 import { readAccessToken } from "@/features/auth/storage"
+import { useIsMobile } from "@/hooks/useIsMobile"
 import type { VoiceGender } from "@/features/auth/types"
 
 type Props = {
@@ -22,6 +23,7 @@ export function ProfileSetupScreen({ onComplete }: Props) {
 
   const trimmedFirst = firstName.trim()
   const canSubmitName = trimmedFirst.length > 0 && !loading
+  const isMobile = useIsMobile()
 
   const handleNameNext = () => {
     if (!canSubmitName) return
@@ -71,7 +73,7 @@ export function ProfileSetupScreen({ onComplete }: Props) {
                 autoFocus
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleNameNext() }}
+                onKeyDown={(e) => { if (!isMobile && e.key === "Enter") handleNameNext() }}
                 placeholder={t("profileSetup.firstNamePlaceholder")}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -87,7 +89,7 @@ export function ProfileSetupScreen({ onComplete }: Props) {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleNameNext() }}
+                onKeyDown={(e) => { if (!isMobile && e.key === "Enter") handleNameNext() }}
                 placeholder={t("profileSetup.lastNamePlaceholder")}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
