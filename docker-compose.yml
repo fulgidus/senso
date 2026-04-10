@@ -105,6 +105,8 @@ services:
 
 volumes:
   postgres_data:
+    name: ${DEPLOY_ENV:-senso}_postgres_data
   minio_data:
+    name: ${DEPLOY_ENV:-senso}_minio_data
   modules_generated:
   modules_promoted:
