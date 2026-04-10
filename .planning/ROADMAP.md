@@ -383,11 +383,11 @@ Plans:
 **Goal:** Remove Enter-to-submit from all single-line inputs on mobile (touch devices). Desktop behavior unchanged. Send button is the sole mobile submission path. Tag chip input gets comma trigger + "Add" button on mobile.
 **Requirements**: D-01 through D-07 (see 25-CONTEXT.md)
 **Depends on:** Phase 24
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 25-01-PLAN.md - useIsMobile hook + ChatScreen handleKeyDown + session rename input
-- [ ] 25-02-PLAN.md - ProfileSetupScreen + SettingsScreen TagInput (comma + Add button) + i18n + build
+- [x] 25-02-PLAN.md - ProfileSetupScreen + SettingsScreen TagInput (comma + Add button) + i18n + build
 
 ### Phase 26: Enriched coach messages rendering fix - backend response format null issue
 
