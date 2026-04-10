@@ -5,8 +5,10 @@ All endpoints require is_admin=True (D-19/D-22).
 
 from datetime import UTC, datetime
 
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.ingestion import get_current_user
@@ -340,9 +342,33 @@ def revert_moderation_action(
 
 # ── Phase 14: Admin handle claim ─────────────────────────────────────────────
 
+_RESERVED_HANDLE_BODIES = {"admin", "sistema", "senso"}
+_HANDLE_BODY_RE = re.compile(r"^[a-z0-9-]+$")
+
+
 class ClaimHandleRequest(BaseModel):
-    handle: str = Field(min_length=2, description="Admin handle, must start with !")
+    adminHandle: str = Field(min_length=4, description="Admin handle, must start with ! followed by 3-30 lowercase alphanumeric/hyphen chars")
     model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("adminHandle")
+    @classmethod
+    def validate_handle_format(cls, v: str) -> str:
+        if not v.startswith("!"):
+            raise ValueError("Handle must start with '!'.")
+        body = v[1:]  # strip the leading !
+        if len(body) < 3:
+            raise ValueError("Handle body must be at least 3 characters (excluding !).")
+        if len(body) > 30:
+            raise ValueError("Handle body must be at most 30 characters (excluding !).")
+        if not _HANDLE_BODY_RE.match(body):
+            raise ValueError(
+                "Handle body must contain only lowercase letters, numbers, and hyphens."
+            )
+        if body in _RESERVED_HANDLE_BODIES:
+            raise ValueError(
+                f"Handle '!{body}' is reserved and cannot be claimed."
+            )
+        return v
 
 
 class ClaimHandleResponse(BaseModel):
@@ -362,21 +388,18 @@ def claim_admin_handle(
     D-26: admin_handle exposed in UserDTO (wired in Plan 14-02).
     D-27: No settings UI in Phase 14 - Phase 15 adds the UI.
     """
-    if not body.handle.startswith("!"):
-        raise HTTPException(status_code=422, detail="Handle must start with '!'.")
-
     # Check uniqueness
-    existing = db.query(User).filter(User.admin_handle == body.handle).first()
+    existing = db.query(User).filter(User.admin_handle == body.adminHandle).first()
     if existing is not None:
         raise HTTPException(
-            status_code=409, detail=f"Handle '{body.handle}' is already taken."
+            status_code=409, detail=f"Handle '{body.adminHandle}' is already taken."
         )
 
     user_row = db.query(User).filter(User.id == current_user.id).first()
     if user_row is None:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    user_row.admin_handle = body.handle
+    user_row.admin_handle = body.adminHandle
     db.commit()
     db.refresh(user_row)
 
