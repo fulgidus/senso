@@ -369,28 +369,30 @@ Plans:
 
 ### Phase 24: Voice stack fix - STT TTS e2e repair and ElevenLabs STT support with Web Speech API fallback
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Fix STT/TTS pipeline end-to-end: restore sttError prop chain, add ElevenLabs default + Whisper fallback, E2E audio fixtures, and regression tests for Chromium audio contention and MediaRecorder STT path.
+**Requirements**: D-01 through D-11 (see 24-CONTEXT.md)
 **Depends on:** Phase 23
-**Plans:** 0 plans
+**Plans:** 2/2 complete ✓
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 24 to break down)
+- [x] 24-01-PLAN.md - Backend voice ID fix + sttError prop chain repair + D-09/D-11 regression tests (completed 2026-04-10)
+- [x] 24-02-PLAN.md - E2E audio fixtures + Playwright voice-mode tests + MediaRecorder regression tests (completed 2026-04-10)
 
 ### Phase 25: Mobile input UX - send button only no enter submit on single-line inputs
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Remove Enter-to-submit from all single-line inputs on mobile (touch devices). Desktop behavior unchanged. Send button is the sole mobile submission path. Tag chip input gets comma trigger + "Add" button on mobile.
+**Requirements**: D-01 through D-07 (see 25-CONTEXT.md)
 **Depends on:** Phase 24
-**Plans:** 0 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 25 to break down)
+- [x] 25-01-PLAN.md - useIsMobile hook + ChatScreen handleKeyDown + session rename input
+- [ ] 25-02-PLAN.md - ProfileSetupScreen + SettingsScreen TagInput (comma + Add button) + i18n + build
 
 ### Phase 26: Enriched coach messages rendering fix - backend response format null issue
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Fix null content_cards/interactive_cards crashing the frontend. Backend: replace setdefault() with explicit null coercion in _repair_response(); add content_cards and interactive_cards to schema required[]. Frontend: defensive null guards in AssistantBubble and parseStoredMessage.
+**Requirements**: D-01 through D-07 (see 26-CONTEXT.md)
 **Depends on:** Phase 25
 **Plans:** 0 plans
 
@@ -399,8 +401,8 @@ Plans:
 
 ### Phase 27: Admin username enforcement
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Gate admin users who lack a username (pre-Phase-13 accounts) behind a username-setup modal before allowing normal app operation. Frontend: detect admin && !username in AuthContext/AppShell; show blocking modal with suggested username + accept/regenerate. Backend: endpoint to persist the username update if needed.
+**Requirements**: D-01 through D-08 (see 27-CONTEXT.md)
 **Depends on:** Phase 26
 **Plans:** 0 plans
 
@@ -409,18 +411,18 @@ Plans:
 
 ### Phase 28: Auth token renewal flow fix - broken expiry handling
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Wire onUnauthorized callback to all authenticated API calls in profile-api.ts and admin API modules so that 401 + failed refresh = redirect to /auth. Fixes the silent broken-screen bug on token expiry during normal navigation.
+**Requirements**: D-01 through D-08 (see 28-CONTEXT.md)
 **Depends on:** Phase 27
 **Plans:** 0 plans
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 28 to break down)
 
-### Phase 29: Profile sealed and unsealed data sections with goals habits migration
+### Phase 29: Profile sealed and unsealed data sections with goals/habits migration
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Move goals/dos/donts preferences from SettingsScreen to a new Preferenze tab in ProfileScreen. Add a "sealed notes" section (NaCl client-side encryption via Phase 13 keypair) for private data the AI cannot access. Backend: add sealed_notes TEXT column to user_profiles. Frontend: ProfileScreen Preferenze tab with "Visibile all'AI" (unsealed) and "Solo per te" (sealed) subsections.
+**Requirements**: D-01 through D-11 (see 29-CONTEXT.md)
 **Depends on:** Phase 28
 **Plans:** 0 plans
 
