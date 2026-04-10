@@ -462,6 +462,40 @@ def _add_missing_columns() -> None:
                 )
         conn.commit()
 
+    # ── Round 22: Phase 27 - Backfill admin usernames ──────────────────────────
+    # Assigns a unique $adj-noun-N username to any user where:
+    #   - username IS NULL (pre-Phase-13 accounts)
+    #   - username = '!admin' (legacy default from generate_admin_username())
+    # Uses SessionLocal (ORM session) because generate_username() needs a live db session
+    # for uniqueness checking. Cannot use the raw engine.connect() block above.
+    if not DATABASE_URL.startswith("sqlite"):
+        try:
+            from app.db.models import User as _User  # noqa: PLC0415
+            from app.services.username_generator import generate_username as _gen_username  # noqa: PLC0415
+
+            _db = SessionLocal()
+            try:
+                needs_backfill = (
+                    _db.query(_User)
+                    .filter(
+                        (_User.username.is_(None)) | (_User.username == "!admin")
+                    )
+                    .all()
+                )
+                for _user in needs_backfill:
+                    _user.username = _gen_username(_db)
+                if needs_backfill:
+                    _db.commit()
+                    logging.getLogger(__name__).info(
+                        "Round 22: backfilled %d admin username(s)", len(needs_backfill)
+                    )
+            finally:
+                _db.close()
+        except Exception as _exc:
+            logging.getLogger(__name__).warning(
+                "Round 22 backfill skipped: %s", _exc
+            )
+
 
 def _backfill_content_slugs() -> None:
     """Backfill slug column for content_items that have NULL slugs.
