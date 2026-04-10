@@ -169,15 +169,15 @@ export function SettingsScreen() {
         try {
             const { apiRequest } = await import("@/lib/api-client")
             const { getBackendBaseUrl } = await import("@/lib/config")
-            const res = await apiRequest<{ admin_handle: string }>(getBackendBaseUrl(), "/admin/claim-handle", {
+            const res = await apiRequest<{ adminHandle: string }>(getBackendBaseUrl(), "/admin/claim-handle", {
                 method: "POST",
                 token,
                 body: { adminHandle: `!${raw}` },
             })
-            updateUser({ adminHandle: res.admin_handle })
+            updateUser({ adminHandle: res.adminHandle })
             setHandleSuccess(true)
         } catch {
-            setHandleError(t("settings.handleError"))
+            setHandleError(t("settings.adminHandleError"))
         } finally {
             setHandleSaving(false)
         }
