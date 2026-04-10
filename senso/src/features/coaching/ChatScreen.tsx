@@ -1046,6 +1046,19 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     const restoreToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const shouldStickToBottomRef = useRef(true)
 
+    const loadSessionHistory = useCallback(async (id: string) => {
+        setLoadingHistory(true)
+        setMessages([])
+        try {
+            const msgs = await getSessionMessages(id)
+            setMessages(msgs.map(parseStoredMessage))
+        } catch {
+            setMessages([])
+        } finally {
+            setLoadingHistory(false)
+        }
+    }, [])
+
     // Pull-to-refresh: reload current session messages on pull-down
     const handleChatRefresh = useCallback(async () => {
         if (sessionId) {
@@ -1108,19 +1121,6 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             return []
         }
     }, [setErrorWithAutoDismiss])
-
-    const loadSessionHistory = useCallback(async (id: string) => {
-        setLoadingHistory(true)
-        setMessages([])
-        try {
-            const msgs = await getSessionMessages(id)
-            setMessages(msgs.map(parseStoredMessage))
-        } catch {
-            setMessages([])
-        } finally {
-            setLoadingHistory(false)
-        }
-    }, [])
 
     const updateStickiness = useCallback(() => {
         const container = listRef.current
