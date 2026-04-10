@@ -34,6 +34,7 @@ import {
 import { MessageCircle, PenLine, Trash2, Plus, X, Check, Mic, Square, Volume2, Loader2, ExternalLink, ChevronDown, RotateCcw, ShieldCheck, ShieldOff, Bell, BookOpen, BarChart3, Settings as SettingsIcon, Brain, Scale, Calendar, Search, Lightbulb, ChevronsDown } from "lucide-react"
 import { useKeyboardHeight } from "@/hooks/useKeyboardHeight"
 import { usePullToRefresh } from "@/hooks/usePullToRefresh"
+import { useIsMobile } from "@/hooks/useIsMobile"
 import { useTTS, type TTSConfig } from "./useTTS"
 import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
@@ -995,6 +996,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     const { t } = useTranslation()
     const { theme } = useTheme()
     const haptic = useHapticFeedback()
+    const isMobile = useIsMobile()
 
     // Resolve which gender key to use for translated strings:
     // user preference wins unless "indifferent", then fall back to persona default.
@@ -1608,7 +1610,9 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     }, [messages, activePersonaId, sessionId, locale, fetchSessions, setErrorWithAutoDismiss, t])
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === "Enter" && !e.shiftKey) {
+        // On mobile: Enter inserts a newline (default textarea behavior); send button is the only path.
+        // On desktop: Enter submits (Shift+Enter still inserts newline — existing behavior, unchanged).
+        if (!isMobile && e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
             void handleSend()
         }
