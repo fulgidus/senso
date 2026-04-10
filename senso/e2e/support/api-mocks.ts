@@ -463,3 +463,47 @@ export function mockCoachSwitch(page: Page, newPersonaId: string): void {
         }
     })
 }
+
+// ── Voice endpoint mocks ──────────────────────────────────────────────────────
+
+/**
+ * Mock POST /coaching/stt — returns a fake transcript JSON response.
+ * Simulates successful server-side STT transcription without a real microphone.
+ *
+ * @param page - Playwright Page
+ * @param transcript - The transcript text to return (default: Italian test phrase)
+ */
+export function mockCoachingSTT(
+    page: Page,
+    transcript = "Quanto posso spendere in affitto questo mese?"
+): void {
+    page.route("**/coaching/stt", (route: Route) => {
+        route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ text: transcript }),
+        })
+    })
+}
+
+/**
+ * Mock POST /coaching/tts — returns fake audio bytes with audio/mpeg content type.
+ * Simulates successful TTS audio generation without a real ElevenLabs key.
+ *
+ * Pass a real audio buffer for tests that validate Audio element playback;
+ * omit for tests that only check UI state changes.
+ *
+ * @param page - Playwright Page
+ * @param audioBuffer - Optional real audio bytes; defaults to minimal fake MP3 bytes
+ */
+export function mockCoachingTTS(page: Page, audioBuffer?: Buffer): void {
+    // Minimal ID3v2 header so the Audio element doesn't reject the blob outright
+    const fakeAudio = audioBuffer ?? Buffer.from("ID3\x03\x00\x00\x00\x00\x00\x00")
+    page.route("**/coaching/tts", (route: Route) => {
+        route.fulfill({
+            status: 200,
+            contentType: "audio/mpeg",
+            body: fakeAudio,
+        })
+    })
+}

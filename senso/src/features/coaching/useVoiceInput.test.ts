@@ -241,3 +241,155 @@ describe("useVoiceInput - recording state", () => {
     expect(onFinalTranscript).toHaveBeenCalledWith("ciao mondo");
   });
 });
+
+// ── MediaRecorder backend regression tests ───────────────────────────────────
+// D-11: Regression for stt-server-side-whisper.md debug session.
+// Verifies the MediaRecorder + server-side STT path works correctly.
+
+describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
+  beforeEach(() => {
+    // Ensure Web Speech API is absent so the hook falls back to MediaRecorder
+    Object.defineProperty(window, "SpeechRecognition", {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(window, "webkitSpeechRecognition", {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+
+    // Mock MediaRecorder as available
+    const mockMediaRecorderInstance = {
+      start: vi.fn(),
+      stop: vi.fn(),
+      state: "inactive" as "inactive" | "recording" | "paused",
+      ondataavailable: null as ((e: { data: Blob }) => void) | null,
+      onstop: null as (() => void) | null,
+    };
+
+    const MockMediaRecorder = vi.fn().mockImplementation(() => {
+      mockMediaRecorderInstance.state = "inactive";
+      return mockMediaRecorderInstance;
+    }) as unknown as typeof MediaRecorder;
+
+    (MockMediaRecorder as unknown as { isTypeSupported: (t: string) => boolean })
+      .isTypeSupported = vi.fn().mockReturnValue(true);
+
+    Object.defineProperty(window, "MediaRecorder", {
+      value: MockMediaRecorder,
+      configurable: true,
+      writable: true,
+    });
+
+    // Mock navigator.mediaDevices.getUserMedia
+    const fakeTrack = { stop: vi.fn(), kind: "audio" };
+    const fakeStream = { getTracks: () => [fakeTrack] };
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: {
+        getUserMedia: vi.fn().mockResolvedValue(fakeStream),
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("isAvailable is true when Web Speech API is absent but MediaRecorder is available", async () => {
+    const { result } = renderHook(() => useVoiceInput({ onFinalTranscript: vi.fn() }));
+    // flush detectBackend useEffect
+    await act(async () => { await Promise.resolve(); });
+    expect(result.current.isAvailable).toBe(true);
+  });
+
+  it(
+    "MediaRecorder path calls POST /coaching/stt on stop — " +
+    "regression for stt-server-side-whisper.md debug session",
+    async () => {
+      const onFinalTranscript = vi.fn();
+      const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: true,
+        json: async () => ({ text: "Ciao dal MediaRecorder" }),
+      } as Response);
+
+      const { result } = renderHook(() =>
+        useVoiceInput({ locale: "it", onFinalTranscript })
+      );
+
+      // flush detectBackend effect
+      await act(async () => { await Promise.resolve(); });
+
+      // Start recording
+      await act(async () => {
+        result.current.startRecording();
+        await Promise.resolve();
+      });
+
+      const MockMR = window.MediaRecorder as unknown as ReturnType<typeof vi.fn>;
+      const mrInstance = MockMR.mock.results[0]?.value as {
+        onstop: (() => void) | null;
+        ondataavailable: ((e: { data: Blob }) => void) | null;
+      };
+
+      // Simulate data arrival then stop
+      act(() => {
+        mrInstance.ondataavailable?.({ data: new Blob([new Uint8Array(100)], { type: "audio/webm" }) });
+      });
+
+      await act(async () => {
+        result.current.stopRecording();
+        mrInstance.onstop?.();
+        await Promise.resolve();
+        await Promise.resolve(); // flush fetch promise
+      });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining("/coaching/stt"),
+        expect.objectContaining({ method: "POST" })
+      );
+      expect(onFinalTranscript).toHaveBeenCalledWith("Ciao dal MediaRecorder");
+
+      fetchSpy.mockRestore();
+    }
+  );
+
+  it(
+    "getUserMedia stream tracks are stopped after recording — " +
+    "no micStreamRef held (regression: stt-hold-to-speak-chromium-no-audio.md)",
+    async () => {
+      const fakeTrackStop = vi.fn();
+      (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue({
+        getTracks: () => [{ stop: fakeTrackStop, kind: "audio" }],
+      });
+
+      const { result } = renderHook(() =>
+        useVoiceInput({ onFinalTranscript: vi.fn() })
+      );
+
+      await act(async () => { await Promise.resolve(); });
+
+      await act(async () => {
+        result.current.startRecording();
+        await Promise.resolve();
+      });
+
+      const MockMR = window.MediaRecorder as unknown as ReturnType<typeof vi.fn>;
+      const mrInstance = MockMR.mock.results[0]?.value as {
+        onstop: (() => void) | null;
+      };
+
+      await act(async () => {
+        result.current.stopRecording();
+        mrInstance.onstop?.();
+        await Promise.resolve();
+      });
+
+      // After onstop, stream tracks must be stopped — no live stream held
+      expect(fakeTrackStop).toHaveBeenCalled();
+    }
+  );
+});
