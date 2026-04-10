@@ -882,7 +882,8 @@
     "dosPlaceholder": "e.g. invest 10% of income",
     "dontsLabel": "Avoid",
     "dontsPlaceholder": "e.g. subscriptions over €50/month",
-    "addHint": "Press Enter to add",
+    "addHint": "Press Enter or comma to add",
+    "addButton": "Add",
     "saved": "Saved"
   },
   "voice": {

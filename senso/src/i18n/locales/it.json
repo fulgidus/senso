@@ -882,7 +882,8 @@
     "dosPlaceholder": "es. investire 10% del reddito",
     "dontsLabel": "Da evitare",
     "dontsPlaceholder": "es. abbonamenti oltre 50€/mese",
-    "addHint": "Premi Invio per aggiungere",
+    "addHint": "Premi Invio o virgola per aggiungere",
+    "addButton": "Aggiungi",
     "saved": "Salvato"
   },
   "voice": {
