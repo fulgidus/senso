@@ -66,7 +66,7 @@ Each task was committed atomically:
 ## Files Created/Modified
 - `senso/src/lib/config.ts` - backend URL loader projected from root config
 - `senso/src/lib/api-client.ts` - typed fetch wrapper with structured error handling
-- `senso/src/features/auth/storage.ts` - localStorage token read/write/clear helpers
+- `senso/src/features/auth/storage.ts` - localStorage token read/write/new helpers
 - `senso/src/features/auth/session.ts` - signup/login/refresh/me/logout/google-start orchestration
 - `senso/src/features/auth/useAuth.ts` - auth state machine for app shell and UI actions
 - `senso/src/features/auth/AuthScreen.tsx` - unauthenticated UI with email and Google fallback flow

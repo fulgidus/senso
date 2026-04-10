@@ -120,7 +120,7 @@ def test_create_item(client):
         "title": "Nuovo articolo",
         "summary": "Un riassunto",
         "topics": ["test", "nuovo"],
-        "metadata": {"url": "https://example.com/new", "estimated_read_minutes": 3},
+        "metadata": {"url": "https://example.com/clear", "estimated_read_minutes": 3},
     }
     resp = client.post("/admin/content/items", headers=headers, json=body)
     assert resp.status_code == 201
@@ -130,7 +130,7 @@ def test_create_item(client):
     assert data["locale"] == "it"
     assert data["type"] == "article"
     assert data["title"] == "Nuovo articolo"
-    assert data["metadata"]["url"] == "https://example.com/new"
+    assert data["metadata"]["url"] == "https://example.com/clear"
 
 
 def test_create_duplicate_slug_409(client):

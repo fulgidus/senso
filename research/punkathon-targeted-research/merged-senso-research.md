@@ -33,12 +33,12 @@ When percentage-based rules fail due to income volatility or extreme resource sc
 Zero-Based Budgeting operates on the principle of absolute intentionality. Every single euro earned is proactively assigned a specific job before the month begins, ensuring that income minus all allocated expenses (including savings and debt assignments) equals exactly zero.9 This method prevents lifestyle creep because surplus cash is never permitted to sit idly in a checking account; it is immediately directed toward a predetermined financial goal.14 While it offers unparalleled control over personal cash flow, the cognitive load is immense. It requires the meticulous, constant tracking of every transaction, which frequently leads to tracking fatigue and burnout if not supported by highly automated digital tools.15  
 Conversely, the "Pay Yourself First" method (often structured as an 80/20 reverse budget) relies on behavioral inertia. Under this system, savings and debt repayments are treated as the most critical, non-negotiable bills of the month. Once 20% of income is automatically routed to an investment or savings account on payday, the remaining 80% can be spent freely without strict categorization or guilt.14 This approach is ideal for individuals who suffer from tracking fatigue but possess enough baseline income to comfortably cover their essential needs.14 By automating the wealth-building process, it entirely bypasses the willpower required to save money at the end of a long month.17 However, the lack of granular tracking carries the risk of cash-flow shortages for essential bills toward the end of the pay cycle if the user is not naturally frugal.17
 
-| Framework | Optimal User Profile | Cognitive Load | Primary Advantage | Primary Vulnerability |
-| :---- | :---- | :---- | :---- | :---- |
-| **50-30-20 Rule** | Mid-income earners with predictable salaries | Low | Promotes a balanced, sustainable lifestyle without extreme austerity | Unrealistic "Needs" cap in the current high-inflation economy |
-| **65-20-15 Rule** | Low/Entry-income earners, urban renters | Medium | Realistic reflection of modern fixed costs | Requires extreme discipline on discretionary spending to maintain the savings rate |
-| **Zero-Based** | Gig workers, freelancers, high-debt individuals | Very High | Provides absolute control over every single unit of currency | High risk of burnout from constant manual tracking and reconciliation |
-| **Pay Yourself First** | Hands-off savers seeking automation | Very Low | Guarantees wealth building by bypassing human willpower | Risk of mid-month cash-flow shortages for fundamental necessities |
+| Framework              | Optimal User Profile                            | Cognitive Load | Primary Advantage                                                    | Primary Vulnerability                                                              |
+| :--------------------- | :---------------------------------------------- | :------------- | :------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| **50-30-20 Rule**      | Mid-income earners with predictable salaries    | Low            | Promotes a balanced, sustainable lifestyle without extreme austerity | Unrealistic "Needs" cap in the current high-inflation economy                      |
+| **65-20-15 Rule**      | Low/Entry-income earners, urban renters         | Medium         | Realistic reflection of modern fixed costs                           | Requires extreme discipline on discretionary spending to maintain the savings rate |
+| **Zero-Based**         | Gig workers, freelancers, high-debt individuals | Very High      | Provides absolute control over every single unit of currency         | High risk of burnout from constant manual tracking and reconciliation              |
+| **Pay Yourself First** | Hands-off savers seeking automation             | Very Low       | Guarantees wealth building by bypassing human willpower              | Risk of mid-month cash-flow shortages for fundamental necessities                  |
 
 ## **2\. Common Personal Finance Mistakes Among Young Adults**
 
@@ -67,12 +67,12 @@ The foundational pillar of financial resilience—the emergency cash reserve—i
 According to the comprehensive 2023/2024 Indagine sul Risparmio (Savings Survey) conducted jointly by Intesa Sanpaolo and the Centro Einaudi, a staggering 60% to 63% of Italian families lack a sufficient emergency fund to independently cover sudden, unforeseen expenses.32 The implications for young adults, whose baseline incomes are significantly lower than the national family average, are even more severe.  
 When faced with a financial emergency, 24% of respondents resort to formal bank loans, while 25% are forced to rely on family and friends.32 This heavy reliance on shadow networks highlights a profound vulnerability. For young adults, who often lack prime credit scores or tangible collateral, access to formal, low-interest bank loans is severely restricted.34 Consequently, they are forced either into the arms of high-interest alternative lenders or into a prolonged state of dependency on parental support, heavily delaying their transition to full economic adulthood.34 The absence of an emergency fund is a direct symptom of absent budgeting habits; without a structured framework like Zero-Based Budgeting, surplus cash is routinely viewed as "spendable" rather than "storable," leaving the individual entirely exposed to macroeconomic shocks, health emergencies, or sudden unemployment.
 
-| Financial Mistake | Underlying Mechanism | Primary Demographic Affected | Statistical Context (Italy/Europe) |
-| :---- | :---- | :---- | :---- |
-| **Misunderstanding of Debt/Interest** | Low baseline financial literacy; cultural avoidance of money discussions. | Lower-educated, lower-income youth; pronounced gender gap against women. | Only 35% of Italian youth grasp basic concepts like inflation and diversification.18 |
-| **BNPL Dependency** | Decoupling the "pain of paying" from acquisition; frictionless UX; low financing diligence. | High-impulse buyers; individuals with the lowest financial literacy scores. | BNPL disbursements grew by 85% in two years; 33.6% of surveyed individuals intend to use it.23 |
-| **Subscription Creep** | Exploitation of consumer inertia via UI "dark patterns"; auto-renewal architectures. | Broadly applicable to all highly digitized youth cohorts. | Consumers routinely underestimate subscription spend by over $100 per month.29 |
-| **Lack of Emergency Fund** | Absence of formal budgeting habits; viewing surplus cash as immediately spendable. | Entry-level workers, gig-economy participants. | 63% of Italian families cannot independently cover a sudden financial shock.32 |
+| Financial Mistake                     | Underlying Mechanism                                                                        | Primary Demographic Affected                                                | Statistical Context (Italy/Europe)                                                             |
+| :------------------------------------ | :------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| **Misunderstanding of Debt/Interest** | Low baseline financial literacy; cultural avoidance of money discussions.                   | Lower-educated, lower-income youth; pronounced gender gap against women.    | Only 35% of Italian youth grasp basic concepts like inflation and diversification.18           |
+| **BNPL Dependency**                   | Decoupling the "pain of paying" from acquisition; frictionless UX; low financing diligence. | High-impulse buyers; individuals with the lowest financial literacy scores. | BNPL disbursements grew by 85% in two years; 33.6% of surveyed individuals intend to use it.23 |
+| **Subscription Creep**                | Exploitation of consumer inertia via UI "dark patterns"; auto-renewal architectures.        | Broadly applicable to all highly digitized youth cohorts.                   | Consumers routinely underestimate subscription spend by over $100 per month.29                 |
+| **Lack of Emergency Fund**            | Absence of formal budgeting habits; viewing surplus cash as immediately spendable.          | Entry-level workers, gig-economy participants.                              | 63% of Italian families cannot independently cover a sudden financial shock.32                 |
 
 ## **3\. Competitive Landscape: Small Cooperative Banks vs. Large Banks in Italy**
 
@@ -123,15 +123,15 @@ To transition from divergent brainstorming to viable hackathon prototypes, the r
 * **Product Potential (Score 1-5):** Does it solve a validated, statistically proven problem (e.g., BNPL debt, emergency funds) justifying long-term adoption?  
 * **Creative AI Use (Score 1-5):** Does it transcend a basic chatbot interface by utilizing AI for behavioral nudging, visual generation, or complex NLP data extraction?
 
-| Product Concept | Feasibility | NEXT Alignment | Product Potential | Creative AI Use | Total Score |
-| :---- | :---- | :---- | :---- | :---- | :---- |
-| **"Vocale" Voice-to-Budget Journal** | 5 | 3 | 5 | 5 | **18** |
-| **BNPL Interceptor & Debt Visualizer** | 4 | 4 | 5 | 4 | **17** |
-| **Eco-Local Multiplier Index** | 4 | 5 | 4 | 4 | **17** |
-| **NEXT Pitch-Simulator Sandbox** | 5 | 5 | 3 | 4 | **17** |
-| AR Jargon Translator | 2 | 2 | 4 | 5 | **13** |
-| Freelance Income Smoother | 2 | 3 | 4 | 3 | **12** |
-| "Future Face" GAN Simulator | 3 | 2 | 3 | 4 | **12** |
+| Product Concept                        | Feasibility | NEXT Alignment | Product Potential | Creative AI Use | Total Score |
+| :------------------------------------- | :---------- | :------------- | :---------------- | :-------------- | :---------- |
+| **"Vocale" Voice-to-Budget Journal**   | 5           | 3              | 5                 | 5               | **18**      |
+| **BNPL Interceptor & Debt Visualizer** | 4           | 4              | 5                 | 4               | **17**      |
+| **Eco-Local Multiplier Index**         | 4           | 5              | 4                 | 4               | **17**      |
+| **NEXT Pitch-Simulator Sandbox**       | 5           | 5              | 3                 | 4               | **17**      |
+| AR Jargon Translator                   | 2           | 2              | 4                 | 5               | **13**      |
+| Freelance Income Smoother              | 2           | 3              | 4                 | 3               | **12**      |
+| "Future Face" GAN Simulator            | 3           | 2              | 3                 | 4               | **12**      |
 
 Based on the quantitative filtering matrix, the following four product specifications represent the optimal targets for hackathon development and subsequent deployment by BTM.
 
@@ -209,7 +209,7 @@ For Banca Territori del Monviso, the sponsorship of a financial education hackat
 34. 2\. Financial help and independence in young adulthood \- Pew Research Center, accesso eseguito il giorno aprile 9, 2026, [https://www.pewresearch.org/social-trends/2024/01/25/financial-help-and-independence-in-young-adulthood/](https://www.pewresearch.org/social-trends/2024/01/25/financial-help-and-independence-in-young-adulthood/)  
 35. Financial Behaviour Under Economic Strain in Different Age Groups: Predictors and Change Across 20 Years \- PMC, accesso eseguito il giorno aprile 9, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC7947154/](https://pmc.ncbi.nlm.nih.gov/articles/PMC7947154/)  
 36. ECB publishes supervisory banking statistics on significant institutions for the first quarter of 2025, accesso eseguito il giorno aprile 9, 2026, [https://www.bankingsupervision.europa.eu/press/pr/date/2025/html/ssm.pr250806\~67678707e2.en.html](https://www.bankingsupervision.europa.eu/press/pr/date/2025/html/ssm.pr250806~67678707e2.en.html)  
-37. Next” di Banca Territori del Monviso: al via l'evento di lancio del ..., accesso eseguito il giorno aprile 9, 2026, [https://www.bancabtm.it/news/next-fest-btm/](https://www.bancabtm.it/news/next-fest-btm/)  
+37. Next” di Banca Territori del Monviso: al via l'evento di lancio del ..., accesso eseguito il giorno aprile 9, 2026, [https://www.bancabtm.it/clears/next-fest-btm/](https://www.bancabtm.it/clears/next-fest-btm/)  
 38. BTM Next Young Community – La community dei giovani soci \- BTM ..., accesso eseguito il giorno aprile 9, 2026, [https://www.bancabtm.it/giovani/next-young-community/](https://www.bancabtm.it/giovani/next-young-community/)  
 39. The Deposit Business at Large vs. Small Banks \- Banca d'Italia, accesso eseguito il giorno aprile 9, 2026, [https://www.bancaditalia.it/pubblicazioni/altri-atti-seminari/2024/D\_Avernas\_slides.pdf](https://www.bancaditalia.it/pubblicazioni/altri-atti-seminari/2024/D_Avernas_slides.pdf)  
 40. 15 Examples of AI Being Used in Finance \- University of San Diego Online Degrees, accesso eseguito il giorno aprile 9, 2026, [https://onlinedegrees.sandiego.edu/artificial-intelligence-finance/](https://onlinedegrees.sandiego.edu/artificial-intelligence-finance/)  
@@ -218,11 +218,11 @@ For Banca Territori del Monviso, the sponsorship of a financial education hackat
 43. The Reform of Italian Cooperative Banks: Discussion of Proposals; Eva Gutiérrez; IMF Working Paper 08/74; March 1, 2008, accesso eseguito il giorno aprile 9, 2026, [https://www.imf.org/external/pubs/ft/wp/2008/wp0874.pdf](https://www.imf.org/external/pubs/ft/wp/2008/wp0874.pdf)  
 44. The value of growing together \- Gruppo BCC Iccrea, accesso eseguito il giorno aprile 9, 2026, [https://www.gruppobcciccrea.it/Documents/BCC%20ICCREA\_The%20value%20of%20growing%20together\_ENG%20light.pdf](https://www.gruppobcciccrea.it/Documents/BCC%20ICCREA_The%20value%20of%20growing%20together_ENG%20light.pdf)  
 45. Gruppo BCC ICCREA \- IBM, accesso eseguito il giorno aprile 9, 2026, [https://www.ibm.com/case-studies/bcc-iccrea-group](https://www.ibm.com/case-studies/bcc-iccrea-group)  
-46. BCC Iccrea Group and Accenture Form Partnership to Support the ..., accesso eseguito il giorno aprile 9, 2026, [https://newsroom.accenture.com/news/2025/bcc-iccrea-group-and-accenture-form-partnership-to-support-the-group-s-it-transformation](https://newsroom.accenture.com/news/2025/bcc-iccrea-group-and-accenture-form-partnership-to-support-the-group-s-it-transformation)  
+46. BCC Iccrea Group and Accenture Form Partnership to Support the ..., accesso eseguito il giorno aprile 9, 2026, [https://clearsroom.accenture.com/clears/2025/bcc-iccrea-group-and-accenture-form-partnership-to-support-the-group-s-it-transformation](https://clearsroom.accenture.com/clears/2025/bcc-iccrea-group-and-accenture-form-partnership-to-support-the-group-s-it-transformation)  
 47. Italian bank tasks Accenture with digital overhaul \- Mobile World Live, accesso eseguito il giorno aprile 9, 2026, [https://www.mobileworldlive.com/europe/italian-bank-tasks-accenture-with-digital-overhaul/](https://www.mobileworldlive.com/europe/italian-bank-tasks-accenture-with-digital-overhaul/)  
 48. BCC Iccrea Group selects Cleafy, setting a new standard in digital banking protection, accesso eseguito il giorno aprile 9, 2026, [https://www.cleafy.com/press/bcc-iccrea-group-selects-cleafy-for-digital-fraud-protection](https://www.cleafy.com/press/bcc-iccrea-group-selects-cleafy-for-digital-fraud-protection)  
 49. Generative AI use cases in the financial industry \- SC Ventures, accesso eseguito il giorno aprile 9, 2026, [https://scventures.io/fintechbridge/community/afbeba8c-abf2-4edd-b3c4-d554ca1f82f6](https://scventures.io/fintechbridge/community/afbeba8c-abf2-4edd-b3c4-d554ca1f82f6)  
-50. BCC Banca Iccrea Chooses expert.ai's Artificial Intelligence to Support AML Processes, accesso eseguito il giorno aprile 9, 2026, [https://www.expert.ai/news/bcc-banca-iccrea-chooses-expert-ais-artificial-intelligence-to-support-aml-processes/](https://www.expert.ai/news/bcc-banca-iccrea-chooses-expert-ais-artificial-intelligence-to-support-aml-processes/)
+50. BCC Banca Iccrea Chooses expert.ai's Artificial Intelligence to Support AML Processes, accesso eseguito il giorno aprile 9, 2026, [https://www.expert.ai/clears/bcc-banca-iccrea-chooses-expert-ais-artificial-intelligence-to-support-aml-processes/](https://www.expert.ai/clears/bcc-banca-iccrea-chooses-expert-ais-artificial-intelligence-to-support-aml-processes/)
 
 # **Claude**
 
@@ -244,11 +244,11 @@ The "Four Pillars" framework appears in multiple variants across the personal fi
 
 There is also **William Bernstein's "Four Pillars of Investing"** (2002), a classic book framing investment knowledge around Theory, History, Psychology, and Business (the finance industry). This is more academic and aimed at self-directed investors.
 
-| Aspect | Best for | Strengths | Limitations |
-| :---- | :---- | :---- | :---- |
-| Stocks & Flows (A) | Beginners who need a mental model | Dead simple; works at any income | Doesn't prescribe action |
-| Behavioral (B) | People ready to build habits | Actionable; covers insurance gap | Assumes stable income |
-| Bernstein (Investing) | Intermediate/advanced investors | Deep; historically grounded | Not a budgeting framework; US-centric |
+| Aspect                | Best for                          | Strengths                        | Limitations                           |
+| :-------------------- | :-------------------------------- | :------------------------------- | :------------------------------------ |
+| Stocks & Flows (A)    | Beginners who need a mental model | Dead simple; works at any income | Doesn't prescribe action              |
+| Behavioral (B)        | People ready to build habits      | Actionable; covers insurance gap | Assumes stable income                 |
+| Bernstein (Investing) | Intermediate/advanced investors   | Deep; historically grounded      | Not a budgeting framework; US-centric |
 
 **Relevance to SENSO:** Variant A maps perfectly to the onboarding step — the AI digests uploads and presents assets, debts, income, expenses. Variant B maps to the coaching layer on top.
 
@@ -270,13 +270,13 @@ Compare with the **50-30-20 rule** (Elizabeth Warren, *All Your Worth*, 2006):
 * **30% → Wants**  
 * **20% → Savings & debt repayment**
 
-| Dimension | 50-30-20 | 15-65-20 |
-| :---- | :---- | :---- |
-| Savings rate | 20% | 15% |
-| Needs allowance | 50% | 65% |
-| Wants allowance | 30% | 20% |
-| Best for | People with moderate cost of living | People in high-cost areas or with tight margins |
-| Philosophy | Save aggressively, cut wants | Be realistic about expenses, protect enjoyment |
+| Dimension       | 50-30-20                            | 15-65-20                                        |
+| :-------------- | :---------------------------------- | :---------------------------------------------- |
+| Savings rate    | 20%                                 | 15%                                             |
+| Needs allowance | 50%                                 | 65%                                             |
+| Wants allowance | 30%                                 | 20%                                             |
+| Best for        | People with moderate cost of living | People in high-cost areas or with tight margins |
+| Philosophy      | Save aggressively, cut wants        | Be realistic about expenses, protect enjoyment  |
 
 The 15-65-20 is arguably more realistic for young Italian workers in cities like Turin or Milan, where rent alone can consume 40%+ of a low-to-medium salary. The 50-30-20 often fails because 50% doesn't cover essentials, leading people to abandon the framework entirely.
 
@@ -396,18 +396,18 @@ Sources: [ScienceDirect — Bank efficiency and local market conditions](https:/
 
 Evaluation criteria: (F) Feasibility for a small BCC, (A) Alignment with NEXT and BTM's mission, (P) Post-hackathon adoption potential, (C) Creative/non-obvious use of AI.
 
-| Rank | Idea | F | A | P | C | Notes |
-| :---- | :---- | :---- | :---- | :---- | :---- | :---- |
-| **1** | **SENSO (current concept)** | ★★★ | ★★★★ | ★★★★ | ★★★★ | Already designed around BTM's context. Voice AI \+ real data \+ education \+ service funnel. The full concept is MVP-scoped correctly. Post-hackathon, BTM could pilot it with NEXT members. |
-| **2** | **"Quanto Mi Costa Davvero"** | ★★★★ | ★★★★ | ★★★★ | ★★★ | Could be a standalone feature OR a simplified entry point into SENSO. Zero onboarding version (no bank data needed) makes it instantly deployable. BTM could embed it on their website. |
-| **3** | **"Primo Stipendio" Simulator** | ★★★★ | ★★★★★ | ★★★★ | ★★★ | Perfectly targeted at NEXT demographic (18-30, first job). Highly educational. Doesn't require real financial data. Could be a workshop tool for NEXT events. BTM can brand it. |
-| **4** | **"Contratto Decoder"** | ★★★★ | ★★★ | ★★★★ | ★★★★ | Universally useful. Builds trust with young clients. BTM could offer it as a free service — "bring us any contract, we'll help you understand it." Differentiator vs. large banks. |
-| **5** | **Subscription Audit Agent** | ★★★★ | ★★★ | ★★★ | ★★★ | Practical and viral. The "your forgotten subscriptions cost €47/month" moment drives engagement. Lower alignment with banking mission per se, but strong as a lead-gen / trust-building tool. |
-| **6** | **Gamified Savings Challenges** | ★★★ | ★★★★★ | ★★★★ | ★★★ | Natural fit for NEXT community. Could integrate with BTM savings accounts. Requires ongoing content/moderation but AI can generate challenges. ElevenLabs voice for daily nudges. |
-| **7** | **Financial Time Machine** | ★★★ | ★★★★ | ★★★ | ★★★★ | Powerful educational tool. Makes compound interest visible. Works as a feature within SENSO rather than standalone. |
-| **8** | **"Chiedi alla Banca"** | ★★★★ | ★★★★ | ★★★★★ | ★★ | Highest post-hackathon adoption potential (direct business value for BTM), but lowest creative score — it's essentially an AI chatbot for product info. Still valuable, just not "punk." |
-| **9** | **AI Financial Diary** | ★★★★ | ★★★ | ★★★ | ★★★ | Privacy-first approach is appealing. Low tech barrier. But less differentiated — many budgeting apps exist. Voice check-in angle is novel. |
-| **10** | **BNPL X-Ray** | ★★ | ★★★ | ★★ | ★★★★ | Great concept, but technical integration with BNPL providers is extremely hard. No APIs available. Would need to rely on CSV/screenshot parsing. Interesting as a SENSO sub-feature. |
+| Rank   | Idea                            | F    | A     | P     | C    | Notes                                                                                                                                                                                         |
+| :----- | :------------------------------ | :--- | :---- | :---- | :--- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | **SENSO (current concept)**     | ★★★  | ★★★★  | ★★★★  | ★★★★ | Already designed around BTM's context. Voice AI \+ real data \+ education \+ service funnel. The full concept is MVP-scoped correctly. Post-hackathon, BTM could pilot it with NEXT members.  |
+| **2**  | **"Quanto Mi Costa Davvero"**   | ★★★★ | ★★★★  | ★★★★  | ★★★  | Could be a standalone feature OR a simplified entry point into SENSO. Zero onboarding version (no bank data needed) makes it instantly deployable. BTM could embed it on their website.       |
+| **3**  | **"Primo Stipendio" Simulator** | ★★★★ | ★★★★★ | ★★★★  | ★★★  | Perfectly targeted at NEXT demographic (18-30, first job). Highly educational. Doesn't require real financial data. Could be a workshop tool for NEXT events. BTM can brand it.               |
+| **4**  | **"Contratto Decoder"**         | ★★★★ | ★★★   | ★★★★  | ★★★★ | Universally useful. Builds trust with young clients. BTM could offer it as a free service — "bring us any contract, we'll help you understand it." Differentiator vs. large banks.            |
+| **5**  | **Subscription Audit Agent**    | ★★★★ | ★★★   | ★★★   | ★★★  | Practical and viral. The "your forgotten subscriptions cost €47/month" moment drives engagement. Lower alignment with banking mission per se, but strong as a lead-gen / trust-building tool. |
+| **6**  | **Gamified Savings Challenges** | ★★★  | ★★★★★ | ★★★★  | ★★★  | Natural fit for NEXT community. Could integrate with BTM savings accounts. Requires ongoing content/moderation but AI can generate challenges. ElevenLabs voice for daily nudges.             |
+| **7**  | **Financial Time Machine**      | ★★★  | ★★★★  | ★★★   | ★★★★ | Powerful educational tool. Makes compound interest visible. Works as a feature within SENSO rather than standalone.                                                                           |
+| **8**  | **"Chiedi alla Banca"**         | ★★★★ | ★★★★  | ★★★★★ | ★★   | Highest post-hackathon adoption potential (direct business value for BTM), but lowest creative score — it's essentially an AI chatbot for product info. Still valuable, just not "punk."      |
+| **9**  | **AI Financial Diary**          | ★★★★ | ★★★   | ★★★   | ★★★  | Privacy-first approach is appealing. Low tech barrier. But less differentiated — many budgeting apps exist. Voice check-in angle is novel.                                                    |
+| **10** | **BNPL X-Ray**                  | ★★   | ★★★   | ★★    | ★★★★ | Great concept, but technical integration with BNPL providers is extremely hard. No APIs available. Would need to rely on CSV/screenshot parsing. Interesting as a SENSO sub-feature.          |
 
 **Recommendation for the hackathon:** Stick with SENSO as the main concept, but scope the demo around the "Quanto Mi Costa Davvero" moment — it's the highest-impact, lowest-friction demonstration. The 75-second demo flow in the CONCEPT.md is already well designed. Consider adding one "Primo Stipendio" screen as a secondary demo path to show breadth.
 
@@ -422,7 +422,7 @@ Evaluation criteria: (F) Feasibility for a small BCC, (A) Alignment with NEXT an
 * Il Sole 24 Ore (Nov 2025). *Financial education, where do we stand?* [https://en.ilsole24ore.com/art/financial-education-where-we-stand-compared-to-italy-and-some-eu-countries-AHBb2PuD](https://en.ilsole24ore.com/art/financial-education-where-we-stand-compared-to-italy-and-some-eu-countries-AHBb2PuD)  
 * Museo del Risparmio (Feb 2025). *Young People and Financial Education in Italy*. [https://www.museodelrisparmio.it/blog/young-people-and-financial-education-where-do-we-stand-in-italy/](https://www.museodelrisparmio.it/blog/young-people-and-financial-education-where-do-we-stand-in-italy/)  
 * Bruegel (2024). *The state of financial knowledge in the EU*. [https://www.bruegel.org/policy-brief/state-financial-knowledge-european-union](https://www.bruegel.org/policy-brief/state-financial-knowledge-european-union)  
-* European Commission (2025). *EU Financial Literacy Strategy*. Via [https://legal.pwc.de/en/news/articles/european-commission-publishes-its-2025-financial-literacy-strategy](https://legal.pwc.de/en/news/articles/european-commission-publishes-its-2025-financial-literacy-strategy)  
+* European Commission (2025). *EU Financial Literacy Strategy*. Via [https://legal.pwc.de/en/clears/articles/european-commission-publishes-its-2025-financial-literacy-strategy](https://legal.pwc.de/en/clears/articles/european-commission-publishes-its-2025-financial-literacy-strategy)  
 * Bank of Italy / Format Research (Mar 2026). *Buy Now Pay Later: Market Characteristics*. [https://formatresearch.com/en/2026/03/25/buy-now-pay-later-caratteristiche-del-mercato-banca-ditalia/](https://formatresearch.com/en/2026/03/25/buy-now-pay-later-caratteristiche-del-mercato-banca-ditalia/)  
 * The Conservative (Nov 2025). *Europe Tightens BNPL Rules*. [https://www.theconservative.online/europe-tightens-the-rules-on-buy-now-pay-later-what-the-2026-reform-means-for-consumers-and-platforms](https://www.theconservative.online/europe-tightens-the-rules-on-buy-now-pay-later-what-the-2026-reform-means-for-consumers-and-platforms)  
 * Oliver Wyman (Feb 2025). *Impact of CCD2 on BNPL in Europe*. [https://www.oliverwyman.com/our-expertise/insights/2025/feb/impact-of-ccd2-on-buy-now-pay-later-services-in-europe.html](https://www.oliverwyman.com/our-expertise/insights/2025/feb/impact-of-ccd2-on-buy-now-pay-later-services-in-europe.html)  
@@ -771,15 +771,15 @@ Feasibility is highest when the idea:
 
 #### Ranked shortlist
 
-| Rank | Idea | Why it fits BTM \+ NEXT | What makes the AI non-obvious | Pilot scope (realistic) |
-| :---- | :---- | :---- | :---- | :---- |
-| Top | **SENSO-style voice coach \+ decision moments** fileciteturn0file0 | Matches NEXT’s mentoring/community vibe; fits mobile-first learning preference; aligns with BTM’s “human \+ tech” messaging | AI is used as a *personalized tutor* grounded in the user’s numbers, with structured learning \+ actions (not generic chat) | MVP: upload CSV \+ voice question “Can I afford X?”; output explanation \+ learning cards |
-| Top | **BNPL Reality Lens** | Directly targets the biggest emerging EU consumer trap (BNPL) and youth vulnerability | AI converts installment psychology into total-cost \+ risk narrative, personalized to cash-flow | MVP: paste checkout terms → AI computes total cost \+ “risk prompts”; later integrate transaction data |
-| High | **Subscription Genome** | Recurring spend is a common leak; EBA flags subscription traps as fraud vector | AI classifies recurring payments, estimates “forget risk,” and generates cancellation scripts and reminders | MVP: parse CSV; detect recurring; create “cancel pack” and monthly savings forecast |
-| High | **Micro-simulator for life choices** | NEXT community likely discusses moving out, cars, travel; strong engagement hook | AI builds scenario distributions, making uncertainty explicit (not just a single number) | MVP: scenario templates \+ user data; outputs best/base/worst and “break-even” rules |
-| Medium-high | **Fraud & Scam Gym** | EBA highlights fraud and AI-enabled scams; fits “education that protects” | AI generates adaptive simulations and tracks skill improvement | MVP: 10 scenario generator \+ scoring; run in NEXT workshops |
-| Medium | **Auto sinking funds engine** | Converts “unexpected expenses” into planned micro-actions; helps emergency savings | AI learns irregular expense patterns and builds a smoothing plan | MVP: detect annual/quarterly expenses; recommend monthly set-aside \+ autopay reminders |
-| Medium | **Ask the Advisor prep** | Amplifies BTM’s relationship banking rather than replacing it | AI summarizes behavior and generates questions/trade-offs for human consult | MVP: upload data → one-page printable prep sheet for a branch meeting |
+| Rank        | Idea                                                               | Why it fits BTM \+ NEXT                                                                                                     | What makes the AI non-obvious                                                                                               | Pilot scope (realistic)                                                                                |
+| :---------- | :----------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| Top         | **SENSO-style voice coach \+ decision moments** fileciteturn0file0 | Matches NEXT’s mentoring/community vibe; fits mobile-first learning preference; aligns with BTM’s “human \+ tech” messaging | AI is used as a *personalized tutor* grounded in the user’s numbers, with structured learning \+ actions (not generic chat) | MVP: upload CSV \+ voice question “Can I afford X?”; output explanation \+ learning cards              |
+| Top         | **BNPL Reality Lens**                                              | Directly targets the biggest emerging EU consumer trap (BNPL) and youth vulnerability                                       | AI converts installment psychology into total-cost \+ risk narrative, personalized to cash-flow                             | MVP: paste checkout terms → AI computes total cost \+ “risk prompts”; later integrate transaction data |
+| High        | **Subscription Genome**                                            | Recurring spend is a common leak; EBA flags subscription traps as fraud vector                                              | AI classifies recurring payments, estimates “forget risk,” and generates cancellation scripts and reminders                 | MVP: parse CSV; detect recurring; create “cancel pack” and monthly savings forecast                    |
+| High        | **Micro-simulator for life choices**                               | NEXT community likely discusses moving out, cars, travel; strong engagement hook                                            | AI builds scenario distributions, making uncertainty explicit (not just a single number)                                    | MVP: scenario templates \+ user data; outputs best/base/worst and “break-even” rules                   |
+| Medium-high | **Fraud & Scam Gym**                                               | EBA highlights fraud and AI-enabled scams; fits “education that protects”                                                   | AI generates adaptive simulations and tracks skill improvement                                                              | MVP: 10 scenario generator \+ scoring; run in NEXT workshops                                           |
+| Medium      | **Auto sinking funds engine**                                      | Converts “unexpected expenses” into planned micro-actions; helps emergency savings                                          | AI learns irregular expense patterns and builds a smoothing plan                                                            | MVP: detect annual/quarterly expenses; recommend monthly set-aside \+ autopay reminders                |
+| Medium      | **Ask the Advisor prep**                                           | Amplifies BTM’s relationship banking rather than replacing it                                                               | AI summarizes behavior and generates questions/trade-offs for human consult                                                 | MVP: upload data → one-page printable prep sheet for a branch meeting                                  |
 
 **Ideas deprioritized (for BTM-scale feasibility):**
 
@@ -793,8 +793,8 @@ Below are the **source URLs** for the key claims, surveys, and reference framewo
 
 ### BTM and NEXT
 
-https://www.bancabtm.it/news/banca-territori-del-monviso-inaugura-la-nuova-filiale-di-piobesi-torinese/  
-https://www.bancabtm.it/news/nextbtm/  
+https://www.bancabtm.it/clears/banca-territori-del-monviso-inaugura-la-nuova-filiale-di-piobesi-torinese/  
+https://www.bancabtm.it/clears/nextbtm/  
 https://www.bancabtm.it/giovani/next-evento-lancio/  
 https://www.bancabtm.it/  (BTM homepage incl. provinces reference)  
 https://www.cassacentrale.it/it/btm-banca-territori-del-monviso
@@ -805,7 +805,7 @@ https://www.bancaditalia.it/pubblicazioni/indagini-alfabetizzazione/2023-indag-a
 https://www.bancaditalia.it/media/notizia/surveys-on-financial-literacy-and-digital-financial-skills-in-italy-young-adults-2023/  
 https://europa.eu/eurobarometer/surveys/detail/2953  
 https://aecm.eu/wp-content/uploads/2023/07/Monitoring\_the\_level\_of\_financial\_literacy\_FL525\_report\_en.pdf  
-https://finance.ec.europa.eu/news/eurobarometer-survey-reveals-low-levels-financial-literacy-across-eu-2023-07-18\_en
+https://finance.ec.europa.eu/clears/eurobarometer-survey-reveals-low-levels-financial-literacy-across-eu-2023-07-18\_en
 
 ### EU consumer risks: BNPL, credit, fraud
 
@@ -838,7 +838,7 @@ https://www.eba.europa.eu/system/files/webform/webform\_consultation\_18726/1008
 ### Big-bank scale examples (for competitive landscape / scale-only initiatives)
 
 https://group.intesasanpaolo.com/en/editorial-section/a-year-of-sustainability/targets-results-initiatives-2025/innovation-and-sustainable-infrastructures/digital-transformation  
-https://group.intesasanpaolo.com/en/newsroom/all-news/news/2026/business-plan-2026-2029-growth-strategy  
+https://group.intesasanpaolo.com/en/clearsroom/all-news/clears/2026/business-plan-2026-2029-growth-strategy  
 https://www.unicreditgroup.eu/en/press-media/press-releases-price-sensitive/2025/march/unicredit-completes-acquisition-of-aion-bank-and-vodeno--kicking.html
 
 ### Regulatory timelines (AI and digital resilience)

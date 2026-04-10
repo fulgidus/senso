@@ -16,11 +16,11 @@ The "Four Pillars" framework appears in multiple variants across the personal fi
 
 There is also **William Bernstein's "Four Pillars of Investing"** (2002), a classic book framing investment knowledge around Theory, History, Psychology, and Business (the finance industry). This is more academic and aimed at self-directed investors.
 
-| Aspect | Best for | Strengths | Limitations |
-|---|---|---|---|
-| Stocks & Flows (A) | Beginners who need a mental model | Dead simple; works at any income | Doesn't prescribe action |
-| Behavioral (B) | People ready to build habits | Actionable; covers insurance gap | Assumes stable income |
-| Bernstein (Investing) | Intermediate/advanced investors | Deep; historically grounded | Not a budgeting framework; US-centric |
+| Aspect                | Best for                          | Strengths                        | Limitations                           |
+| --------------------- | --------------------------------- | -------------------------------- | ------------------------------------- |
+| Stocks & Flows (A)    | Beginners who need a mental model | Dead simple; works at any income | Doesn't prescribe action              |
+| Behavioral (B)        | People ready to build habits      | Actionable; covers insurance gap | Assumes stable income                 |
+| Bernstein (Investing) | Intermediate/advanced investors   | Deep; historically grounded      | Not a budgeting framework; US-centric |
 
 **Relevance to SENSO:** Variant A maps perfectly to the onboarding step — the AI digests uploads and presents assets, debts, income, expenses. Variant B maps to the coaching layer on top.
 
@@ -42,13 +42,13 @@ Compare with the **50-30-20 rule** (Elizabeth Warren, *All Your Worth*, 2006):
 - **30% → Wants**
 - **20% → Savings & debt repayment**
 
-| Dimension | 50-30-20 | 15-65-20 |
-|---|---|---|
-| Savings rate | 20% | 15% |
-| Needs allowance | 50% | 65% |
-| Wants allowance | 30% | 20% |
-| Best for | People with moderate cost of living | People in high-cost areas or with tight margins |
-| Philosophy | Save aggressively, cut wants | Be realistic about expenses, protect enjoyment |
+| Dimension       | 50-30-20                            | 15-65-20                                        |
+| --------------- | ----------------------------------- | ----------------------------------------------- |
+| Savings rate    | 20%                                 | 15%                                             |
+| Needs allowance | 50%                                 | 65%                                             |
+| Wants allowance | 30%                                 | 20%                                             |
+| Best for        | People with moderate cost of living | People in high-cost areas or with tight margins |
+| Philosophy      | Save aggressively, cut wants        | Be realistic about expenses, protect enjoyment  |
 
 The 15-65-20 is arguably more realistic for young Italian workers in cities like Turin or Milan, where rent alone can consume 40%+ of a low-to-medium salary. The 50-30-20 often fails because 50% doesn't cover essentials, leading people to abandon the framework entirely.
 
@@ -182,18 +182,18 @@ Sources: [ScienceDirect — Bank efficiency and local market conditions](https:/
 
 Evaluation criteria: (F) Feasibility for a small BCC, (A) Alignment with NEXT and BTM's mission, (P) Post-hackathon adoption potential, (C) Creative/non-obvious use of AI.
 
-| Rank | Idea | F | A | P | C | Notes |
-|------|-------|---|---|---|---|-------|
-| **1** | **SENSO (current concept)** | ★★★ | ★★★★ | ★★★★ | ★★★★ | Already designed around BTM's context. Voice AI + real data + education + service funnel. The full concept is MVP-scoped correctly. Post-hackathon, BTM could pilot it with NEXT members. |
-| **2** | **"Quanto Mi Costa Davvero"** | ★★★★ | ★★★★ | ★★★★ | ★★★ | Could be a standalone feature OR a simplified entry point into SENSO. Zero onboarding version (no bank data needed) makes it instantly deployable. BTM could embed it on their website. |
-| **3** | **"Primo Stipendio" Simulator** | ★★★★ | ★★★★★ | ★★★★ | ★★★ | Perfectly targeted at NEXT demographic (18-30, first job). Highly educational. Doesn't require real financial data. Could be a workshop tool for NEXT events. BTM can brand it. |
-| **4** | **"Contratto Decoder"** | ★★★★ | ★★★ | ★★★★ | ★★★★ | Universally useful. Builds trust with young clients. BTM could offer it as a free service — "bring us any contract, we'll help you understand it." Differentiator vs. large banks. |
-| **5** | **Subscription Audit Agent** | ★★★★ | ★★★ | ★★★ | ★★★ | Practical and viral. The "your forgotten subscriptions cost €47/month" moment drives engagement. Lower alignment with banking mission per se, but strong as a lead-gen / trust-building tool. |
-| **6** | **Gamified Savings Challenges** | ★★★ | ★★★★★ | ★★★★ | ★★★ | Natural fit for NEXT community. Could integrate with BTM savings accounts. Requires ongoing content/moderation but AI can generate challenges. ElevenLabs voice for daily nudges. |
-| **7** | **Financial Time Machine** | ★★★ | ★★★★ | ★★★ | ★★★★ | Powerful educational tool. Makes compound interest visible. Works as a feature within SENSO rather than standalone. |
-| **8** | **"Chiedi alla Banca"** | ★★★★ | ★★★★ | ★★★★★ | ★★ | Highest post-hackathon adoption potential (direct business value for BTM), but lowest creative score — it's essentially an AI chatbot for product info. Still valuable, just not "punk." |
-| **9** | **AI Financial Diary** | ★★★★ | ★★★ | ★★★ | ★★★ | Privacy-first approach is appealing. Low tech barrier. But less differentiated — many budgeting apps exist. Voice check-in angle is novel. |
-| **10** | **BNPL X-Ray** | ★★ | ★★★ | ★★ | ★★★★ | Great concept, but technical integration with BNPL providers is extremely hard. No APIs available. Would need to rely on CSV/screenshot parsing. Interesting as a SENSO sub-feature. |
+| Rank   | Idea                            | F    | A     | P     | C    | Notes                                                                                                                                                                                         |
+| ------ | ------------------------------- | ---- | ----- | ----- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1**  | **SENSO (current concept)**     | ★★★  | ★★★★  | ★★★★  | ★★★★ | Already designed around BTM's context. Voice AI + real data + education + service funnel. The full concept is MVP-scoped correctly. Post-hackathon, BTM could pilot it with NEXT members.     |
+| **2**  | **"Quanto Mi Costa Davvero"**   | ★★★★ | ★★★★  | ★★★★  | ★★★  | Could be a standalone feature OR a simplified entry point into SENSO. Zero onboarding version (no bank data needed) makes it instantly deployable. BTM could embed it on their website.       |
+| **3**  | **"Primo Stipendio" Simulator** | ★★★★ | ★★★★★ | ★★★★  | ★★★  | Perfectly targeted at NEXT demographic (18-30, first job). Highly educational. Doesn't require real financial data. Could be a workshop tool for NEXT events. BTM can brand it.               |
+| **4**  | **"Contratto Decoder"**         | ★★★★ | ★★★   | ★★★★  | ★★★★ | Universally useful. Builds trust with young clients. BTM could offer it as a free service — "bring us any contract, we'll help you understand it." Differentiator vs. large banks.            |
+| **5**  | **Subscription Audit Agent**    | ★★★★ | ★★★   | ★★★   | ★★★  | Practical and viral. The "your forgotten subscriptions cost €47/month" moment drives engagement. Lower alignment with banking mission per se, but strong as a lead-gen / trust-building tool. |
+| **6**  | **Gamified Savings Challenges** | ★★★  | ★★★★★ | ★★★★  | ★★★  | Natural fit for NEXT community. Could integrate with BTM savings accounts. Requires ongoing content/moderation but AI can generate challenges. ElevenLabs voice for daily nudges.             |
+| **7**  | **Financial Time Machine**      | ★★★  | ★★★★  | ★★★   | ★★★★ | Powerful educational tool. Makes compound interest visible. Works as a feature within SENSO rather than standalone.                                                                           |
+| **8**  | **"Chiedi alla Banca"**         | ★★★★ | ★★★★  | ★★★★★ | ★★   | Highest post-hackathon adoption potential (direct business value for BTM), but lowest creative score — it's essentially an AI chatbot for product info. Still valuable, just not "punk."      |
+| **9**  | **AI Financial Diary**          | ★★★★ | ★★★   | ★★★   | ★★★  | Privacy-first approach is appealing. Low tech barrier. But less differentiated — many budgeting apps exist. Voice check-in angle is novel.                                                    |
+| **10** | **BNPL X-Ray**                  | ★★   | ★★★   | ★★    | ★★★★ | Great concept, but technical integration with BNPL providers is extremely hard. No APIs available. Would need to rely on CSV/screenshot parsing. Interesting as a SENSO sub-feature.          |
 
 **Recommendation for the hackathon:** Stick with SENSO as the main concept, but scope the demo around the "Quanto Mi Costa Davvero" moment — it's the highest-impact, lowest-friction demonstration. The 75-second demo flow in the CONCEPT.md is already well designed. Consider adding one "Primo Stipendio" screen as a secondary demo path to show breadth.
 
@@ -208,7 +208,7 @@ Evaluation criteria: (F) Feasibility for a small BCC, (A) Alignment with NEXT an
 - Il Sole 24 Ore (Nov 2025). *Financial education, where do we stand?* https://en.ilsole24ore.com/art/financial-education-where-we-stand-compared-to-italy-and-some-eu-countries-AHBb2PuD
 - Museo del Risparmio (Feb 2025). *Young People and Financial Education in Italy*. https://www.museodelrisparmio.it/blog/young-people-and-financial-education-where-do-we-stand-in-italy/
 - Bruegel (2024). *The state of financial knowledge in the EU*. https://www.bruegel.org/policy-brief/state-financial-knowledge-european-union
-- European Commission (2025). *EU Financial Literacy Strategy*. Via https://legal.pwc.de/en/news/articles/european-commission-publishes-its-2025-financial-literacy-strategy
+- European Commission (2025). *EU Financial Literacy Strategy*. Via https://legal.pwc.de/en/clears/articles/european-commission-publishes-its-2025-financial-literacy-strategy
 - Bank of Italy / Format Research (Mar 2026). *Buy Now Pay Later: Market Characteristics*. https://formatresearch.com/en/2026/03/25/buy-now-pay-later-caratteristiche-del-mercato-banca-ditalia/
 - The Conservative (Nov 2025). *Europe Tightens BNPL Rules*. https://www.theconservative.online/europe-tightens-the-rules-on-buy-now-pay-later-what-the-2026-reform-means-for-consumers-and-platforms
 - Oliver Wyman (Feb 2025). *Impact of CCD2 on BNPL in Europe*. https://www.oliverwyman.com/our-expertise/insights/2025/feb/impact-of-ccd2-on-buy-now-pay-later-services-in-europe.html

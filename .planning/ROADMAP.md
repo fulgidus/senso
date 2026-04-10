@@ -185,13 +185,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 14. E2E Messaging Backend                                            | 0/0            | Skipped  | -          |
 | 15. E2E Messaging Frontend                                           | 6/6            | Complete | 2026-04-05 |
 | 16. E2E Test Suite & Mobile Regressions                              | 5/5            | Complete | 2026-04-05 |
-| 17. MARP Real Rendering                                               | 2/2            | Complete | 2026-04-07 |
-| 18. Ingestion Reliability + Non-Ledger Support                        | 4/4            | Complete | 2026-04-07 |
-| 19. Financial Timeline - Real Inference + Visibility                  | 4/4            | Complete | 2026-04-07 |
-| 20. Coach Intelligence - Tool Suite + Structured Memory               | 4/4            | Complete | 2026-04-08 |
-| 21. Coach Output Rationalization                                      | 4/4            | Complete | 2026-04-08 |
-| 22. Mobile-First UI Overhaul                                          | 6/6            | Complete | 2026-04-08 |
-| 23. E2E Real Stack Test Suite                                         | 5/5            | Complete | 2026-04-08 |
+| 17. MARP Real Rendering                                              | 2/2            | Complete | 2026-04-07 |
+| 18. Ingestion Reliability + Non-Ledger Support                       | 4/4            | Complete | 2026-04-07 |
+| 19. Financial Timeline - Real Inference + Visibility                 | 4/4            | Complete | 2026-04-07 |
+| 20. Coach Intelligence - Tool Suite + Structured Memory              | 4/4            | Complete | 2026-04-08 |
+| 21. Coach Output Rationalization                                     | 4/4            | Complete | 2026-04-08 |
+| 22. Mobile-First UI Overhaul                                         | 6/6            | Complete | 2026-04-08 |
+| 23. E2E Real Stack Test Suite                                        | 5/5            | Complete | 2026-04-08 |
 
 ### Phase 8: Content Platform Management, Indexing & Public Serving
 
@@ -301,7 +301,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 12.1.1 to break down)
+- [ ] TBD (run /gsd-plan-phase 12.1.1 to break down)
 
 ### Phase 13: Crypto Identity Foundation - asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 
@@ -366,6 +366,66 @@ Plans:
 - [x] 16-03-PLAN.md - Mobile nav drawer tests (open/close/Escape/overlay/focus-trap/aria-modal). (completed 2026-04-05)
 - [x] 16-04-PLAN.md - Accessibility tests (axe-core + keyboard navigation + aria-live). (completed 2026-04-05)
 - [x] 16-05-PLAN.md - PWA, ergonomics & coach picker regression tests. (completed 2026-04-05)
+
+### Phase 24: Voice stack fix - STT TTS e2e repair and ElevenLabs STT support with Web Speech API fallback
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 23
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 24 to break down)
+
+### Phase 25: Mobile input UX - send button only no enter submit on single-line inputs
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 24
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 25 to break down)
+
+### Phase 26: Enriched coach messages rendering fix - backend response format null issue
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 25
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 26 to break down)
+
+### Phase 27: Admin username enforcement
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 26
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 27 to break down)
+
+### Phase 28: Auth token renewal flow fix - broken expiry handling
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 27
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 28 to break down)
+
+### Phase 29: Profile sealed and unsealed data sections with goals habits migration
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 28
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 29 to break down)
 
 ---
 

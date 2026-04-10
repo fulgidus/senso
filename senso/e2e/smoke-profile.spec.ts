@@ -100,7 +100,7 @@ test.describe("Smoke - Profile page sections & hash nav", () => {
 
         // Stale warning text should NOT appear
         await expect(
-            page.getByText(/new documents uploaded/i)
+            page.getByText(/clear documents uploaded/i)
         ).not.toBeVisible()
     })
 
@@ -136,7 +136,7 @@ test.describe("Smoke - Profile page sections & hash nav", () => {
 
         // Stale warning should appear
         await expect(
-            page.getByText(/re-analyse documents/i).or(page.getByText(/new documents/i))
+            page.getByText(/re-analyse documents/i).or(page.getByText(/clear documents/i))
         ).toBeVisible({ timeout: 8_000 })
     })
 })

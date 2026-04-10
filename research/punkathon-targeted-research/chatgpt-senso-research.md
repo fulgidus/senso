@@ -315,15 +315,15 @@ Feasibility is highest when the idea:
 
 #### Ranked shortlist
 
-| Rank | Idea | Why it fits BTM + NEXT | What makes the AI non-obvious | Pilot scope (realistic) |
-|---|---|---|---|---|
-| Top | **SENSO-style voice coach + decision moments** fileciteturn0file0 | Matches NEXT’s mentoring/community vibe; fits mobile-first learning preference; aligns with BTM’s “human + tech” messaging | AI is used as a *personalized tutor* grounded in the user’s numbers, with structured learning + actions (not generic chat) | MVP: upload CSV + voice question “Can I afford X?”; output explanation + learning cards |
-| Top | **BNPL Reality Lens** | Directly targets the biggest emerging EU consumer trap (BNPL) and youth vulnerability | AI converts installment psychology into total-cost + risk narrative, personalized to cash-flow | MVP: paste checkout terms → AI computes total cost + “risk prompts”; later integrate transaction data |
-| High | **Subscription Genome** | Recurring spend is a common leak; EBA flags subscription traps as fraud vector | AI classifies recurring payments, estimates “forget risk,” and generates cancellation scripts and reminders | MVP: parse CSV; detect recurring; create “cancel pack” and monthly savings forecast |
-| High | **Micro-simulator for life choices** | NEXT community likely discusses moving out, cars, travel; strong engagement hook | AI builds scenario distributions, making uncertainty explicit (not just a single number) | MVP: scenario templates + user data; outputs best/base/worst and “break-even” rules |
-| Medium-high | **Fraud & Scam Gym** | EBA highlights fraud and AI-enabled scams; fits “education that protects” | AI generates adaptive simulations and tracks skill improvement | MVP: 10 scenario generator + scoring; run in NEXT workshops |
-| Medium | **Auto sinking funds engine** | Converts “unexpected expenses” into planned micro-actions; helps emergency savings | AI learns irregular expense patterns and builds a smoothing plan | MVP: detect annual/quarterly expenses; recommend monthly set-aside + autopay reminders |
-| Medium | **Ask the Advisor prep** | Amplifies BTM’s relationship banking rather than replacing it | AI summarizes behavior and generates questions/trade-offs for human consult | MVP: upload data → one-page printable prep sheet for a branch meeting |
+| Rank        | Idea                                                                 | Why it fits BTM + NEXT                                                                                                     | What makes the AI non-obvious                                                                                              | Pilot scope (realistic)                                                                               |
+| ----------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Top         | **SENSO-style voice coach + decision moments** fileciteturn0file0 | Matches NEXT’s mentoring/community vibe; fits mobile-first learning preference; aligns with BTM’s “human + tech” messaging | AI is used as a *personalized tutor* grounded in the user’s numbers, with structured learning + actions (not generic chat) | MVP: upload CSV + voice question “Can I afford X?”; output explanation + learning cards               |
+| Top         | **BNPL Reality Lens**                                                | Directly targets the biggest emerging EU consumer trap (BNPL) and youth vulnerability                                      | AI converts installment psychology into total-cost + risk narrative, personalized to cash-flow                             | MVP: paste checkout terms → AI computes total cost + “risk prompts”; later integrate transaction data |
+| High        | **Subscription Genome**                                              | Recurring spend is a common leak; EBA flags subscription traps as fraud vector                                             | AI classifies recurring payments, estimates “forget risk,” and generates cancellation scripts and reminders                | MVP: parse CSV; detect recurring; create “cancel pack” and monthly savings forecast                   |
+| High        | **Micro-simulator for life choices**                                 | NEXT community likely discusses moving out, cars, travel; strong engagement hook                                           | AI builds scenario distributions, making uncertainty explicit (not just a single number)                                   | MVP: scenario templates + user data; outputs best/base/worst and “break-even” rules                   |
+| Medium-high | **Fraud & Scam Gym**                                                 | EBA highlights fraud and AI-enabled scams; fits “education that protects”                                                  | AI generates adaptive simulations and tracks skill improvement                                                             | MVP: 10 scenario generator + scoring; run in NEXT workshops                                           |
+| Medium      | **Auto sinking funds engine**                                        | Converts “unexpected expenses” into planned micro-actions; helps emergency savings                                         | AI learns irregular expense patterns and builds a smoothing plan                                                           | MVP: detect annual/quarterly expenses; recommend monthly set-aside + autopay reminders                |
+| Medium      | **Ask the Advisor prep**                                             | Amplifies BTM’s relationship banking rather than replacing it                                                              | AI summarizes behavior and generates questions/trade-offs for human consult                                                | MVP: upload data → one-page printable prep sheet for a branch meeting                                 |
 
 **Ideas deprioritized (for BTM-scale feasibility):**  
 - Full “purchase overlay” integrations across merchants (complex distribution).  
@@ -337,8 +337,8 @@ Below are the **source URLs** for the key claims, surveys, and reference framewo
 ### BTM and NEXT
 
 ```text
-https://www.bancabtm.it/news/banca-territori-del-monviso-inaugura-la-nuova-filiale-di-piobesi-torinese/
-https://www.bancabtm.it/news/nextbtm/
+https://www.bancabtm.it/clears/banca-territori-del-monviso-inaugura-la-nuova-filiale-di-piobesi-torinese/
+https://www.bancabtm.it/clears/nextbtm/
 https://www.bancabtm.it/giovani/next-evento-lancio/
 https://www.bancabtm.it/  (BTM homepage incl. provinces reference)
 https://www.cassacentrale.it/it/btm-banca-territori-del-monviso
@@ -351,7 +351,7 @@ https://www.bancaditalia.it/pubblicazioni/indagini-alfabetizzazione/2023-indag-a
 https://www.bancaditalia.it/media/notizia/surveys-on-financial-literacy-and-digital-financial-skills-in-italy-young-adults-2023/
 https://europa.eu/eurobarometer/surveys/detail/2953
 https://aecm.eu/wp-content/uploads/2023/07/Monitoring_the_level_of_financial_literacy_FL525_report_en.pdf
-https://finance.ec.europa.eu/news/eurobarometer-survey-reveals-low-levels-financial-literacy-across-eu-2023-07-18_en
+https://finance.ec.europa.eu/clears/eurobarometer-survey-reveals-low-levels-financial-literacy-across-eu-2023-07-18_en
 ```
 
 ### EU consumer risks: BNPL, credit, fraud
@@ -392,7 +392,7 @@ https://www.eba.europa.eu/system/files/webform/webform_consultation_18726/100805
 
 ```text
 https://group.intesasanpaolo.com/en/editorial-section/a-year-of-sustainability/targets-results-initiatives-2025/innovation-and-sustainable-infrastructures/digital-transformation
-https://group.intesasanpaolo.com/en/newsroom/all-news/news/2026/business-plan-2026-2029-growth-strategy
+https://group.intesasanpaolo.com/en/clearsroom/all-news/clears/2026/business-plan-2026-2029-growth-strategy
 https://www.unicreditgroup.eu/en/press-media/press-releases-price-sensitive/2025/march/unicredit-completes-acquisition-of-aion-bank-and-vodeno--kicking.html
 ```
 

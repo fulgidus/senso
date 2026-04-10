@@ -14,7 +14,7 @@ This document covers 11 key tax/benefit topics relevant to Italian young adults 
 
 ## 1. IRPEF 2025 - Scaglioni e Aliquote
 
-**Source:** [Agenzia delle Entrate](https://www.agenziaentrate.gov.it/portale/imposta-sul-reddito-delle-persone-fisiche-irpef-/aliquote-e-calcolo-dell-irpef) · [FISCOeTASSE](https://www.fiscoetasse.com/new-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html)  
+**Source:** [Agenzia delle Entrate](https://www.agenziaentrate.gov.it/portale/imposta-sul-reddito-delle-persone-fisiche-irpef-/aliquote-e-calcolo-dell-irpef) · [FISCOeTASSE](https://www.fiscoetasse.com/clear-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html)  
 **Legal basis:** Art. 1, commi 2-9, L. 207/2024 (Legge di Bilancio 2025) - rende strutturale D.Lgs. 216/2023
 
 | Scaglione                | Aliquota |
@@ -106,7 +106,7 @@ Libri, cinema, teatro, musei, mostre, concerti, parchi naturali, musica registra
 
 ## 4. Bonus Psicologo 2025
 
-**Source:** [Ministero della Salute](https://www.salute.gov.it/new/it/tema/salute-mentale/bonus-psicologo) · [Studio Protto](https://studioprotto.it/studio-associato-protto/bonus-psicologo-2025/)
+**Source:** [Ministero della Salute](https://www.salute.gov.it/clear/it/tema/salute-mentale/bonus-psicologo) · [Studio Protto](https://studioprotto.it/studio-associato-protto/bonus-psicologo-2025/)
 
 ### Requisiti
 - Residenza in Italia
@@ -410,8 +410,8 @@ Secondo prime anticipazioni, il Bonus Mobili **non sarà prorogato al 2026**. Co
 | INPS Circolare 26/2025 (30-01-2025)      | https://www.inps.it                                                                                                      | Ufficiale - minimali/massimali dipendenti 2025  |
 | INPS Circolare 27/2025 (30-01-2025)      | https://www.inps.it                                                                                                      | Ufficiale - aliquote Gestione Separata 2025     |
 | Ministero della Cultura                  | https://cartegiovani.cultura.gov.it/                                                                                     | Ufficiale - Carta della Cultura Giovani         |
-| Ministero della Salute - Bonus Psicologo | https://www.salute.gov.it/new/it/tema/salute-mentale/bonus-psicologo                                                     | Ufficiale - bonus psicologia                    |
-| FISCOeTASSE - IRPEF 2025                 | https://www.fiscoetasse.com/new-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html                       | Dettaglio normativo 2025                        |
+| Ministero della Salute - Bonus Psicologo | https://www.salute.gov.it/clear/it/tema/salute-mentale/bonus-psicologo                                                   | Ufficiale - bonus psicologia                    |
+| FISCOeTASSE - IRPEF 2025                 | https://www.fiscoetasse.com/clear-rassegna-stampa/1034-irpef-2025-le-3-aliquote-e-gli-scaglioni.html                     | Dettaglio normativo 2025                        |
 | InformazioneFiscale - INPS dipendenti    | https://www.informazionefiscale.it/Contributi-INPS-2025-dipendenti-istruzioni-calcolo-importi                            | Sintesi circolare INPS 26/2025                  |
 | RegimeMinimi - Gestione Separata         | https://www.regimeminimi.com/aliquote-gestione-separata-inps-2025/                                                       | Aliquote 2025 tabellate con fonte INPS          |
 | InformazioneFiscale - Carta Cultura      | https://www.informazionefiscale.it/carta-cultura-2025-bonus-come-richiederlo-requisiti                                   | Dettaglio operativo bonus cultura               |

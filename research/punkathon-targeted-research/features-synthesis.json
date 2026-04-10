@@ -1,1058 +1,2155 @@
 {
-  "_meta": {
-    "generated": "2026-04-09",
-    "sources": [
-      "Punkathon.md (Gemini + ChatGPT research)",
-      ".planning/PROJECT.md",
-      ".planning/REQUIREMENTS.md",
-      ".planning/ROADMAP.md",
-      ".planning/STATE.md",
-      "CONCEPT.md",
-      ".planning/seeds/SEED-001..003",
-      ".planning/todos/pending/*",
-      ".planning/phases/*/CONTEXT.md"
-    ],
-    "legend": {
-      "status": "implemented | partial | planned | idea | deferred",
-      "importance": "0.0-10.0",
-      "risk": "0.0-10.0 (higher = riskier)",
-      "hackathon-advantage": "0.0-10.0 (closer to winning)",
-      "estimated-effort": "hours, AI-assisted, rounded to 0.5h"
-    }
-  },
-
-  "voice-first-coaching": {
-    "name": "Voice-First Financial Coaching",
-    "details": "Users speak a financial question ('Posso comprare un iPhone?') and receive a spoken, personalized recommendation grounded in their own uploaded financial data. The core differentiator: voice-in, voice-out with real numbers.",
-    "status": "implemented",
-    "category": "core-experience",
-    "tags": ["voice", "AI", "coaching", "STT", "TTS", "ElevenLabs", "demo-critical"],
-    "importance": 9.8,
-    "risk": 5.5,
-    "estimated-effort": { "min": 16.0, "max": 24.0 },
-    "hackathon-advantage": 9.5,
-    "implementation-details": {
-      "steps": [
-        { "name": "Browser STT via Web Speech API", "details": "useVoiceInput hook with feature detection + fallback to typed input (VOIC-02)", "src": ["senso/src/features/coaching/useVoiceInput.ts"] },
-        { "name": "ElevenLabs TTS backend", "details": "POST /coaching/tts, per-persona voice IDs, 503 fallback to browser speechSynthesis", "src": ["api/app/coaching/tts.py"] },
-        { "name": "Dual-channel response", "details": "Voice-optimized message (no decimals, prose only) + details_a2ui structured panel", "src": ["api/app/coaching/prompts/response_format.j2"] }
-      ],
-      "risks": [
-        { "name": "STT browser variance", "details": "Web Speech API not universally supported; Chrome-only for reliable demos" },
-        { "name": "ElevenLabs latency", "details": "TTS generation adds 1-3s to response time; mitigated by speechSynthesis fallback" }
-      ]
+    "_meta": {
+        "generated": "2026-04-09",
+        "sources": [
+            "Punkathon.md (Gemini + ChatGPT research)",
+            ".planning/PROJECT.md",
+            ".planning/REQUIREMENTS.md",
+            ".planning/ROADMAP.md",
+            ".planning/STATE.md",
+            "CONCEPT.md",
+            ".planning/seeds/SEED-001..003",
+            ".planning/todos/pending/*",
+            ".planning/phases/*/CONTEXT.md"
+        ],
+        "legend": {
+            "status": "implemented | partial | planned | idea | deferred",
+            "importance": "0.0-10.0",
+            "risk": "0.0-10.0 (higher = riskier)",
+            "hackathon-advantage": "0.0-10.0 (closer to winning)",
+            "estimated-effort": "hours, AI-assisted, rounded to 0.5h"
+        }
     },
-    "problems-solved": [
-      { "name": "Low-friction financial education", "details": "18-30 year olds won't read articles; voice interaction meets them where they are (accustomed to voice assistants)" }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 7.0, "stakeholder": 9.5, "technical-jury": 9.0,
-      "coolness": 9.5, "innovation-ai": 8.5, "innovation-approach": 9.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 6.0, "privacy": 5.0, "banking-features": 7.0,
-      "banking-compliance": 4.0, "education": 9.5, "community": 7.0, "goodness": 8.5
-    }
-  },
-
-  "grounded-financial-profile": {
-    "name": "Real-Data Financial Profile from Uploads",
-    "details": "Users upload real bank statements (CSV/XLSX/PDF), payslips, receipts. The system extracts structured data, builds a canonical financial profile (income, expenses, margin, categories, patterns), and uses it to ground all coaching.",
-    "status": "implemented",
-    "category": "core-experience",
-    "tags": ["ingestion", "parsing", "OCR", "LLM-extraction", "profile", "data-grounding"],
-    "importance": 9.5,
-    "risk": 6.0,
-    "estimated-effort": { "min": 24.0, "max": 40.0 },
-    "hackathon-advantage": 9.0,
-    "implementation-details": {
-      "steps": [
-        { "name": "Module registry with fingerprint matching", "details": "7 builtin modules (Fineco, Revolut, Satispay, PayPal, Edison, generic invoice, generic CSV) + adaptive LLM pipeline for unknown formats", "src": ["api/app/ingestion/registry.py"] },
-        { "name": "3-tier OCR pipeline", "details": "pytesseract → LLM text → LLM vision escalation", "src": ["api/app/ingestion/ocr.py"] },
-        { "name": "Non-ledger enrichment", "details": "Payslip/utility/receipt modules enrich profile with verified income, fixed expenses", "src": ["api/app/services/profile_service.py"] }
-      ],
-      "risks": [
-        { "name": "Extraction accuracy on Italian documents", "details": "Italian bank formats vary wildly; adaptive pipeline catches unknowns but quality varies" }
-      ]
+    "voice-first-coaching": {
+        "name": "Voice-First Financial Coaching",
+        "details": "Users speak a financial question ('Posso comprare un iPhone?') and receive a spoken, personalized recommendation grounded in their own uploaded financial data. The core differentiator: voice-in, voice-out with real numbers.",
+        "status": "implemented",
+        "category": "core-experience",
+        "tags": [
+            "voice",
+            "AI",
+            "coaching",
+            "STT",
+            "TTS",
+            "ElevenLabs",
+            "demo-critical"
+        ],
+        "importance": 9.8,
+        "risk": 5.5,
+        "estimated-effort": {
+            "min": 16.0,
+            "max": 24.0
+        },
+        "hackathon-advantage": 9.5,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Browser STT via Web Speech API",
+                    "details": "useVoiceInput hook with feature detection + fallback to typed input (VOIC-02)",
+                    "src": [
+                        "senso/src/features/coaching/useVoiceInput.ts"
+                    ]
+                },
+                {
+                    "name": "ElevenLabs TTS backend",
+                    "details": "POST /coaching/tts, per-persona voice IDs, 503 fallback to browser speechSynthesis",
+                    "src": [
+                        "api/app/coaching/tts.py"
+                    ]
+                },
+                {
+                    "name": "Dual-channel response",
+                    "details": "Voice-optimized message (no decimals, prose only) + details_a2ui structured panel",
+                    "src": [
+                        "api/app/coaching/prompts/response_format.j2"
+                    ]
+                }
+            ],
+            "risks": [
+                {
+                    "name": "STT browser variance",
+                    "details": "Web Speech API not universally supported; Chrome-only for reliable demos"
+                },
+                {
+                    "name": "ElevenLabs latency",
+                    "details": "TTS generation adds 1-3s to response time; mitigated by speechSynthesis fallback"
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "Low-friction financial education",
+                "details": "18-30 year olds won't read articles; voice interaction meets them where they are (accustomed to voice assistants)"
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 7.0,
+            "stakeholder": 9.5,
+            "technical-jury": 9.0,
+            "coolness": 9.5,
+            "innovation-ai": 8.5,
+            "innovation-approach": 9.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 5.0,
+            "banking-features": 7.0,
+            "banking-compliance": 4.0,
+            "education": 9.5,
+            "community": 7.0,
+            "goodness": 8.5
+        }
     },
-    "problems-solved": [
-      { "name": "Generic AI advice has zero trust", "details": "Without real numbers, coaching is generic tips. Grounding in actual €X income and €Y expenses creates credibility and personalization" }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 8.0, "stakeholder": 9.0, "technical-jury": 8.5,
-      "coolness": 7.0, "innovation-ai": 8.0, "innovation-approach": 8.5,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 8.0,
-      "innovation-efficiency": 7.0, "privacy": 6.0, "banking-features": 9.0,
-      "banking-compliance": 7.0, "education": 8.0, "community": 5.0, "goodness": 7.0
-    }
-  },
-
-  "transparent-reasoning": {
-    "name": "Transparent Reasoning with User Numbers",
-    "details": "Every coaching response shows explicit reasoning: which numbers were used, what tradeoffs exist, what assumptions were made. Never just 'yes/no' — always 'here's why, with YOUR data'.",
-    "status": "implemented",
-    "category": "trust-and-transparency",
-    "tags": ["reasoning", "explainability", "trust", "schema-enforced"],
-    "importance": 9.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 8.5,
-    "implementation-details": {
-      "steps": [
-        { "name": "Structured response schema", "details": "coaching_response.schema.json enforces reasoning_used array with minItems:1", "src": ["api/app/coaching/schemas/coaching_response.schema.json"] }
-      ]
+    "grounded-financial-profile": {
+        "name": "Real-Data Financial Profile from Uploads",
+        "details": "Users upload real bank statements (CSV/XLSX/PDF), payslips, receipts. The system extracts structured data, builds a canonical financial profile (income, expenses, margin, categories, patterns), and uses it to ground all coaching.",
+        "status": "implemented",
+        "category": "core-experience",
+        "tags": [
+            "ingestion",
+            "parsing",
+            "OCR",
+            "LLM-extraction",
+            "profile",
+            "data-grounding"
+        ],
+        "importance": 9.5,
+        "risk": 6.0,
+        "estimated-effort": {
+            "min": 24.0,
+            "max": 40.0
+        },
+        "hackathon-advantage": 9.0,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Module registry with fingerprint matching",
+                    "details": "7 builtin modules (Fineco, Revolut, Satispay, PayPal, Edison, generic invoice, generic CSV) + adaptive LLM pipeline for unknown formats",
+                    "src": [
+                        "api/app/ingestion/registry.py"
+                    ]
+                },
+                {
+                    "name": "3-tier OCR pipeline",
+                    "details": "pytesseract → LLM text → LLM vision escalation",
+                    "src": [
+                        "api/app/ingestion/ocr.py"
+                    ]
+                },
+                {
+                    "name": "Non-ledger enrichment",
+                    "details": "Payslip/utility/receipt modules enrich profile with verified income, fixed expenses",
+                    "src": [
+                        "api/app/services/profile_service.py"
+                    ]
+                }
+            ],
+            "risks": [
+                {
+                    "name": "Extraction accuracy on Italian documents",
+                    "details": "Italian bank formats vary wildly; adaptive pipeline catches unknowns but quality varies"
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "Generic AI advice has zero trust",
+                "details": "Without real numbers, coaching is generic tips. Grounding in actual €X income and €Y expenses creates credibility and personalization"
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 8.0,
+            "stakeholder": 9.0,
+            "technical-jury": 8.5,
+            "coolness": 7.0,
+            "innovation-ai": 8.0,
+            "innovation-approach": 8.5,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 8.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 6.0,
+            "banking-features": 9.0,
+            "banking-compliance": 7.0,
+            "education": 8.0,
+            "community": 5.0,
+            "goodness": 7.0
+        }
     },
-    "problems-solved": [
-      { "name": "AI trust deficit", "details": "Users won't follow financial advice from an AI they don't trust. Showing the math builds confidence." }
-    ],
-    "importance-by-pov": {
-      "users": 9.5, "dev": 6.0, "stakeholder": 9.0, "technical-jury": 8.0,
-      "coolness": 6.0, "innovation-ai": 7.0, "innovation-approach": 8.5,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 5.0, "privacy": 7.0, "banking-features": 8.0,
-      "banking-compliance": 8.5, "education": 9.5, "community": 5.0, "goodness": 9.0
-    }
-  },
-
-  "learn-act-cards": {
-    "name": "Learn + Act Action Cards",
-    "details": "Every coaching response can include educational resources (articles, videos, MARP slides) and actionable service cards (bank products, partner offers). Education → understanding → concrete action funnel.",
-    "status": "implemented",
-    "category": "core-experience",
-    "tags": ["cards", "education", "funnel", "BM25", "content-catalog"],
-    "importance": 8.5,
-    "risk": 4.0,
-    "estimated-effort": { "min": 12.0, "max": 18.0 },
-    "hackathon-advantage": 8.0,
-    "implementation-details": {
-      "steps": [
-        { "name": "BM25 content search", "details": "search_content tool call by LLM + fallback injection", "src": ["api/app/content/search.py"] },
-        { "name": "Content catalog", "details": "articles.json, videos.json, slides.json, partners.json", "src": ["api/app/content/"] }
-      ]
+    "transparent-reasoning": {
+        "name": "Transparent Reasoning with User Numbers",
+        "details": "Every coaching response shows explicit reasoning: which numbers were used, what tradeoffs exist, what assumptions were made. Never just 'yes/no' — always 'here's why, with YOUR data'.",
+        "status": "implemented",
+        "category": "trust-and-transparency",
+        "tags": [
+            "reasoning",
+            "explainability",
+            "trust",
+            "schema-enforced"
+        ],
+        "importance": 9.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 8.5,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Structured response schema",
+                    "details": "coaching_response.schema.json enforces reasoning_used array with minItems:1",
+                    "src": [
+                        "api/app/coaching/schemas/coaching_response.schema.json"
+                    ]
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "AI trust deficit",
+                "details": "Users won't follow financial advice from an AI they don't trust. Showing the math builds confidence."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.5,
+            "dev": 6.0,
+            "stakeholder": 9.0,
+            "technical-jury": 8.0,
+            "coolness": 6.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 8.5,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 7.0,
+            "banking-features": 8.0,
+            "banking-compliance": 8.5,
+            "education": 9.5,
+            "community": 5.0,
+            "goodness": 9.0
+        }
     },
-    "problems-solved": [
-      { "name": "Advice without action is useless", "details": "The funnel: AI educates → user understands → user acts via real bank/partner service. This is BTM's monetization path." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 6.0, "stakeholder": 9.5, "technical-jury": 7.0,
-      "coolness": 6.5, "innovation-ai": 6.0, "innovation-approach": 8.0,
-      "innovation-scalability": 7.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 6.0, "privacy": 5.0, "banking-features": 9.5,
-      "banking-compliance": 6.0, "education": 9.0, "community": 6.0, "goodness": 8.0
-    }
-  },
-
-  "persona-mentor-system": {
-    "name": "Configurable Mentor Personas",
-    "details": "4 selectable coaching personas (Mentore Saggio, Amico Sarcastico, Sergente Hartman, Cheerleader) with shared safety boundaries. Tone varies, financial correctness doesn't.",
-    "status": "implemented",
-    "category": "engagement",
-    "tags": ["personas", "tone", "safety", "customization"],
-    "importance": 7.0,
-    "risk": 4.5,
-    "estimated-effort": { "min": 8.0, "max": 12.0 },
-    "hackathon-advantage": 7.5,
-    "problems-solved": [
-      { "name": "One-size-fits-all is boring", "details": "Different users respond to different communication styles. A stern drill sergeant motivates some; cheerful encouragement works for others." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 5.0, "stakeholder": 7.0, "technical-jury": 7.5,
-      "coolness": 8.5, "innovation-ai": 6.5, "innovation-approach": 7.5,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 8.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 5.0,
-      "banking-compliance": 6.0, "education": 7.0, "community": 7.0, "goodness": 6.0
-    }
-  },
-
-  "safety-guardrails": {
-    "name": "3-Layer Safety Pipeline",
-    "details": "Input guard (prompt injection detection), persona boundary enforcement (system prompt), output scanner (hard-boundaries.yml regex groups). No investment-picking, no regulated advice, educational framing enforced.",
-    "status": "implemented",
-    "category": "safety-and-compliance",
-    "tags": ["safety", "guardrails", "prompt-injection", "compliance"],
-    "importance": 9.0,
-    "risk": 5.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 7.0,
-    "problems-solved": [
-      { "name": "Regulatory and reputational risk", "details": "A bank-associated AI giving bad financial advice = lawsuit. Safety pipeline prevents this." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 8.0, "stakeholder": 10.0, "technical-jury": 7.0,
-      "coolness": 3.0, "innovation-ai": 6.0, "innovation-approach": 6.0,
-      "innovation-scalability": 7.0, "innovation-ha": 8.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 7.0, "banking-features": 6.0,
-      "banking-compliance": 10.0, "education": 5.0, "community": 4.0, "goodness": 9.0
-    }
-  },
-
-  "italy-rules-knowledge-base": {
-    "name": "Italy Financial Rules Knowledge Base",
-    "details": "Static JSON with verified 2025 IRPEF brackets, INPS thresholds, bonus cultura, 730 deadlines, ISEE, TFR, regime forfettario. BM25-indexed. Coach can cite specific Italian rules.",
-    "status": "implemented",
-    "category": "knowledge",
-    "tags": ["italy", "tax", "IRPEF", "INPS", "regulatory", "BM25"],
-    "importance": 8.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 6.0 },
-    "hackathon-advantage": 7.5,
-    "problems-solved": [
-      { "name": "Generic European advice is useless", "details": "Italian tax system is specific. IRPEF brackets, contributi INPS, cedolare secca — users need answers grounded in Italian law, not generic tips." }
-    ],
-    "importance-by-pov": {
-      "users": 8.5, "dev": 5.0, "stakeholder": 9.0, "technical-jury": 7.0,
-      "coolness": 5.0, "innovation-ai": 5.0, "innovation-approach": 7.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 7.0, "privacy": 5.0, "banking-features": 8.0,
-      "banking-compliance": 9.0, "education": 9.5, "community": 5.0, "goodness": 8.0
-    }
-  },
-
-  "coach-tool-suite": {
-    "name": "7-Tool LLM Coach Intelligence Suite",
-    "details": "Coach has 7 tools: search_content, search_italy_rules, get_user_profile, search_user_transactions, get_user_preferences, recall_past_insights, get_timeline_events. Lazy tool-first prompting replaces static profile blob.",
-    "status": "implemented",
-    "category": "ai-intelligence",
-    "tags": ["tools", "function-calling", "LLM", "RAG", "memory"],
-    "importance": 8.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 16.0, "max": 24.0 },
-    "hackathon-advantage": 8.0,
-    "problems-solved": [
-      { "name": "Prompt bloat and irrelevant context", "details": "Static profile blob wasted tokens. Tool-first means coach fetches only what's needed per question." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 9.0, "stakeholder": 7.0, "technical-jury": 9.0,
-      "coolness": 7.0, "innovation-ai": 9.5, "innovation-approach": 8.5,
-      "innovation-scalability": 8.0, "innovation-ha": 6.0, "innovation-flexibility": 9.0,
-      "innovation-efficiency": 8.0, "privacy": 6.0, "banking-features": 6.0,
-      "banking-compliance": 5.0, "education": 7.0, "community": 4.0, "goodness": 6.0
-    }
-  },
-
-  "financial-timeline": {
-    "name": "Financial Timeline with Life Event Detection",
-    "details": "Detects 6 life event types from transaction patterns: income shift, relocation, subscription accumulation, major purchase, debt change, extraordinary income. Visible in ProfileScreen Timeline tab. Injected into coach context.",
-    "status": "implemented",
-    "category": "intelligence",
-    "tags": ["timeline", "life-events", "pattern-detection", "behavioral"],
-    "importance": 7.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 12.0, "max": 18.0 },
-    "hackathon-advantage": 7.0,
-    "problems-solved": [
-      { "name": "Coach lacks temporal awareness", "details": "Without knowing the user recently changed jobs or moved, advice is out of context." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 6.0, "stakeholder": 7.5, "technical-jury": 8.0,
-      "coolness": 7.5, "innovation-ai": 8.0, "innovation-approach": 8.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 6.0, "privacy": 5.0, "banking-features": 7.0,
-      "banking-compliance": 5.0, "education": 7.0, "community": 5.0, "goodness": 6.0
-    }
-  },
-
-  "e2e-encrypted-messaging": {
-    "name": "E2E Encrypted User-to-User Messaging",
-    "details": "NaCl/libsodium X25519+Ed25519 asymmetric encryption. Pseudonymous $adjective-noun-NNNN usernames. Zero-knowledge server routing via recipient hashes. Admin !handle for signed official messages. BIP-39 recovery envelope.",
-    "status": "implemented",
-    "category": "security-and-privacy",
-    "tags": ["crypto", "E2E", "messaging", "NaCl", "privacy", "zero-knowledge"],
-    "importance": 6.5,
-    "risk": 7.0,
-    "estimated-effort": { "min": 24.0, "max": 36.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "No private communication channel", "details": "Users and admins need a way to communicate about sensitive financial matters without server-readable plaintext." }
-    ],
-    "importance-by-pov": {
-      "users": 5.0, "dev": 7.0, "stakeholder": 6.0, "technical-jury": 8.5,
-      "coolness": 8.0, "innovation-ai": 3.0, "innovation-approach": 9.0,
-      "innovation-scalability": 6.0, "innovation-ha": 6.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 5.0, "privacy": 10.0, "banking-features": 7.0,
-      "banking-compliance": 8.0, "education": 2.0, "community": 6.0, "goodness": 9.0
-    }
-  },
-
-  "encryption-at-rest": {
-    "name": "Tiered Encryption at Rest + LLM No-Data-Retention",
-    "details": "T1 (E2E user-key) for raw content, T2 (server AES-GCM) for behavioral data, T3 (E2E) for identity fields. OpenAI no-store headers. OpenRouter ZDR. Per-user Strict Privacy Mode toggle.",
-    "status": "implemented",
-    "category": "security-and-privacy",
-    "tags": ["encryption", "AES-GCM", "PBKDF2", "privacy-mode", "ZDR"],
-    "importance": 7.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 12.0, "max": 18.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "DB breach exposes sensitive financial data", "details": "Bank statements, payslips, conversations stored in plaintext = catastrophic breach. Encryption limits blast radius." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 7.0, "stakeholder": 9.0, "technical-jury": 7.0,
-      "coolness": 4.0, "innovation-ai": 3.0, "innovation-approach": 7.0,
-      "innovation-scalability": 6.0, "innovation-ha": 7.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 4.0, "privacy": 10.0, "banking-features": 8.0,
-      "banking-compliance": 9.5, "education": 2.0, "community": 3.0, "goodness": 9.0
-    }
-  },
-
-  "quanto-mi-costa-davvero": {
-    "name": "\"Quanto Mi Costa Davvero\" (What It Really Costs Me)",
-    "details": "Zero-onboarding single-purpose tool: say or type a purchase, AI shows real cost in hours worked, months of delayed savings, total BNPL interest. Instant impact, no bank data required.",
-    "status": "idea",
-    "category": "standalone-tool",
-    "tags": ["zero-onboarding", "BNPL", "cost-awareness", "viral", "embeddable"],
-    "importance": 8.5,
-    "risk": 2.0,
-    "estimated-effort": { "min": 3.0, "max": 6.0 },
-    "hackathon-advantage": 8.5,
-    "implementation-details": {
-      "steps": [
-        { "name": "Single-page widget", "details": "Input: purchase amount + optional hourly wage. Output: hours worked equivalent, BNPL total cost calculator, savings delay impact." },
-        { "name": "Embeddable version", "details": "BTM can embed on bancabtm.it as a lead-gen tool" }
-      ]
+    "learn-act-cards": {
+        "name": "Learn + Act Action Cards",
+        "details": "Every coaching response can include educational resources (articles, videos, MARP slides) and actionable service cards (bank products, partner offers). Education → understanding → concrete action funnel.",
+        "status": "implemented",
+        "category": "core-experience",
+        "tags": [
+            "cards",
+            "education",
+            "funnel",
+            "BM25",
+            "content-catalog"
+        ],
+        "importance": 8.5,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 18.0
+        },
+        "hackathon-advantage": 8.0,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "BM25 content search",
+                    "details": "search_content tool call by LLM + fallback injection",
+                    "src": [
+                        "api/app/content/search.py"
+                    ]
+                },
+                {
+                    "name": "Content catalog",
+                    "details": "articles.json, videos.json, slides.json, partners.json",
+                    "src": [
+                        "api/app/content/"
+                    ]
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "Advice without action is useless",
+                "details": "The funnel: AI educates → user understands → user acts via real bank/partner service. This is BTM's monetization path."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 6.0,
+            "stakeholder": 9.5,
+            "technical-jury": 7.0,
+            "coolness": 6.5,
+            "innovation-ai": 6.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 5.0,
+            "banking-features": 9.5,
+            "banking-compliance": 6.0,
+            "education": 9.0,
+            "community": 6.0,
+            "goodness": 8.0
+        }
     },
-    "problems-solved": [
-      { "name": "BNPL obfuscation", "details": "BNPL grew 85% in 2 years in Italy. Users don't feel the real cost. This makes it viscerally tangible." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 4.0, "stakeholder": 9.0, "technical-jury": 7.0,
-      "coolness": 8.0, "innovation-ai": 5.0, "innovation-approach": 8.0,
-      "innovation-scalability": 9.0, "innovation-ha": 8.0, "innovation-flexibility": 9.0,
-      "innovation-efficiency": 9.0, "privacy": 9.0, "banking-features": 7.0,
-      "banking-compliance": 5.0, "education": 9.5, "community": 7.0, "goodness": 9.0
-    }
-  },
-
-  "primo-stipendio-simulator": {
-    "name": "\"Primo Stipendio\" (First Paycheck) Simulator",
-    "details": "Interactive simulator for students/new workers: input expected salary, AI explains gross vs net, IRPEF, INPS, TFR, and walks through setting up a budget. Workshop-ready tool for NEXT events.",
-    "status": "idea",
-    "category": "education-tool",
-    "tags": ["simulator", "payslip", "onboarding", "NEXT-community", "workshops"],
-    "importance": 8.0,
-    "risk": 2.5,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 7.5,
-    "implementation-details": {
-      "steps": [
-        { "name": "Salary input form", "details": "RAL (gross annual), contract type, region → compute net monthly, IRPEF, INPS, TFR" },
-        { "name": "Budget walkthrough", "details": "AI guides through 65-20-15 allocation with the user's actual net figure" },
-        { "name": "ElevenLabs narration", "details": "Voice explains each deduction as the numbers appear" }
-      ]
+    "persona-mentor-system": {
+        "name": "Configurable Mentor Personas",
+        "details": "4 selectable coaching personas (Mentore Saggio, Amico Sarcastico, Sergente Hartman, Cheerleader) with shared safety boundaries. Tone varies, financial correctness doesn't.",
+        "status": "implemented",
+        "category": "engagement",
+        "tags": [
+            "personas",
+            "tone",
+            "safety",
+            "customization"
+        ],
+        "importance": 7.0,
+        "risk": 4.5,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 12.0
+        },
+        "hackathon-advantage": 7.5,
+        "problems-solved": [
+            {
+                "name": "One-size-fits-all is boring",
+                "details": "Different users respond to different communication styles. A stern drill sergeant motivates some; cheerful encouragement works for others."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 5.0,
+            "stakeholder": 7.0,
+            "technical-jury": 7.5,
+            "coolness": 8.5,
+            "innovation-ai": 6.5,
+            "innovation-approach": 7.5,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 8.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 5.0,
+            "banking-compliance": 6.0,
+            "education": 7.0,
+            "community": 7.0,
+            "goodness": 6.0
+        }
     },
-    "problems-solved": [
-      { "name": "First-job shock", "details": "Young Italians see RAL in job offers but don't understand net. 'I was promised €24K but I only get €1,400/month?!' This makes it crystal clear." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 4.0, "stakeholder": 9.5, "technical-jury": 7.0,
-      "coolness": 7.0, "innovation-ai": 5.0, "innovation-approach": 7.5,
-      "innovation-scalability": 8.0, "innovation-ha": 7.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 8.0, "privacy": 9.0, "banking-features": 8.0,
-      "banking-compliance": 7.0, "education": 10.0, "community": 9.0, "goodness": 9.0
+    "safety-guardrails": {
+        "name": "3-Layer Safety Pipeline",
+        "details": "Input guard (prompt injection detection), persona boundary enforcement (system prompt), output scanner (hard-boundaries.yml regex groups). No investment-picking, no regulated advice, educational framing enforced.",
+        "status": "implemented",
+        "category": "safety-and-compliance",
+        "tags": [
+            "safety",
+            "guardrails",
+            "prompt-injection",
+            "compliance"
+        ],
+        "importance": 9.0,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 7.0,
+        "problems-solved": [
+            {
+                "name": "Regulatory and reputational risk",
+                "details": "A bank-associated AI giving bad financial advice = lawsuit. Safety pipeline prevents this."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 8.0,
+            "stakeholder": 10.0,
+            "technical-jury": 7.0,
+            "coolness": 3.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 8.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 7.0,
+            "banking-features": 6.0,
+            "banking-compliance": 10.0,
+            "education": 5.0,
+            "community": 4.0,
+            "goodness": 9.0
+        }
+    },
+    "italy-rules-knowledge-base": {
+        "name": "Italy Financial Rules Knowledge Base",
+        "details": "Static JSON with verified 2025 IRPEF brackets, INPS thresholds, bonus cultura, 730 deadlines, ISEE, TFR, regime forfettario. BM25-indexed. Coach can cite specific Italian rules.",
+        "status": "implemented",
+        "category": "knowledge",
+        "tags": [
+            "italy",
+            "tax",
+            "IRPEF",
+            "INPS",
+            "regulatory",
+            "BM25"
+        ],
+        "importance": 8.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 7.5,
+        "problems-solved": [
+            {
+                "name": "Generic European advice is useless",
+                "details": "Italian tax system is specific. IRPEF brackets, contributi INPS, cedolare secca — users need answers grounded in Italian law, not generic tips."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.5,
+            "dev": 5.0,
+            "stakeholder": 9.0,
+            "technical-jury": 7.0,
+            "coolness": 5.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 5.0,
+            "banking-features": 8.0,
+            "banking-compliance": 9.0,
+            "education": 9.5,
+            "community": 5.0,
+            "goodness": 8.0
+        }
+    },
+    "coach-tool-suite": {
+        "name": "7-Tool LLM Coach Intelligence Suite",
+        "details": "Coach has 7 tools: search_content, search_italy_rules, get_user_profile, search_user_transactions, get_user_preferences, recall_past_insights, get_timeline_events. Lazy tool-first prompting replaces static profile blob.",
+        "status": "implemented",
+        "category": "ai-intelligence",
+        "tags": [
+            "tools",
+            "function-calling",
+            "LLM",
+            "RAG",
+            "memory"
+        ],
+        "importance": 8.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 16.0,
+            "max": 24.0
+        },
+        "hackathon-advantage": 8.0,
+        "problems-solved": [
+            {
+                "name": "Prompt bloat and irrelevant context",
+                "details": "Static profile blob wasted tokens. Tool-first means coach fetches only what's needed per question."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 9.0,
+            "stakeholder": 7.0,
+            "technical-jury": 9.0,
+            "coolness": 7.0,
+            "innovation-ai": 9.5,
+            "innovation-approach": 8.5,
+            "innovation-scalability": 8.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 9.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 6.0,
+            "banking-features": 6.0,
+            "banking-compliance": 5.0,
+            "education": 7.0,
+            "community": 4.0,
+            "goodness": 6.0
+        }
+    },
+    "financial-timeline": {
+        "name": "Financial Timeline with Life Event Detection",
+        "details": "Detects 6 life event types from transaction patterns: income shift, relocation, subscription accumulation, major purchase, debt change, extraordinary income. Visible in ProfileScreen Timeline tab. Injected into coach context.",
+        "status": "implemented",
+        "category": "intelligence",
+        "tags": [
+            "timeline",
+            "life-events",
+            "pattern-detection",
+            "behavioral"
+        ],
+        "importance": 7.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 18.0
+        },
+        "hackathon-advantage": 7.0,
+        "problems-solved": [
+            {
+                "name": "Coach lacks temporal awareness",
+                "details": "Without knowing the user recently changed jobs or moved, advice is out of context."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 6.0,
+            "stakeholder": 7.5,
+            "technical-jury": 8.0,
+            "coolness": 7.5,
+            "innovation-ai": 8.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 5.0,
+            "banking-features": 7.0,
+            "banking-compliance": 5.0,
+            "education": 7.0,
+            "community": 5.0,
+            "goodness": 6.0
+        }
+    },
+    "e2e-encrypted-messaging": {
+        "name": "E2E Encrypted User-to-User Messaging",
+        "details": "NaCl/libsodium X25519+Ed25519 asymmetric encryption. Pseudonymous $adjective-noun-NNNN usernames. Zero-knowledge server routing via recipient hashes. Admin !handle for signed official messages. BIP-39 recovery envelope.",
+        "status": "implemented",
+        "category": "security-and-privacy",
+        "tags": [
+            "crypto",
+            "E2E",
+            "messaging",
+            "NaCl",
+            "privacy",
+            "zero-knowledge"
+        ],
+        "importance": 6.5,
+        "risk": 7.0,
+        "estimated-effort": {
+            "min": 24.0,
+            "max": 36.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "No private communication channel",
+                "details": "Users and admins need a way to communicate about sensitive financial matters without server-readable plaintext."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 5.0,
+            "dev": 7.0,
+            "stakeholder": 6.0,
+            "technical-jury": 8.5,
+            "coolness": 8.0,
+            "innovation-ai": 3.0,
+            "innovation-approach": 9.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 10.0,
+            "banking-features": 7.0,
+            "banking-compliance": 8.0,
+            "education": 2.0,
+            "community": 6.0,
+            "goodness": 9.0
+        }
+    },
+    "encryption-at-rest": {
+        "name": "Tiered Encryption at Rest + LLM No-Data-Retention",
+        "details": "T1 (E2E user-key) for raw content, T2 (server AES-GCM) for behavioral data, T3 (E2E) for identity fields. OpenAI no-store headers. OpenRouter ZDR. Per-user Strict Privacy Mode toggle.",
+        "status": "implemented",
+        "category": "security-and-privacy",
+        "tags": [
+            "encryption",
+            "AES-GCM",
+            "PBKDF2",
+            "privacy-mode",
+            "ZDR"
+        ],
+        "importance": 7.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 18.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "DB breach exposes sensitive financial data",
+                "details": "Bank statements, payslips, conversations stored in plaintext = catastrophic breach. Encryption limits blast radius."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 7.0,
+            "stakeholder": 9.0,
+            "technical-jury": 7.0,
+            "coolness": 4.0,
+            "innovation-ai": 3.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 7.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 4.0,
+            "privacy": 10.0,
+            "banking-features": 8.0,
+            "banking-compliance": 9.5,
+            "education": 2.0,
+            "community": 3.0,
+            "goodness": 9.0
+        }
+    },
+    "quanto-mi-costa-davvero": {
+        "name": "\"Quanto Mi Costa Davvero\" (What It Really Costs Me)",
+        "details": "Zero-onboarding single-purpose tool: say or type a purchase, AI shows real cost in hours worked, months of delayed savings, total BNPL interest. Instant impact, no bank data required.",
+        "status": "idea",
+        "category": "standalone-tool",
+        "tags": [
+            "zero-onboarding",
+            "BNPL",
+            "cost-awareness",
+            "viral",
+            "embeddable"
+        ],
+        "importance": 8.5,
+        "risk": 2.0,
+        "estimated-effort": {
+            "min": 3.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 8.5,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Single-page widget",
+                    "details": "Input: purchase amount + optional hourly wage. Output: hours worked equivalent, BNPL total cost calculator, savings delay impact."
+                },
+                {
+                    "name": "Embeddable version",
+                    "details": "BTM can embed on bancabtm.it as a lead-gen tool"
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "BNPL obfuscation",
+                "details": "BNPL grew 85% in 2 years in Italy. Users don't feel the real cost. This makes it viscerally tangible."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 4.0,
+            "stakeholder": 9.0,
+            "technical-jury": 7.0,
+            "coolness": 8.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 9.0,
+            "innovation-ha": 8.0,
+            "innovation-flexibility": 9.0,
+            "innovation-efficiency": 9.0,
+            "privacy": 9.0,
+            "banking-features": 7.0,
+            "banking-compliance": 5.0,
+            "education": 9.5,
+            "community": 7.0,
+            "goodness": 9.0
+        }
+    },
+    "primo-stipendio-simulator": {
+        "name": "\"Primo Stipendio\" (First Paycheck) Simulator",
+        "details": "Interactive simulator for students/clear workers: input expected salary, AI explains gross vs net, IRPEF, INPS, TFR, and walks through setting up a budget. Workshop-ready tool for NEXT events.",
+        "status": "idea",
+        "category": "education-tool",
+        "tags": [
+            "simulator",
+            "payslip",
+            "onboarding",
+            "NEXT-community",
+            "workshops"
+        ],
+        "importance": 8.0,
+        "risk": 2.5,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 7.5,
+        "implementation-details": {
+            "steps": [
+                {
+                    "name": "Salary input form",
+                    "details": "RAL (gross annual), contract type, region → compute net monthly, IRPEF, INPS, TFR"
+                },
+                {
+                    "name": "Budget walkthrough",
+                    "details": "AI guides through 65-20-15 allocation with the user's actual net figure"
+                },
+                {
+                    "name": "ElevenLabs narration",
+                    "details": "Voice explains each deduction as the numbers appear"
+                }
+            ]
+        },
+        "problems-solved": [
+            {
+                "name": "First-job shock",
+                "details": "Young Italians see RAL in job offers but don't understand net. 'I was promised €24K but I only get €1,400/month?!' This makes it crystal clear."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 4.0,
+            "stakeholder": 9.5,
+            "technical-jury": 7.0,
+            "coolness": 7.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 7.5,
+            "innovation-scalability": 8.0,
+            "innovation-ha": 7.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 9.0,
+            "banking-features": 8.0,
+            "banking-compliance": 7.0,
+            "education": 10.0,
+            "community": 9.0,
+            "goodness": 9.0
+        }
+    },
+    "contratto-decoder": {
+        "name": "\"Contratto Decoder\" (Contract Decoder)",
+        "details": "Upload any financial document (loan contract, insurance, phone plan) and AI explains it in plain Italian, highlighting hidden costs, penalty clauses, and comparisons to alternatives.",
+        "status": "idea",
+        "category": "standalone-tool",
+        "tags": [
+            "document-analysis",
+            "plain-language",
+            "consumer-protection",
+            "trust-building"
+        ],
+        "importance": 7.5,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 7.0,
+        "problems-solved": [
+            {
+                "name": "Low financing diligence",
+                "details": "BNPL users consistently fail to read ToS. This tool reads contracts FOR them and surfaces the traps."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.5,
+            "dev": 5.0,
+            "stakeholder": 8.0,
+            "technical-jury": 7.5,
+            "coolness": 7.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 8.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 6.0,
+            "banking-features": 7.0,
+            "banking-compliance": 6.0,
+            "education": 9.0,
+            "community": 6.0,
+            "goodness": 8.5
+        }
+    },
+    "subscription-audit-agent": {
+        "name": "Subscription Audit Agent",
+        "details": "Upload CSV or connect bank data; AI identifies all recurring charges, classifies them (essential/nice-to-have/forgotten), calculates annual cost, generates cancellation plan with step-by-step scripts.",
+        "status": "partial",
+        "category": "intelligence",
+        "tags": [
+            "subscriptions",
+            "recurring",
+            "savings",
+            "detection",
+            "cancellation"
+        ],
+        "importance": 7.5,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 7.0,
+        "problems-solved": [
+            {
+                "name": "Subscription creep",
+                "details": "Consumers underestimate monthly subscription spend by €100+. 63% of under-35s have 3+ video subscriptions."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 5.0,
+            "stakeholder": 7.0,
+            "technical-jury": 6.5,
+            "coolness": 7.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 6.5,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 5.0,
+            "banking-features": 6.0,
+            "banking-compliance": 4.0,
+            "education": 7.0,
+            "community": 5.0,
+            "goodness": 7.5
+        }
+    },
+    "financial-time-machine": {
+        "name": "Financial Time Machine",
+        "details": "Show two futures: one with current behavior, one with specific changes. Visualize net worth at 30, 40, 50. Make compound interest tangible with the user's own numbers.",
+        "status": "idea",
+        "category": "education-tool",
+        "tags": [
+            "visualization",
+            "compound-interest",
+            "projection",
+            "behavioral-change"
+        ],
+        "importance": 7.5,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 7.5,
+        "problems-solved": [
+            {
+                "name": "Compound interest incomprehension",
+                "details": "Only 30% of Italian young adults understand compound interest. Seeing '€50/month → €15,000 in 15 years' makes it real."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.5,
+            "dev": 5.0,
+            "stakeholder": 8.0,
+            "technical-jury": 8.0,
+            "coolness": 8.5,
+            "innovation-ai": 6.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 7.0,
+            "banking-features": 8.0,
+            "banking-compliance": 5.0,
+            "education": 10.0,
+            "community": 6.0,
+            "goodness": 9.0
+        }
+    },
+    "bnpl-reality-lens": {
+        "name": "BNPL Reality Lens",
+        "details": "Paste checkout terms or describe a BNPL offer; AI computes total real cost including fees/interest, shows 'future you impact' in plain language, personalized to the user's monthly cash-flow slack.",
+        "status": "idea",
+        "category": "consumer-protection",
+        "tags": [
+            "BNPL",
+            "debt-awareness",
+            "checkout-intercept",
+            "cost-calculator"
+        ],
+        "importance": 8.0,
+        "risk": 3.5,
+        "estimated-effort": {
+            "min": 3.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 7.5,
+        "problems-solved": [
+            {
+                "name": "BNPL psychological obfuscation",
+                "details": "BNPL decouples 'pain of paying' from acquisition. This tool re-couples it by showing the actual total cost + opportunity cost."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 4.0,
+            "stakeholder": 8.5,
+            "technical-jury": 7.0,
+            "coolness": 7.0,
+            "innovation-ai": 5.5,
+            "innovation-approach": 7.5,
+            "innovation-scalability": 8.0,
+            "innovation-ha": 7.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 8.0,
+            "banking-features": 7.0,
+            "banking-compliance": 7.0,
+            "education": 9.5,
+            "community": 6.0,
+            "goodness": 9.5
+        }
+    },
+    "gamified-savings-challenges": {
+        "name": "Gamified Savings Challenges (NEXT League)",
+        "details": "AI-generated weekly micro-challenges ('Skip delivery twice, move €20 to savings'). Progress tracked via voice check-ins. Leaderboards within NEXT community. ElevenLabs voice nudges.",
+        "status": "idea",
+        "category": "engagement",
+        "tags": [
+            "gamification",
+            "challenges",
+            "community",
+            "NEXT",
+            "habit-formation"
+        ],
+        "importance": 7.0,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 6.5,
+        "problems-solved": [
+            {
+                "name": "Behavior change requires sustained engagement",
+                "details": "One coaching session doesn't change habits. Weekly challenges with social accountability do."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 5.0,
+            "stakeholder": 9.0,
+            "technical-jury": 7.0,
+            "coolness": 8.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 7.0,
+            "banking-compliance": 4.0,
+            "education": 8.0,
+            "community": 10.0,
+            "goodness": 8.0
+        }
+    },
+    "impulse-vs-passion-classifier": {
+        "name": "Impulse vs Passion Purchase Classifier",
+        "details": "AI surfaces behavioral history at purchase-decision moment: 'You've bought into 3 new hobbies in 6 months — 2 were abandoned within 4 weeks. Is this one different?' Self-reflection prompts before verdict.",
+        "status": "deferred",
+        "category": "behavioral-intelligence",
+        "tags": [
+            "behavioral",
+            "self-awareness",
+            "longitudinal",
+            "SEED-003"
+        ],
+        "importance": 7.0,
+        "risk": 6.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 20.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Impulse vs genuine passion is invisible in the moment",
+                "details": "Dopamine hit feels identical for impulse and real investment. Only behavioral history reveals the pattern."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 6.0,
+            "stakeholder": 7.0,
+            "technical-jury": 8.0,
+            "coolness": 8.0,
+            "innovation-ai": 8.5,
+            "innovation-approach": 9.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 4.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 6.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 9.0,
+            "community": 5.0,
+            "goodness": 9.0
+        }
+    },
+    "crowdsourced-merchant-mapping": {
+        "name": "Crowdsourced Merchant Category Mapping",
+        "details": "Shared merchant→category knowledge base accumulated from LLM classifications and user corrections. 3-tier LLM escalation (sm→md→lg). Admin blacklist for adversarial entries. Compounding accuracy improvement.",
+        "status": "implemented",
+        "category": "intelligence",
+        "tags": [
+            "crowdsourcing",
+            "merchant-map",
+            "categorization",
+            "LLM-tiers",
+            "SEED-001"
+        ],
+        "importance": 7.0,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 10.0,
+            "max": 16.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Category accuracy degrades trust",
+                "details": "Phase 3 rules missed too many transactions. Crowdsourced map + LLM escalation dramatically reduces 'uncategorized' rate."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 7.0,
+            "stakeholder": 6.0,
+            "technical-jury": 7.0,
+            "coolness": 5.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 8.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 4.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 4.0,
+            "community": 7.0,
+            "goodness": 5.0
+        }
+    },
+    "content-platform-public": {
+        "name": "Public Content Platform (/learn)",
+        "details": "Articles, MARP presentations, videos browsable at /learn without authentication. Shareable URLs. BM25 search. Admin CRUD. SEO-friendly.",
+        "status": "implemented",
+        "category": "education-tool",
+        "tags": [
+            "content",
+            "public",
+            "SEO",
+            "sharing",
+            "education"
+        ],
+        "importance": 6.5,
+        "risk": 2.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 5.5,
+        "problems-solved": [
+            {
+                "name": "Educational content locked behind login",
+                "details": "Content should be freely accessible to build trust and drive sign-ups."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 5.0,
+            "stakeholder": 7.0,
+            "technical-jury": 5.0,
+            "coolness": 4.0,
+            "innovation-ai": 3.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 8.0,
+            "banking-features": 6.0,
+            "banking-compliance": 5.0,
+            "education": 8.0,
+            "community": 7.0,
+            "goodness": 7.0
+        }
+    },
+    "peer-benchmark-anonymized": {
+        "name": "Anonymized Peer Spending Benchmark",
+        "details": "'People your age in your area earn X on average, save Y, spend Z on categories A, B, C.' Uses aggregate anonymized data. Social context without judgment.",
+        "status": "idea",
+        "category": "behavioral-intelligence",
+        "tags": [
+            "benchmarking",
+            "anonymized",
+            "social-comparison",
+            "aggregate-data"
+        ],
+        "importance": 6.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "No reference point for 'normal'",
+                "details": "Young adults have no idea if their spending is typical. 'Am I spending too much on food?' needs a benchmark."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.5,
+            "dev": 5.0,
+            "stakeholder": 7.0,
+            "technical-jury": 6.5,
+            "coolness": 7.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 3.0,
+            "banking-features": 6.0,
+            "banking-compliance": 5.0,
+            "education": 7.0,
+            "community": 8.0,
+            "goodness": 6.0
+        }
+    },
+    "fraud-scam-gym": {
+        "name": "Fraud & Scam Gym",
+        "details": "AI generates personalized scam simulations (smishing, vishing, subscription traps, fake job offers) tuned to local patterns. Score-based training. Could run in NEXT workshops.",
+        "status": "idea",
+        "category": "education-tool",
+        "tags": [
+            "fraud",
+            "scam",
+            "simulation",
+            "training",
+            "EBA-aligned"
+        ],
+        "importance": 6.5,
+        "risk": 4.5,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "AI-enabled fraud targeting youth",
+                "details": "EBA explicitly flags subscription traps and AI-enabled scams. Education must include recognition training."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 5.0,
+            "stakeholder": 8.0,
+            "technical-jury": 7.5,
+            "coolness": 8.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 7.0,
+            "banking-features": 6.0,
+            "banking-compliance": 7.0,
+            "education": 9.0,
+            "community": 8.0,
+            "goodness": 9.0
+        }
+    },
+    "micro-life-simulator": {
+        "name": "Micro-Simulator for Life Choices",
+        "details": "'If I move out?' 'If I buy a car?' AI builds scenario model from real spending: best/base/worst probability bands. Makes uncertainty explicit, not just a single number.",
+        "status": "idea",
+        "category": "planning-tool",
+        "tags": [
+            "simulator",
+            "scenario",
+            "Monte-Carlo",
+            "life-decisions"
+        ],
+        "importance": 7.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 7.0,
+        "problems-solved": [
+            {
+                "name": "Life decisions made blind",
+                "details": "Moving out, buying a car — these are the biggest financial decisions for 18-30s. They currently decide by gut feeling."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 6.0,
+            "stakeholder": 8.0,
+            "technical-jury": 8.0,
+            "coolness": 8.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 8.5,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 8.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 6.0,
+            "banking-features": 8.0,
+            "banking-compliance": 5.0,
+            "education": 9.0,
+            "community": 6.0,
+            "goodness": 8.0
+        }
+    },
+    "chiedi-alla-banca": {
+        "name": "\"Chiedi alla Banca\" (Ask the Bank)",
+        "details": "AI front-end for BTM's actual product catalog. Natural-language queries about real bank offerings. Grounded in BTM's actual products, rates, and conditions.",
+        "status": "idea",
+        "category": "banking-integration",
+        "tags": [
+            "product-catalog",
+            "BTM",
+            "chatbot",
+            "lead-gen"
+        ],
+        "importance": 6.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Young adults don't understand bank products",
+                "details": "What's a conto deposito? What savings account should I open? Natural language answers grounded in real offerings."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 4.0,
+            "stakeholder": 10.0,
+            "technical-jury": 4.0,
+            "coolness": 3.0,
+            "innovation-ai": 4.0,
+            "innovation-approach": 4.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 7.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 6.0,
+            "banking-features": 10.0,
+            "banking-compliance": 6.0,
+            "education": 7.0,
+            "community": 5.0,
+            "goodness": 6.0
+        }
+    },
+    "impulse-interceptor-72h": {
+        "name": "Impulse Interceptor (72-Hour AI Escrow)",
+        "details": "When user wants to buy something impulsively, AI proposes a 72-hour cooldown contract with personalized alternatives (swap, rent, buy used, wait for paycheck). Tracks outcomes.",
+        "status": "idea",
+        "category": "behavioral-intelligence",
+        "tags": [
+            "impulse-control",
+            "cooldown",
+            "behavioral-nudge",
+            "alternatives"
+        ],
+        "importance": 7.0,
+        "risk": 3.5,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 6.5,
+        "problems-solved": [
+            {
+                "name": "Impulse buying is the #1 budget killer",
+                "details": "The 72-hour rule is proven but nobody enforces it. AI makes it a structured commitment with alternatives."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 4.0,
+            "stakeholder": 7.0,
+            "technical-jury": 7.0,
+            "coolness": 7.5,
+            "innovation-ai": 6.0,
+            "innovation-approach": 8.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 6.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 8.0,
+            "community": 5.0,
+            "goodness": 8.5
+        }
+    },
+    "ai-explain-my-payslip": {
+        "name": "AI \"Explain My Payslip\"",
+        "details": "Parse payslips; explain net vs gross, each tax line (IRPEF, INPS, addizionale regionale), overtime, TFR. Creates a 'salary upgrade' action plan (deductions, bonus applications).",
+        "status": "partial",
+        "category": "education-tool",
+        "tags": [
+            "payslip",
+            "tax-education",
+            "IRPEF",
+            "INPS",
+            "TFR"
+        ],
+        "importance": 7.5,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 3.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 6.5,
+        "problems-solved": [
+            {
+                "name": "Payslip incomprehension",
+                "details": "Most young Italians can't read their own busta paga. They see the net number and ignore everything else."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.5,
+            "dev": 4.0,
+            "stakeholder": 8.0,
+            "technical-jury": 6.0,
+            "coolness": 5.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 5.0,
+            "banking-features": 7.0,
+            "banking-compliance": 6.0,
+            "education": 9.5,
+            "community": 5.0,
+            "goodness": 8.0
+        }
+    },
+    "auto-sinking-funds": {
+        "name": "Auto Sinking Funds Engine",
+        "details": "AI identifies irregular annual/quarterly costs (insurance, car tax, holiday gifts, bollo auto) from transaction history and proposes a monthly micro-saving schedule to smooth them.",
+        "status": "idea",
+        "category": "planning-tool",
+        "tags": [
+            "sinking-funds",
+            "smoothing",
+            "automation",
+            "recurring-costs"
+        ],
+        "importance": 6.5,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 5.5,
+        "problems-solved": [
+            {
+                "name": "Irregular expenses destroy budgets",
+                "details": "Car insurance, annual subscriptions, holiday gifts — these 'surprises' break monthly budgets every time."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 5.0,
+            "stakeholder": 7.0,
+            "technical-jury": 6.0,
+            "coolness": 5.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 6.5,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 5.0,
+            "banking-features": 7.0,
+            "banking-compliance": 4.0,
+            "education": 7.0,
+            "community": 4.0,
+            "goodness": 7.0
+        }
+    },
+    "ask-advisor-prep": {
+        "name": "AI-Assisted \"Ask the Advisor\" Prep",
+        "details": "Before a branch appointment, AI generates a one-page briefing: user goals, constraints, key questions to ask, trade-offs to consider. Printable PDF. Amplifies BTM's relationship banking.",
+        "status": "idea",
+        "category": "banking-integration",
+        "tags": [
+            "branch",
+            "appointment",
+            "relationship-banking",
+            "PDF"
+        ],
+        "importance": 6.0,
+        "risk": 2.0,
+        "estimated-effort": {
+            "min": 3.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Young adults intimidated by bank meetings",
+                "details": "They don't know what to ask. AI prep makes the meeting productive for both parties."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 3.0,
+            "stakeholder": 9.0,
+            "technical-jury": 5.0,
+            "coolness": 4.0,
+            "innovation-ai": 4.0,
+            "innovation-approach": 7.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 6.0,
+            "banking-features": 9.0,
+            "banking-compliance": 5.0,
+            "education": 7.0,
+            "community": 6.0,
+            "goodness": 7.0
+        }
+    },
+    "financial-literacy-duolingo": {
+        "name": "Financial Literacy Duolingo with Your Own Data",
+        "details": "Short daily quizzes using the user's real spending: 'If your delivery spend stays at €X/month, what's the annual cost?' Personalized learning that sticks because it's about YOUR money.",
+        "status": "idea",
+        "category": "education-tool",
+        "tags": [
+            "gamification",
+            "quiz",
+            "personalized-learning",
+            "daily-habit"
+        ],
+        "importance": 7.0,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 10.0,
+            "max": 16.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "Abstract financial education doesn't stick",
+                "details": "Generic quiz: 'What is compound interest?' — boring. Personalized: 'Your €280/month delivery = €3,360/year. That's a vacation. True or false?' — memorable."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 6.0,
+            "stakeholder": 8.0,
+            "technical-jury": 7.0,
+            "coolness": 8.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 8.5,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 10.0,
+            "community": 7.0,
+            "goodness": 8.0
+        }
+    },
+    "streaming-sse-responses": {
+        "name": "Token-by-Token SSE Streaming",
+        "details": "Coach responses stream word-by-word via Server-Sent Events. Structured payloads (cards, verdict, A2UI) appear only when final. Graceful fallback to full-response if SSE breaks.",
+        "status": "implemented",
+        "category": "ux-polish",
+        "tags": [
+            "streaming",
+            "SSE",
+            "perceived-performance",
+            "UX"
+        ],
+        "importance": 6.5,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "5-15s LLM response feels like it's broken",
+                "details": "Without streaming, the app looks frozen during LLM generation. Streaming gives immediate feedback."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 6.0,
+            "stakeholder": 5.0,
+            "technical-jury": 6.0,
+            "coolness": 5.0,
+            "innovation-ai": 4.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 5.0,
+            "banking-features": 3.0,
+            "banking-compliance": 3.0,
+            "education": 3.0,
+            "community": 3.0,
+            "goodness": 4.0
+        }
+    },
+    "pwa-standalone": {
+        "name": "PWA Standalone App (vite-plugin-pwa)",
+        "details": "Progressive Web App with standalone display mode, service worker, offline shell caching, proper icons, installable on mobile home screens.",
+        "status": "implemented",
+        "category": "distribution",
+        "tags": [
+            "PWA",
+            "mobile",
+            "offline",
+            "installable"
+        ],
+        "importance": 6.0,
+        "risk": 2.0,
+        "estimated-effort": {
+            "min": 2.0,
+            "max": 4.0
+        },
+        "hackathon-advantage": 5.5,
+        "problems-solved": [
+            {
+                "name": "Web app feels like a website, not an app",
+                "details": "PWA standalone removes browser chrome. Feels native on mobile."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 5.0,
+            "stakeholder": 6.0,
+            "technical-jury": 5.0,
+            "coolness": 5.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 4.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 5.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 3.0,
+            "community": 4.0,
+            "goodness": 4.0
+        }
+    },
+    "mobile-first-ui": {
+        "name": "Mobile-First UI Overhaul",
+        "details": "visualViewport keyboard handling, tables→cards on mobile, pull-to-refresh, 44px tap targets, profile tab grid, safe-area insets. Designed for 390px screens first.",
+        "status": "implemented",
+        "category": "ux-polish",
+        "tags": [
+            "mobile",
+            "responsive",
+            "iOS",
+            "Android",
+            "accessibility"
+        ],
+        "importance": 7.0,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 18.0
+        },
+        "hackathon-advantage": 6.5,
+        "problems-solved": [
+            {
+                "name": "App unusable on mobile",
+                "details": "Tables overflow, keyboard covers input, tabs don't fit — target audience uses phones exclusively."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 9.0,
+            "dev": 7.0,
+            "stakeholder": 7.0,
+            "technical-jury": 6.0,
+            "coolness": 4.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 4.0,
+            "banking-features": 4.0,
+            "banking-compliance": 3.0,
+            "education": 3.0,
+            "community": 4.0,
+            "goodness": 5.0
+        }
+    },
+    "about-page-transparency": {
+        "name": "Public About Page + Privacy Transparency",
+        "details": "Public /about explaining how it works, what data is stored, how AI is used, legal disclaimers. Written for 20-year-olds. No provider names. Strict Privacy Mode toggle in Settings.",
+        "status": "implemented",
+        "category": "trust-and-transparency",
+        "tags": [
+            "transparency",
+            "about-page",
+            "GDPR",
+            "privacy",
+            "disclaimers"
+        ],
+        "importance": 6.5,
+        "risk": 1.5,
+        "estimated-effort": {
+            "min": 3.0,
+            "max": 5.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Users don't trust AI with their financial data",
+                "details": "Radical transparency about what happens to their data builds trust. Judges want to see this."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 4.0,
+            "stakeholder": 8.0,
+            "technical-jury": 6.0,
+            "coolness": 3.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 4.0,
+            "innovation-efficiency": 4.0,
+            "privacy": 9.0,
+            "banking-features": 5.0,
+            "banking-compliance": 8.0,
+            "education": 5.0,
+            "community": 5.0,
+            "goodness": 8.0
+        }
+    },
+    "community-podcast-generator": {
+        "name": "AI Community Financial Literacy Podcast",
+        "details": "AI takes a financial topic + NEXT community questions and generates a short audio episode with ElevenLabs voices. Weekly, distributed via BTM channels.",
+        "status": "idea",
+        "category": "content-generation",
+        "tags": [
+            "podcast",
+            "ElevenLabs",
+            "community",
+            "NEXT",
+            "content"
+        ],
+        "importance": 5.5,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Content creation is expensive for a small bank",
+                "details": "AI-generated audio content at near-zero marginal cost. NEXT community provides the questions."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 5.0,
+            "dev": 4.0,
+            "stakeholder": 7.0,
+            "technical-jury": 6.0,
+            "coolness": 7.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 6.0,
+            "innovation-efficiency": 8.0,
+            "privacy": 7.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 7.0,
+            "community": 9.0,
+            "goodness": 6.0
+        }
+    },
+    "emotional-spending-detector": {
+        "name": "Emotional Spending Detector",
+        "details": "Uses time + merchant patterns to flag likely emotional spending (late-night purchases, post-payday sprees). Offers alternative actions (walk, delayed checkout). Tracks outcomes.",
+        "status": "idea",
+        "category": "behavioral-intelligence",
+        "tags": [
+            "emotional",
+            "behavioral",
+            "pattern-detection",
+            "nudge"
+        ],
+        "importance": 6.0,
+        "risk": 6.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Emotional spending is invisible",
+                "details": "Users don't recognize their own patterns. 'You buy from Amazon at 11pm on Fridays' is a powerful mirror."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 5.0,
+            "stakeholder": 6.0,
+            "technical-jury": 7.0,
+            "coolness": 7.0,
+            "innovation-ai": 7.0,
+            "innovation-approach": 7.5,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 4.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 4.0,
+            "banking-features": 4.0,
+            "banking-compliance": 4.0,
+            "education": 7.0,
+            "community": 4.0,
+            "goodness": 7.0
+        }
+    },
+    "e2e-test-suite": {
+        "name": "Real Stack E2E Test Suite",
+        "details": "Playwright tests against real Docker Compose stack (no mocks). LLM stub server. Full user journey, tool call verification, error paths, mobile viewport. 22 tests across chromium + mobile.",
+        "status": "implemented",
+        "category": "quality",
+        "tags": [
+            "testing",
+            "E2E",
+            "Playwright",
+            "CI",
+            "reliability"
+        ],
+        "importance": 7.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 12.0,
+            "max": 18.0
+        },
+        "hackathon-advantage": 4.0,
+        "problems-solved": [
+            {
+                "name": "Demo reliability",
+                "details": "Zero integration tests = demo could fail from any untested seam. Real E2E catches what unit tests miss."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 4.0,
+            "dev": 9.0,
+            "stakeholder": 5.0,
+            "technical-jury": 7.0,
+            "coolness": 3.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 8.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 4.0,
+            "banking-features": 3.0,
+            "banking-compliance": 5.0,
+            "education": 2.0,
+            "community": 3.0,
+            "goodness": 5.0
+        }
+    },
+    "user-goals-and-preferences": {
+        "name": "User Goals, Dos & Don'ts Preferences",
+        "details": "Users can set financial goals ('save for emergency fund'), dos ('always check price per kg'), and don'ts ('never buy BNPL'). Coach references these across sessions.",
+        "status": "implemented",
+        "category": "personalization",
+        "tags": [
+            "goals",
+            "preferences",
+            "memory",
+            "cross-session"
+        ],
+        "importance": 7.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 6.0,
+        "problems-solved": [
+            {
+                "name": "Coach forgets your priorities",
+                "details": "Without stored preferences, every session starts from zero context about what the user cares about."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 8.0,
+            "dev": 5.0,
+            "stakeholder": 6.0,
+            "technical-jury": 6.0,
+            "coolness": 5.0,
+            "innovation-ai": 6.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 6.0,
+            "community": 4.0,
+            "goodness": 6.0
+        }
+    },
+    "marp-real-rendering": {
+        "name": "MARP Real Slide Rendering",
+        "details": "@marp-team/marp-core replaces marked. Proper theme (senso), CSS var dark mode, fullscreen portal, 16:9 aspect ratio. Educational slides look professional.",
+        "status": "implemented",
+        "category": "ux-polish",
+        "tags": [
+            "MARP",
+            "slides",
+            "presentation",
+            "education",
+            "rendering"
+        ],
+        "importance": 5.5,
+        "risk": 2.0,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 6.0
+        },
+        "hackathon-advantage": 4.5,
+        "problems-solved": [
+            {
+                "name": "Educational slides looked broken",
+                "details": "marked-based renderer didn't handle MARP directives. Slides looked like plain HTML instead of proper presentations."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 5.0,
+            "dev": 5.0,
+            "stakeholder": 4.0,
+            "technical-jury": 4.0,
+            "coolness": 4.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 3.0,
+            "innovation-scalability": 4.0,
+            "innovation-ha": 4.0,
+            "innovation-flexibility": 4.0,
+            "innovation-efficiency": 4.0,
+            "privacy": 3.0,
+            "banking-features": 3.0,
+            "banking-compliance": 3.0,
+            "education": 6.0,
+            "community": 3.0,
+            "goodness": 4.0
+        }
+    },
+    "tos-moderation-system": {
+        "name": "TOS Moderation with Progressive Enforcement",
+        "details": "LLM-based TOS check on user-submitted text (timeline context, merchant names). Progressive penalty: warning → 24h timeout → 7d → ban. Appeals via notifications. Admin moderation queue.",
+        "status": "implemented",
+        "category": "safety-and-compliance",
+        "tags": [
+            "moderation",
+            "TOS",
+            "progressive-penalty",
+            "appeals",
+            "admin"
+        ],
+        "importance": 5.5,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 12.0
+        },
+        "hackathon-advantage": 3.5,
+        "problems-solved": [
+            {
+                "name": "User-submitted content can be abusive",
+                "details": "Free-text inputs need moderation. Progressive enforcement is fair while preventing abuse."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 4.0,
+            "dev": 6.0,
+            "stakeholder": 7.0,
+            "technical-jury": 5.0,
+            "coolness": 3.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 4.0,
+            "banking-compliance": 7.0,
+            "education": 2.0,
+            "community": 6.0,
+            "goodness": 6.0
+        }
+    },
+    "accessibility-hooks": {
+        "name": "Accessibility: Reduced Motion, High Contrast, Offline Detection",
+        "details": "6 hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat). CSS reduced-motion and high-contrast overrides. OfflineBanner. BalanceMask.",
+        "status": "implemented",
+        "category": "accessibility",
+        "tags": [
+            "a11y",
+            "reduced-motion",
+            "high-contrast",
+            "offline",
+            "i18n"
+        ],
+        "importance": 6.0,
+        "risk": 1.5,
+        "estimated-effort": {
+            "min": 4.0,
+            "max": 8.0
+        },
+        "hackathon-advantage": 4.0,
+        "problems-solved": [
+            {
+                "name": "Accessibility is table stakes",
+                "details": "prefers-reduced-motion, high contrast, offline indicators — these are expected in any modern app."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 6.0,
+            "stakeholder": 5.0,
+            "technical-jury": 5.0,
+            "coolness": 3.0,
+            "innovation-ai": 2.0,
+            "innovation-approach": 4.0,
+            "innovation-scalability": 5.0,
+            "innovation-ha": 6.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 4.0,
+            "banking-features": 3.0,
+            "banking-compliance": 5.0,
+            "education": 3.0,
+            "community": 4.0,
+            "goodness": 7.0
+        }
+    },
+    "local-deals-budget-alignment": {
+        "name": "Local Deals + Budget Alignment",
+        "details": "Partner with local merchants to recommend budget-compatible alternatives (affordable gym, local events) instead of expensive options. Ties into BTM's territorial mission.",
+        "status": "idea",
+        "category": "banking-integration",
+        "tags": [
+            "local",
+            "merchants",
+            "BTM-territory",
+            "partnerships"
+        ],
+        "importance": 5.5,
+        "risk": 5.0,
+        "estimated-effort": {
+            "min": 8.0,
+            "max": 14.0
+        },
+        "hackathon-advantage": 4.5,
+        "problems-solved": [
+            {
+                "name": "Generic advice vs local context",
+                "details": "BTM's strength is territorial presence. Recommending the local gym instead of a franchise subscription leverages this."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 4.0,
+            "stakeholder": 9.0,
+            "technical-jury": 5.0,
+            "coolness": 5.0,
+            "innovation-ai": 4.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 4.0,
+            "innovation-ha": 4.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 5.0,
+            "banking-features": 8.0,
+            "banking-compliance": 4.0,
+            "education": 5.0,
+            "community": 8.0,
+            "goodness": 7.0
+        }
+    },
+    "next-advisory-board-tool": {
+        "name": "NEXT Advisory Board Decision Support Tool",
+        "details": "Internal AI tool for BTM's young Advisory Board to evaluate project proposals. AI scores feasibility, cost, community impact, and alignment with BTM's mission.",
+        "status": "idea",
+        "category": "internal-tool",
+        "tags": [
+            "internal",
+            "advisory-board",
+            "NEXT",
+            "decision-support"
+        ],
+        "importance": 4.0,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 3.5,
+        "problems-solved": [
+            {
+                "name": "Evidence-based youth governance",
+                "details": "The Advisory Board needs data, not vibes. AI helps evaluate proposals with structured criteria."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 3.0,
+            "dev": 4.0,
+            "stakeholder": 8.0,
+            "technical-jury": 4.0,
+            "coolness": 4.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 5.0,
+            "innovation-scalability": 4.0,
+            "innovation-ha": 4.0,
+            "innovation-flexibility": 5.0,
+            "innovation-efficiency": 6.0,
+            "privacy": 5.0,
+            "banking-features": 6.0,
+            "banking-compliance": 4.0,
+            "education": 4.0,
+            "community": 8.0,
+            "goodness": 6.0
+        }
+    },
+    "ai-financial-diary": {
+        "name": "AI Financial Diary (Voice Check-in)",
+        "details": "Daily 30-second voice check-in: 'What did you spend today?' AI builds spending profile over time without bank integration. Privacy-first, low-friction.",
+        "status": "idea",
+        "category": "engagement",
+        "tags": [
+            "diary",
+            "voice",
+            "low-friction",
+            "privacy-first",
+            "habit"
+        ],
+        "importance": 5.5,
+        "risk": 3.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 10.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Not everyone wants to upload bank data",
+                "details": "Privacy-first alternative: build spending awareness through daily voice journaling, no bank connection required."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 6.0,
+            "dev": 4.0,
+            "stakeholder": 5.0,
+            "technical-jury": 6.0,
+            "coolness": 6.0,
+            "innovation-ai": 5.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 6.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 7.0,
+            "innovation-efficiency": 5.0,
+            "privacy": 9.0,
+            "banking-features": 3.0,
+            "banking-compliance": 5.0,
+            "education": 6.0,
+            "community": 4.0,
+            "goodness": 6.0
+        }
+    },
+    "tabaccaio-digitale": {
+        "name": "\"Il Tabaccaio Digitale\" (WhatsApp/Telegram Bot)",
+        "details": "A WhatsApp/Telegram bot in local dialect that answers financial questions the way a trusted older neighbor would. Zero app install. Maximum accessibility.",
+        "status": "idea",
+        "category": "distribution",
+        "tags": [
+            "WhatsApp",
+            "Telegram",
+            "bot",
+            "accessibility",
+            "no-install"
+        ],
+        "importance": 5.0,
+        "risk": 4.0,
+        "estimated-effort": {
+            "min": 6.0,
+            "max": 12.0
+        },
+        "hackathon-advantage": 5.0,
+        "problems-solved": [
+            {
+                "name": "Not everyone downloads apps",
+                "details": "WhatsApp is already on every Italian phone. Meeting users where they are = maximum reach."
+            }
+        ],
+        "importance-by-pov": {
+            "users": 7.0,
+            "dev": 4.0,
+            "stakeholder": 7.0,
+            "technical-jury": 5.0,
+            "coolness": 6.0,
+            "innovation-ai": 4.0,
+            "innovation-approach": 6.0,
+            "innovation-scalability": 7.0,
+            "innovation-ha": 5.0,
+            "innovation-flexibility": 8.0,
+            "innovation-efficiency": 7.0,
+            "privacy": 4.0,
+            "banking-features": 5.0,
+            "banking-compliance": 4.0,
+            "education": 7.0,
+            "community": 7.0,
+            "goodness": 6.0
+        }
     }
-  },
-
-  "contratto-decoder": {
-    "name": "\"Contratto Decoder\" (Contract Decoder)",
-    "details": "Upload any financial document (loan contract, insurance, phone plan) and AI explains it in plain Italian, highlighting hidden costs, penalty clauses, and comparisons to alternatives.",
-    "status": "idea",
-    "category": "standalone-tool",
-    "tags": ["document-analysis", "plain-language", "consumer-protection", "trust-building"],
-    "importance": 7.5,
-    "risk": 4.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 7.0,
-    "problems-solved": [
-      { "name": "Low financing diligence", "details": "BNPL users consistently fail to read ToS. This tool reads contracts FOR them and surfaces the traps." }
-    ],
-    "importance-by-pov": {
-      "users": 8.5, "dev": 5.0, "stakeholder": 8.0, "technical-jury": 7.5,
-      "coolness": 7.0, "innovation-ai": 7.0, "innovation-approach": 7.0,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 8.0,
-      "innovation-efficiency": 7.0, "privacy": 6.0, "banking-features": 7.0,
-      "banking-compliance": 6.0, "education": 9.0, "community": 6.0, "goodness": 8.5
-    }
-  },
-
-  "subscription-audit-agent": {
-    "name": "Subscription Audit Agent",
-    "details": "Upload CSV or connect bank data; AI identifies all recurring charges, classifies them (essential/nice-to-have/forgotten), calculates annual cost, generates cancellation plan with step-by-step scripts.",
-    "status": "partial",
-    "category": "intelligence",
-    "tags": ["subscriptions", "recurring", "savings", "detection", "cancellation"],
-    "importance": 7.5,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 7.0,
-    "problems-solved": [
-      { "name": "Subscription creep", "details": "Consumers underestimate monthly subscription spend by €100+. 63% of under-35s have 3+ video subscriptions." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 5.0, "stakeholder": 7.0, "technical-jury": 6.5,
-      "coolness": 7.0, "innovation-ai": 6.0, "innovation-approach": 6.5,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 8.0, "privacy": 5.0, "banking-features": 6.0,
-      "banking-compliance": 4.0, "education": 7.0, "community": 5.0, "goodness": 7.5
-    }
-  },
-
-  "financial-time-machine": {
-    "name": "Financial Time Machine",
-    "details": "Show two futures: one with current behavior, one with specific changes. Visualize net worth at 30, 40, 50. Make compound interest tangible with the user's own numbers.",
-    "status": "idea",
-    "category": "education-tool",
-    "tags": ["visualization", "compound-interest", "projection", "behavioral-change"],
-    "importance": 7.5,
-    "risk": 4.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 7.5,
-    "problems-solved": [
-      { "name": "Compound interest incomprehension", "details": "Only 30% of Italian young adults understand compound interest. Seeing '€50/month → €15,000 in 15 years' makes it real." }
-    ],
-    "importance-by-pov": {
-      "users": 8.5, "dev": 5.0, "stakeholder": 8.0, "technical-jury": 8.0,
-      "coolness": 8.5, "innovation-ai": 6.0, "innovation-approach": 8.0,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 6.0, "privacy": 7.0, "banking-features": 8.0,
-      "banking-compliance": 5.0, "education": 10.0, "community": 6.0, "goodness": 9.0
-    }
-  },
-
-  "bnpl-reality-lens": {
-    "name": "BNPL Reality Lens",
-    "details": "Paste checkout terms or describe a BNPL offer; AI computes total real cost including fees/interest, shows 'future you impact' in plain language, personalized to the user's monthly cash-flow slack.",
-    "status": "idea",
-    "category": "consumer-protection",
-    "tags": ["BNPL", "debt-awareness", "checkout-intercept", "cost-calculator"],
-    "importance": 8.0,
-    "risk": 3.5,
-    "estimated-effort": { "min": 3.0, "max": 6.0 },
-    "hackathon-advantage": 7.5,
-    "problems-solved": [
-      { "name": "BNPL psychological obfuscation", "details": "BNPL decouples 'pain of paying' from acquisition. This tool re-couples it by showing the actual total cost + opportunity cost." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 4.0, "stakeholder": 8.5, "technical-jury": 7.0,
-      "coolness": 7.0, "innovation-ai": 5.5, "innovation-approach": 7.5,
-      "innovation-scalability": 8.0, "innovation-ha": 7.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 8.0, "privacy": 8.0, "banking-features": 7.0,
-      "banking-compliance": 7.0, "education": 9.5, "community": 6.0, "goodness": 9.5
-    }
-  },
-
-  "gamified-savings-challenges": {
-    "name": "Gamified Savings Challenges (NEXT League)",
-    "details": "AI-generated weekly micro-challenges ('Skip delivery twice, move €20 to savings'). Progress tracked via voice check-ins. Leaderboards within NEXT community. ElevenLabs voice nudges.",
-    "status": "idea",
-    "category": "engagement",
-    "tags": ["gamification", "challenges", "community", "NEXT", "habit-formation"],
-    "importance": 7.0,
-    "risk": 4.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 6.5,
-    "problems-solved": [
-      { "name": "Behavior change requires sustained engagement", "details": "One coaching session doesn't change habits. Weekly challenges with social accountability do." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 5.0, "stakeholder": 9.0, "technical-jury": 7.0,
-      "coolness": 8.0, "innovation-ai": 6.0, "innovation-approach": 7.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 7.0,
-      "banking-compliance": 4.0, "education": 8.0, "community": 10.0, "goodness": 8.0
-    }
-  },
-
-  "impulse-vs-passion-classifier": {
-    "name": "Impulse vs Passion Purchase Classifier",
-    "details": "AI surfaces behavioral history at purchase-decision moment: 'You've bought into 3 new hobbies in 6 months — 2 were abandoned within 4 weeks. Is this one different?' Self-reflection prompts before verdict.",
-    "status": "deferred",
-    "category": "behavioral-intelligence",
-    "tags": ["behavioral", "self-awareness", "longitudinal", "SEED-003"],
-    "importance": 7.0,
-    "risk": 6.0,
-    "estimated-effort": { "min": 12.0, "max": 20.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Impulse vs genuine passion is invisible in the moment", "details": "Dopamine hit feels identical for impulse and real investment. Only behavioral history reveals the pattern." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 6.0, "stakeholder": 7.0, "technical-jury": 8.0,
-      "coolness": 8.0, "innovation-ai": 8.5, "innovation-approach": 9.0,
-      "innovation-scalability": 5.0, "innovation-ha": 4.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 5.0, "privacy": 6.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 9.0, "community": 5.0, "goodness": 9.0
-    }
-  },
-
-  "crowdsourced-merchant-mapping": {
-    "name": "Crowdsourced Merchant Category Mapping",
-    "details": "Shared merchant→category knowledge base accumulated from LLM classifications and user corrections. 3-tier LLM escalation (sm→md→lg). Admin blacklist for adversarial entries. Compounding accuracy improvement.",
-    "status": "implemented",
-    "category": "intelligence",
-    "tags": ["crowdsourcing", "merchant-map", "categorization", "LLM-tiers", "SEED-001"],
-    "importance": 7.0,
-    "risk": 4.0,
-    "estimated-effort": { "min": 10.0, "max": 16.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Category accuracy degrades trust", "details": "Phase 3 rules missed too many transactions. Crowdsourced map + LLM escalation dramatically reduces 'uncategorized' rate." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 7.0, "stakeholder": 6.0, "technical-jury": 7.0,
-      "coolness": 5.0, "innovation-ai": 7.0, "innovation-approach": 7.0,
-      "innovation-scalability": 8.0, "innovation-ha": 6.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 8.0, "privacy": 4.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 4.0, "community": 7.0, "goodness": 5.0
-    }
-  },
-
-  "content-platform-public": {
-    "name": "Public Content Platform (/learn)",
-    "details": "Articles, MARP presentations, videos browsable at /learn without authentication. Shareable URLs. BM25 search. Admin CRUD. SEO-friendly.",
-    "status": "implemented",
-    "category": "education-tool",
-    "tags": ["content", "public", "SEO", "sharing", "education"],
-    "importance": 6.5,
-    "risk": 2.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 5.5,
-    "problems-solved": [
-      { "name": "Educational content locked behind login", "details": "Content should be freely accessible to build trust and drive sign-ups." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 5.0, "stakeholder": 7.0, "technical-jury": 5.0,
-      "coolness": 4.0, "innovation-ai": 3.0, "innovation-approach": 5.0,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 6.0, "privacy": 8.0, "banking-features": 6.0,
-      "banking-compliance": 5.0, "education": 8.0, "community": 7.0, "goodness": 7.0
-    }
-  },
-
-  "peer-benchmark-anonymized": {
-    "name": "Anonymized Peer Spending Benchmark",
-    "details": "'People your age in your area earn X on average, save Y, spend Z on categories A, B, C.' Uses aggregate anonymized data. Social context without judgment.",
-    "status": "idea",
-    "category": "behavioral-intelligence",
-    "tags": ["benchmarking", "anonymized", "social-comparison", "aggregate-data"],
-    "importance": 6.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "No reference point for 'normal'", "details": "Young adults have no idea if their spending is typical. 'Am I spending too much on food?' needs a benchmark." }
-    ],
-    "importance-by-pov": {
-      "users": 7.5, "dev": 5.0, "stakeholder": 7.0, "technical-jury": 6.5,
-      "coolness": 7.0, "innovation-ai": 5.0, "innovation-approach": 7.0,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 3.0, "banking-features": 6.0,
-      "banking-compliance": 5.0, "education": 7.0, "community": 8.0, "goodness": 6.0
-    }
-  },
-
-  "fraud-scam-gym": {
-    "name": "Fraud & Scam Gym",
-    "details": "AI generates personalized scam simulations (smishing, vishing, subscription traps, fake job offers) tuned to local patterns. Score-based training. Could run in NEXT workshops.",
-    "status": "idea",
-    "category": "education-tool",
-    "tags": ["fraud", "scam", "simulation", "training", "EBA-aligned"],
-    "importance": 6.5,
-    "risk": 4.5,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "AI-enabled fraud targeting youth", "details": "EBA explicitly flags subscription traps and AI-enabled scams. Education must include recognition training." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 5.0, "stakeholder": 8.0, "technical-jury": 7.5,
-      "coolness": 8.0, "innovation-ai": 7.0, "innovation-approach": 8.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 5.0, "privacy": 7.0, "banking-features": 6.0,
-      "banking-compliance": 7.0, "education": 9.0, "community": 8.0, "goodness": 9.0
-    }
-  },
-
-  "micro-life-simulator": {
-    "name": "Micro-Simulator for Life Choices",
-    "details": "'If I move out?' 'If I buy a car?' AI builds scenario model from real spending: best/base/worst probability bands. Makes uncertainty explicit, not just a single number.",
-    "status": "idea",
-    "category": "planning-tool",
-    "tags": ["simulator", "scenario", "Monte-Carlo", "life-decisions"],
-    "importance": 7.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 7.0,
-    "problems-solved": [
-      { "name": "Life decisions made blind", "details": "Moving out, buying a car — these are the biggest financial decisions for 18-30s. They currently decide by gut feeling." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 6.0, "stakeholder": 8.0, "technical-jury": 8.0,
-      "coolness": 8.0, "innovation-ai": 7.0, "innovation-approach": 8.5,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 8.0,
-      "innovation-efficiency": 6.0, "privacy": 6.0, "banking-features": 8.0,
-      "banking-compliance": 5.0, "education": 9.0, "community": 6.0, "goodness": 8.0
-    }
-  },
-
-  "chiedi-alla-banca": {
-    "name": "\"Chiedi alla Banca\" (Ask the Bank)",
-    "details": "AI front-end for BTM's actual product catalog. Natural-language queries about real bank offerings. Grounded in BTM's actual products, rates, and conditions.",
-    "status": "idea",
-    "category": "banking-integration",
-    "tags": ["product-catalog", "BTM", "chatbot", "lead-gen"],
-    "importance": 6.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Young adults don't understand bank products", "details": "What's a conto deposito? What savings account should I open? Natural language answers grounded in real offerings." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 4.0, "stakeholder": 10.0, "technical-jury": 4.0,
-      "coolness": 3.0, "innovation-ai": 4.0, "innovation-approach": 4.0,
-      "innovation-scalability": 7.0, "innovation-ha": 7.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 7.0, "privacy": 6.0, "banking-features": 10.0,
-      "banking-compliance": 6.0, "education": 7.0, "community": 5.0, "goodness": 6.0
-    }
-  },
-
-  "impulse-interceptor-72h": {
-    "name": "Impulse Interceptor (72-Hour AI Escrow)",
-    "details": "When user wants to buy something impulsively, AI proposes a 72-hour cooldown contract with personalized alternatives (swap, rent, buy used, wait for paycheck). Tracks outcomes.",
-    "status": "idea",
-    "category": "behavioral-intelligence",
-    "tags": ["impulse-control", "cooldown", "behavioral-nudge", "alternatives"],
-    "importance": 7.0,
-    "risk": 3.5,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 6.5,
-    "problems-solved": [
-      { "name": "Impulse buying is the #1 budget killer", "details": "The 72-hour rule is proven but nobody enforces it. AI makes it a structured commitment with alternatives." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 4.0, "stakeholder": 7.0, "technical-jury": 7.0,
-      "coolness": 7.5, "innovation-ai": 6.0, "innovation-approach": 8.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 6.0, "privacy": 6.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 8.0, "community": 5.0, "goodness": 8.5
-    }
-  },
-
-  "ai-explain-my-payslip": {
-    "name": "AI \"Explain My Payslip\"",
-    "details": "Parse payslips; explain net vs gross, each tax line (IRPEF, INPS, addizionale regionale), overtime, TFR. Creates a 'salary upgrade' action plan (deductions, bonus applications).",
-    "status": "partial",
-    "category": "education-tool",
-    "tags": ["payslip", "tax-education", "IRPEF", "INPS", "TFR"],
-    "importance": 7.5,
-    "risk": 3.0,
-    "estimated-effort": { "min": 3.0, "max": 6.0 },
-    "hackathon-advantage": 6.5,
-    "problems-solved": [
-      { "name": "Payslip incomprehension", "details": "Most young Italians can't read their own busta paga. They see the net number and ignore everything else." }
-    ],
-    "importance-by-pov": {
-      "users": 8.5, "dev": 4.0, "stakeholder": 8.0, "technical-jury": 6.0,
-      "coolness": 5.0, "innovation-ai": 5.0, "innovation-approach": 6.0,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 7.0, "privacy": 5.0, "banking-features": 7.0,
-      "banking-compliance": 6.0, "education": 9.5, "community": 5.0, "goodness": 8.0
-    }
-  },
-
-  "auto-sinking-funds": {
-    "name": "Auto Sinking Funds Engine",
-    "details": "AI identifies irregular annual/quarterly costs (insurance, car tax, holiday gifts, bollo auto) from transaction history and proposes a monthly micro-saving schedule to smooth them.",
-    "status": "idea",
-    "category": "planning-tool",
-    "tags": ["sinking-funds", "smoothing", "automation", "recurring-costs"],
-    "importance": 6.5,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 5.5,
-    "problems-solved": [
-      { "name": "Irregular expenses destroy budgets", "details": "Car insurance, annual subscriptions, holiday gifts — these 'surprises' break monthly budgets every time." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 5.0, "stakeholder": 7.0, "technical-jury": 6.0,
-      "coolness": 5.0, "innovation-ai": 6.0, "innovation-approach": 6.5,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 7.0, "privacy": 5.0, "banking-features": 7.0,
-      "banking-compliance": 4.0, "education": 7.0, "community": 4.0, "goodness": 7.0
-    }
-  },
-
-  "ask-advisor-prep": {
-    "name": "AI-Assisted \"Ask the Advisor\" Prep",
-    "details": "Before a branch appointment, AI generates a one-page briefing: user goals, constraints, key questions to ask, trade-offs to consider. Printable PDF. Amplifies BTM's relationship banking.",
-    "status": "idea",
-    "category": "banking-integration",
-    "tags": ["branch", "appointment", "relationship-banking", "PDF"],
-    "importance": 6.0,
-    "risk": 2.0,
-    "estimated-effort": { "min": 3.0, "max": 6.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Young adults intimidated by bank meetings", "details": "They don't know what to ask. AI prep makes the meeting productive for both parties." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 3.0, "stakeholder": 9.0, "technical-jury": 5.0,
-      "coolness": 4.0, "innovation-ai": 4.0, "innovation-approach": 7.0,
-      "innovation-scalability": 6.0, "innovation-ha": 6.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 7.0, "privacy": 6.0, "banking-features": 9.0,
-      "banking-compliance": 5.0, "education": 7.0, "community": 6.0, "goodness": 7.0
-    }
-  },
-
-  "financial-literacy-duolingo": {
-    "name": "Financial Literacy Duolingo with Your Own Data",
-    "details": "Short daily quizzes using the user's real spending: 'If your delivery spend stays at €X/month, what's the annual cost?' Personalized learning that sticks because it's about YOUR money.",
-    "status": "idea",
-    "category": "education-tool",
-    "tags": ["gamification", "quiz", "personalized-learning", "daily-habit"],
-    "importance": 7.0,
-    "risk": 5.0,
-    "estimated-effort": { "min": 10.0, "max": 16.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "Abstract financial education doesn't stick", "details": "Generic quiz: 'What is compound interest?' — boring. Personalized: 'Your €280/month delivery = €3,360/year. That's a vacation. True or false?' — memorable." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 6.0, "stakeholder": 8.0, "technical-jury": 7.0,
-      "coolness": 8.0, "innovation-ai": 7.0, "innovation-approach": 8.5,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 10.0, "community": 7.0, "goodness": 8.0
-    }
-  },
-
-  "streaming-sse-responses": {
-    "name": "Token-by-Token SSE Streaming",
-    "details": "Coach responses stream word-by-word via Server-Sent Events. Structured payloads (cards, verdict, A2UI) appear only when final. Graceful fallback to full-response if SSE breaks.",
-    "status": "implemented",
-    "category": "ux-polish",
-    "tags": ["streaming", "SSE", "perceived-performance", "UX"],
-    "importance": 6.5,
-    "risk": 3.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "5-15s LLM response feels like it's broken", "details": "Without streaming, the app looks frozen during LLM generation. Streaming gives immediate feedback." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 6.0, "stakeholder": 5.0, "technical-jury": 6.0,
-      "coolness": 5.0, "innovation-ai": 4.0, "innovation-approach": 5.0,
-      "innovation-scalability": 5.0, "innovation-ha": 6.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 7.0, "privacy": 5.0, "banking-features": 3.0,
-      "banking-compliance": 3.0, "education": 3.0, "community": 3.0, "goodness": 4.0
-    }
-  },
-
-  "pwa-standalone": {
-    "name": "PWA Standalone App (vite-plugin-pwa)",
-    "details": "Progressive Web App with standalone display mode, service worker, offline shell caching, proper icons, installable on mobile home screens.",
-    "status": "implemented",
-    "category": "distribution",
-    "tags": ["PWA", "mobile", "offline", "installable"],
-    "importance": 6.0,
-    "risk": 2.0,
-    "estimated-effort": { "min": 2.0, "max": 4.0 },
-    "hackathon-advantage": 5.5,
-    "problems-solved": [
-      { "name": "Web app feels like a website, not an app", "details": "PWA standalone removes browser chrome. Feels native on mobile." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 5.0, "stakeholder": 6.0, "technical-jury": 5.0,
-      "coolness": 5.0, "innovation-ai": 2.0, "innovation-approach": 4.0,
-      "innovation-scalability": 6.0, "innovation-ha": 6.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 6.0, "privacy": 5.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 3.0, "community": 4.0, "goodness": 4.0
-    }
-  },
-
-  "mobile-first-ui": {
-    "name": "Mobile-First UI Overhaul",
-    "details": "visualViewport keyboard handling, tables→cards on mobile, pull-to-refresh, 44px tap targets, profile tab grid, safe-area insets. Designed for 390px screens first.",
-    "status": "implemented",
-    "category": "ux-polish",
-    "tags": ["mobile", "responsive", "iOS", "Android", "accessibility"],
-    "importance": 7.0,
-    "risk": 4.0,
-    "estimated-effort": { "min": 12.0, "max": 18.0 },
-    "hackathon-advantage": 6.5,
-    "problems-solved": [
-      { "name": "App unusable on mobile", "details": "Tables overflow, keyboard covers input, tabs don't fit — target audience uses phones exclusively." }
-    ],
-    "importance-by-pov": {
-      "users": 9.0, "dev": 7.0, "stakeholder": 7.0, "technical-jury": 6.0,
-      "coolness": 4.0, "innovation-ai": 2.0, "innovation-approach": 5.0,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 6.0, "privacy": 4.0, "banking-features": 4.0,
-      "banking-compliance": 3.0, "education": 3.0, "community": 4.0, "goodness": 5.0
-    }
-  },
-
-  "about-page-transparency": {
-    "name": "Public About Page + Privacy Transparency",
-    "details": "Public /about explaining how it works, what data is stored, how AI is used, legal disclaimers. Written for 20-year-olds. No provider names. Strict Privacy Mode toggle in Settings.",
-    "status": "implemented",
-    "category": "trust-and-transparency",
-    "tags": ["transparency", "about-page", "GDPR", "privacy", "disclaimers"],
-    "importance": 6.5,
-    "risk": 1.5,
-    "estimated-effort": { "min": 3.0, "max": 5.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Users don't trust AI with their financial data", "details": "Radical transparency about what happens to their data builds trust. Judges want to see this." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 4.0, "stakeholder": 8.0, "technical-jury": 6.0,
-      "coolness": 3.0, "innovation-ai": 2.0, "innovation-approach": 5.0,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 4.0,
-      "innovation-efficiency": 4.0, "privacy": 9.0, "banking-features": 5.0,
-      "banking-compliance": 8.0, "education": 5.0, "community": 5.0, "goodness": 8.0
-    }
-  },
-
-  "community-podcast-generator": {
-    "name": "AI Community Financial Literacy Podcast",
-    "details": "AI takes a financial topic + NEXT community questions and generates a short audio episode with ElevenLabs voices. Weekly, distributed via BTM channels.",
-    "status": "idea",
-    "category": "content-generation",
-    "tags": ["podcast", "ElevenLabs", "community", "NEXT", "content"],
-    "importance": 5.5,
-    "risk": 4.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Content creation is expensive for a small bank", "details": "AI-generated audio content at near-zero marginal cost. NEXT community provides the questions." }
-    ],
-    "importance-by-pov": {
-      "users": 5.0, "dev": 4.0, "stakeholder": 7.0, "technical-jury": 6.0,
-      "coolness": 7.0, "innovation-ai": 6.0, "innovation-approach": 6.0,
-      "innovation-scalability": 7.0, "innovation-ha": 5.0, "innovation-flexibility": 6.0,
-      "innovation-efficiency": 8.0, "privacy": 7.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 7.0, "community": 9.0, "goodness": 6.0
-    }
-  },
-
-  "emotional-spending-detector": {
-    "name": "Emotional Spending Detector",
-    "details": "Uses time + merchant patterns to flag likely emotional spending (late-night purchases, post-payday sprees). Offers alternative actions (walk, delayed checkout). Tracks outcomes.",
-    "status": "idea",
-    "category": "behavioral-intelligence",
-    "tags": ["emotional", "behavioral", "pattern-detection", "nudge"],
-    "importance": 6.0,
-    "risk": 6.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Emotional spending is invisible", "details": "Users don't recognize their own patterns. 'You buy from Amazon at 11pm on Fridays' is a powerful mirror." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 5.0, "stakeholder": 6.0, "technical-jury": 7.0,
-      "coolness": 7.0, "innovation-ai": 7.0, "innovation-approach": 7.5,
-      "innovation-scalability": 5.0, "innovation-ha": 4.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 4.0, "banking-features": 4.0,
-      "banking-compliance": 4.0, "education": 7.0, "community": 4.0, "goodness": 7.0
-    }
-  },
-
-  "e2e-test-suite": {
-    "name": "Real Stack E2E Test Suite",
-    "details": "Playwright tests against real Docker Compose stack (no mocks). LLM stub server. Full user journey, tool call verification, error paths, mobile viewport. 22 tests across chromium + mobile.",
-    "status": "implemented",
-    "category": "quality",
-    "tags": ["testing", "E2E", "Playwright", "CI", "reliability"],
-    "importance": 7.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 12.0, "max": 18.0 },
-    "hackathon-advantage": 4.0,
-    "problems-solved": [
-      { "name": "Demo reliability", "details": "Zero integration tests = demo could fail from any untested seam. Real E2E catches what unit tests miss." }
-    ],
-    "importance-by-pov": {
-      "users": 4.0, "dev": 9.0, "stakeholder": 5.0, "technical-jury": 7.0,
-      "coolness": 3.0, "innovation-ai": 2.0, "innovation-approach": 5.0,
-      "innovation-scalability": 7.0, "innovation-ha": 8.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 6.0, "privacy": 4.0, "banking-features": 3.0,
-      "banking-compliance": 5.0, "education": 2.0, "community": 3.0, "goodness": 5.0
-    }
-  },
-
-  "user-goals-and-preferences": {
-    "name": "User Goals, Dos & Don'ts Preferences",
-    "details": "Users can set financial goals ('save for emergency fund'), dos ('always check price per kg'), and don'ts ('never buy BNPL'). Coach references these across sessions.",
-    "status": "implemented",
-    "category": "personalization",
-    "tags": ["goals", "preferences", "memory", "cross-session"],
-    "importance": 7.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 6.0,
-    "problems-solved": [
-      { "name": "Coach forgets your priorities", "details": "Without stored preferences, every session starts from zero context about what the user cares about." }
-    ],
-    "importance-by-pov": {
-      "users": 8.0, "dev": 5.0, "stakeholder": 6.0, "technical-jury": 6.0,
-      "coolness": 5.0, "innovation-ai": 6.0, "innovation-approach": 6.0,
-      "innovation-scalability": 5.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 6.0, "community": 4.0, "goodness": 6.0
-    }
-  },
-
-  "marp-real-rendering": {
-    "name": "MARP Real Slide Rendering",
-    "details": "@marp-team/marp-core replaces marked. Proper theme (senso), CSS var dark mode, fullscreen portal, 16:9 aspect ratio. Educational slides look professional.",
-    "status": "implemented",
-    "category": "ux-polish",
-    "tags": ["MARP", "slides", "presentation", "education", "rendering"],
-    "importance": 5.5,
-    "risk": 2.0,
-    "estimated-effort": { "min": 4.0, "max": 6.0 },
-    "hackathon-advantage": 4.5,
-    "problems-solved": [
-      { "name": "Educational slides looked broken", "details": "marked-based renderer didn't handle MARP directives. Slides looked like plain HTML instead of proper presentations." }
-    ],
-    "importance-by-pov": {
-      "users": 5.0, "dev": 5.0, "stakeholder": 4.0, "technical-jury": 4.0,
-      "coolness": 4.0, "innovation-ai": 2.0, "innovation-approach": 3.0,
-      "innovation-scalability": 4.0, "innovation-ha": 4.0, "innovation-flexibility": 4.0,
-      "innovation-efficiency": 4.0, "privacy": 3.0, "banking-features": 3.0,
-      "banking-compliance": 3.0, "education": 6.0, "community": 3.0, "goodness": 4.0
-    }
-  },
-
-  "tos-moderation-system": {
-    "name": "TOS Moderation with Progressive Enforcement",
-    "details": "LLM-based TOS check on user-submitted text (timeline context, merchant names). Progressive penalty: warning → 24h timeout → 7d → ban. Appeals via notifications. Admin moderation queue.",
-    "status": "implemented",
-    "category": "safety-and-compliance",
-    "tags": ["moderation", "TOS", "progressive-penalty", "appeals", "admin"],
-    "importance": 5.5,
-    "risk": 4.0,
-    "estimated-effort": { "min": 8.0, "max": 12.0 },
-    "hackathon-advantage": 3.5,
-    "problems-solved": [
-      { "name": "User-submitted content can be abusive", "details": "Free-text inputs need moderation. Progressive enforcement is fair while preventing abuse." }
-    ],
-    "importance-by-pov": {
-      "users": 4.0, "dev": 6.0, "stakeholder": 7.0, "technical-jury": 5.0,
-      "coolness": 3.0, "innovation-ai": 5.0, "innovation-approach": 5.0,
-      "innovation-scalability": 7.0, "innovation-ha": 6.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 4.0,
-      "banking-compliance": 7.0, "education": 2.0, "community": 6.0, "goodness": 6.0
-    }
-  },
-
-  "accessibility-hooks": {
-    "name": "Accessibility: Reduced Motion, High Contrast, Offline Detection",
-    "details": "6 hooks (useMediaQuery, useReducedMotion, useHighContrast, useOnlineStatus, useHapticFeedback, useLocaleFormat). CSS reduced-motion and high-contrast overrides. OfflineBanner. BalanceMask.",
-    "status": "implemented",
-    "category": "accessibility",
-    "tags": ["a11y", "reduced-motion", "high-contrast", "offline", "i18n"],
-    "importance": 6.0,
-    "risk": 1.5,
-    "estimated-effort": { "min": 4.0, "max": 8.0 },
-    "hackathon-advantage": 4.0,
-    "problems-solved": [
-      { "name": "Accessibility is table stakes", "details": "prefers-reduced-motion, high contrast, offline indicators — these are expected in any modern app." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 6.0, "stakeholder": 5.0, "technical-jury": 5.0,
-      "coolness": 3.0, "innovation-ai": 2.0, "innovation-approach": 4.0,
-      "innovation-scalability": 5.0, "innovation-ha": 6.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 4.0, "banking-features": 3.0,
-      "banking-compliance": 5.0, "education": 3.0, "community": 4.0, "goodness": 7.0
-    }
-  },
-
-  "local-deals-budget-alignment": {
-    "name": "Local Deals + Budget Alignment",
-    "details": "Partner with local merchants to recommend budget-compatible alternatives (affordable gym, local events) instead of expensive options. Ties into BTM's territorial mission.",
-    "status": "idea",
-    "category": "banking-integration",
-    "tags": ["local", "merchants", "BTM-territory", "partnerships"],
-    "importance": 5.5,
-    "risk": 5.0,
-    "estimated-effort": { "min": 8.0, "max": 14.0 },
-    "hackathon-advantage": 4.5,
-    "problems-solved": [
-      { "name": "Generic advice vs local context", "details": "BTM's strength is territorial presence. Recommending the local gym instead of a franchise subscription leverages this." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 4.0, "stakeholder": 9.0, "technical-jury": 5.0,
-      "coolness": 5.0, "innovation-ai": 4.0, "innovation-approach": 6.0,
-      "innovation-scalability": 4.0, "innovation-ha": 4.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 5.0, "privacy": 5.0, "banking-features": 8.0,
-      "banking-compliance": 4.0, "education": 5.0, "community": 8.0, "goodness": 7.0
-    }
-  },
-
-  "next-advisory-board-tool": {
-    "name": "NEXT Advisory Board Decision Support Tool",
-    "details": "Internal AI tool for BTM's young Advisory Board to evaluate project proposals. AI scores feasibility, cost, community impact, and alignment with BTM's mission.",
-    "status": "idea",
-    "category": "internal-tool",
-    "tags": ["internal", "advisory-board", "NEXT", "decision-support"],
-    "importance": 4.0,
-    "risk": 3.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 3.5,
-    "problems-solved": [
-      { "name": "Evidence-based youth governance", "details": "The Advisory Board needs data, not vibes. AI helps evaluate proposals with structured criteria." }
-    ],
-    "importance-by-pov": {
-      "users": 3.0, "dev": 4.0, "stakeholder": 8.0, "technical-jury": 4.0,
-      "coolness": 4.0, "innovation-ai": 5.0, "innovation-approach": 5.0,
-      "innovation-scalability": 4.0, "innovation-ha": 4.0, "innovation-flexibility": 5.0,
-      "innovation-efficiency": 6.0, "privacy": 5.0, "banking-features": 6.0,
-      "banking-compliance": 4.0, "education": 4.0, "community": 8.0, "goodness": 6.0
-    }
-  },
-
-  "ai-financial-diary": {
-    "name": "AI Financial Diary (Voice Check-in)",
-    "details": "Daily 30-second voice check-in: 'What did you spend today?' AI builds spending profile over time without bank integration. Privacy-first, low-friction.",
-    "status": "idea",
-    "category": "engagement",
-    "tags": ["diary", "voice", "low-friction", "privacy-first", "habit"],
-    "importance": 5.5,
-    "risk": 3.0,
-    "estimated-effort": { "min": 6.0, "max": 10.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Not everyone wants to upload bank data", "details": "Privacy-first alternative: build spending awareness through daily voice journaling, no bank connection required." }
-    ],
-    "importance-by-pov": {
-      "users": 6.0, "dev": 4.0, "stakeholder": 5.0, "technical-jury": 6.0,
-      "coolness": 6.0, "innovation-ai": 5.0, "innovation-approach": 6.0,
-      "innovation-scalability": 6.0, "innovation-ha": 5.0, "innovation-flexibility": 7.0,
-      "innovation-efficiency": 5.0, "privacy": 9.0, "banking-features": 3.0,
-      "banking-compliance": 5.0, "education": 6.0, "community": 4.0, "goodness": 6.0
-    }
-  },
-
-  "tabaccaio-digitale": {
-    "name": "\"Il Tabaccaio Digitale\" (WhatsApp/Telegram Bot)",
-    "details": "A WhatsApp/Telegram bot in local dialect that answers financial questions the way a trusted older neighbor would. Zero app install. Maximum accessibility.",
-    "status": "idea",
-    "category": "distribution",
-    "tags": ["WhatsApp", "Telegram", "bot", "accessibility", "no-install"],
-    "importance": 5.0,
-    "risk": 4.0,
-    "estimated-effort": { "min": 6.0, "max": 12.0 },
-    "hackathon-advantage": 5.0,
-    "problems-solved": [
-      { "name": "Not everyone downloads apps", "details": "WhatsApp is already on every Italian phone. Meeting users where they are = maximum reach." }
-    ],
-    "importance-by-pov": {
-      "users": 7.0, "dev": 4.0, "stakeholder": 7.0, "technical-jury": 5.0,
-      "coolness": 6.0, "innovation-ai": 4.0, "innovation-approach": 6.0,
-      "innovation-scalability": 7.0, "innovation-ha": 5.0, "innovation-flexibility": 8.0,
-      "innovation-efficiency": 7.0, "privacy": 4.0, "banking-features": 5.0,
-      "banking-compliance": 4.0, "education": 7.0, "community": 7.0, "goodness": 6.0
-    }
-  }
 }

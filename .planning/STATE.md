@@ -270,6 +270,12 @@ Recent decisions affecting current work:
 - Phase 13 added: Crypto Identity Foundation - asymmetric key pairs at signup, username generation, and PII encryption replacing obfuscated email
 - Phase 14 added: E2E Messaging Backend - undelivered_messages routing table, pull-on-login delivery, TTL purge, and zero-knowledge recipient hashing
 - Phase 15 added: E2E Messaging Frontend - client-side libsodium encrypt/decrypt, compose and inbox UI, attachment handling, and admin signed-message verification
+- Phase 24 added: Voice stack fix - STT/TTS e2e repair and ElevenLabs STT support with Web Speech API fallback
+- Phase 25 added: Mobile input UX - send button only, no enter submit on single-line inputs
+- Phase 26 added: Enriched coach messages rendering fix - backend response format null issue
+- Phase 27 added: Admin username enforcement
+- Phase 28 added: Auth token renewal flow fix - broken expiry handling
+- Phase 29 added: Profile sealed and unsealed data sections with goals/habits migration
 
 ### Design Decisions (2026-04-01 session)
 
