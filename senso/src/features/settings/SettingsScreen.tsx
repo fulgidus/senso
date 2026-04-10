@@ -14,6 +14,7 @@ import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
 import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
 import { useHapticFeedback } from "@/hooks/useHapticFeedback"
+import { useIsMobile } from "@/hooks/useIsMobile"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
 
 type ThemeOption = "light" | "dark" | "system"
@@ -25,10 +26,18 @@ const VOICE_GENDER_OPTIONS: { value: VoiceGender; labelKey: string }[] = [
     { value: "neutral", labelKey: "settings.voiceGenderNeutral" },
 ]
 
-function TagInput({ items, onChange, placeholder }: {
-    items: string[]; onChange: (v: string[]) => void; placeholder: string
+function TagInput({ items, onChange, placeholder, addButtonLabel }: {
+    items: string[]; onChange: (v: string[]) => void; placeholder: string; addButtonLabel: string
 }) {
     const [input, setInput] = useState("")
+    const isMobile = useIsMobile()
+    const addChip = () => {
+        const trimmed = input.trim()
+        if (trimmed && !items.includes(trimmed)) {
+            onChange([...items, trimmed])
+        }
+        setInput("")
+    }
     return (
         <div>
             <div className="flex flex-wrap gap-1 mb-1">
@@ -45,15 +54,24 @@ function TagInput({ items, onChange, placeholder }: {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={placeholder}
                 onKeyDown={(e) => {
-                    if (e.key === "Enter" && input.trim()) {
+                    // Desktop: Enter OR comma adds a chip
+                    // Mobile: comma auto-adds; Enter does nothing (Add button is the only path)
+                    if (e.key === "," || (!isMobile && e.key === "Enter")) {
                         e.preventDefault()
-                        if (!items.includes(input.trim())) {
-                            onChange([...items, input.trim()])
-                        }
-                        setInput("")
+                        addChip()
                     }
                 }}
             />
+            {isMobile && (
+                <button
+                    type="button"
+                    onClick={addChip}
+                    disabled={!input.trim()}
+                    className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-primary hover:bg-primary/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                    {addButtonLabel}
+                </button>
+            )}
         </div>
     )
 }
@@ -99,15 +117,15 @@ function PreferencesSection() {
             <div className="space-y-3">
                 <div>
                     <label className="text-sm font-medium text-muted-foreground">{t("preferences.goalsLabel")}</label>
-                    <TagInput items={goals} onChange={v => { setGoals(v); save(v, dos, donts) }} placeholder={t("preferences.goalsPlaceholder")} />
+                    <TagInput items={goals} onChange={v => { setGoals(v); save(v, dos, donts) }} placeholder={t("preferences.goalsPlaceholder")} addButtonLabel={t("preferences.addButton")} />
                 </div>
                 <div>
                     <label className="text-sm font-medium text-muted-foreground">{t("preferences.dosLabel")}</label>
-                    <TagInput items={dos} onChange={v => { setDos(v); save(goals, v, donts) }} placeholder={t("preferences.dosPlaceholder")} />
+                    <TagInput items={dos} onChange={v => { setDos(v); save(goals, v, donts) }} placeholder={t("preferences.dosPlaceholder")} addButtonLabel={t("preferences.addButton")} />
                 </div>
                 <div>
                     <label className="text-sm font-medium text-muted-foreground">{t("preferences.dontsLabel")}</label>
-                    <TagInput items={donts} onChange={v => { setDonts(v); save(goals, dos, v) }} placeholder={t("preferences.dontsPlaceholder")} />
+                    <TagInput items={donts} onChange={v => { setDonts(v); save(goals, dos, v) }} placeholder={t("preferences.dontsPlaceholder")} addButtonLabel={t("preferences.addButton")} />
                 </div>
                 <p className="text-xs text-muted-foreground">{t("preferences.addHint")}</p>
             </div>
