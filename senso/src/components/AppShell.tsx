@@ -6,6 +6,7 @@ import {
     FileText,
     Flag,
     Globe,
+    Info,
     LogOut,
     Mail,
     MapPin,
@@ -354,6 +355,11 @@ export function AppShell({ children }: AppShellProps) {
             to: "/learn",
             label: t("nav.learn"),
             icon: <BookOpen className="h-5 w-5" />,
+        },
+        {
+            to: "/about",
+            label: t("nav.about"),
+            icon: <Info className="h-5 w-5" />,
         },
     ];
 

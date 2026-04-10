@@ -844,7 +844,8 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
   const canAdvance = (): boolean => {
     switch (step) {
       case 0: return !!answers.employmentType
-      case 1: {
+      case 1: return !!answers.currency
+      case 2: {
         const sources = incomeSources
         if (sources.length === 0) return false
         return sources.every((s) => {
@@ -852,7 +853,6 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
           return (s.valueMin ?? 0) > 0
         })
       }
-      case 2: return !!answers.currency
       case 3: return true
       default: return true
     }
@@ -924,8 +924,29 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
           </div>
         )
 
-      // ── Step 1: Income sources ──────────────────────────────────────────
+      // ── Step 1: Currency ────────────────────────────────────────────────
       case 1:
+        return (
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-foreground">
+              {t("questionnaire.step2Title")}
+            </h2>
+            <select
+              value={currency}
+              onChange={(e) => setAnswer("currency", e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="EUR">EUR - Euro</option>
+              <option value="USD">USD - Dollaro americano</option>
+              <option value="GBP">GBP - Sterlina britannica</option>
+              <option value="CHF">CHF - Franco svizzero</option>
+              <option value="other">Altra valuta</option>
+            </select>
+          </div>
+        )
+
+      // ── Step 2: Income sources ──────────────────────────────────────────
+      case 2:
         return (
           <div>
             <h2 className="mb-1 text-xl font-semibold text-foreground">
@@ -966,27 +987,6 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
                 </span>
               </div>
             )}
-          </div>
-        )
-
-      // ── Step 2: Currency ────────────────────────────────────────────────
-      case 2:
-        return (
-          <div>
-            <h2 className="mb-4 text-xl font-semibold text-foreground">
-              {t("questionnaire.step2Title")}
-            </h2>
-            <select
-              value={currency}
-              onChange={(e) => setAnswer("currency", e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="EUR">EUR - Euro</option>
-              <option value="USD">USD - Dollaro americano</option>
-              <option value="GBP">GBP - Sterlina britannica</option>
-              <option value="CHF">CHF - Franco svizzero</option>
-              <option value="other">Altra valuta</option>
-            </select>
           </div>
         )
 

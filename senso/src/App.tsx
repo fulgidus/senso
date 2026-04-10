@@ -16,6 +16,7 @@ import { ModerationQueuePage } from "@/features/admin/ModerationQueuePage";
 import { readAccessToken } from "@/features/auth/storage";
 import type { User } from "@/features/auth/types";
 import { AboutPage } from "@/features/about/AboutPage";
+import { DeepAboutPage } from "@/features/about/DeepAboutPage";
 import { DebugScreen } from "@/features/debug/DebugScreen";
 import { SodiumProvider } from "@/providers/SodiumProvider";
 import { RecoveryPhraseInterstitial } from "@/features/messages/RecoveryPhraseInterstitial";
@@ -53,7 +54,7 @@ function LocationToast() {
     if (!toast) return null;
 
     return (
-        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-2">
             {toast}
         </div>
     );
@@ -116,7 +117,7 @@ function AppRoutes() {
     const location = useLocation();
 
     const isLearnRoute = location.pathname === "/learn" || location.pathname.startsWith("/learn/");
-    const isAboutRoute = location.pathname === "/about";
+    const isAboutRoute = location.pathname === "/about" || location.pathname.startsWith("/about/");
     const isLoginRoute = location.pathname === "/login";
 
     // ── State 1: Public /learn - no auth needed ──
@@ -139,6 +140,7 @@ function AppRoutes() {
                 <LocationToast />
                 <Routes>
                     <Route path="/about" element={<AboutPage />} />
+                    <Route path="/about/deep" element={<DeepAboutPage />} />
                     <Route path="*" element={<Navigate to="/about" replace />} />
                 </Routes>
             </PublicShell>
@@ -253,6 +255,7 @@ function AppRoutes() {
                         />
                     )}
                     <Route path="/about" element={<AboutPage />} />
+                    <Route path="/about/deep" element={<DeepAboutPage />} />
                     <Route
                         path="/messages"
                         element={

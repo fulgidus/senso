@@ -1717,7 +1717,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
             <div className="relative flex-1">
                 <div
                     ref={mergedListRef}
-                    className="h-full overflow-y-auto px-4 py-4 space-y-4 overscroll-contain"
+                    className="h-full overflow-y-auto px-4 py-4 space-y-4"
                     onScroll={updateStickiness}
                 >
                 {/* Pull-to-refresh visual indicator */}

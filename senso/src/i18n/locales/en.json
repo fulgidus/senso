@@ -548,7 +548,9 @@
     "safetyBody": "The coach does not provide investment advice, does not manage money, and does not know financial markets. It is an educator, not a broker.",
     "safetyRetention": "We ask AI providers not to use your data to train their models. Some providers guarantee this contractually.",
     "legalTitle": "Legal notice",
-    "legalBody": "S.E.N.S.O. is an educational tool. It does not provide professional financial, tax, or legal advice. Financial decisions are the sole responsibility of the user."
+    "legalBody": "S.E.N.S.O. is an educational tool. It does not provide professional financial, tax, or legal advice. Financial decisions are the sole responsibility of the user.",
+    "deepLinkTitle": "Want to know more?",
+    "deepLinkBody": "Architecture, security, privacy, and all the technical details"
   },
   "content": {
     "browseTitle": "Learn",
@@ -867,7 +869,7 @@
       "copyAll": "Copy all words",
       "copied": "Copied!",
       "downloadTxt": "Download as .txt",
-      "warning": "⚠ Without this phrase, you cannot recover your messages if you lose your password.",
+      "warning": "⚠ Without this phrase, you cannot recover your personal data if you lose your password.",
       "savedCheckbox": "I have saved my recovery phrase in a safe place.",
       "continueButton": "Continue"
     }
@@ -886,5 +888,36 @@
   "voice": {
     "recording": "Recording...",
     "holdToSpeak": "Hold to speak"
+  },
+  "aboutDeep": {
+    "backToAbout": "← Back to About",
+    "pageTitle": "S.E.N.S.O. — Technical Details",
+    "pageSubtitle": "Architecture, security, privacy, and innovative approaches",
+    "archTitle": "Architecture",
+    "archBody": "S.E.N.S.O. is a modern full-stack application with clear frontend/backend separation.",
+    "archFrontend": "Frontend: React 19 SPA with Vite, Tailwind CSS 4, PWA-ready",
+    "archBackend": "Backend: FastAPI (Python) for AI orchestration, ingestion, and coaching",
+    "archDatabase": "Database: PostgreSQL for relational data, user profiles, and sessions",
+    "archVector": "Storage: MinIO for uploaded documents, S3-compatible object storage",
+    "archVoice": "Voice: ElevenLabs TTS for speech synthesis, Web Speech API for recognition",
+    "aiTitle": "AI & Innovation",
+    "aiBody": "AI is the core of the experience, not an accessory. Every interaction is driven by language models.",
+    "aiCoaching": "AI financial coach with structured reasoning, affordability verdicts, and personalized suggestions",
+    "aiIngestion": "Document ingestion: automatic data extraction from bank statements, payslips, and other financial documents",
+    "aiSafety": "Safety guardrails: the coach never gives specific financial advice, only education and context",
+    "aiTools": "Tool calling: the coach can search educational content, compute metrics, and access user profiles",
+    "privacyTitle": "Privacy & Security",
+    "privacyBody": "Privacy is a design principle, not an afterthought.",
+    "privacyE2E": "End-to-end encryption: private messages encrypted with NaCl sealed box, readable only by the recipient",
+    "privacyMnemonic": "BIP-39 recovery phrase: 24 words to recover personal data if the password is lost",
+    "privacySealedBox": "NaCl sealed box: each message is encrypted with the recipient's public key — even the server cannot read it",
+    "privacyArgon2": "Argon2id: password-based key derivation with hardware-resistant anti-bruteforce protection",
+    "stackTitle": "Tech Stack",
+    "innovationTitle": "Innovative Approaches",
+    "innovVoiceFirst": "Voice-first: natural conversation with hold-to-talk, auto TTS, and post-reply auto-listen",
+    "innovSealed": "Sealed data: separation between server-accessible data and user-only-readable data",
+    "innovRAL": "RAL→Net calculator: automatic conversion from gross RAL to monthly net with CCNL, meal vouchers, and bonuses",
+    "innovA2UI": "A2UI (AI-to-UI): the coach generates interactive UI components (calculators, comparisons, charts) inline in chat",
+    "innovBM25": "Local BM25 search: the coach searches educational content without depending on external services"
   }
 }

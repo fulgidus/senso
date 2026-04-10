@@ -1,4 +1,4 @@
-import { FileUp, MessageSquare, Zap } from "lucide-react"
+import { FileUp, MessageSquare } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
@@ -7,14 +7,15 @@ type Props = {
   user: User
   onChooseFiles: () => void
   onChooseQuizThorough: () => void
-  onChooseQuizQuick: () => void
+  // onChooseQuizQuick temporarily disabled
+  onChooseQuizQuick?: () => void
   onSignOut?: () => Promise<void>
 }
 
 export function OnboardingChoiceScreen({
   onChooseFiles,
   onChooseQuizThorough,
-  onChooseQuizQuick,
+  // onChooseQuizQuick, // temporarily disabled
 }: Props) {
   const { t } = useTranslation()
 
@@ -25,7 +26,7 @@ export function OnboardingChoiceScreen({
           {t("onboarding.heading")}
         </h2>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {/* Option 1: From files */}
           <div className="rounded-2xl border-2 border-border bg-card p-6 hover:border-primary transition-colors">
             <div className="mb-3 flex justify-center">
@@ -58,7 +59,7 @@ export function OnboardingChoiceScreen({
             </Button>
           </div>
 
-          {/* Option 3: Quick questionnaire */}
+          {/* Option 3: Quick questionnaire - temporarily disabled
           <div className="rounded-2xl border-2 border-border bg-card p-6 hover:border-primary transition-colors">
             <div className="mb-3 flex justify-center">
               <Zap className="h-8 w-8 text-muted-foreground" />
@@ -77,6 +78,7 @@ export function OnboardingChoiceScreen({
               {t("onboarding.quizQuickCta")}
             </Button>
           </div>
+          */}
         </div>
       </div>
     </main>

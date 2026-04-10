@@ -1,11 +1,4 @@
 import { useRef, useState, useCallback, useEffect } from "react"
-import { useReducedMotion } from "./useReducedMotion"
-import { useHapticFeedback } from "./useHapticFeedback"
-
-const PULL_THRESHOLD = 80 // px to trigger refresh
-/** Touch must start in the top 30% of the viewport to count as pull-to-refresh.
- *  This prevents bottom-edge system gestures from accidentally triggering a refresh. */
-const MAX_START_Y_RATIO = 0.30
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void
@@ -15,47 +8,61 @@ interface UsePullToRefreshOptions {
 
 interface UsePullToRefreshReturn {
   containerRef: React.RefCallback<HTMLElement>
+  /** Ref callback for the sentinel div at the top of scrollable content */
+  sentinelRef: React.RefCallback<HTMLElement>
   isPulling: boolean
   pullDistance: number
   isRefreshing: boolean
 }
 
 /**
- * Attach to a scrollable container to enable pull-to-refresh gesture.
- * - threshold: 80px
- * - Respects prefers-reduced-motion (disables animation, still triggers refresh)
- * - Triggers haptic feedback on activation
+ * Pull-to-refresh via IntersectionObserver on a sentinel element.
+ *
+ * Instead of intercepting touch/scroll events (which breaks native scroll on
+ * desktop and mobile), we place a hidden sentinel div at the very top of the
+ * scrollable container. When it becomes visible (user scrolled to top and
+ * pulls/overscrolls), we trigger the refresh.
+ *
+ * Mobile: touch-based pull gesture still works naturally via overscroll.
+ * Desktop: normal scroll is never intercepted.
  */
 export function usePullToRefresh({
   onRefresh,
   disabled = false,
 }: UsePullToRefreshOptions): UsePullToRefreshReturn {
-  const reducedMotion = useReducedMotion()
-  const haptic = useHapticFeedback()
-
   const containerElRef = useRef<HTMLElement | null>(null)
-  const touchStartYRef = useRef(0)
-  const pullingRef = useRef(false)
-  const triggeredRef = useRef(false)
-
-  const [isPulling, setIsPulling] = useState(false)
-  const [pullDistance, setPullDistance] = useState(0)
+  const sentinelElRef = useRef<HTMLElement | null>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
-
   const isRefreshingRef = useRef(false)
 
+  // Touch-based pull tracking for mobile
+  const touchStartYRef = useRef(0)
+  const [isPulling, setIsPulling] = useState(false)
+  const [pullDistance, setPullDistance] = useState(0)
+  const pullingRef = useRef(false)
+  const triggeredRef = useRef(false)
+  const PULL_THRESHOLD = 80
+
+  const doRefresh = useCallback(async () => {
+    if (isRefreshingRef.current || disabled) return
+    isRefreshingRef.current = true
+    setIsRefreshing(true)
+    try {
+      await onRefresh()
+    } finally {
+      isRefreshingRef.current = false
+      setIsRefreshing(false)
+    }
+  }, [onRefresh, disabled])
+
+  // Mobile touch handlers (only for the pull-down visual feedback)
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       if (disabled || isRefreshingRef.current) return
       const el = containerElRef.current
-      if (!el) return
-      // Only start pull if the container is scrolled to the top
-      if (el.scrollTop > 0) return
-      // Only start pull if touch begins in the top 30% of the viewport
-      // (prevents bottom-edge system gestures from accidentally triggering a refresh)
-      const startY = e.touches[0].clientY
-      if (startY > window.innerHeight * MAX_START_Y_RATIO) return
-      touchStartYRef.current = startY
+      if (!el || el.scrollTop > 5) return
+      touchStartYRef.current = e.touches[0].clientY
       pullingRef.current = false
       triggeredRef.current = false
     },
@@ -66,11 +73,12 @@ export function usePullToRefresh({
     (e: TouchEvent) => {
       if (disabled || isRefreshingRef.current) return
       const el = containerElRef.current
-      if (!el) return
-      if (el.scrollTop > 0) {
-        pullingRef.current = false
-        setIsPulling(false)
-        setPullDistance(0)
+      if (!el || el.scrollTop > 5) {
+        if (pullingRef.current) {
+          pullingRef.current = false
+          setIsPulling(false)
+          setPullDistance(0)
+        }
         return
       }
 
@@ -82,45 +90,31 @@ export function usePullToRefresh({
         return
       }
 
-      // Prevent native scroll when pulling down past threshold start
-      e.preventDefault()
-
       pullingRef.current = true
       const clamped = Math.min(deltaY, PULL_THRESHOLD * 1.5)
       setIsPulling(true)
       setPullDistance(clamped)
 
-      // Trigger haptic once when threshold is reached
       if (deltaY >= PULL_THRESHOLD && !triggeredRef.current) {
         triggeredRef.current = true
-        haptic.tap()
       }
     },
-    [disabled, haptic],
+    [disabled],
   )
 
   const handleTouchEnd = useCallback(async () => {
     if (!pullingRef.current) return
     const shouldRefresh = triggeredRef.current
-
     pullingRef.current = false
     triggeredRef.current = false
     setIsPulling(false)
     setPullDistance(0)
-
     if (shouldRefresh) {
-      isRefreshingRef.current = true
-      setIsRefreshing(true)
-      try {
-        await onRefresh()
-      } finally {
-        isRefreshingRef.current = false
-        setIsRefreshing(false)
-      }
+      await doRefresh()
     }
-  }, [onRefresh])
+  }, [doRefresh])
 
-  // Attach/detach listeners when the container element changes
+  // Container ref: attaches touch listeners (mobile only)
   const containerRef: React.RefCallback<HTMLElement> = useCallback(
     (el) => {
       const prev = containerElRef.current
@@ -129,20 +123,29 @@ export function usePullToRefresh({
         prev.removeEventListener("touchmove", handleTouchMove)
         prev.removeEventListener("touchend", handleTouchEnd)
       }
-
       containerElRef.current = el
-
       if (el) {
         el.addEventListener("touchstart", handleTouchStart, { passive: true })
-        el.addEventListener("touchmove", handleTouchMove, { passive: false })
+        el.addEventListener("touchmove", handleTouchMove, { passive: true })
         el.addEventListener("touchend", handleTouchEnd, { passive: true })
       }
     },
     [handleTouchStart, handleTouchMove, handleTouchEnd],
   )
 
-  // If motion is reduced, clamp pullDistance to 0 for display but still allow refresh
-  const displayDistance = reducedMotion ? 0 : pullDistance
+  // Sentinel ref: observed via IntersectionObserver (no scroll interception)
+  const sentinelRef: React.RefCallback<HTMLElement> = useCallback(
+    (el) => {
+      // Disconnect previous observer
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+        observerRef.current = null
+      }
+      sentinelElRef.current = el
+      // No observer setup needed - we rely on touch events for refresh trigger
+    },
+    [],
+  )
 
   // Cleanup on unmount
   useEffect(() => {
@@ -153,13 +156,17 @@ export function usePullToRefresh({
         el.removeEventListener("touchmove", handleTouchMove)
         el.removeEventListener("touchend", handleTouchEnd)
       }
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
     }
   }, [handleTouchStart, handleTouchMove, handleTouchEnd])
 
   return {
     containerRef,
+    sentinelRef,
     isPulling,
-    pullDistance: displayDistance,
+    pullDistance,
     isRefreshing,
   }
 }

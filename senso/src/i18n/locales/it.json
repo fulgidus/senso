@@ -38,7 +38,7 @@
     "languageMenuLabel": "Seleziona lingua",
     "languageCode": "it",
     "languageFullName": "Italiano",
-    "about": "Informazioni",
+    "about": "Info",
     "messages": "Messaggi"
   },
   "avatar": {
@@ -548,7 +548,9 @@
     "safetyBody": "Il coach non fornisce consigli di investimento, non gestisce denaro e non conosce i mercati finanziari. È un educatore, non un broker.",
     "safetyRetention": "Chiediamo ai fornitori AI di non usare i tuoi dati per addestrare i propri modelli. Alcuni fornitori lo garantiscono contrattualmente.",
     "legalTitle": "Avviso legale",
-    "legalBody": "S.E.N.S.O. è uno strumento educativo. Non fornisce consulenza finanziaria professionale, fiscale o legale. Le decisioni finanziarie sono di esclusiva responsabilità dell'utente."
+    "legalBody": "S.E.N.S.O. è uno strumento educativo. Non fornisce consulenza finanziaria professionale, fiscale o legale. Le decisioni finanziarie sono di esclusiva responsabilità dell'utente.",
+    "deepLinkTitle": "Vuoi saperne di più?",
+    "deepLinkBody": "Architettura, sicurezza, privacy e tutti i dettagli tecnici"
   },
   "content": {
     "browseTitle": "Impara",
@@ -867,7 +869,7 @@
       "copyAll": "Copia tutte le parole",
       "copied": "Copiate!",
       "downloadTxt": "Scarica come .txt",
-      "warning": "⚠ Senza questa frase, non potrai recuperare i tuoi messaggi in caso di perdita della password.",
+      "warning": "⚠ Senza questa frase, non potrai recuperare i tuoi dati personali in caso di perdita della password.",
       "savedCheckbox": "Ho salvato la mia frase di recupero in un luogo sicuro.",
       "continueButton": "Continua"
     }
@@ -886,5 +888,36 @@
   "voice": {
     "recording": "Registrazione...",
     "holdToSpeak": "Tieni premuto per parlare"
+  },
+  "aboutDeep": {
+    "backToAbout": "← Torna a Info",
+    "pageTitle": "S.E.N.S.O. — Dettagli tecnici",
+    "pageSubtitle": "Architettura, sicurezza, privacy e approcci innovativi",
+    "archTitle": "Architettura",
+    "archBody": "S.E.N.S.O. è un'applicazione full-stack moderna con separazione tra frontend e backend.",
+    "archFrontend": "Frontend: React 19 SPA con Vite, Tailwind CSS 4, PWA-ready",
+    "archBackend": "Backend: FastAPI (Python) per orchestrazione AI, ingestion e coaching",
+    "archDatabase": "Database: PostgreSQL per dati relazionali, profili utente e sessioni",
+    "archVector": "Storage: MinIO per documenti caricati, storage oggetti S3-compatibile",
+    "archVoice": "Voice: ElevenLabs TTS per sintesi vocale, Web Speech API per riconoscimento",
+    "aiTitle": "AI e Innovazione",
+    "aiBody": "L'AI è il cuore dell'esperienza, non un accessorio. Ogni interazione è guidata da modelli linguistici.",
+    "aiCoaching": "Coach finanziario AI con ragionamento strutturato, verdetto di accessibilità e suggerimenti personalizzati",
+    "aiIngestion": "Ingestion documenti: estrazione automatica di dati da estratti conto, buste paga e altri documenti finanziari",
+    "aiSafety": "Guardrail di sicurezza: il coach non fornisce mai consigli finanziari specifici, ma educazione e contesto",
+    "aiTools": "Tool calling: il coach può cercare contenuti educativi, calcolare metriche e accedere al profilo utente",
+    "privacyTitle": "Privacy e Sicurezza",
+    "privacyBody": "La privacy è un principio di design fondamentale, non un'aggiunta successiva.",
+    "privacyE2E": "Crittografia end-to-end: i messaggi privati sono cifrati con NaCl sealed box, leggibili solo dal destinatario",
+    "privacyMnemonic": "Frase di recupero BIP-39: 24 parole per recuperare i dati personali in caso di perdita della password",
+    "privacySealedBox": "Sealed box NaCl: ogni messaggio è cifrato con la chiave pubblica del destinatario — nemmeno il server può leggerlo",
+    "privacyArgon2": "Argon2id: derivazione chiave dalla password con protezione anti-bruteforce hardware-resistant",
+    "stackTitle": "Stack Tecnologico",
+    "innovationTitle": "Approcci Innovativi",
+    "innovVoiceFirst": "Voice-first: conversazione naturale con hold-to-talk, TTS automatico e auto-listen post-risposta",
+    "innovSealed": "Dati sigillati: separazione tra dati accessibili dal server e dati leggibili solo dall'utente",
+    "innovRAL": "Calcolatore RAL→Netto: conversione automatica da RAL lordo a netto mensile con CCNL, buoni pasto e bonus",
+    "innovA2UI": "A2UI (AI-to-UI): il coach genera componenti UI interattivi (calcolatori, confronti, grafici) inline nel chat",
+    "innovBM25": "Ricerca BM25 locale: il coach cerca contenuti educativi senza dipendere da servizi esterni"
   }
 }
