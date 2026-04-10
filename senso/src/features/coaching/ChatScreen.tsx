@@ -845,7 +845,8 @@ function ConversationsModal({
                                             value={editValue}
                                             onChange={(e) => setEditValue(e.target.value)}
                                             onKeyDown={(e) => {
-                                                if (e.key === "Enter") void commitRename(s.id)
+                                                // On mobile: no Enter-submit; user blurs/taps away to commit.
+                                                if (!isMobile && e.key === "Enter") void commitRename(s.id)
                                                 if (e.key === "Escape") setEditingId(null)
                                             }}
                                             className="flex-1 text-sm border border-input rounded px-2 py-1 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
