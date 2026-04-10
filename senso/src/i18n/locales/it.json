@@ -917,8 +917,22 @@
     "innovationTitle": "Approcci Innovativi",
     "innovVoiceFirst": "Voice-first: conversazione naturale con hold-to-talk, TTS automatico e auto-listen post-risposta",
     "innovSealed": "Dati sigillati: separazione tra dati accessibili dal server e dati leggibili solo dall'utente",
-    "innovRAL": "Calcolatore RAL→Netto: conversione automatica da RAL lordo a netto mensile con CCNL, buoni pasto e bonus",
+    "innovRAL": "Calcolatore RAL\u2192Netto: conversione automatica da RAL lordo a netto mensile con CCNL, buoni pasto e bonus",
     "innovA2UI": "A2UI (AI-to-UI): il coach genera componenti UI interattivi (calcolatori, confronti, grafici) inline nel chat",
     "innovBM25": "Ricerca BM25 locale: il coach cerca contenuti educativi senza dipendere da servizi esterni"
+  },
+  "adminHandleGate": {
+    "dialogLabel": "Imposta handle admin",
+    "title": "Scegli il tuo handle admin",
+    "description": "Devi impostare il tuo !handle prima di continuare. Sar\u00e0 visibile agli utenti nei messaggi ufficiali.",
+    "inputLabel": "Handle admin (senza !)",
+    "inputPlaceholder": "mio-handle",
+    "formatHint": "Solo lettere minuscole, numeri e trattini. Da 3 a 30 caratteri.",
+    "cta": "Salva handle",
+    "saving": "Salvataggio\u2026",
+    "errorReserved": "Questo handle \u00e8 riservato. Scegline un altro.",
+    "errorTaken": "Handle gi\u00e0 in uso. Scegline un altro.",
+    "errorFallback": "Impossibile salvare l'handle. Riprova.",
+    "charCount": "{{count}}/30"
   }
 }
