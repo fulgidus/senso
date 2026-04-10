@@ -389,15 +389,16 @@ Plans:
 - [x] 25-01-PLAN.md - useIsMobile hook + ChatScreen handleKeyDown + session rename input
 - [x] 25-02-PLAN.md - ProfileSetupScreen + SettingsScreen TagInput (comma + Add button) + i18n + build
 
-### Phase 26: Enriched coach messages rendering fix - backend response format null issue
+### Phase 26: Enriched coach messages rendering fix - backend response format null issue ✓ Complete (2026-04-10)
 
 **Goal:** Fix null content_cards/interactive_cards crashing the frontend. Backend: replace setdefault() with explicit null coercion in _repair_response(); add content_cards and interactive_cards to schema required[]. Frontend: defensive null guards in AssistantBubble and parseStoredMessage.
 **Requirements**: D-01 through D-07 (see 26-CONTEXT.md)
 **Depends on:** Phase 25
-**Plans:** 0 plans
+**Plans:** 2/2 complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 26 to break down)
+- [x] 26-01-PLAN.md - Backend null coercion and schema required fields
+- [x] 26-02-PLAN.md - Frontend defensive null guards in AssistantBubble and parseStoredMessage
 
 ### Phase 27: Admin username enforcement
 
