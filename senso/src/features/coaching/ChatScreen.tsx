@@ -707,12 +707,12 @@ function AssistantBubble({
                         )}
 
                         {/* 5. Content cards (horizontal strip) */}
-                        {resp.content_cards.length > 0 && (
+                        {(resp.content_cards ?? []).length > 0 && (
                             <ContentCardStrip cards={resp.content_cards} />
                         )}
 
                         {/* 6. Interactive cards (reminder) */}
-                        {resp.interactive_cards.length > 0 && (
+                        {(resp.interactive_cards ?? []).length > 0 && (
                             <div className="mt-2 flex flex-col gap-2">
                                 {resp.interactive_cards.map((c, i) => (
                                     <InteractiveCardComponent key={i} card={c} />
@@ -919,6 +919,8 @@ function parseStoredMessage(m: SessionMessage): DisplayMessage {
     if (m.role === "assistant") {
         try {
             const parsed = JSON.parse(m.content) as CoachingResponse & { message?: string }
+            parsed.content_cards ??= []
+            parsed.interactive_cards ??= []
             return {
                 role: "assistant",
                 content: parsed.message ?? m.content,
