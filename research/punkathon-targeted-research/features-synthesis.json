@@ -670,7 +670,7 @@
     },
     "primo-stipendio-simulator": {
         "name": "\"Primo Stipendio\" (First Paycheck) Simulator",
-        "details": "Interactive simulator for students/clear workers: input expected salary, AI explains gross vs net, IRPEF, INPS, TFR, and walks through setting up a budget. Workshop-ready tool for NEXT events.",
+        "details": "Interactive simulator for students/new workers: input expected salary, AI explains gross vs net, IRPEF, INPS, TFR, and walks through setting up a budget. Workshop-ready tool for NEXT events.",
         "status": "idea",
         "category": "education-tool",
         "tags": [

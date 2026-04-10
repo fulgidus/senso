@@ -245,7 +245,7 @@ test.describe("Smoke - Admin content page", () => {
         ).not.toBeVisible()
 
         // Click New content
-        await page.getByRole("button", { name: /clear content/i }).click()
+        await page.getByRole("button", { name: /newcontent/i }).click()
 
         // Form heading should appear
         await expect(
