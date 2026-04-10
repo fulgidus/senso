@@ -23,6 +23,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { getNotifications } from "@/api/notificationsApi";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PageTransition } from "@/components/PageTransition";
+import { AdminHandleGateModal } from "@/components/AdminHandleGateModal";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useAuthContext } from "@/features/auth/AuthContext";
 import { NotificationPanel } from "@/features/notifications/NotificationPanel";
@@ -297,7 +298,7 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-    const { user, signOut, pendingMessageCount } = useAuthContext();
+    const { user, signOut, pendingMessageCount, updateUser } = useAuthContext();
     const { t } = useTranslation();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons);
@@ -396,6 +397,15 @@ export function AppShell({ children }: AppShellProps) {
     const hamburgerClass = topbarButtons
         ? "flex md:hidden shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         : "flex shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors";
+
+    // ── Phase 27: Admin handle gate ────────────────────────────────────────
+    if (user && user.isAdmin && !user.adminHandle) {
+        return (
+            <AdminHandleGateModal
+                onSaved={(handle) => updateUser({ adminHandle: handle })}
+            />
+        );
+    }
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
