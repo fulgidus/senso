@@ -37,7 +37,7 @@ from app.db.nacl_crypto import (
 )
 from app.personas.loader import _load_config
 from app.schemas.auth import AuthResponseDTO, AuthTokensDTO, UpdateMeRequest, UserDTO
-from app.services.username_generator import generate_username, generate_admin_username
+from app.services.username_generator import generate_username
 
 
 _DEFAULT_PERSONA_ID = "mentore-saggio"
@@ -110,7 +110,7 @@ class AuthService:
         user.pbkdf2_salt = salt_b64
         # ── Phase 13: Crypto identity ──────────────────────────────────────
         user.username = (
-            generate_admin_username() if is_admin else generate_username(self.db)
+            generate_username(self.db)
         )
         nacl_salt = os.urandom(32)
         nacl_master_key = generate_nacl_master_key()
