@@ -40,6 +40,8 @@ export interface UseVoiceModeResult {
     isSttAvailable: boolean
     /** STT error string or null */
     sttError: string | null
+    /** Raw error code from STT — use to classify hard vs soft errors */
+    sttErrorCode: string | null
     /** TTS is generating audio */
     isGenerating: boolean
     /** TTS is playing audio */
@@ -76,7 +78,7 @@ export function useVoiceMode({
 
     // ── STT ──────────────────────────────────────────────────────────────────
 
-    const { isAvailable: isSttAvailable, isRecording, transcript, error: sttError, startRecording, stopRecording } =
+    const { isAvailable: isSttAvailable, isRecording, transcript, error: sttError, errorCode: sttErrorCode, startRecording, stopRecording } =
         useVoiceInput({
             locale,
             onFinalTranscript: (text) => {
@@ -196,6 +198,7 @@ export function useVoiceMode({
         transcript,
         isSttAvailable,
         sttError,
+        sttErrorCode,
         isGenerating,
         isPlaying,
         isAutoListening,

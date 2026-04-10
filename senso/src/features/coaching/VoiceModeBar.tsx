@@ -20,6 +20,8 @@ interface VoiceModeBarProps {
     isAutoListening: boolean
     transcript: string
     isSttAvailable: boolean
+    /** Soft/transient STT error text to display inline (hard errors shown via toast by ChatScreen) */
+    sttError?: string | null
     onMicPointerDown: (e: React.PointerEvent) => void
     onMicPointerUp: (e: React.PointerEvent) => void
     onStopTTS: () => void
@@ -34,6 +36,7 @@ export function VoiceModeBar({
     isAutoListening,
     transcript,
     isSttAvailable,
+    sttError = null,
     onMicPointerDown,
     onMicPointerUp,
     onStopTTS,
@@ -50,6 +53,7 @@ export function VoiceModeBar({
     else if (isGenerating) statusText = t("coaching.ttsGenerating")
     else if (isPlaying) statusText = t("coaching.ttsPlaying")
     else if (isAutoListening) statusText = t("coaching.voiceModeAutoListen")
+    else if (sttError) statusText = sttError
 
     return (
         <div className="flex flex-col items-center gap-3 py-2">
@@ -57,7 +61,11 @@ export function VoiceModeBar({
             <p
                 className={[
                     "text-sm text-center min-h-[1.25rem] px-4 transition-colors",
-                    isRecording ? "text-red-500 font-medium" : "text-muted-foreground",
+                    isRecording
+                        ? "text-red-500 font-medium"
+                        : sttError
+                            ? "text-red-400"
+                            : "text-muted-foreground",
                 ].join(" ")}
             >
                 {statusText}

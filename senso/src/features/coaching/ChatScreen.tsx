@@ -39,6 +39,10 @@ import { useVoiceMode } from "./useVoiceMode"
 import { VoiceModeBar } from "./VoiceModeBar"
 import { MarpSlideViewer } from "./MarpSlideViewer"
 
+// Hard STT error codes that should trigger a toast instead of inline display in VoiceModeBar.
+// "not-allowed": mic permission denied — user must fix in browser settings
+// "stt_unavailable": backend STT service down — transient but not recoverable by retrying immediately
+const STT_HARD_ERROR_CODES = new Set(["not-allowed", "stt_unavailable"])
 
 interface ChatScreenProps {
     onNavigateBack: () => void
@@ -1621,6 +1625,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         transcript,
         isSttAvailable,
         sttError,
+        sttErrorCode,
         isGenerating: voiceIsGenerating,
         isPlaying: voiceIsPlaying,
         isAutoListening,
@@ -1650,12 +1655,17 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         () => sessionStorage.getItem("senso:ttsNoticeDismissed") === "true"
     )
     useEffect(() => {
-        if (sttError) {
+        if (!sttError) return
+        if (isVoiceMode && sttErrorCode && STT_HARD_ERROR_CODES.has(sttErrorCode)) {
+            // Hard error during voice mode: surface as a toast
+            showRestoreToast(sttError)
+        } else {
+            // Soft error (any mode) or hard error outside voice mode: inline with auto-dismiss
             setSttErrorVisible(true)
             const timer = setTimeout(() => setSttErrorVisible(false), 4000)
             return () => clearTimeout(timer)
         }
-    }, [sttError])
+    }, [sttError, sttErrorCode, isVoiceMode, showRestoreToast])
 
     // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -1851,6 +1861,11 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                         isAutoListening={isAutoListening}
                         transcript={transcript}
                         isSttAvailable={isSttAvailable}
+                        sttError={
+                            sttError && sttErrorCode && !STT_HARD_ERROR_CODES.has(sttErrorCode)
+                                ? sttError
+                                : null
+                        }
                         onMicPointerDown={onMicPointerDown}
                         onMicPointerUp={onMicPointerUp}
                         onStopTTS={stopTTS}

@@ -142,7 +142,7 @@ def test_get_voice_id_named_persona_locale_match():
     from app.personas.loader import get_voice_id
 
     voice_id = get_voice_id("mentore-saggio", "it", "masculine")
-    assert voice_id == "o4b57JYAECRMJyCEXyIE"
+    assert voice_id == "NOpBlnGInO9m6vDvFkFC"
 
 
 def test_get_voice_id_named_persona_locale_match_feminine():
@@ -150,7 +150,7 @@ def test_get_voice_id_named_persona_locale_match_feminine():
     from app.personas.loader import get_voice_id
 
     voice_id = get_voice_id("mentore-saggio", "it", "feminine")
-    assert voice_id == "8KInRSd4DtD5L5gK7itu"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_named_persona_locale_match_neutral():
@@ -158,7 +158,7 @@ def test_get_voice_id_named_persona_locale_match_neutral():
     from app.personas.loader import get_voice_id
 
     voice_id = get_voice_id("mentore-saggio", "it", "neutral")
-    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_falls_back_to_default_for_unknown_persona():
@@ -167,7 +167,7 @@ def test_get_voice_id_falls_back_to_default_for_unknown_persona():
 
     voice_id = get_voice_id("nonexistent-persona", "it", "neutral")
     # defaultPersonaSettings.voiceIds.any.neutral
-    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_falls_back_to_default_for_persona_without_voice_ids():
@@ -176,7 +176,7 @@ def test_get_voice_id_falls_back_to_default_for_persona_without_voice_ids():
 
     voice_id = get_voice_id("amico-sarcastico", "it", "neutral")
     # falls through to defaultPersonaSettings.voiceIds.any.neutral
-    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_locale_fallback_to_any():
@@ -185,7 +185,7 @@ def test_get_voice_id_locale_fallback_to_any():
 
     voice_id = get_voice_id("mentore-saggio", "en", "neutral")
     # No "en" bucket in mentore-saggio, no "en" in default → falls to "any" neutral
-    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_gender_fallback_to_neutral():
@@ -193,7 +193,7 @@ def test_get_voice_id_gender_fallback_to_neutral():
     from app.personas.loader import get_voice_id
 
     voice_id = get_voice_id("mentore-saggio", "it", "unknown-gender")
-    assert voice_id == "9rJyhPcU6dKFmhVRrfA9"
+    assert voice_id == "OYTbf65OHHFELVut7v2H"
 
 
 def test_get_voice_id_none_persona_uses_default():
@@ -202,7 +202,7 @@ def test_get_voice_id_none_persona_uses_default():
 
     voice_id = get_voice_id(None, "it", "masculine")
     # default has "any" bucket only → masculine
-    assert voice_id == "o4b57JYAECRMJyCEXyIE"
+    assert voice_id == "NOpBlnGInO9m6vDvFkFC"
 
 
 # ── Integration tests: POST /coaching/tts endpoint ────────────────────────────

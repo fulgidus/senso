@@ -333,3 +333,98 @@ def test_whisper_stt_returns_502_on_api_failure(client):
 
     assert resp.status_code == 502
     assert resp.json()["detail"]["code"] == "stt_failed"
+
+
+# ── D-09: stt_provider default ────────────────────────────────────────────────
+
+
+def test_stt_provider_default_is_elevenlabs(monkeypatch):
+    """get_settings().stt_provider == 'elevenlabs' when STT_PROVIDER env var is absent.
+
+    Regression guard: ensures the default is never silently changed to "openai"
+    which would require LLM_OPENAI_API_KEY instead of the shared ELEVENLABS_API_KEY.
+    """
+    monkeypatch.delenv("STT_PROVIDER", raising=False)
+    from app.core.config import get_settings  # re-import to call get_settings fresh
+
+    settings = get_settings()
+    assert settings.stt_provider == "elevenlabs"
+
+
+# ── D-11 regressions ──────────────────────────────────────────────────────────
+
+
+def test_chromium_audio_contention_regression_webm_accepted(client):
+    """Regression: POST /coaching/stt accepts audio/webm (Chrome MediaRecorder format).
+
+    Context: The Chromium hold-to-speak bug was caused by the frontend holding a live
+    MediaStream while SpeechRecognition was active (audio device contention). After that
+    fix, the frontend sends MediaRecorder audio (webm) to the server-side STT endpoint.
+    This test guards that the backend never regresses to rejecting webm MIME type.
+    See: .planning/debug/stt-hold-to-speak-chromium-no-audio.md
+    """
+    token = _register_and_login(client, "stt-webm-regression@example.com")
+
+    mock_result = MagicMock()
+    mock_result.text = "Quanto posso spendere?"
+
+    settings_obj = _settings_with(
+        stt_provider="elevenlabs", elevenlabs_api_key="el-key"
+    )
+    app.dependency_overrides[get_settings] = _dep_override(settings_obj)
+    try:
+        with patch("elevenlabs.ElevenLabs") as mock_el_cls:
+            mock_el_client = MagicMock()
+            mock_el_client.speech_to_text.convert.return_value = mock_result
+            mock_el_cls.return_value = mock_el_client
+
+            resp = client.post(
+                "/coaching/stt",
+                files={
+                    "audio": ("audio.webm", io.BytesIO(b"fake-webm-audio"), "audio/webm")
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert resp.status_code == 200
+    assert resp.json()["text"] == "Quanto posso spendere?"
+
+
+def test_media_recorder_server_side_stt_path_ogg(client):
+    """Regression: POST /coaching/stt accepts audio/ogg (Firefox/LibreWolf MediaRecorder format).
+
+    Context: The server-side Whisper/ElevenLabs STT fallback was added for browsers
+    (LibreWolf, Firefox) that block Web Speech API. MediaRecorder in Firefox produces
+    audio/ogg. This test guards that the backend STT endpoint handles both webm (Chrome)
+    and ogg (Firefox) without format-based 400 errors.
+    See: .planning/debug/stt-server-side-whisper.md
+    """
+    token = _register_and_login(client, "stt-ogg-regression@example.com")
+
+    mock_result = MagicMock()
+    mock_result.text = "Voglio comprare una macchina"
+
+    settings_obj = _settings_with(
+        stt_provider="elevenlabs", elevenlabs_api_key="el-key"
+    )
+    app.dependency_overrides[get_settings] = _dep_override(settings_obj)
+    try:
+        with patch("elevenlabs.ElevenLabs") as mock_el_cls:
+            mock_el_client = MagicMock()
+            mock_el_client.speech_to_text.convert.return_value = mock_result
+            mock_el_cls.return_value = mock_el_client
+
+            resp = client.post(
+                "/coaching/stt",
+                files={
+                    "audio": ("audio.ogg", io.BytesIO(b"fake-ogg-audio"), "audio/ogg")
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert resp.status_code == 200
+    assert resp.json()["text"] == "Voglio comprare una macchina"

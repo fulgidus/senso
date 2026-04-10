@@ -29,6 +29,7 @@ interface UseVoiceInputResult {
     isRecording: boolean
     transcript: string
     error: string | null
+    errorCode: string | null   // raw code: "not-allowed", "network", "no-speech", "stt_unavailable", "stt_empty_audio", "stt_failed", etc.
     startRecording: () => void
     stopRecording: () => void
 }
@@ -138,6 +139,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
     const [isRecording, setIsRecording] = useState(false)
     const [transcript, setTranscript] = useState("")
     const [error, setError] = useState<string | null>(null)
+    const [errorCode, setErrorCode] = useState<string | null>(null)
 
     // Web Speech API refs
     const recognitionRef = useRef<ISpeechRecognition | null>(null)
@@ -168,6 +170,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
         const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition
         if (!SR) return
         setError(null)
+        setErrorCode(null)
         setTranscript("")
         finalTranscriptRef.current = ""
 
@@ -213,6 +216,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
             }
             const msg = errorMessages[event.error] ?? `Errore vocale: ${event.error}`
             if (msg) setError(msg)
+            setErrorCode(event.error)   // always set code regardless of whether msg is empty
         }
 
         recognitionRef.current = recognition
@@ -234,6 +238,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
         if (isTranscribingRef.current) return  // Don't start a new recording while transcribing
 
         setError(null)
+        setErrorCode(null)
         setTranscript("")
         chunksRef.current = []
 
@@ -286,6 +291,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
                                 "stt_failed": "Trascrizione fallita. Riprova.",
                             }
                             setError(errorMessages[err.message] ?? "Errore durante la trascrizione.")
+                            setErrorCode(err.message)   // err.message is the raw code
                         })
                 }
 
@@ -295,6 +301,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
             })
             .catch(() => {
                 setError("Accesso al microfono negato. Controlla le impostazioni del browser.")
+                setErrorCode("not-allowed")
             })
     }, [locale])
 
@@ -326,6 +333,7 @@ export function useVoiceInput({ locale = "it", onFinalTranscript }: UseVoiceInpu
         isRecording,
         transcript,
         error,
+        errorCode,
         startRecording,
         stopRecording,
     }
