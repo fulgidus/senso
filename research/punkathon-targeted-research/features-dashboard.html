@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.E.N.S.O. Feature Synthesis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0e13;
+  --bg2: #12151c;
+  --bg3: #1a1e28;
+  --bg4: #222733;
+  --border: #2a2f3d;
+  --border2: #3a4055;
+  --fg: #e8eaf0;
+  --fg2: #9ba1b4;
+  --fg3: #6b7186;
+  --accent: #5b8af5;
+  --accent2: #7c5bf5;
+  --accent-glow: rgba(91,138,245,0.15);
+  --green: #3dd68c;
+  --amber: #f5b95b;
+  --red: #f55b6a;
+  --cyan: #5bd6f5;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: var(--bg); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ─── Header ─── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(12,14,19,0.85);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex; align-items: center; gap: 24px;
+}
+header h1 {
+  font-family: var(--serif);
+  font-size: 24px; font-weight: 400;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+header h1 em { font-style: italic; color: var(--accent); }
+.header-stats {
+  display: flex; gap: 20px; margin-left: auto; font-size: 12px;
+  color: var(--fg2); font-family: var(--mono);
+}
+.header-stats span { white-space: nowrap; }
+.header-stats .val { color: var(--fg); font-weight: 500; }
+
+/* ─── Controls bar ─── */
+.controls {
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  background: var(--bg2);
+}
+.search-box {
+  flex: 1; min-width: 200px; max-width: 360px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 14px;
+  color: var(--fg); font-family: var(--sans); font-size: 13px;
+  outline: none; transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--fg3); }
+
+select, .btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 12px;
+  color: var(--fg); font-family: var(--sans); font-size: 12px;
+  cursor: pointer; transition: all 0.15s;
+}
+select:hover, .btn:hover { border-color: var(--accent); background: var(--bg4); }
+.btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+.view-toggle { display: flex; gap: 0; }
+.view-toggle .btn { border-radius: 0; }
+.view-toggle .btn:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.view-toggle .btn:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+/* ─── Tags ribbon ─── */
+.tags-ribbon {
+  padding: 10px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 6px;
+  background: var(--bg);
+}
+.tag-pill {
+  font-size: 11px; font-family: var(--mono);
+  padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--fg3);
+  cursor: pointer; transition: all 0.15s;
+  user-select: none; white-space: nowrap;
+}
+.tag-pill:hover { border-color: var(--fg3); color: var(--fg2); }
+.tag-pill.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.tag-pill .count { opacity: 0.6; margin-left: 3px; }
+
+/* ─── Categories ribbon ─── */
+.cats-ribbon {
+  padding: 10px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; gap: 6px;
+  background: var(--bg);
+}
+.cat-pill {
+  font-size: 11px; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--fg2);
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.cat-pill:hover { border-color: var(--accent); }
+.cat-pill.on { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+/* ─── Main layout ─── */
+main { padding: 24px 32px; }
+.results-info { font-size: 12px; color: var(--fg3); margin-bottom: 16px; font-family: var(--mono); }
+
+/* ─── Card grid ─── */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card.expanded { grid-column: 1 / -1; }
+
+.card-head {
+  padding: 16px 18px 12px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.card-head .status-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+}
+.status-implemented { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-partial { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.status-idea { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.status-deferred { background: var(--fg3); }
+.status-planned { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
+
+.card-title {
+  font-family: var(--serif); font-size: 18px;
+  line-height: 1.25; letter-spacing: -0.01em;
+}
+.card-slug {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--fg3); margin-top: 2px;
+}
+.card-body { padding: 0 18px 14px; }
+.card-desc { font-size: 13px; color: var(--fg2); line-height: 1.5; }
+.card-cat {
+  display: inline-block; font-size: 10px; font-family: var(--mono);
+  color: var(--accent); background: var(--accent-glow);
+  padding: 2px 8px; border-radius: 4px; margin-top: 8px;
+}
+
+/* Scores bar */
+.scores-bar {
+  display: flex; gap: 1px; padding: 0 18px 14px;
+  flex-wrap: wrap;
+}
+.score-chip {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 6px 10px; background: var(--bg3); border-radius: var(--radius-sm);
+  min-width: 64px;
+}
+.score-chip .label { font-size: 9px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.score-chip .val { font-size: 16px; font-weight: 600; font-family: var(--mono); }
+.sc-high { color: var(--green); }
+.sc-mid { color: var(--amber); }
+.sc-low { color: var(--red); }
+
+/* Tags in card */
+.card-tags { padding: 0 18px 14px; display: flex; flex-wrap: wrap; gap: 4px; }
+.card-tags .t {
+  font-size: 10px; font-family: var(--mono);
+  padding: 1px 6px; border-radius: 3px;
+  background: var(--bg4); color: var(--fg3); border: 1px solid var(--border);
+}
+
+/* Effort bar */
+.effort-bar { padding: 0 18px 14px; }
+.effort-track {
+  height: 4px; background: var(--bg4); border-radius: 2px;
+  position: relative; overflow: visible;
+}
+.effort-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  position: absolute; left: 0; top: 0;
+}
+.effort-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: var(--fg3); font-family: var(--mono); }
+
+/* Radar chart (SVG inline) */
+.radar-wrap { padding: 0 18px 14px; display: flex; justify-content: center; }
+.radar-wrap svg { max-width: 260px; }
+
+/* Expand toggle */
+.card-expand-btn {
+  width: 100%; background: none; border: none; border-top: 1px solid var(--border);
+  padding: 8px; color: var(--fg3); font-size: 11px; cursor: pointer;
+  font-family: var(--sans); transition: color 0.15s;
+}
+.card-expand-btn:hover { color: var(--fg); }
+
+/* ─── Table view ─── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 500;
+  color: var(--fg3); text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); cursor: pointer;
+  user-select: none; white-space: nowrap;
+}
+th:hover { color: var(--fg2); }
+th .sort-arrow { margin-left: 4px; font-size: 10px; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:hover td { background: var(--bg2); }
+td.name-col { font-family: var(--serif); font-size: 15px; min-width: 220px; }
+td .td-slug { font-family: var(--mono); font-size: 10px; color: var(--fg3); display: block; }
+td .mini-bar {
+  display: inline-block; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  vertical-align: middle; margin-right: 6px;
+}
+
+/* ─── Detail panel (overlay) ─── */
+.overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); }
+.overlay.open { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
+.detail-panel {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; max-width: 720px; width: 100%;
+  padding: 32px; position: relative;
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.detail-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--bg4); border: 1px solid var(--border); border-radius: 50%;
+  width: 32px; height: 32px; color: var(--fg2); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.detail-close:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.detail-panel h2 { font-family: var(--serif); font-size: 26px; margin-bottom: 4px; }
+.detail-panel .dp-slug { font-family: var(--mono); font-size: 11px; color: var(--fg3); margin-bottom: 16px; }
+.detail-panel .dp-desc { font-size: 14px; color: var(--fg2); line-height: 1.6; margin-bottom: 20px; }
+.detail-section { margin-bottom: 20px; }
+.detail-section h3 {
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--fg3); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.dp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.dp-cell {
+  background: var(--bg3); border-radius: var(--radius-sm); padding: 10px 12px;
+  text-align: center;
+}
+.dp-cell .dp-label { font-size: 10px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.04em; }
+.dp-cell .dp-val { font-size: 20px; font-weight: 600; font-family: var(--mono); margin-top: 2px; }
+
+.dp-steps { list-style: none; }
+.dp-steps li {
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px; color: var(--fg2);
+}
+.dp-steps li strong { color: var(--fg); }
+.dp-steps li .dp-src { font-family: var(--mono); font-size: 10px; color: var(--fg3); display: block; margin-top: 2px; }
+
+/* ─── Responsive ─── */
+@media (max-width: 700px) {
+  header, .controls, .tags-ribbon, .cats-ribbon, main { padding-left: 16px; padding-right: 16px; }
+  .grid { grid-template-columns: 1fr; }
+  header h1 { font-size: 18px; }
+  .header-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>S.E.N.S.O. <em>Feature Synthesis</em></h1>
+  <div class="header-stats">
+    <span>Features: <span class="val" id="totalCount">0</span></span>
+    <span>Showing: <span class="val" id="filteredCount">0</span></span>
+    <span>Avg Hackathon: <span class="val" id="avgHack">0</span></span>
+  </div>
+</header>
+
+<div class="controls">
+  <input class="search-box" id="searchBox" type="text" placeholder="Search features…">
+  <select id="sortBy">
+    <option value="hackathon-advantage">Sort: Hackathon Advantage</option>
+    <option value="importance">Sort: Importance</option>
+    <option value="risk">Sort: Risk</option>
+    <option value="effort-min">Sort: Effort (min)</option>
+    <option value="name">Sort: Name</option>
+    <option value="status">Sort: Status</option>
+  </select>
+  <select id="statusFilter">
+    <option value="all">Status: All</option>
+    <option value="implemented">Implemented</option>
+    <option value="partial">Partial</option>
+    <option value="idea">Idea</option>
+    <option value="deferred">Deferred</option>
+    <option value="planned">Planned</option>
+  </select>
+  <select id="povSort">
+    <option value="">PoV highlight: None</option>
+  </select>
+  <div class="view-toggle">
+    <button class="btn active" data-view="grid" id="viewGrid">Grid</button>
+    <button class="btn" data-view="table" id="viewTable">Table</button>
+  </div>
+</div>
+
+<div class="cats-ribbon" id="catsRibbon"></div>
+<div class="tags-ribbon" id="tagsRibbon"></div>
+
+<main>
+  <div class="results-info" id="resultsInfo"></div>
+  <div id="gridView" class="grid"></div>
+  <div id="tableView" class="table-wrap" style="display:none"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="detail-panel" id="detailPanel">
+    <button class="detail-close" id="detailClose">&times;</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {"voice-first-coaching":{"name":"Voice-First Financial Coaching","details":"Users speak a financial question and receive a spoken, personalized recommendation grounded in their own uploaded financial data. The core differentiator: voice-in, voice-out with real numbers.","status":"implemented","category":"core-experience","tags":["voice","AI","coaching","STT","TTS","ElevenLabs","demo-critical"],"importance":9.8,"risk":5.5,"estimated-effort":{"min":16,"max":24},"hackathon-advantage":9.5,"implementation-details":{"steps":[{"name":"Browser STT via Web Speech API","details":"useVoiceInput hook with feature detection + fallback to typed input","src":["senso/src/features/coaching/useVoiceInput.ts"]},{"name":"ElevenLabs TTS backend","details":"POST /coaching/tts, per-persona voice IDs, 503 fallback to browser speechSynthesis","src":["api/app/coaching/tts.py"]},{"name":"Dual-channel response","details":"Voice-optimized message + details_a2ui structured panel","src":["api/app/coaching/prompts/response_format.j2"]}],"risks":[{"name":"STT browser variance","details":"Web Speech API not universally supported"},{"name":"ElevenLabs latency","details":"TTS generation adds 1-3s to response time"}]},"problems-solved":[{"name":"Low-friction financial education","details":"18-30 year olds won't read articles; voice meets them where they are"}],"importance-by-pov":{"users":9,"dev":7,"stakeholder":9.5,"technical-jury":9,"coolness":9.5,"innovation-ai":8.5,"innovation-approach":9,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":7,"innovation-efficiency":6,"privacy":5,"banking-features":7,"banking-compliance":4,"education":9.5,"community":7,"goodness":8.5}},"grounded-financial-profile":{"name":"Real-Data Financial Profile from Uploads","details":"Users upload real bank statements, payslips, receipts. System extracts structured data, builds canonical financial profile, uses it to ground all coaching.","status":"implemented","category":"core-experience","tags":["ingestion","parsing","OCR","LLM-extraction","profile","data-grounding"],"importance":9.5,"risk":6,"estimated-effort":{"min":24,"max":40},"hackathon-advantage":9,"implementation-details":{"steps":[{"name":"Module registry with fingerprint matching","details":"7 builtin modules + adaptive LLM pipeline","src":["api/app/ingestion/registry.py"]},{"name":"3-tier OCR pipeline","details":"pytesseract → LLM text → LLM vision","src":["api/app/ingestion/ocr.py"]}],"risks":[{"name":"Italian document format variance","details":"Each bank exports differently"}]},"problems-solved":[{"name":"Generic AI = zero trust","details":"Without real numbers, coaching is generic tips"}],"importance-by-pov":{"users":9,"dev":8,"stakeholder":9,"technical-jury":8.5,"coolness":7,"innovation-ai":8,"innovation-approach":8.5,"innovation-scalability":7,"innovation-ha":6,"innovation-flexibility":8,"innovation-efficiency":7,"privacy":6,"banking-features":9,"banking-compliance":7,"education":8,"community":5,"goodness":7}},"transparent-reasoning":{"name":"Transparent Reasoning with User Numbers","details":"Every coaching response shows explicit reasoning: which numbers, what tradeoffs, what assumptions.","status":"implemented","category":"trust-and-transparency","tags":["reasoning","explainability","trust","schema-enforced"],"importance":9,"risk":3,"estimated-effort":{"min":4,"max":8},"hackathon-advantage":8.5,"implementation-details":{"steps":[{"name":"Structured schema","details":"reasoning_used array with minItems:1","src":["api/app/coaching/schemas/coaching_response.schema.json"]}]},"problems-solved":[{"name":"AI trust deficit","details":"Showing the math builds confidence"}],"importance-by-pov":{"users":9.5,"dev":6,"stakeholder":9,"technical-jury":8,"coolness":6,"innovation-ai":7,"innovation-approach":8.5,"innovation-scalability":5,"innovation-ha":5,"innovation-flexibility":6,"innovation-efficiency":5,"privacy":7,"banking-features":8,"banking-compliance":8.5,"education":9.5,"community":5,"goodness":9}},"learn-act-cards":{"name":"Learn + Act Action Cards","details":"Educational resources + actionable service cards per coaching response.","status":"implemented","category":"core-experience","tags":["cards","education","funnel","BM25","content-catalog"],"importance":8.5,"risk":4,"estimated-effort":{"min":12,"max":18},"hackathon-advantage":8,"implementation-details":{"steps":[{"name":"BM25 content search","details":"search_content tool + fallback injection","src":["api/app/content/search.py"]}]},"problems-solved":[{"name":"Advice without action is useless","details":"Education → understanding → action funnel"}],"importance-by-pov":{"users":8,"dev":6,"stakeholder":9.5,"technical-jury":7,"coolness":6.5,"innovation-ai":6,"innovation-approach":8,"innovation-scalability":7,"innovation-ha":5,"innovation-flexibility":7,"innovation-efficiency":6,"privacy":5,"banking-features":9.5,"banking-compliance":6,"education":9,"community":6,"goodness":8}},"persona-mentor-system":{"name":"Configurable Mentor Personas","details":"4 selectable coaching personas with shared safety boundaries.","status":"implemented","category":"engagement","tags":["personas","tone","safety","customization"],"importance":7,"risk":4.5,"estimated-effort":{"min":8,"max":12},"hackathon-advantage":7.5,"problems-solved":[{"name":"One-size-fits-all is boring","details":"Different users respond to different communication styles"}],"importance-by-pov":{"users":8,"dev":5,"stakeholder":7,"technical-jury":7.5,"coolness":8.5,"innovation-ai":6.5,"innovation-approach":7.5,"innovation-scalability":5,"innovation-ha":5,"innovation-flexibility":8,"innovation-efficiency":5,"privacy":5,"banking-features":5,"banking-compliance":6,"education":7,"community":7,"goodness":6}},"safety-guardrails":{"name":"3-Layer Safety Pipeline","details":"Input guard + persona boundaries + output scanner. No investment-picking, educational framing.","status":"implemented","category":"safety-and-compliance","tags":["safety","guardrails","prompt-injection","compliance"],"importance":9,"risk":5,"estimated-effort":{"min":8,"max":14},"hackathon-advantage":7,"problems-solved":[{"name":"Regulatory risk","details":"Bank-associated AI giving bad advice = lawsuit"}],"importance-by-pov":{"users":6,"dev":8,"stakeholder":10,"technical-jury":7,"coolness":3,"innovation-ai":6,"innovation-approach":6,"innovation-scalability":7,"innovation-ha":8,"innovation-flexibility":5,"innovation-efficiency":5,"privacy":7,"banking-features":6,"banking-compliance":10,"education":5,"community":4,"goodness":9}},"italy-rules-knowledge-base":{"name":"Italy Financial Rules Knowledge Base","details":"IRPEF, INPS, bonus cultura, 730, TFR, regime forfettario — verified 2025 data.","status":"implemented","category":"knowledge","tags":["italy","tax","IRPEF","INPS","regulatory","BM25"],"importance":8,"risk":3,"estimated-effort":{"min":4,"max":6},"hackathon-advantage":7.5,"problems-solved":[{"name":"Generic European advice","details":"Italian tax system is specific — users need Italian answers"}],"importance-by-pov":{"users":8.5,"dev":5,"stakeholder":9,"technical-jury":7,"coolness":5,"innovation-ai":5,"innovation-approach":7,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":6,"innovation-efficiency":7,"privacy":5,"banking-features":8,"banking-compliance":9,"education":9.5,"community":5,"goodness":8}},"coach-tool-suite":{"name":"7-Tool LLM Coach Intelligence Suite","details":"7 tools: content, Italy rules, profile, transactions, preferences, memory, timeline.","status":"implemented","category":"ai-intelligence","tags":["tools","function-calling","LLM","RAG","memory"],"importance":8.5,"risk":5,"estimated-effort":{"min":16,"max":24},"hackathon-advantage":8,"problems-solved":[{"name":"Prompt bloat","details":"Tool-first means coach fetches only what's needed"}],"importance-by-pov":{"users":7,"dev":9,"stakeholder":7,"technical-jury":9,"coolness":7,"innovation-ai":9.5,"innovation-approach":8.5,"innovation-scalability":8,"innovation-ha":6,"innovation-flexibility":9,"innovation-efficiency":8,"privacy":6,"banking-features":6,"banking-compliance":5,"education":7,"community":4,"goodness":6}},"quanto-mi-costa-davvero":{"name":"\"Quanto Mi Costa Davvero\"","details":"Zero-onboarding: say a purchase, see real cost in hours worked, months of delayed savings, BNPL interest.","status":"idea","category":"standalone-tool","tags":["zero-onboarding","BNPL","cost-awareness","viral","embeddable"],"importance":8.5,"risk":2,"estimated-effort":{"min":3,"max":6},"hackathon-advantage":8.5,"problems-solved":[{"name":"BNPL obfuscation","details":"BNPL grew 85% in 2 years. This makes cost viscerally tangible."}],"importance-by-pov":{"users":9,"dev":4,"stakeholder":9,"technical-jury":7,"coolness":8,"innovation-ai":5,"innovation-approach":8,"innovation-scalability":9,"innovation-ha":8,"innovation-flexibility":9,"innovation-efficiency":9,"privacy":9,"banking-features":7,"banking-compliance":5,"education":9.5,"community":7,"goodness":9}},"primo-stipendio-simulator":{"name":"\"Primo Stipendio\" Simulator","details":"Input expected salary → AI explains gross vs net, IRPEF, INPS, TFR → budget walkthrough.","status":"idea","category":"education-tool","tags":["simulator","payslip","onboarding","NEXT-community","workshops"],"importance":8,"risk":2.5,"estimated-effort":{"min":4,"max":8},"hackathon-advantage":7.5,"problems-solved":[{"name":"First-job shock","details":"RAL vs net confusion — this makes it crystal clear"}],"importance-by-pov":{"users":9,"dev":4,"stakeholder":9.5,"technical-jury":7,"coolness":7,"innovation-ai":5,"innovation-approach":7.5,"innovation-scalability":8,"innovation-ha":7,"innovation-flexibility":7,"innovation-efficiency":8,"privacy":9,"banking-features":8,"banking-compliance":7,"education":10,"community":9,"goodness":9}},"contratto-decoder":{"name":"\"Contratto Decoder\"","details":"Upload any contract → AI explains in plain Italian, highlighting hidden costs and penalties.","status":"idea","category":"standalone-tool","tags":["document-analysis","plain-language","consumer-protection","trust-building"],"importance":7.5,"risk":4,"estimated-effort":{"min":6,"max":10},"hackathon-advantage":7,"problems-solved":[{"name":"Low financing diligence","details":"Users don't read ToS. This reads FOR them."}],"importance-by-pov":{"users":8.5,"dev":5,"stakeholder":8,"technical-jury":7.5,"coolness":7,"innovation-ai":7,"innovation-approach":7,"innovation-scalability":7,"innovation-ha":6,"innovation-flexibility":8,"innovation-efficiency":7,"privacy":6,"banking-features":7,"banking-compliance":6,"education":9,"community":6,"goodness":8.5}},"financial-time-machine":{"name":"Financial Time Machine","details":"Two futures: current behavior vs changes. Visualize net worth at 30, 40, 50.","status":"idea","category":"education-tool","tags":["visualization","compound-interest","projection","behavioral-change"],"importance":7.5,"risk":4,"estimated-effort":{"min":6,"max":10},"hackathon-advantage":7.5,"problems-solved":[{"name":"Compound interest incomprehension","details":"Only 30% understand it. Seeing projections makes it real."}],"importance-by-pov":{"users":8.5,"dev":5,"stakeholder":8,"technical-jury":8,"coolness":8.5,"innovation-ai":6,"innovation-approach":8,"innovation-scalability":7,"innovation-ha":6,"innovation-flexibility":7,"innovation-efficiency":6,"privacy":7,"banking-features":8,"banking-compliance":5,"education":10,"community":6,"goodness":9}},"bnpl-reality-lens":{"name":"BNPL Reality Lens","details":"Paste BNPL terms → AI computes total real cost, personalized to your cash-flow.","status":"idea","category":"consumer-protection","tags":["BNPL","debt-awareness","checkout-intercept","cost-calculator"],"importance":8,"risk":3.5,"estimated-effort":{"min":3,"max":6},"hackathon-advantage":7.5,"problems-solved":[{"name":"BNPL psychological obfuscation","details":"Re-couples pain of paying with acquisition"}],"importance-by-pov":{"users":9,"dev":4,"stakeholder":8.5,"technical-jury":7,"coolness":7,"innovation-ai":5.5,"innovation-approach":7.5,"innovation-scalability":8,"innovation-ha":7,"innovation-flexibility":7,"innovation-efficiency":8,"privacy":8,"banking-features":7,"banking-compliance":7,"education":9.5,"community":6,"goodness":9.5}},"gamified-savings-challenges":{"name":"Gamified Savings Challenges","details":"AI-generated weekly micro-challenges. NEXT community leaderboards. Voice nudges.","status":"idea","category":"engagement","tags":["gamification","challenges","community","NEXT","habit-formation"],"importance":7,"risk":4,"estimated-effort":{"min":8,"max":14},"hackathon-advantage":6.5,"problems-solved":[{"name":"Sustained engagement","details":"Weekly challenges with social accountability"}],"importance-by-pov":{"users":8,"dev":5,"stakeholder":9,"technical-jury":7,"coolness":8,"innovation-ai":6,"innovation-approach":7,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":7,"innovation-efficiency":5,"privacy":5,"banking-features":7,"banking-compliance":4,"education":8,"community":10,"goodness":8}},"micro-life-simulator":{"name":"Micro-Simulator for Life Choices","details":"'If I move out?' AI builds best/base/worst scenarios from real spending.","status":"idea","category":"planning-tool","tags":["simulator","scenario","Monte-Carlo","life-decisions"],"importance":7.5,"risk":5,"estimated-effort":{"min":8,"max":14},"hackathon-advantage":7,"problems-solved":[{"name":"Life decisions made blind","details":"Moving out, buying a car — decided by gut feeling today"}],"importance-by-pov":{"users":9,"dev":6,"stakeholder":8,"technical-jury":8,"coolness":8,"innovation-ai":7,"innovation-approach":8.5,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":8,"innovation-efficiency":6,"privacy":6,"banking-features":8,"banking-compliance":5,"education":9,"community":6,"goodness":8}},"impulse-interceptor-72h":{"name":"Impulse Interceptor (72h Cooldown)","details":"AI proposes 72-hour cooldown with personalized alternatives. Tracks outcomes.","status":"idea","category":"behavioral-intelligence","tags":["impulse-control","cooldown","behavioral-nudge","alternatives"],"importance":7,"risk":3.5,"estimated-effort":{"min":4,"max":8},"hackathon-advantage":6.5,"problems-solved":[{"name":"Impulse buying","details":"72-hour rule proven but nobody enforces it"}],"importance-by-pov":{"users":8,"dev":4,"stakeholder":7,"technical-jury":7,"coolness":7.5,"innovation-ai":6,"innovation-approach":8,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":7,"innovation-efficiency":6,"privacy":6,"banking-features":5,"banking-compliance":4,"education":8,"community":5,"goodness":8.5}},"fraud-scam-gym":{"name":"Fraud & Scam Gym","details":"AI generates personalized scam simulations. Score-based training for NEXT workshops.","status":"idea","category":"education-tool","tags":["fraud","scam","simulation","training","EBA-aligned"],"importance":6.5,"risk":4.5,"estimated-effort":{"min":8,"max":14},"hackathon-advantage":6,"problems-solved":[{"name":"AI-enabled fraud targeting youth","details":"EBA flags scams; education must include recognition training"}],"importance-by-pov":{"users":7,"dev":5,"stakeholder":8,"technical-jury":7.5,"coolness":8,"innovation-ai":7,"innovation-approach":8,"innovation-scalability":6,"innovation-ha":5,"innovation-flexibility":6,"innovation-efficiency":5,"privacy":7,"banking-features":6,"banking-compliance":7,"education":9,"community":8,"goodness":9}}};
+
+// ── Derive all tags, categories, pov keys ──
+const entries = Object.entries(DATA).map(([slug, f]) => ({ slug, ...f }));
+const allTags = new Map();
+const allCats = new Map();
+const povKeys = Object.keys(entries[0]?.["importance-by-pov"] || {});
+
+entries.forEach(f => {
+  (f.tags || []).forEach(t => allTags.set(t, (allTags.get(t)||0)+1));
+  if (f.category) allCats.set(f.category, (allCats.get(f.category)||0)+1);
+});
+
+// ── State ──
+let activeTags = new Set();
+let activeCats = new Set();
+let view = 'grid';
+let expandedSlug = null;
+let sortKey = 'hackathon-advantage';
+let statusFilter = 'all';
+let searchText = '';
+let povHighlight = '';
+let tableSortKey = 'hackathon-advantage';
+let tableSortDir = -1;
+
+// ── Populate controls ──
+const povSelect = document.getElementById('povSort');
+povKeys.forEach(k => {
+  const o = document.createElement('option');
+  o.value = k; o.textContent = 'PoV: ' + k.replace(/-/g,' ');
+  povSelect.appendChild(o);
+});
+
+function renderTags() {
+  const ribbon = document.getElementById('tagsRibbon');
+  ribbon.innerHTML = '';
+  [...allTags.entries()].sort((a,b) => b[1]-a[1]).forEach(([tag, count]) => {
+    const pill = document.createElement('button');
+    pill.className = 'tag-pill' + (activeTags.has(tag) ? ' on' : '');
+    pill.innerHTML = tag + '<span class="count">'+count+'</span>';
+    pill.onclick = () => { activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag); render(); };
+    ribbon.appendChild(pill);
+  });
+}
+
+function renderCats() {
+  const ribbon = document.getElementById('catsRibbon');
+  ribbon.innerHTML = '';
+  [...allCats.entries()].sort((a,b) => b[1]-a[1]).forEach(([cat, count]) => {
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill' + (activeCats.has(cat) ? ' on' : '');
+    pill.textContent = cat + ' (' + count + ')';
+    pill.onclick = () => { activeCats.has(cat) ? activeCats.delete(cat) : activeCats.add(cat); render(); };
+    ribbon.appendChild(pill);
+  });
+}
+
+function scoreClass(v) { return v >= 7.5 ? 'sc-high' : v >= 5 ? 'sc-mid' : 'sc-low'; }
+
+function effortPct(f) {
+  const maxE = 40;
+  return Math.min(100, (f["estimated-effort"].max / maxE) * 100);
+}
+
+function radarSVG(pov, size=240) {
+  const keys = Object.keys(pov);
+  const n = keys.length;
+  const cx = size/2, cy = size/2, r = size/2 - 30;
+  const step = (Math.PI*2)/n;
+
+  let gridLines = '';
+  for (let ring = 0.25; ring <= 1; ring += 0.25) {
+    let pts = keys.map((_, i) => {
+      const a = i*step - Math.PI/2;
+      return `${cx+Math.cos(a)*r*ring},${cy+Math.sin(a)*r*ring}`;
+    }).join(' ');
+    gridLines += `<polygon points="${pts}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;
+  }
+
+  let labels = keys.map((k, i) => {
+    const a = i*step - Math.PI/2;
+    const lx = cx + Math.cos(a)*(r+16);
+    const ly = cy + Math.sin(a)*(r+16);
+    return `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="var(--fg3)" font-size="7" font-family="var(--mono)">${k.replace('innovation-','').replace('banking-','')}</text>`;
+  }).join('');
+
+  let dataPts = keys.map((k, i) => {
+    const a = i*step - Math.PI/2;
+    const v = pov[k]/10;
+    return `${cx+Math.cos(a)*r*v},${cy+Math.sin(a)*r*v}`;
+  }).join(' ');
+
+  return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+    ${gridLines}${labels}
+    <polygon points="${dataPts}" fill="rgba(91,138,245,0.2)" stroke="var(--accent)" stroke-width="1.5"/>
+  </svg>`;
+}
+
+function buildCard(f, expanded) {
+  const pov = f["importance-by-pov"] || {};
+  const eff = f["estimated-effort"] || {min:0,max:0};
+  let html = `<div class="card${expanded?' expanded':''}" data-slug="${f.slug}">
+    <div class="card-head">
+      <div class="status-dot status-${f.status}"></div>
+      <div>
+        <div class="card-title">${f.name}</div>
+        <div class="card-slug">${f.slug}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">${f.details}</div>
+      <div class="card-cat">${f.category}</div>
+    </div>
+    <div class="scores-bar">
+      <div class="score-chip"><span class="label">Hack</span><span class="val ${scoreClass(f['hackathon-advantage'])}">${f['hackathon-advantage']}</span></div>
+      <div class="score-chip"><span class="label">Import</span><span class="val ${scoreClass(f.importance)}">${f.importance}</span></div>
+      <div class="score-chip"><span class="label">Risk</span><span class="val ${scoreClass(10-f.risk)}">${f.risk}</span></div>
+      <div class="score-chip"><span class="label">Effort</span><span class="val">${eff.min}–${eff.max}h</span></div>
+      ${povHighlight && pov[povHighlight] !== undefined ? `<div class="score-chip"><span class="label">${povHighlight.replace('innovation-','')}</span><span class="val ${scoreClass(pov[povHighlight])}">${pov[povHighlight]}</span></div>` : ''}
+    </div>
+    <div class="card-tags">${(f.tags||[]).map(t=>`<span class="t">${t}</span>`).join('')}</div>
+    <div class="effort-bar">
+      <div class="effort-track"><div class="effort-fill" style="width:${effortPct(f)}%"></div></div>
+      <div class="effort-labels"><span>${eff.min}h min</span><span>${eff.max}h max</span></div>
+    </div>`;
+
+  if (expanded) {
+    html += `<div class="radar-wrap">${radarSVG(pov)}</div>`;
+  }
+
+  html += `<button class="card-expand-btn" data-slug="${f.slug}">${expanded?'Collapse ▴':'Details ▾'}</button></div>`;
+  return html;
+}
+
+function getFiltered() {
+  let list = [...entries];
+  if (searchText) {
+    const q = searchText.toLowerCase();
+    list = list.filter(f => f.name.toLowerCase().includes(q) || f.slug.includes(q) || f.details.toLowerCase().includes(q) || (f.tags||[]).some(t=>t.includes(q)));
+  }
+  if (statusFilter !== 'all') list = list.filter(f => f.status === statusFilter);
+  if (activeTags.size > 0) list = list.filter(f => [...activeTags].some(t => (f.tags||[]).includes(t)));
+  if (activeCats.size > 0) list = list.filter(f => activeCats.has(f.category));
+
+  const sk = povHighlight || sortKey;
+  list.sort((a, b) => {
+    if (sk === 'name') return a.name.localeCompare(b.name);
+    if (sk === 'status') return a.status.localeCompare(b.status);
+    if (sk === 'effort-min') return a["estimated-effort"].min - b["estimated-effort"].min;
+    if (povHighlight && a["importance-by-pov"]?.[sk] !== undefined) return (b["importance-by-pov"][sk]||0) - (a["importance-by-pov"][sk]||0);
+    return (b[sk]||0) - (a[sk]||0);
+  });
+  return list;
+}
+
+function renderGrid(list) {
+  document.getElementById('gridView').innerHTML = list.map(f => buildCard(f, expandedSlug===f.slug)).join('');
+  document.querySelectorAll('.card-expand-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const slug = btn.dataset.slug;
+      expandedSlug = expandedSlug === slug ? null : slug;
+      render();
+    });
+  });
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('dblclick', () => openDetail(card.dataset.slug));
+  });
+}
+
+function renderTable(list) {
+  const cols = [
+    {key:'name',label:'Feature'},
+    {key:'status',label:'Status'},
+    {key:'hackathon-advantage',label:'Hack'},
+    {key:'importance',label:'Import'},
+    {key:'risk',label:'Risk'},
+    {key:'effort',label:'Effort'},
+    {key:'category',label:'Category'},
+  ];
+  if (povHighlight) cols.push({key:povHighlight, label:povHighlight.replace('innovation-','').replace('banking-','')});
+
+  let sorted = [...list];
+  sorted.sort((a,b) => {
+    const k = tableSortKey;
+    if (k === 'name') return tableSortDir * a.name.localeCompare(b.name);
+    if (k === 'status') return tableSortDir * a.status.localeCompare(b.status);
+    if (k === 'effort') return tableSortDir * (a["estimated-effort"].min - b["estimated-effort"].min);
+    if (k === 'category') return tableSortDir * (a.category||'').localeCompare(b.category||'');
+    if (povHighlight && k === povHighlight) return tableSortDir * ((a["importance-by-pov"]?.[k]||0) - (b["importance-by-pov"]?.[k]||0));
+    return tableSortDir * ((a[k]||0) - (b[k]||0));
+  });
+
+  let html = '<table><thead><tr>';
+  cols.forEach(c => {
+    const arrow = tableSortKey===c.key ? (tableSortDir>0?'▲':'▼') : '';
+    html += `<th data-col="${c.key}">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+  sorted.forEach(f => {
+    const eff = f["estimated-effort"];
+    const pv = f["importance-by-pov"]||{};
+    html += `<tr data-slug="${f.slug}">
+      <td class="name-col">${f.name}<span class="td-slug">${f.slug}</span></td>
+      <td><span class="status-dot status-${f.status}" style="display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle;margin-right:6px"></span>${f.status}</td>
+      <td><span class="mini-bar" style="width:${f['hackathon-advantage']*6}px"></span>${f['hackathon-advantage']}</td>
+      <td><span class="mini-bar" style="width:${f.importance*6}px"></span>${f.importance}</td>
+      <td>${f.risk}</td>
+      <td style="font-family:var(--mono);font-size:12px">${eff.min}–${eff.max}h</td>
+      <td><span class="card-cat">${f.category}</span></td>
+      ${povHighlight ? `<td><span class="mini-bar" style="width:${(pv[povHighlight]||0)*6}px"></span>${pv[povHighlight]||'—'}</td>` : ''}
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('tableView').innerHTML = html;
+
+  document.querySelectorAll('#tableView th').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (tableSortKey === col) tableSortDir *= -1; else { tableSortKey = col; tableSortDir = -1; }
+      render();
+    });
+  });
+  document.querySelectorAll('#tableView tr[data-slug]').forEach(tr => {
+    tr.addEventListener('dblclick', () => openDetail(tr.dataset.slug));
+    tr.style.cursor = 'pointer';
+  });
+}
+
+function openDetail(slug) {
+  const f = entries.find(e => e.slug === slug);
+  if (!f) return;
+  const pov = f["importance-by-pov"]||{};
+  const impl = f["implementation-details"]||{};
+  const probs = f["problems-solved"]||[];
+  const eff = f["estimated-effort"]||{};
+
+  let html = `<h2>${f.name}</h2><div class="dp-slug">${f.slug} · ${f.status} · ${f.category}</div>
+    <div class="dp-desc">${f.details}</div>
+    <div class="detail-section"><h3>Core Scores</h3>
+      <div class="dp-grid">
+        <div class="dp-cell"><div class="dp-label">Hackathon</div><div class="dp-val ${scoreClass(f['hackathon-advantage'])}">${f['hackathon-advantage']}</div></div>
+        <div class="dp-cell"><div class="dp-label">Importance</div><div class="dp-val ${scoreClass(f.importance)}">${f.importance}</div></div>
+        <div class="dp-cell"><div class="dp-label">Risk</div><div class="dp-val ${scoreClass(10-f.risk)}">${f.risk}</div></div>
+        <div class="dp-cell"><div class="dp-label">Effort</div><div class="dp-val">${eff.min}–${eff.max}h</div></div>
+      </div>
+    </div>
+    <div class="detail-section"><h3>Importance by Perspective</h3>
+      <div class="dp-grid">${Object.entries(pov).map(([k,v])=>`<div class="dp-cell"><div class="dp-label">${k.replace('innovation-','✦ ').replace('banking-','🏦 ')}</div><div class="dp-val ${scoreClass(v)}">${v}</div></div>`).join('')}</div>
+    </div>
+    <div class="detail-section"><h3>Radar</h3><div style="display:flex;justify-content:center">${radarSVG(pov, 300)}</div></div>`;
+
+  if (probs.length) {
+    html += `<div class="detail-section"><h3>Problems Solved</h3><ul class="dp-steps">${probs.map(p=>`<li><strong>${p.name}</strong> — ${p.details}</li>`).join('')}</ul></div>`;
+  }
+  if (impl.steps?.length) {
+    html += `<div class="detail-section"><h3>Implementation Steps</h3><ul class="dp-steps">${impl.steps.map(s=>`<li><strong>${s.name}</strong> — ${s.details}${(s.src||[]).map(x=>`<span class="dp-src">${x}</span>`).join('')}</li>`).join('')}</ul></div>`;
+  }
+  if (impl.risks?.length) {
+    html += `<div class="detail-section"><h3>Risks</h3><ul class="dp-steps">${impl.risks.map(r=>`<li><strong>${r.name}</strong> — ${r.details}</li>`).join('')}</ul></div>`;
+  }
+  html += `<div class="detail-section"><h3>Tags</h3><div style="display:flex;flex-wrap:wrap;gap:4px">${(f.tags||[]).map(t=>`<span class="card-tags"><span class="t">${t}</span></span>`).join('')}</div></div>`;
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+}
+
+document.getElementById('detailClose').onclick = () => document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) document.getElementById('overlay').classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('overlay').classList.remove('open'); });
+
+function render() {
+  renderTags();
+  renderCats();
+  const list = getFiltered();
+  document.getElementById('totalCount').textContent = entries.length;
+  document.getElementById('filteredCount').textContent = list.length;
+  const avg = list.length ? (list.reduce((s,f)=>s+f['hackathon-advantage'],0)/list.length).toFixed(1) : '—';
+  document.getElementById('avgHack').textContent = avg;
+  document.getElementById('resultsInfo').textContent = `${list.length} feature${list.length!==1?'s':''} · sorted by ${povHighlight||sortKey} · double-click for detail`;
+
+  if (view === 'grid') {
+    document.getElementById('gridView').style.display = '';
+    document.getElementById('tableView').style.display = 'none';
+    renderGrid(list);
+  } else {
+    document.getElementById('gridView').style.display = 'none';
+    document.getElementById('tableView').style.display = '';
+    renderTable(list);
+  }
+}
+
+// ── Wire controls ──
+document.getElementById('searchBox').addEventListener('input', e => { searchText = e.target.value; render(); });
+document.getElementById('sortBy').addEventListener('change', e => { sortKey = e.target.value; render(); });
+document.getElementById('statusFilter').addEventListener('change', e => { statusFilter = e.target.value; render(); });
+document.getElementById('povSort').addEventListener('change', e => { povHighlight = e.target.value; render(); });
+document.getElementById('viewGrid').addEventListener('click', () => { view='grid'; document.getElementById('viewGrid').classList.add('active'); document.getElementById('viewTable').classList.remove('active'); render(); });
+document.getElementById('viewTable').addEventListener('click', () => { view='table'; document.getElementById('viewTable').classList.add('active'); document.getElementById('viewGrid').classList.remove('active'); render(); });
+
+render();
+</script>
+</body>
+</html>
