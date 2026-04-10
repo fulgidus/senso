@@ -1,0 +1,39 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-yaml" },
+    { id = "check-added-large-files", args = ["--maxkb=1024"] },
+    { id = "check-merge-conflict" },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "frontend-tsc"
+name = "Frontend TypeScript check"
+entry = "bash -c 'cd senso && pnpm exec tsc -b --noEmit'"
+language = "system"
+files = '^senso/src/.*\.(ts|tsx)$'
+pass_filenames = false
+stages = ["pre-commit"]
+
+[[repos.hooks]]
+id = "frontend-build"
+name = "Frontend production build"
+entry = "bash -c 'cd senso && pnpm build'"
+language = "system"
+pass_filenames = false
+stages = ["pre-push"]
+
+[[repos.hooks]]
+id = "backend-check"
+name = "Backend import check"
+entry = "bash -c 'docker compose run --rm api /app/.venv/bin/python -c \"import app; print(ok)\"'"
+language = "system"
+pass_filenames = false
+stages = ["pre-push"]
