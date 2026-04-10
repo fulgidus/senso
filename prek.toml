@@ -33,7 +33,7 @@ stages = ["pre-push"]
 [[repos.hooks]]
 id = "backend-check"
 name = "Backend import check"
-entry = "bash -c 'docker compose run --rm api /app/.venv/bin/python -c \"import app; print(ok)\"'"
+entry = "./scripts/check-backend.sh"
 language = "system"
 pass_filenames = false
 stages = ["pre-push"]
