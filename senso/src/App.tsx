@@ -54,7 +54,7 @@ function LocationToast() {
     if (!toast) return null;
 
     return (
-        <div className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-lg animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed top-16 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground shadow-lg pointer-events-none animate-in fade-in slide-in-from-top-2">
             {toast}
         </div>
     );
