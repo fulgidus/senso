@@ -977,8 +977,10 @@ class CoachingService:
             data["reasoning_used"] = [
                 {"step": "Analisi", "detail": "Risposta generata."}
             ]
-        data.setdefault("content_cards", [])
-        data.setdefault("interactive_cards", [])
+        if data.get("content_cards") is None:
+            data["content_cards"] = []
+        if data.get("interactive_cards") is None:
+            data["interactive_cards"] = []
         # New enrichment surfaces default to null (not empty)
         data.setdefault("transaction_evidence", None)
         data.setdefault("goal_progress", None)

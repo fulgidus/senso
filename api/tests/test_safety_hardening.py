@@ -359,6 +359,18 @@ class TestSchemaValidation:
         assert "interactive_cards" in repaired
         # learn_cards removed in Phase 21
 
+    def test_repair_response_coerces_null_arrays(self):
+        """_repair_response must coerce null content_cards/interactive_cards to []."""
+        from app.coaching.service import CoachingService
+        svc = CoachingService.__new__(CoachingService)
+        repaired = svc._repair_response({
+            "message": "test",
+            "content_cards": None,
+            "interactive_cards": None,
+        })
+        assert repaired["content_cards"] == []
+        assert repaired["interactive_cards"] == []
+
     def test_repair_response_preserves_existing_message(self):
         from app.coaching.service import CoachingService
 

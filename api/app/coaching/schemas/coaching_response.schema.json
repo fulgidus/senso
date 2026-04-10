@@ -4,7 +4,7 @@
   "title": "CoachingResponse",
   "description": "Full colloquial coaching response with message, reasoning, and optional enrichment surfaces.",
   "type": "object",
-  "required": ["message", "reasoning_used"],
+  "required": ["message", "reasoning_used", "content_cards", "interactive_cards"],
   "additionalProperties": false,
   "properties": {
     "message": {
