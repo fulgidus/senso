@@ -18,5 +18,25 @@
             "database": "senso",
             "username": "senso"
         }
-    ]
+    ],
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#1569a2",
+        "activityBar.background": "#1569a2",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#ed72bb",
+        "activityBarBadge.foreground": "#15202b",
+        "commandCenter.border": "#e7e7e799",
+        "sash.hoverBorder": "#1569a2",
+        "statusBar.background": "#0f4c75",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#1569a2",
+        "statusBarItem.remoteBackground": "#0f4c75",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#0f4c75",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#0f4c7599",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#0F4C75"
 }
