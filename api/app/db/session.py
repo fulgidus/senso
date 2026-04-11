@@ -51,37 +51,46 @@ def _add_missing_columns() -> None:
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS voice_auto_listen BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS default_persona_id VARCHAR(64) NOT NULL DEFAULT 'mentore-saggio'",
         # ── Round 3: chat relational integrity ────────────────────────────────
-        # chat_sessions: drop user_id ownership in favour of session_participants
-        "ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS creator_id VARCHAR(36)",
-        # Back-fill creator_id from old user_id before we can drop user_id.
-        # Safe to run multiple times (WHERE creator_id IS NULL guard).
-        "UPDATE chat_sessions SET creator_id = user_id WHERE creator_id IS NULL AND user_id IS NOT NULL",
-        # Add FK constraint only if it doesn't exist (Postgres idempotent pattern)
+        # chat_sessions: ensure owner_id column exists (originally user_id → creator_id → owner_id)
+        "ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS owner_id VARCHAR(36)",
+        # Back-fill owner_id from old user_id if the column still exists (legacy migration path)
+        """
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'chat_sessions' AND column_name = 'user_id'
+          ) THEN
+            UPDATE chat_sessions SET owner_id = user_id WHERE owner_id IS NULL AND user_id IS NOT NULL;
+          END IF;
+        END$$
+        """,
+        # Add FK constraint for owner_id if it doesn't exist
         """
         DO $$
         BEGIN
           IF NOT EXISTS (
             SELECT 1 FROM information_schema.table_constraints
-            WHERE constraint_name = 'chat_sessions_creator_id_fkey'
+            WHERE constraint_name = 'chat_sessions_owner_id_fkey'
           ) THEN
             ALTER TABLE chat_sessions
-              ADD CONSTRAINT chat_sessions_creator_id_fkey
-              FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE SET NULL;
+              ADD CONSTRAINT chat_sessions_owner_id_fkey
+              FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL;
           END IF;
         END$$
         """,
         # chat_messages: sender_id + persona_id
         "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS sender_id VARCHAR(36)",
         "ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS persona_id VARCHAR(64)",
-        # Back-fill sender_id for existing user messages via session→user_id
+        # Back-fill sender_id for existing user messages via session→owner_id
         """
         UPDATE chat_messages cm
-        SET sender_id = cs.user_id
+        SET sender_id = cs.owner_id
         FROM chat_sessions cs
         WHERE cm.session_id = cs.id
           AND cm.role = 'user'
           AND cm.sender_id IS NULL
-          AND cs.user_id IS NOT NULL
+          AND cs.owner_id IS NOT NULL
         """,
         # Add FK for sender_id
         """
@@ -110,6 +119,9 @@ def _add_missing_columns() -> None:
           IF EXISTS (
             SELECT 1 FROM information_schema.columns
             WHERE table_name = 'chat_sessions' AND column_name = 'creator_id'
+          ) AND NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'chat_sessions' AND column_name = 'owner_id'
           ) THEN
             ALTER TABLE chat_sessions RENAME COLUMN creator_id TO owner_id;
           END IF;
@@ -151,23 +163,23 @@ def _add_missing_columns() -> None:
           CONSTRAINT uq_session_participant UNIQUE (session_id, participant_id)
         )
         """,
-        # Back-fill session_participants from chat_sessions.user_id for existing rows
+        # Back-fill session_participants from chat_sessions.owner_id for existing rows
         """
         INSERT INTO session_participants (id, session_id, participant_id, is_session_admin, can_talk, can_invite_participants, can_share, joined_at)
         SELECT
           gen_random_uuid()::text,
           cs.id,
-          cs.user_id,
+          cs.owner_id,
           TRUE,
           TRUE,
           TRUE,
           TRUE,
           cs.created_at
         FROM chat_sessions cs
-        WHERE cs.user_id IS NOT NULL
+        WHERE cs.owner_id IS NOT NULL
           AND NOT EXISTS (
             SELECT 1 FROM session_participants sp
-            WHERE sp.session_id = cs.id AND sp.participant_id = cs.user_id
+            WHERE sp.session_id = cs.id AND sp.participant_id = cs.owner_id
           )
         """,
         """
