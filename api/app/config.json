@@ -1,191 +1,191 @@
 {
-    "app": {
-        "name": "S.E.N.S.O.",
-        "fullName": "Sistema Educativo per Numeri, Spese e Obiettivi",
-        "version": "0.1.0",
-        "tagline": "Finalmente qualcuno che ti dice la verità sui tuoi soldi."
-    },
-    "api": {
-        "backendUrl": "http://localhost:8000",
-        "frontendUrl": "http://localhost:3000"
-    },
-    "llm": {
-        "_comment": "Non-sensitive LLM config. API keys come from env: LLM_{PROVIDER_NAME_UPPER}_API_KEY",
-        "providers": [
-            {
-                "name": "openrouter",
-                "base_url": "https://openrouter.ai/api/v1",
-                "env_key": "LLM_OPENROUTER_API_KEY",
-                "priority": 1
-            },
-            {
-                "name": "gemini",
-                "base_url": null,
-                "env_key": "LLM_GEMINI_API_KEY",
-                "priority": 2
-            },
-            {
-                "name": "openai",
-                "base_url": null,
-                "env_key": "LLM_OPENAI_API_KEY",
-                "priority": 3
-            }
-        ],
-        "routing": {
-            "text": {
-                "generation": {
-                    "sm": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 30
-                    },
-                    "md": {
-                        "provider": "openrouter",
-                        "model": "google/gemini-2.0-flash-001",
-                        "timeout": 45
-                    },
-                    "lg": {
-                        "provider": "openrouter",
-                        "model": "google/gemini-2.5-flash-preview:thinking",
-                        "timeout": 90
-                    }
-                },
-                "classification": {
-                    "sm": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 15
-                    },
-                    "md": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 20
-                    },
-                    "lg": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-24b-instruct-2501",
-                        "timeout": 30
-                    }
-                }
-            },
-            "vision": {
-                "ocr": {
-                    "sm": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 45
-                    },
-                    "md": {
-                        "provider": "openrouter",
-                        "model": "meta-llama/llama-4-scout",
-                        "timeout": 60
-                    },
-                    "lg": {
-                        "provider": "gemini",
-                        "model": "gemini-2.0-flash",
-                        "timeout": 90
-                    }
-                },
-                "generation": {
-                    "sm": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 45
-                    },
-                    "md": {
-                        "provider": "openrouter",
-                        "model": "meta-llama/llama-4-scout",
-                        "timeout": 60
-                    },
-                    "lg": {
-                        "provider": "gemini",
-                        "model": "gemini-2.0-flash",
-                        "timeout": 90
-                    }
-                }
-            },
-            "multi": {
-                "generation": {
-                    "sm": {
-                        "provider": "openrouter",
-                        "model": "mistralai/mistral-small-3.1-24b-instruct",
-                        "timeout": 45
-                    },
-                    "md": {
-                        "provider": "openrouter",
-                        "model": "meta-llama/llama-4-scout",
-                        "timeout": 60
-                    },
-                    "lg": {
-                        "provider": "gemini",
-                        "model": "gemini-2.0-flash",
-                        "timeout": 90
-                    }
-                }
-            }
-        }
-    },
-    "voice": {
-        "sttProvider": "web-speech-api",
-        "ttsProvider": "elevenlabs",
-        "defaultLanguage": "it-IT"
-    },
-    "rag": {
-        "embeddingModel": "text-embedding-004",
-        "chunkSize": 512,
-        "chunkOverlap": 64,
-        "topK": 5,
-        "qdrantUrl": "http://localhost:6333",
-        "qdrantCollections": {
-            "knowledgeBase": "senso_kb",
-            "userDocuments": "senso_user_docs"
-        }
-    },
-    "database": {
-        "postgresUrl": "postgresql://senso:senso@localhost:5432/senso"
-    },
-    "personas": {
-        "configPath": "personas/config.json",
-        "soulDir": "personas/soul",
-        "ethosFile": "personas/ethos.md",
-        "boundariesFile": "personas/boundaries.md",
-        "allowlistFile": "personas/allowlist.md",
-        "hardBoundariesFile": "personas/hard-boundaries.yml",
-        "defaultPersona": "mentore-saggio"
-    },
-    "contentPolicy": {
-        "hardBoundariesFile": "personas/hard-boundaries.yml",
-        "userDataFields": [
-            "iban",
-            "codiceFiscale",
-            "telefono",
-            "email",
-            "indirizzo",
-            "numeroCarta"
-        ],
-        "piiMatchMode": {
-            "ownData": "user_profile_only",
-            "thirdPartyData": "exclude_user_profile"
+  "app": {
+    "name": "S.E.N.S.O.",
+    "fullName": "Sistema Educativo per Numeri, Spese e Obiettivi",
+    "version": "0.1.0",
+    "tagline": "Finalmente qualcuno che ti dice la verità sui tuoi soldi."
+  },
+  "api": {
+    "backendUrl": "http://localhost:8000",
+    "frontendUrl": "http://localhost:3000"
+  },
+  "llm": {
+    "_comment": "Non-sensitive LLM config. API keys come from env: LLM_{PROVIDER_NAME_UPPER}_API_KEY",
+    "providers": [
+      {
+        "name": "openrouter",
+        "base_url": "https://openrouter.ai/api/v1",
+        "env_key": "LLM_OPENROUTER_API_KEY",
+        "priority": 1
+      },
+      {
+        "name": "gemini",
+        "base_url": null,
+        "env_key": "LLM_GEMINI_API_KEY",
+        "priority": 2
+      },
+      {
+        "name": "openai",
+        "base_url": null,
+        "env_key": "LLM_OPENAI_API_KEY",
+        "priority": 3
+      }
+    ],
+    "routing": {
+      "text": {
+        "generation": {
+          "sm": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 30
+          },
+          "md": {
+            "provider": "openrouter",
+            "model": "google/gemini-2.0-flash-001",
+            "timeout": 45
+          },
+          "lg": {
+            "provider": "openrouter",
+            "model": "google/gemini-2.5-flash-preview:thinking",
+            "timeout": 90
+          }
         },
-        "notes": [
-            "userDataFields elenca i campi del profilo utente che il regex engine usa per distinguere PII propria (lecita) da PII di terze parti (vietata).",
-            "Un utente può sempre chiedere i propri dati. Il sistema segnala solo se l'LLM li riproduce senza che fossero stati richiesti (possibile RAG poisoning)."
-        ]
-    },
-    "i18n": {
-        "defaultLocale": "it",
-        "supportedLocales": [
-            "it",
-            "en"
-        ]
-    },
-    "features": {
-        "voiceInput": true,
-        "voiceOutput": true,
-        "documentUpload": true,
-        "partnerFunnel": true,
-        "emailLogin": true,
-        "googleLogin": true,
-        "personaSelector": true
+        "classification": {
+          "sm": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 15
+          },
+          "md": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 20
+          },
+          "lg": {
+            "provider": "openrouter",
+            "model": "mistralai/mistral-small-24b-instruct-2501",
+            "timeout": 30
+          }
+        }
+      },
+      "vision": {
+        "ocr": {
+          "sm": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 45
+          },
+          "md": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 60
+          },
+          "lg": {
+            "provider": "gemini",
+            "model": "gemini-2.0-flash",
+            "timeout": 90
+          }
+        },
+        "generation": {
+          "sm": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 45
+          },
+          "md": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 60
+          },
+          "lg": {
+            "provider": "gemini",
+            "model": "gemini-2.0-flash",
+            "timeout": 90
+          }
+        }
+      },
+      "multi": {
+        "generation": {
+          "sm": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 45
+          },
+          "md": {
+            "provider": "openrouter",
+            "model": "meta-llama/llama-4-scout",
+            "timeout": 60
+          },
+          "lg": {
+            "provider": "gemini",
+            "model": "gemini-2.0-flash",
+            "timeout": 90
+          }
+        }
+      }
     }
+  },
+  "voice": {
+    "sttProvider": "web-speech-api",
+    "ttsProvider": "elevenlabs",
+    "defaultLanguage": "it-IT"
+  },
+  "rag": {
+    "embeddingModel": "text-embedding-004",
+    "chunkSize": 512,
+    "chunkOverlap": 64,
+    "topK": 5,
+    "qdrantUrl": "http://localhost:6333",
+    "qdrantCollections": {
+      "knowledgeBase": "senso_kb",
+      "userDocuments": "senso_user_docs"
+    }
+  },
+  "database": {
+    "postgresUrl": "postgresql://senso:senso@localhost:5432/senso"
+  },
+  "personas": {
+    "configPath": "personas/config.json",
+    "soulDir": "personas/soul",
+    "ethosFile": "personas/ethos.md",
+    "boundariesFile": "personas/boundaries.md",
+    "allowlistFile": "personas/allowlist.md",
+    "hardBoundariesFile": "personas/hard-boundaries.yml",
+    "defaultPersona": "mentore-saggio"
+  },
+  "contentPolicy": {
+    "hardBoundariesFile": "personas/hard-boundaries.yml",
+    "userDataFields": [
+      "iban",
+      "codiceFiscale",
+      "telefono",
+      "email",
+      "indirizzo",
+      "numeroCarta"
+    ],
+    "piiMatchMode": {
+      "ownData": "user_profile_only",
+      "thirdPartyData": "exclude_user_profile"
+    },
+    "notes": [
+      "userDataFields elenca i campi del profilo utente che il regex engine usa per distinguere PII propria (lecita) da PII di terze parti (vietata).",
+      "Un utente può sempre chiedere i propri dati. Il sistema segnala solo se l'LLM li riproduce senza che fossero stati richiesti (possibile RAG poisoning)."
+    ]
+  },
+  "i18n": {
+    "defaultLocale": "it",
+    "supportedLocales": [
+      "it",
+      "en"
+    ]
+  },
+  "features": {
+    "voiceInput": true,
+    "voiceOutput": true,
+    "documentUpload": true,
+    "partnerFunnel": true,
+    "emailLogin": true,
+    "googleLogin": true,
+    "personaSelector": true
+  }
 }

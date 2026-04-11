@@ -392,7 +392,7 @@ class LLMClient:
     @staticmethod
     def _default_text_model(provider: str) -> str:
         return {
-            "openrouter": "mistralai/mistral-small-3.1-24b-instruct",
+            "openrouter": "meta-llama/llama-4-scout",
             "gemini": "gemini-2.0-flash",
             "openai": "gpt-4o-mini",
         }.get(provider, "gpt-4o-mini")
@@ -400,7 +400,7 @@ class LLMClient:
     @staticmethod
     def _default_vision_model(provider: str) -> str:
         return {
-            "openrouter": "mistralai/mistral-small-3.1-24b-instruct",
+            "openrouter": "meta-llama/llama-4-scout",
             "gemini": "gemini-2.0-flash",
             "openai": "gpt-4o",
         }.get(provider, "gpt-4o")
