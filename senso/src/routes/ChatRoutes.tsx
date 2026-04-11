@@ -38,11 +38,18 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
       return;
     }
     let cancelled = false;
-    profileApi
-      .getProfile(token)
-      .then((profile) => {
+    Promise.all([
+      profileApi.getProfile(token).catch(() => null),
+      profileApi.getProfileStatus(token).catch(() => null),
+    ])
+      .then(([profile, status]) => {
         if (cancelled) return;
-        if (profile?.confirmed) {
+        // Allow chat if profile is confirmed (questionnaire path)
+        // OR if categorization has started (document upload path)
+        const processingOk =
+          status &&
+          ["complete", "generating_insights", "categorizing", "queued"].includes(status.status);
+        if (profile?.confirmed || processingOk) {
           setState("ready");
         } else {
           navigate("/", { replace: true, state: { toast: t("app.profileRequired") } });
