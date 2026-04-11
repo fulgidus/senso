@@ -224,3 +224,117 @@ export async function bulkDelete(params: {
         },
     })
 }
+
+// ── Factory (Pattern B: requireToken() internal, onUnauthorized bound at construction) ──
+
+export type AdminContentApiClient = ReturnType<typeof createAdminContentApi>
+
+export function createAdminContentApi(onUnauthorized?: () => Promise<string | null>) {
+    function req<T>(path: string, opts: Record<string, unknown> = {}): Promise<T> {
+        return apiRequest<T>(API_BASE, path, {
+            ...opts,
+            token: requireToken(),
+            onUnauthorized,
+        })
+    }
+
+    return {
+        listAdminContent: (params?: {
+            locale?: string
+            type?: string
+            publishedOnly?: boolean
+            page?: number
+            pageSize?: number
+            sortBy?: string
+            sortDir?: "asc" | "desc"
+        }) => {
+            const sp = new URLSearchParams()
+            if (params?.locale) sp.set("locale", params.locale)
+            if (params?.type) sp.set("type", params.type)
+            if (params?.publishedOnly) sp.set("published_only", "true")
+            if (params?.page) sp.set("page", String(params.page))
+            if (params?.pageSize) sp.set("page_size", String(params.pageSize))
+            if (params?.sortBy) sp.set("sort_by", params.sortBy)
+            if (params?.sortDir) sp.set("sort_dir", params.sortDir)
+            const qs = sp.toString()
+            return req<PaginatedAdminResponse>(`/admin/content/items${qs ? `?${qs}` : ""}`)
+        },
+
+        getAdminContentItem: (id: string) =>
+            req<AdminContentItemDTO>(`/admin/content/items/${encodeURIComponent(id)}`),
+
+        checkSlugExists: async (slug: string, excludeId?: string): Promise<boolean> => {
+            const sp = new URLSearchParams()
+            if (excludeId) sp.set("exclude_id", excludeId)
+            const qs = sp.toString()
+            const res = await req<{ exists: boolean }>(
+                `/admin/content/slug-exists/${encodeURIComponent(slug)}${qs ? `?${qs}` : ""}`,
+            )
+            return res.exists
+        },
+
+        searchLinkableItems: (params: {
+            q: string
+            contentType: string
+            excludeLocale: string
+            limit?: number
+        }) => {
+            const sp = new URLSearchParams({
+                q: params.q,
+                content_type: params.contentType,
+                exclude_locale: params.excludeLocale,
+            })
+            if (params.limit) sp.set("limit", String(params.limit))
+            return req<AdminContentItemDTO[]>(`/admin/content/linkable-items?${sp.toString()}`)
+        },
+
+        getItemSiblings: (itemId: string) =>
+            req<AdminContentItemDTO[]>(
+                `/admin/content/items/${encodeURIComponent(itemId)}/siblings`,
+            ),
+
+        createContentItem: (data: ContentItemCreatePayload) =>
+            req<AdminContentItemDTO>("/admin/content/items", { method: "POST", body: data }),
+
+        updateContentItem: (id: string, data: ContentItemUpdatePayload) =>
+            req<AdminContentItemDTO>(`/admin/content/items/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                body: data,
+            }),
+
+        deleteContentItem: (id: string) =>
+            req<{ deleted: boolean }>(
+                `/admin/content/items/${encodeURIComponent(id)}`,
+                { method: "DELETE" },
+            ),
+
+        bulkPublish: (params: {
+            itemIds: string[]
+            isPublished: boolean
+            applyToGroup?: boolean
+        }) =>
+            req<{ updated: number; groups_affected: number }>(
+                "/admin/content/bulk-publish",
+                {
+                    method: "POST",
+                    body: {
+                        item_ids: params.itemIds,
+                        is_published: params.isPublished,
+                        apply_to_group: params.applyToGroup ?? true,
+                    },
+                },
+            ),
+
+        bulkDelete: (params: { itemIds: string[]; applyToGroup?: boolean }) =>
+            req<{ deleted: boolean }>(
+                "/admin/content/bulk-delete",
+                {
+                    method: "POST",
+                    body: {
+                        item_ids: params.itemIds,
+                        apply_to_group: params.applyToGroup ?? true,
+                    },
+                },
+            ),
+    }
+}

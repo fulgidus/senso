@@ -119,3 +119,78 @@ export async function revertModerationAction(logId: string): Promise<void> {
         },
     )
 }
+
+// ── Factory (Pattern B: requireToken() internal, onUnauthorized bound at construction) ──
+
+export type AdminMerchantApiClient = ReturnType<typeof createAdminMerchantApi>
+
+export function createAdminMerchantApi(onUnauthorized?: () => Promise<string | null>) {
+    function req<T>(path: string, opts: Record<string, unknown> = {}): Promise<T> {
+        return apiRequest<T>(API_BASE, path, {
+            ...opts,
+            token: requireToken(),
+            onUnauthorized,
+        })
+    }
+
+    return {
+        getMerchantMap: (
+            params: {
+                search?: string
+                method?: string
+                blacklisted?: string
+                limit?: number
+                offset?: number
+            } = {},
+        ) => {
+            const q = new URLSearchParams()
+            if (params.search) q.set("search", params.search)
+            if (params.method) q.set("method", params.method)
+            if (params.blacklisted) q.set("blacklisted", params.blacklisted)
+            if (params.limit != null) q.set("limit", String(params.limit))
+            if (params.offset != null) q.set("offset", String(params.offset))
+            const qs = q.toString()
+            return req<MerchantMapAdminDTO[]>(`/admin/learned-merchants${qs ? `?${qs}` : ""}`)
+        },
+
+        blacklistMerchant: (merchantId: string, reason: string) =>
+            req<void>(
+                `/admin/learned-merchants/${encodeURIComponent(merchantId)}/blacklist`,
+                { method: "POST", body: { reason } },
+            ),
+
+        unblacklistMerchant: (merchantId: string) =>
+            req<void>(
+                `/admin/learned-merchants/${encodeURIComponent(merchantId)}/unblacklist`,
+                { method: "POST" },
+            ),
+
+        getModerationQueue: (statusFilter?: string) => {
+            const qs = statusFilter
+                ? `?status_filter=${encodeURIComponent(statusFilter)}`
+                : ""
+            return req<ModerationLogAdminDTO[]>(`/admin/moderation${qs}`)
+        },
+
+        confirmModerationAction: (logId: string) =>
+            req<void>(
+                `/admin/moderation/${encodeURIComponent(logId)}/confirm`,
+                { method: "POST" },
+            ),
+
+        revertModerationAction: (logId: string) =>
+            req<void>(
+                `/admin/moderation/${encodeURIComponent(logId)}/revert`,
+                { method: "POST" },
+            ),
+
+        /** Claim or update the admin handle for the authenticated user.
+         *  `adminHandle` must include the leading `!` prefix, e.g. `"!myhandle"`.
+         *  Replaces the raw dynamic apiRequest import in SettingsScreen and AdminHandleGateModal. */
+        claimHandle: (adminHandle: string) =>
+            req<{ adminHandle: string }>("/admin/claim-handle", {
+                method: "POST",
+                body: { adminHandle },
+            }),
+    }
+}
