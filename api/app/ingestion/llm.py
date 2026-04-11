@@ -40,8 +40,11 @@ Inject via get_llm_client() FastAPI dependency.
 from __future__ import annotations
 
 import json
+import logging
 import time
 from typing import Any, Callable
+
+logger = logging.getLogger(__name__)
 
 from app.core.llm_config import (
     LLMCallTrace,

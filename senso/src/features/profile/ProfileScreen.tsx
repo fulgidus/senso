@@ -279,9 +279,7 @@ export function ProfileScreen({
     (slug) => t(`profile.categories.${slug}`, { defaultValue: slug.replace(/_/g, " ") }),
   );
   const incomeAvailable = !!profile.incomeSummary?.amount;
-  const confirmedDate = profile.profileGeneratedAt
-    ? fmt.date(new Date(profile.profileGeneratedAt))
-    : "";
+  const confirmedDate = fmt.date(profile.profileGeneratedAt);
   const dataSourcesLabel = formatDataSources(profile.dataSources);
 
   return (

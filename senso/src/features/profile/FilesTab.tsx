@@ -130,7 +130,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
           const busy = actionLoading[file.id] ?? false;
           const canRetry =
             file.extraction_status === "failed" || file.extraction_status === "pending";
-          const uploadDate = fmt.date(new Date(file.uploaded_at));
+          const uploadDate = fmt.date(file.uploaded_at);
 
           return (
             <li
