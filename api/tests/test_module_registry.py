@@ -157,14 +157,15 @@ def test_module_from_promoted_dir_has_source_promoted(tmp_path):
 
 
 def test_match_returns_none_for_empty_registry(tmp_path):
-    """match() returns None when no modules are loaded."""
+    """match() returns (None, scan_text) when no modules are loaded."""
     (tmp_path / "builtin").mkdir()
 
     with patch("app.ingestion.registry.MODULES_DIR", tmp_path):
         registry = ModuleRegistry()
 
-    result = registry.match(tmp_path / "file.csv", "some content without keywords")
-    assert result is None
+    module, scan_text = registry.match(tmp_path / "file.csv", "some content without keywords")
+    assert module is None
+    assert isinstance(scan_text, str)
 
 
 def test_match_returns_module_for_matching_content(tmp_path):
@@ -177,16 +178,17 @@ def test_match_returns_module_for_matching_content(tmp_path):
         registry = ModuleRegistry()
 
     # Content with both fingerprint keywords
-    result = registry.match(
+    module, scan_text = registry.match(
         tmp_path / "file.csv",
         content_preview="test_keyword_unique_abc\nanother_keyword_xyz\nsome other data",
     )
-    assert result is not None
-    assert result.source == "builtin"
+    assert module is not None
+    assert module.source == "builtin"
+    assert scan_text == "test_keyword_unique_abc\nanother_keyword_xyz\nsome other data"
 
 
 def test_match_returns_none_for_non_matching_content(tmp_path):
-    """match() returns None when content does not contain fingerprint keywords."""
+    """match() returns (None, scan_text) when content does not match fingerprint."""
     builtin_dir = tmp_path / "builtin"
     builtin_dir.mkdir(parents=True)
     _write_valid_module(builtin_dir)
@@ -194,11 +196,12 @@ def test_match_returns_none_for_non_matching_content(tmp_path):
     with patch("app.ingestion.registry.MODULES_DIR", tmp_path):
         registry = ModuleRegistry()
 
-    result = registry.match(
+    module, scan_text = registry.match(
         tmp_path / "file.csv",
         content_preview="completely unrelated content without the magic words",
     )
-    assert result is None
+    assert module is None
+    assert scan_text == "completely unrelated content without the magic words"
 
 
 def test_register_module_adds_new_module(tmp_path):

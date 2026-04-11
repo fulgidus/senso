@@ -165,16 +165,19 @@ class ModuleRegistry:
 
     def match(
         self, file_path: Path, content_preview: str = "", mime_type: str = ""
-    ) -> ModuleEntry | None:
+    ) -> tuple[ModuleEntry | None, str]:
         """
         Two-step match:
         1. MIME-type pre-filter: skip modules whose MIME_TYPES list excludes this file
         2. Content fingerprint scoring: keywords matched in scan text
            - XLSX: cell text extracted from workbook (not ZIP bytes)
+           - PDF:  text layer extracted via liteparse
            - Other: first 4KB as UTF-8
-        Returns best match above MATCH_THRESHOLD, or None.
+
+        Returns ``(best_match, scan_text)`` so callers can reuse the already-
+        extracted text when invoking the module, avoiding a second liteparse call.
         """
-        # Get scan text (XLSX-aware)
+        # Get scan text (XLSX/PDF-aware)
         if not content_preview:
             scan_text = _get_scan_text(file_path, mime_type)
         else:
@@ -200,7 +203,7 @@ class ModuleRegistry:
                 best_score = score
                 best_module = entry
 
-        return best_module
+        return best_module, scan_text
 
     def register_module(self, py_file: Path, source: str) -> bool:
         """Dynamically register a newly written module. Returns True on success."""

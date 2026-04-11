@@ -38,10 +38,13 @@ def extract(file_path: Path, raw_text: str | None = None) -> dict:
     """Extract payslip fields from raw_text (PDF text layer or OCR output)."""
     if raw_text is None:
         try:
-            # Try to read as text (e.g. test fixture)
-            raw_text = file_path.read_text(encoding="utf-8", errors="ignore")
+            from app.ingestion.liteparse_extractor import extract_text_with_liteparse
+            raw_text = extract_text_with_liteparse(file_path) or ""
         except Exception:
-            raw_text = ""
+            try:
+                raw_text = file_path.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                raw_text = ""
 
     text = raw_text
 

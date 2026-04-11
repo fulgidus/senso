@@ -25,7 +25,9 @@ from app.ingestion.llm import LLMClient, LLMError, get_llm_client
 from app.ingestion.ocr import extract_with_pdf_pipeline, extract_with_image_pipeline
 from app.ingestion.adaptive import run_adaptive_pipeline
 from app.ingestion.registry import get_registry
-from app.schemas.ingestion import ExtractionResult, UploadStatusDTO
+import inspect
+
+from app.schemas.ingestion import ExtractedDocument, ExtractionResult, UploadStatusDTO
 from app.db.session import SessionLocal
 
 logger = logging.getLogger(__name__)
@@ -41,6 +43,31 @@ IMAGE_MIME_TYPES = {
     "image/webp",
 }
 PDF_MIME_TYPE = "application/pdf"
+
+
+_NON_LEDGER_TYPES = frozenset({"payslip", "receipt", "invoice", "utility_bill"})
+
+
+def _module_is_empty(doc: ExtractedDocument) -> bool:
+    """True when a module's extraction produced no usable content.
+
+    Mirrors the logic in adaptive._extraction_has_content but inverted.
+    Used as a quality gate in _extract() to decide whether to escalate
+    an empty module result to the OCR/LLM pipeline.
+    """
+    if doc.transactions:
+        return False
+    if doc.document_type in _NON_LEDGER_TYPES:
+        return not any([
+            doc.net_income,
+            doc.gross_income,
+            doc.total_due,
+            doc.total_amount,
+            doc.merchant,
+            doc.provider,
+        ])
+    # bank_statement or unknown with no transactions → empty
+    return True
 
 
 class IngestionError(Exception):
@@ -288,29 +315,63 @@ class IngestionService:
     def _extract(
         self, file_path: Path, content_type: str, llm_client: LLMClient, registry
     ) -> ExtractionResult:
-        """Route to the appropriate extraction pipeline."""
-        # Registry now handles MIME-aware routing and XLSX cell-text fingerprinting.
-        # Pass content_type so MIME pre-filter can exclude irrelevant modules.
-        module_entry = registry.match(file_path, mime_type=content_type)
+        """Route to the appropriate extraction pipeline.
+
+        Steps:
+        1. Registry match: find the best-scoring fingerprint module.
+        2. If matched: pass the already-extracted scan_text as raw_text so the
+           module doesn't re-extract text from the file (avoids double liteparse).
+        3. Quality gate: if the module returned an empty result for a PDF/image,
+           escalate to the OCR/LLM pipeline instead of persisting empty data.
+        4. No match, or empty escalation: route to PDF, image, or adaptive pipeline.
+        """
+        from app.schemas.ingestion import ExtractedDocument, ExtractionResult as ER
+
+        # match() now returns (module_entry, scan_text) to avoid re-extracting text.
+        module_entry, scan_text = registry.match(file_path, mime_type=content_type)
+
         if module_entry:
-            raw_result = module_entry.extract_fn(file_path)
+            # Pass scan_text as raw_text to modules that accept it (PDF/image regex
+            # modules). This reuses the text already extracted for fingerprinting.
+            sig = inspect.signature(module_entry.extract_fn)
+            if "raw_text" in sig.parameters and scan_text:
+                raw_result = module_entry.extract_fn(file_path, raw_text=scan_text)
+            else:
+                raw_result = module_entry.extract_fn(file_path)
+
             if isinstance(raw_result, ExtractionResult):
-                return raw_result
-            # Module returned a dict - wrap it
-            from app.schemas.ingestion import ExtractedDocument, ExtractionResult as ER
+                result = raw_result
+            else:
+                doc = ExtractedDocument(**raw_result)
+                result = ER(document=doc, confidence=0.85, tier_used="module")
 
-            doc = ExtractedDocument(**raw_result)
-            return ER(document=doc, confidence=0.85, tier_used="module")
+            # Quality gate: empty module result for PDF/image → escalate to
+            # OCR/LLM pipeline. CSV/XLSX modules are intentionally excluded from
+            # escalation (empty ledger period is a valid result for tabular modules).
+            if (
+                (content_type == PDF_MIME_TYPE or content_type in IMAGE_MIME_TYPES)
+                and _module_is_empty(result.document)
+            ):
+                logger.info(
+                    "Module %r returned empty extraction for %s; "
+                    "escalating to OCR/LLM pipeline",
+                    module_entry.name,
+                    file_path.name,
+                )
+                # Fall through to the OCR/LLM path below.
+            else:
+                return result
 
-        # No module matched - route to PDF or image pipeline
+        # No module matched, or module returned empty for a PDF/image file.
         if content_type == PDF_MIME_TYPE:
             return extract_with_pdf_pipeline(file_path, llm_client, registry)
 
         if content_type in IMAGE_MIME_TYPES:
             return extract_with_image_pipeline(file_path, llm_client, registry)
 
-        # Fallback: adaptive pipeline (e.g. plain text, CSV with no module match)
-        return run_adaptive_pipeline(file_path, preview, llm_client, registry)
+        # Fallback: adaptive pipeline (plain text, CSV with no module match).
+        # Reuse scan_text already extracted by registry.match() as the raw text hint.
+        return run_adaptive_pipeline(file_path, scan_text, llm_client, registry)
 
     def _extract_xlsx(self, file_path: Path) -> ExtractionResult:
         """Extract transactions from xlsx/xls using openpyxl."""
