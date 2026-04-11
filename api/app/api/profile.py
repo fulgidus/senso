@@ -411,3 +411,98 @@ def patch_preferences(
         "dos": profile.dos or [],
         "donts": profile.donts or [],
     }
+
+# ── Phase 29: Sealed profile ──────────────────────────────────────────────────
+
+class SealedProfileBody(BaseModel):
+    ciphertext: str | None = None
+
+
+@router.get("/profile/sealed-profile", tags=["profile"])
+def get_sealed_profile(
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"ciphertext": getattr(profile, "sealed_profile", None)}
+
+
+@router.patch("/profile/sealed-profile", tags=["profile"])
+def patch_sealed_profile(
+    body: SealedProfileBody,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    from datetime import datetime, UTC as _UTC  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    profile.sealed_profile = body.ciphertext
+    profile.updated_at = datetime.now(_UTC)
+    db.commit()
+    return {"ciphertext": profile.sealed_profile}
+
+
+# ── Phase 29: Unsealed demographics ──────────────────────────────────────────
+
+class DemographicsBody(BaseModel):
+    age_bracket: str | None = None
+    gender_at_birth: str | None = None
+    elected_gender: str | None = None
+    household_size: int | None = None
+    has_dependents: bool | None = None
+    employment_status: str | None = None
+    region_of_residence: str | None = None
+
+
+@router.get("/profile/demographics", tags=["profile"])
+def get_demographics(
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {
+        "age_bracket": getattr(profile, "age_bracket", None),
+        "gender_at_birth": getattr(profile, "gender_at_birth", None),
+        "elected_gender": getattr(profile, "elected_gender", None),
+        "household_size": getattr(profile, "household_size", None),
+        "has_dependents": getattr(profile, "has_dependents", None),
+        "employment_status": getattr(profile, "employment_status", None),
+        "region_of_residence": getattr(profile, "region_of_residence", None),
+    }
+
+
+@router.patch("/profile/demographics", tags=["profile"])
+def patch_demographics(
+    body: DemographicsBody,
+    current_user: UserDTO = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.db.models import UserProfile  # noqa: PLC0415
+    from datetime import datetime, UTC as _UTC  # noqa: PLC0415
+    profile = db.query(UserProfile).filter_by(user_id=current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    for field in ["age_bracket", "gender_at_birth", "elected_gender",
+                  "household_size", "has_dependents", "employment_status", "region_of_residence"]:
+        val = getattr(body, field, None)
+        if val is not None:
+            setattr(profile, field, val)
+    profile.updated_at = datetime.now(_UTC)
+    db.commit()
+    return {
+        "age_bracket": getattr(profile, "age_bracket", None),
+        "gender_at_birth": getattr(profile, "gender_at_birth", None),
+        "elected_gender": getattr(profile, "elected_gender", None),
+        "household_size": getattr(profile, "household_size", None),
+        "has_dependents": getattr(profile, "has_dependents", None),
+        "employment_status": getattr(profile, "employment_status", None),
+        "region_of_residence": getattr(profile, "region_of_residence", None),
+    }

@@ -464,7 +464,7 @@ def get_welcome(
     service = get_coaching_service(db=db)
     message = service.get_welcome(
         user_id=current_user.id,
-        first_name=current_user.first_name,
+        first_name=None,
         voice_gender=current_user.voice_gender or "indifferent",
         locale=locale,
         persona_id=persona_id,

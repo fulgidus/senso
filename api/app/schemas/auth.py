@@ -28,8 +28,6 @@ class UserDTO(BaseModel):
 
 
 class UpdateMeRequest(BaseModel):
-    first_name: str | None = None
-    last_name: str | None = None
     voice_gender: VoiceGender | None = None
     voice_auto_listen: bool | None = None
     default_persona_id: str | None = None

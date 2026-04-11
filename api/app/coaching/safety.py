@@ -199,8 +199,6 @@ class SafetyScanner:
 
 _PROFILE_FIELD_HINTS: dict[str, set[str]] = {
     "email": {"email", "mail"},
-    "first_name": {"nome", "name"},
-    "last_name": {"cognome", "surname", "last name"},
     "monthly_margin": {"margine", "margin"},
     "monthly_expenses": {"spese", "expenses", "costi", "costs"},
     "income_summary": {"reddito", "income", "stipendio", "salary"},
