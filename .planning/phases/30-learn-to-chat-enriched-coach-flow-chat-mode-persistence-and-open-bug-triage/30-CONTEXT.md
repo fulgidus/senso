@@ -89,54 +89,71 @@ Cross-referencing STATE.md pending todos with Phase 22 VERIFICATION.md (all 22 f
 - #23 Coach picker dark theme ✓
 - #24 Coach picker non-default persona ✓
 
-**PRIORITY bugs for this phase (actionable, impactful):**
+**PRIORITY bugs for this phase (actionable, confirmed by user):**
 
-**Bug A: Nuke endpoint doesn't fully reset user state** (todo #14)
-- Backend `/debug/nuke` deletes ChatMessage, ExtractedDocument, Upload
-- MISSING: ChatSession records remain (orphaned sessions in UI list)
-- MISSING: UserProfile confirmed flag remains True (user bypasses upload flow)
-- MISSING: UserProfile financial data remains (income, expenses, balance, etc.)
-- Fix: Add ChatSession cascade + UserProfile reset (set confirmed=False, clear financial fields) in `api/app/api/debug.py`
+**Bug A: STT broken on Firefox/LibreWolf** (#21 TTS works, STT is the issue)
+- Root cause 1: `useVoiceInput.ts` uses `useState("none")` + `useEffect` to detect backend.
+  On Firefox (no Web Speech API), first render has `isSttAvailable=false` → mic disabled.
+- Root cause 2: Firefox MediaRecorder falls back to `audio/ogg;codecs=opus`. ElevenLabs
+  Scribe does NOT support OGG (supports: mp3, mp4, mpeg, mpga, m4a, wav, webm). Backend
+  sends OGG directly → `stt_failed`.
+- Fix 1: `useState(() => detectBackend())` lazy init — eliminates false-unavailable flash
+- Fix 2: Backend strips codec params + remaps `audio/ogg` → `audio/webm` content-type
 
-**Bug B: Content management missing i18n** (todo #17/18)
-- Admin content table column headers: `colLocale` and `colActions` still use raw text or icon not from i18n
-- Partially fixed (duplicate JSON keys removed); icon replacement pending
-- Fix: Replace remaining hardcoded column headers with i18n keys + icon-only variants
+**Bug B: Settings coach picker dark mode colors** (#23 — settings picker, not chat picker)
+- `const theme = persona.theme?.light` — hardcoded to light theme in Settings
+- Chat picker correctly uses `getPersonaTheme(persona, resolvedTheme)`
+- Fix: import `getPersonaTheme` in SettingsScreen; use `resolvedTheme` derived from `useTheme()`
 
-**Bug C: STT Chromium regression prevention** (todo #27)
-- Fix was applied (isRecording guard in useVoiceInput), human verify pending
-- Fix: Add a unit test to `useVoiceInput.test.ts` verifying the guard prevents double-start
+**Bug C: Settings coach picker doesn't persist** (#24 — requires Save click)
+- Selecting a coach only updates local state; user must click Save
+- Counter-intuitive: looks like a radio group but isn't
+- `strictPrivacyMode` in same screen already does immediate API save (correct pattern)
+- Fix: `handlePersonaSelect` callback calls `updateMe` + `updateUser` immediately on click;
+  remove `defaultPersonaId` from the Save form entirely
 
-**Bug D: Content management pagination** (todo #20 - quick win for admin UX)
-- AdminContentPage table has no pagination; loads all items
-- Already has state for `page` and `pageSize` in profile-api.ts
-- Fix: Add pagination controls to `AdminContentPage`
+**Bug D: STT Chromium guard regression test** (#27 — fix applied, no test)
+- Fix was applied (`if (isRecording) return` guard in startRecording)
+- Add unit test to confirm guard works (no double-start)
+
+**Confirmed NOT broken (do not re-fix):**
+- #14 Nuke button: works correctly
+- #21 TTS: works; STT is the broken part on Firefox
+- #15 Tables mobile / #2 PWA / #11 Spending pie / #3 Pull-to-refresh: all Phase 22 done
 
 ## File Map
 
-### Feature 1
+### Feature 1 (Plan 30-01)
 - `senso/src/routes/ChatRoutes.tsx` — Replace `AboutChatPage` implementation
 - `senso/src/features/content/contentApi.ts` — Already has `fetchContentItemBySlug`
 - `senso/src/features/coaching/coachingApi.ts` — Already has `sendMessage`, `renameSession`
 
-### Feature 2  
-- `senso/src/features/coaching/useVoiceMode.ts` — Add localStorage read/write
+### Feature 2 (Plan 30-02)
+- `senso/src/features/coaching/useVoiceInput.ts` — Lazy backend detection (Firefox fix)
+- `senso/src/features/coaching/useVoiceMode.ts` — localStorage persistence
+- `api/app/api/coaching.py` — Normalize OGG content-type for ElevenLabs
+- `senso/src/features/coaching/useVoiceInput.test.ts` — Guard regression test
 
-### Feature 3
-- `api/app/api/debug.py` — Fix nuke to reset profile + delete sessions
-- `senso/src/features/admin/AdminContentPage.tsx` (or ContentAdminPage) — Add pagination
-- `senso/src/features/coaching/useVoiceInput.test.ts` — Add guard regression test
+### Feature 3 (Plan 30-03)
+- `senso/src/features/settings/SettingsScreen.tsx` — Coach picker: dark mode colors + auto-save
 
 ## Requirements
 
+### Plan 30-01 (Learn-to-Chat)
 - D-1: `/chat/about/:slug` → fetch content → send enriched message → navigate to `/chat/:id`
-- D-2: Session URL is `/chat/:id` after About flow (not stuck on `/chat/about/:slug`)
-- D-3: Session is renamed to content title after first message
-- D-4: Loading state shown while fetching content + sending message
-- D-5: Error state falls back to `/chat/new` with a toast
-- D-6: `isVoiceMode` persists across page loads via `localStorage.getItem("senso:chatMode")`
-- D-7: Mode toggle writes to localStorage on every change
-- D-8: Nuke endpoint deletes ChatSession records for the user
-- D-9: Nuke endpoint resets UserProfile confirmed=False + clears financial fields
-- D-10: All content management column headers use i18n keys
-- D-11: Unit test covers `isRecording` guard in `useVoiceInput`
+- D-2: Session URL is `/chat/:id` after About flow (replace navigation, not stack)
+- D-3: Session is renamed to content title (fire-and-forget after first message)
+- D-4: Loading state shown while fetching + sending
+- D-5: Error state falls back to `/chat/new` (no dead end)
+
+### Plan 30-02 (STT Firefox + Mode Persistence)
+- D-6: `useVoiceInput.ts` uses lazy init `useState(() => detectBackend())` — no flash
+- D-7: Backend STT normalizes OGG content-type before ElevenLabs call
+- D-8: `isVoiceMode` persists across page loads via `localStorage.getItem("senso:chatMode")`
+- D-9: Mode toggle writes to localStorage
+- D-10: Unit test confirms `isRecording` guard prevents double-start
+
+### Plan 30-03 (Settings Coach Picker)
+- D-11: Settings coach picker uses `getPersonaTheme(persona, resolvedTheme)` — correct dark mode colors
+- D-12: Clicking a coach in Settings auto-saves immediately (no Save button needed)
+- D-13: `defaultPersonaId` removed from `isDirty` / `handleSave` / `handleReset`
