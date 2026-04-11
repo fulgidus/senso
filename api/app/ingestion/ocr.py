@@ -109,7 +109,7 @@ def _llm_text_fallback(
             document=doc,
             confidence=0.45,
             raw_text=text or None,
-            tier_used=tier,  # type: ignore[arg-type]
+            tier_used=tier,
         )
     except (LLMError, json.JSONDecodeError, Exception) as exc:
         logger.warning("LLM text fallback failed: %s", exc)
@@ -135,7 +135,7 @@ def _llm_vision_fallback(
         document=doc,
         confidence=0.55,
         raw_text=raw_text,
-        tier_used=tier,  # type: ignore[arg-type]
+        tier_used=tier,
     )
 
 
@@ -164,7 +164,7 @@ def extract_with_pdf_pipeline(
         logger.debug("PDF %s: LiteParse text usable (%d chars)", file_path.name, len(text))
 
         # Step 2: LLM text structuring — LiteParse gave us text, LLM structures it
-        result = _llm_text_fallback(text, llm_client, "pdf_liteparse_llm_text")
+        result = _llm_text_fallback(text, llm_client, "pdf_llm_text")
         if result is not None:
             return result
     else:
@@ -176,7 +176,7 @@ def extract_with_pdf_pipeline(
 
     # Step 3: Last resort — LLM vision OCR
     logger.info("PDF %s: text path exhausted, trying LLM vision OCR", file_path.name)
-    return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision_ocr")
+    return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -204,14 +204,14 @@ def extract_with_image_pipeline(
         logger.debug("Image %s: LiteParse OCR usable (%d chars)", file_path.name, len(ocr_text))
 
         # Step 2: LLM text structuring
-        result = _llm_text_fallback(ocr_text, llm_client, "image_liteparse_llm_text")
+        result = _llm_text_fallback(ocr_text, llm_client, "image_llm_text")
         if result is not None:
             return result
 
     # Step 3: LLM vision OCR (last resort)
     logger.info("Image %s: LiteParse OCR insufficient, trying LLM vision OCR", file_path.name)
     return _llm_vision_fallback(
-        file_path, ocr_text or None, llm_client, "image_llm_vision_ocr"
+        file_path, ocr_text or None, llm_client, "image_llm_vision"
     )
 
 

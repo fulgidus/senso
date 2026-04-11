@@ -79,6 +79,16 @@ class CatchAllExceptionMiddleware:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # ── Startup validation ─────────────────────────────────────────────────
+    from app.startup_validator import run_startup_validation
+    report = run_startup_validation()
+    report.log()
+    if report.has_errors:
+        logging.getLogger(__name__).error(
+            "STARTUP VALIDATION FAILED — check report above. "
+            "App will start but some features may be broken."
+        )
+
     create_tables()
 
     # Build BM25 content + regional knowledge indexes and seed from JSON if needed
