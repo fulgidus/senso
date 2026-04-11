@@ -66,13 +66,13 @@ type Props = {
 
 export function ProcessingScreen({ token, onBack, onComplete }: Props) {
   const { t } = useTranslation();
-  const { status, errorMessage, progressDetail } = useProfileStatus({
+  const { status, errorMessage, progressDetail, pollError } = useProfileStatus({
     token,
     onComplete,
     enabled: true,
   });
 
-  const isFailed = status === "failed";
+  const isFailed = status === "failed" || pollError != null;
   const isNotStarted = status === "not_started";
 
   // Determine progress bar value
@@ -97,7 +97,7 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
               </h2>
               <p className="mb-4 text-sm text-muted-foreground">
                 {isFailed
-                  ? (errorMessage ?? t("processing.bodyFailed"))
+                  ? (pollError ?? errorMessage ?? t("processing.bodyFailed"))
                   : t("processing.bodyNotStarted")}
               </p>
               <Button variant="default" onClick={onBack}>

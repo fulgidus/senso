@@ -243,12 +243,14 @@ class IngestionService:
                     output_summary="saved to DB",
                     duration_ms=_duration,
                 )
-            except LLMError:
+            except LLMError as exc:
                 upload.extraction_status = "provider_outage"
+                upload.error_message = str(exc)[:512]
                 db.commit()
             except Exception as exc:
                 logger.exception("Extraction failed for upload %s: %s", upload_id, exc)
                 upload.extraction_status = "failed"
+                upload.error_message = str(exc)[:512]
                 db.commit()
             finally:
                 tmp_path.unlink(missing_ok=True)
@@ -308,6 +310,7 @@ class IngestionService:
             upload.extraction_status = "failed"
             upload.extraction_method = "watchdog:stale_pending"
             upload.module_source = None
+            upload.error_message = "Processing timed out after %s seconds" % self.settings.stale_upload_timeout_seconds
 
         self.db.commit()
         return len(stale_uploads)
@@ -727,4 +730,5 @@ class IngestionService:
             moduleSource=upload.module_source,
             confirmed=upload.confirmed,
             reportFlagged=upload.report_flagged,
+            errorMessage=upload.error_message,
         )

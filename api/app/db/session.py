@@ -471,6 +471,8 @@ def _add_missing_columns() -> None:
         "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS region_of_residence VARCHAR(50)",
         # Null out PII name fields — names now live in the sealed profile
         "UPDATE users SET first_name = NULL, last_name = NULL WHERE first_name IS NOT NULL OR last_name IS NOT NULL",
+        # ── Round 24: Upload error messages for debugging ──────────────────────
+        "ALTER TABLE uploads ADD COLUMN IF NOT EXISTS error_message TEXT",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

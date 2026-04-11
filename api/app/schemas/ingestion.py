@@ -103,6 +103,7 @@ class UploadStatusDTO(BaseModel):
     module_source: str | None = Field(alias="moduleSource", default=None)
     confirmed: bool = False
     report_flagged: bool = Field(alias="reportFlagged", default=False)
+    error_message: str | None = Field(alias="errorMessage", default=None)
 
     model_config = {"populate_by_name": True}
 

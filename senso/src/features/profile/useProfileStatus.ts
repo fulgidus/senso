@@ -16,6 +16,7 @@ type ProfileStatusState = {
   status: CategorizationStatus;
   errorMessage: string | null;
   progressDetail: ProgressDetail | null;
+  pollError: string | null; // Error from polling itself (not job failure)
 };
 
 export function useProfileStatus({
@@ -29,7 +30,10 @@ export function useProfileStatus({
     status: "queued",
     errorMessage: null,
     progressDetail: null,
+    pollError: null,
   });
+  const consecutiveErrorsRef = useRef(0);
+  const MAX_CONSECUTIVE_ERRORS = 5;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedRef = useRef(false);
 
@@ -44,10 +48,12 @@ export function useProfileStatus({
     if (!token || completedRef.current) return;
     try {
       const data = await profileApi.getProfileStatus(token);
+      consecutiveErrorsRef.current = 0; // Reset on success
       setState({
         status: data.status,
         errorMessage: data.errorMessage ?? null,
         progressDetail: data.progressDetail ?? null,
+        pollError: null,
       });
       if (data.status === "complete" && !completedRef.current) {
         completedRef.current = true;
@@ -56,8 +62,21 @@ export function useProfileStatus({
       } else if (data.status === "failed" || data.status === "not_started") {
         clearPolling();
       }
-    } catch {
-      // Polling errors are silent - keep retrying
+    } catch (err) {
+      consecutiveErrorsRef.current++;
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.error(
+        `[profile] poll failed (${consecutiveErrorsRef.current}/${MAX_CONSECUTIVE_ERRORS}):`,
+        err,
+      );
+
+      if (consecutiveErrorsRef.current >= MAX_CONSECUTIVE_ERRORS) {
+        clearPolling();
+        setState((s) => ({
+          ...s,
+          pollError: `API polling failed after ${MAX_CONSECUTIVE_ERRORS} attempts: ${errorMsg}`,
+        }));
+      }
     }
   };
 
