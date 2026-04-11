@@ -69,7 +69,10 @@
     "errorGoogleUnavailable": "Google login is not available. Use email and password.",
     "errorGoogleFailed": "Google login failed. Use email and password.",
     "confirmSignOut": "Are you sure you want to sign out from this device?",
-    "signOutTitle": "Sign out"
+    "signOutTitle": "Sign out",
+    "guestPrompt": "Not ready to sign up?",
+    "guestLearn": "Browse content",
+    "guestAbout": "Learn how it works"
   },
   "profileSetup": {
     "heading": "S.E.N.S.O.",
@@ -723,7 +726,7 @@
       "unsealedHint": "Your coach uses this information to answer you better",
       "sealedHeading": "Just for you",
       "sealedHint": "The coach has no access to this data",
-      "savedIndicator": "Saved \uD83D\uDD12",
+      "savedIndicator": "Saved 🔒",
       "saveError": "Unable to save. Check your connection.",
       "lockedHeading": "Private data locked",
       "lockedBody": "Complete authentication to unlock private data",
@@ -955,7 +958,7 @@
     "innovationTitle": "Innovative Approaches",
     "innovVoiceFirst": "Voice-first: natural conversation with hold-to-talk, auto TTS, and post-reply auto-listen",
     "innovSealed": "Sealed data: separation between server-accessible data and user-only-readable data",
-    "innovRAL": "RAL\u2192Net calculator: automatic conversion from gross RAL to monthly net with CCNL, meal vouchers, and bonuses",
+    "innovRAL": "RAL→Net calculator: automatic conversion from gross RAL to monthly net with CCNL, meal vouchers, and bonuses",
     "innovA2UI": "A2UI (AI-to-UI): the coach generates interactive UI components (calculators, comparisons, charts) inline in chat",
     "innovBM25": "Local BM25 search: the coach searches educational content without depending on external services"
   },
@@ -965,9 +968,9 @@
     "description": "Set your !handle before continuing. It will be visible to users in official messages.",
     "inputLabel": "Admin handle (without !)",
     "inputPlaceholder": "my-handle",
-    "formatHint": "Lowercase letters, numbers, and hyphens only. 3\u201330 characters.",
+    "formatHint": "Lowercase letters, numbers, and hyphens only. 3–30 characters.",
     "cta": "Save handle",
-    "saving": "Saving\u2026",
+    "saving": "Saving…",
     "errorReserved": "This handle is reserved. Choose another.",
     "errorTaken": "Handle already taken. Choose another.",
     "errorFallback": "Could not save handle. Please try again.",

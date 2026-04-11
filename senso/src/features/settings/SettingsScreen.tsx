@@ -469,18 +469,6 @@ export function SettingsScreen() {
           )}
         </div>
 
-        {/* About link */}
-        <div className="pt-4 border-t border-border">
-          <p className="text-sm font-medium text-foreground">{t("settings.aboutTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("settings.aboutHint")}</p>
-          <Link
-            to="/about"
-            className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-          >
-            {t("settings.aboutCta")} →
-          </Link>
-        </div>
-
         {/* Developer tools link - visible only for testers and admins */}
         {(user.role === "tester" || user.role === "admin" || user.isAdmin) && (
           <div className="pt-4 border-t border-border">

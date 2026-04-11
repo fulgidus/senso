@@ -1,18 +1,20 @@
-import { useState } from "react"
-import type { FormEvent } from "react"
-import { useTranslation } from "react-i18next"
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { BookOpen, Info } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 type AuthScreenProps = {
-  mode: "signup" | "login"
-  loading: boolean
-  error: string | null
-  googleFallback: string | null
-  onModeChange: (mode: "signup" | "login") => void
-  onSubmit: (email: string, password: string) => Promise<void>
-  onGoogle: () => Promise<void>
-}
+  mode: "signup" | "login";
+  loading: boolean;
+  error: string | null;
+  googleFallback: string | null;
+  onModeChange: (mode: "signup" | "login") => void;
+  onSubmit: (email: string, password: string) => Promise<void>;
+  onGoogle: () => Promise<void>;
+};
 
 export function AuthScreen({
   mode,
@@ -22,18 +24,18 @@ export function AuthScreen({
   onModeChange,
   onSubmit,
 }: AuthScreenProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const { t } = useTranslation()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { t } = useTranslation();
 
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-    await onSubmit(email, password)
-  }
+    event.preventDefault();
+    await onSubmit(email, password);
+  };
 
-  const isLogin = mode === "login"
-  const heading = isLogin ? t("auth.loginHeading") : t("auth.signupHeading")
-  const body = isLogin ? t("auth.loginBody") : t("auth.signupBody")
+  const isLogin = mode === "login";
+  const heading = isLogin ? t("auth.loginHeading") : t("auth.signupHeading");
+  const body = isLogin ? t("auth.loginBody") : t("auth.signupBody");
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-6 py-12">
@@ -90,8 +92,12 @@ export function AuthScreen({
 
           <Button className="h-11 w-full text-sm font-semibold" disabled={loading}>
             {loading
-              ? isLogin ? t("auth.loggingIn") : t("auth.signingUp")
-              : isLogin ? t("auth.loginCta") : t("auth.signupCta")}
+              ? isLogin
+                ? t("auth.loggingIn")
+                : t("auth.signingUp")
+              : isLogin
+                ? t("auth.loginCta")
+                : t("auth.signupCta")}
           </Button>
         </form>
 
@@ -115,7 +121,28 @@ export function AuthScreen({
             {error}
           </p>
         )}
+
+        {/* Guest access links */}
+        <div className="mt-6 border-t border-border pt-5">
+          <p className="mb-3 text-center text-xs text-muted-foreground">{t("auth.guestPrompt")}</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              to="/learn"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
+              {t("auth.guestLearn")}
+            </Link>
+            <Link
+              to="/about"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Info className="h-4 w-4 shrink-0 text-muted-foreground" />
+              {t("auth.guestAbout")}
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
-  )
+  );
 }
