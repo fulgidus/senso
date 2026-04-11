@@ -10,7 +10,7 @@ style: |
   strong { color: #5B9BD5; }
   em { color: #a8c4e0; }
   code { background: #1e4472; color: #5B9BD5; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; }
-  blockquote { border-left: 4px solid #3F72AF; padding: 8px 20px; background: rgba(91,155,213,0.1); border-radius: 0 6px 6px 0; }
+  blockquote { color: #3F72AF; border-left: 4px solid #3F72AF; padding: 8px 20px; background: rgba(91,155,213,0.1); border-radius: 0 6px 6px 0; }
   th { background: #1e4472; color: #5B9BD5; text-align: left; }
   td { border-color: #1e4472; }
   table { font-size: 0.82em; }
@@ -85,12 +85,12 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 *Tono diverso. Principi finanziari identici. Safety boundaries condivisi.*
 
-| | Persona | Stile | Esempio |
-|---|---|---|---|
-| 🧓 | **Mentore Saggio** | Calmo, diretto | *"Con 300€ di margine, le rate ti mangiano un terzo."* |
-| 😏 | **Amico Sarcastico** | Ironico, affettuoso | *"280€/mese in delivery? Ci paghi una vacanza."* |
-| 💪 | **Sergente Hartman** | Duro, motivante | *"Zero risparmi a 25 anni? Sveglia. 50€/mese."* |
-| 🎉 | **Cheerleader** | Entusiasta, positiva | *"30€ risparmiati! Piccoli passi, grandi risultati!"* |
+|     | Persona              | Stile                | Esempio                                                |
+| --- | -------------------- | -------------------- | ------------------------------------------------------ |
+| 🧓   | **Mentore Saggio**   | Calmo, diretto       | *"Con 300€ di margine, le rate ti mangiano un terzo."* |
+| 😏   | **Amico Sarcastico** | Ironico, affettuoso  | *"280€/mese in delivery? Ci paghi una vacanza."*       |
+| 💪   | **Sergente Hartman** | Duro, motivante      | *"Zero risparmi a 25 anni? Sveglia. 50€/mese."*        |
+| 🎉   | **Cheerleader**      | Entusiasta, positiva | *"30€ risparmiati! Piccoli passi, grandi risultati!"*  |
 
 ---
 
@@ -98,15 +98,15 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 ## Stack Tecnico
 
-| Layer | Tecnologie |
-|---|---|
-| **Frontend** | React 19 + Vite + TypeScript · Tailwind 4 + shadcn/ui · **PWA standalone** |
-| **Backend** | FastAPI 0.135 + Pydantic v2 · SQLAlchemy ORM · PostgreSQL 16 |
-| **AI** | Gemini Flash + OpenAI fallback · BM25 retrieval · Jinja2 prompt templates |
-| **Voice** | ElevenLabs TTS (4 voci persona) · Web Speech API STT |
-| **Sicurezza** | AES-GCM encryption at rest · PBKDF2 · NaCl E2E messaging · ZDR headers |
-| **Ingestion** | OCR 3-tier (Tesseract → LLM text → LLM vision) · 7 moduli parser |
-| **Infra** | Docker Compose · Nginx · Let's Encrypt TLS |
+| Layer         | Tecnologie                                                                 |
+| ------------- | -------------------------------------------------------------------------- |
+| **Frontend**  | React 19 + Vite + TypeScript · Tailwind 4 + shadcn/ui · **PWA standalone** |
+| **Backend**   | FastAPI 0.135 + Pydantic v2 · SQLAlchemy ORM · PostgreSQL 16               |
+| **AI**        | Gemini Flash + OpenAI fallback · BM25 retrieval · Jinja2 prompt templates  |
+| **Voice**     | ElevenLabs TTS (4 voci persona) · Web Speech API STT                       |
+| **Sicurezza** | AES-GCM encryption at rest · PBKDF2 · NaCl E2E messaging · ZDR headers     |
+| **Ingestion** | OCR 3-tier (Tesseract → LLM text → LLM vision) · 7 moduli parser           |
+| **Infra**     | Docker Compose · Nginx · Let's Encrypt TLS                                 |
 
 ---
 
@@ -114,12 +114,12 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 ## Il Progetto in Numeri
 
-| Metrica | Valore | Metrica | Valore |
-|---|---|---|---|
-| Fasi completate | **30** / 31 | Piani eseguiti | **126** |
-| Test funzionali | **349** | Commit | **558** |
-| Tool LLM | **7** | Personas coach | **4** |
-| Moduli ingestion | **7** | Contenuti educativi | **16** articoli + video + slide |
+| Metrica          | Valore      | Metrica             | Valore                          |
+| ---------------- | ----------- | ------------------- | ------------------------------- |
+| Fasi completate  | **30** / 31 | Piani eseguiti      | **126**                         |
+| Test funzionali  | **349**     | Commit              | **558**                         |
+| Tool LLM         | **7**       | Personas coach      | **4**                           |
+| Moduli ingestion | **7**       | Contenuti educativi | **16** articoli + video + slide |
 
 ### Evoluzione
 
@@ -137,8 +137,8 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 S.E.N.S.O. è una PWA — scansiona, installa, usa.
 
-| ![w:160](qr-prototype.png) | ![w:160](qr-repo.png) |
-|:---:|:---:|
-| *senso.dev.vps.fulgid.us* | *github.com/fulgidus/senso* |
+| ![w:160](qr-prototype.png) |    ![w:160](qr-repo.png)    |
+| :------------------------: | :-------------------------: |
+| *senso.dev.vps.fulgid.us*  | *github.com/fulgidus/senso* |
 
 `S.E.N.S.O.` · Alessio · PUNKATHON 2026
