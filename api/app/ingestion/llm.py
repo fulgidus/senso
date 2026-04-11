@@ -364,6 +364,7 @@ class LLMClient:
                     response_schema=response_schema,
                     timeout=effective_timeout,
                     strict_mode=strict_mode,
+                    tool_choice=tool_choice,
                 )
                 trace.provider_used = pname
                 trace.model_used = model
@@ -578,6 +579,7 @@ class LLMClient:
         response_schema: dict | None,
         timeout: float,
         strict_mode: bool = False,
+        tool_choice: str = "auto",
     ) -> tuple[str, dict | None]:
         """
         OpenAI tool-call round-trip (one hop max).
@@ -606,7 +608,7 @@ class LLMClient:
         call_kwargs_1: dict[str, Any] = {"model": model, "messages": messages}
         if tools:
             call_kwargs_1["tools"] = tools
-            call_kwargs_1["tool_choice"] = "auto"
+            call_kwargs_1["tool_choice"] = tool_choice
         # Strict privacy mode: inject ZDR body param for OpenRouter
         if strict_mode and base_url and "openrouter" in base_url:
             call_kwargs_1["extra_body"] = {"provider": {"zdr": True}}
@@ -623,6 +625,11 @@ class LLMClient:
 
         # If no tool calls were made, proceed directly to final call
         tool_calls = getattr(choice1.message, "tool_calls", None) or []
+        logger.info(
+            "LLM tool-call step 1: model=%s tool_choice=%s tool_calls=%d content_len=%d",
+            model, tool_choice, len(tool_calls),
+            len(choice1.message.content or ""),
+        )
         if not tool_calls:
             # Model answered directly - re-call with response_schema to get
             # the structured output (the first answer may be prose).

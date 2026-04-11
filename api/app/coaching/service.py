@@ -519,12 +519,18 @@ class CoachingService:
                 tool_call_callback=tool_call_callback,
                 response_schema=self._response_schema,
                 timeout=60.0,
+                tool_choice="required",
             )
         except LLMError as exc:
             logger.error("CoachingService LLM error for user %s: %s", user_id, exc)
             raise CoachingError(
                 "llm_error", f"LLM unavailable: {exc}", status_code=502
             ) from exc
+
+        logger.info(
+            "CoachingService tools_called=%s for user %s",
+            tools_called or "NONE", user_id,
+        )
 
         # Parse JSON
         schema_valid = True
