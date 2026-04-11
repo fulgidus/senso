@@ -240,6 +240,31 @@ describe("useVoiceInput - recording state", () => {
 
     expect(onFinalTranscript).toHaveBeenCalledWith("ciao mondo");
   });
+
+  it("startRecording: guard prevents double-start — calling startRecording while isRecording does not call recognition.start() again (Chromium regression)", () => {
+    const onFinal = vi.fn();
+    const { result } = renderHook(() =>
+      useVoiceInput({ locale: "it", onFinalTranscript: onFinal }),
+    );
+
+    // Start recording once
+    act(() => {
+      result.current.startRecording();
+    });
+    expect(result.current.isRecording).toBe(true);
+
+    // Count how many times start() was called so far
+    const callsBefore = mockInstance.start.mock.calls.length;
+
+    // Call startRecording again while already recording — should be a no-op
+    act(() => {
+      result.current.startRecording();
+    });
+
+    // start() must NOT have been called a second time
+    const callsAfter = mockInstance.start.mock.calls.length;
+    expect(callsAfter).toBe(callsBefore);
+  });
 });
 
 // ── MediaRecorder backend regression tests ───────────────────────────────────

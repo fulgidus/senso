@@ -603,7 +603,17 @@ async def stt_transcribe(
 
             client = ElevenLabs(api_key=settings.elevenlabs_api_key)
             filename = audio.filename or "audio.webm"
-            content_type = audio.content_type or "audio/webm"
+            raw_content_type = audio.content_type or "audio/webm"
+            # ElevenLabs Scribe doesn't support codec parameters or ogg format natively.
+            # Normalize: strip codec params (e.g. "audio/ogg;codecs=opus" → "audio/ogg"),
+            # then remap ogg → webm (ElevenLabs supported list: mp3, mp4, mpeg, mpga, m4a, wav, webm).
+            _base_ct = raw_content_type.split(";")[0].strip()
+            if "ogg" in _base_ct:
+                # Ogg is not in ElevenLabs supported list — remap to webm for API compatibility.
+                content_type = "audio/webm"
+                filename = "audio.webm" if filename.endswith(".ogg") else filename
+            else:
+                content_type = _base_ct
             result = client.speech_to_text.convert(
                 audio=(filename, io.BytesIO(audio_bytes), content_type),
                 model_id="scribe_v1",
@@ -640,7 +650,9 @@ async def stt_transcribe(
 
         client = OpenAI(api_key=api_key)
         filename = audio.filename or "audio.webm"
-        content_type = audio.content_type or "audio/webm"
+        raw_content_type = audio.content_type or "audio/webm"
+        _base_ct = raw_content_type.split(";")[0].strip()
+        content_type = _base_ct
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=(filename, io.BytesIO(audio_bytes), content_type),

@@ -16,195 +16,216 @@
  *
  * Hold-to-talk is implemented via pointer events (mouse + touch unified).
  */
-import { useState, useRef, useCallback, useEffect } from "react"
-import { useVoiceInput } from "./useVoiceInput"
-import { useTTS, type TTSConfig } from "./useTTS"
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useVoiceInput } from "./useVoiceInput";
+import { useTTS, type TTSConfig } from "./useTTS";
 
 export interface UseVoiceModeOptions {
-    locale: "it" | "en"
-    ttsConfig: TTSConfig
-    voiceAutoListen: boolean
-    onSend: (text: string) => void
+  locale: "it" | "en";
+  ttsConfig: TTSConfig;
+  voiceAutoListen: boolean;
+  onSend: (text: string) => void;
 }
 
 export interface UseVoiceModeResult {
-    /** Whether voice mode is currently active */
-    isVoiceMode: boolean
-    /** Toggle voice mode on/off */
-    toggleVoiceMode: () => Promise<void>
-    /** Is the mic currently recording */
-    isRecording: boolean
-    /** Live transcript while recording */
-    transcript: string
-    /** STT availability (Web Speech API) */
-    isSttAvailable: boolean
-    /** STT error string or null */
-    sttError: string | null
-    /** Raw error code from STT — use to classify hard vs soft errors */
-    sttErrorCode: string | null
-    /** TTS is generating audio */
-    isGenerating: boolean
-    /** TTS is playing audio */
-    isPlaying: boolean
-    /** Is the auto-listen (post-TTS) phase active */
-    isAutoListening: boolean
-    /** Stop any ongoing TTS */
-    stopTTS: () => void
-    /** Pointer-down handler for the hold-to-talk button */
-    onMicPointerDown: (e: React.PointerEvent) => void
-    /** Pointer-up handler for the hold-to-talk button */
-    onMicPointerUp: (e: React.PointerEvent) => void
-    /**
-     * Call this after the assistant message has been appended to the UI.
-     * Triggers TTS auto-play and, optionally, auto-listen.
-     */
-    onAssistantMessage: (text: string) => void
+  /** Whether voice mode is currently active */
+  isVoiceMode: boolean;
+  /** Toggle voice mode on/off */
+  toggleVoiceMode: () => Promise<void>;
+  /** Is the mic currently recording */
+  isRecording: boolean;
+  /** Live transcript while recording */
+  transcript: string;
+  /** STT availability (Web Speech API) */
+  isSttAvailable: boolean;
+  /** STT error string or null */
+  sttError: string | null;
+  /** Raw error code from STT — use to classify hard vs soft errors */
+  sttErrorCode: string | null;
+  /** TTS is generating audio */
+  isGenerating: boolean;
+  /** TTS is playing audio */
+  isPlaying: boolean;
+  /** Is the auto-listen (post-TTS) phase active */
+  isAutoListening: boolean;
+  /** Stop any ongoing TTS */
+  stopTTS: () => void;
+  /** Pointer-down handler for the hold-to-talk button */
+  onMicPointerDown: (e: React.PointerEvent) => void;
+  /** Pointer-up handler for the hold-to-talk button */
+  onMicPointerUp: (e: React.PointerEvent) => void;
+  /**
+   * Call this after the assistant message has been appended to the UI.
+   * Triggers TTS auto-play and, optionally, auto-listen.
+   */
+  onAssistantMessage: (text: string) => void;
 }
 
 export function useVoiceMode({
-    locale,
-    ttsConfig,
-    voiceAutoListen,
-    onSend,
+  locale,
+  ttsConfig,
+  voiceAutoListen,
+  onSend,
 }: UseVoiceModeOptions): UseVoiceModeResult {
-    const [isVoiceMode, setIsVoiceMode] = useState(false)
-    const [isAutoListening, setIsAutoListening] = useState(false)
-    // Stable ref for voiceAutoListen so the TTS onended callback doesn't go stale
-    const voiceAutoListenRef = useRef(voiceAutoListen)
-    voiceAutoListenRef.current = voiceAutoListen
+  const CHAT_MODE_KEY = "senso:chatMode";
+  const [isVoiceMode, setIsVoiceMode] = useState<boolean>(
+    () => localStorage.getItem(CHAT_MODE_KEY) === "voice",
+  );
+  const [isAutoListening, setIsAutoListening] = useState(false);
+  // Stable ref for voiceAutoListen so the TTS onended callback doesn't go stale
+  const voiceAutoListenRef = useRef(voiceAutoListen);
+  voiceAutoListenRef.current = voiceAutoListen;
 
-    const onSendRef = useRef(onSend)
-    onSendRef.current = onSend
+  const onSendRef = useRef(onSend);
+  onSendRef.current = onSend;
 
-    // ── STT ──────────────────────────────────────────────────────────────────
+  // ── STT ──────────────────────────────────────────────────────────────────
 
-    const { isAvailable: isSttAvailable, isRecording, transcript, error: sttError, errorCode: sttErrorCode, startRecording, stopRecording } =
-        useVoiceInput({
-            locale,
-            onFinalTranscript: (text) => {
-                // Final transcript received → send message
-                onSendRef.current(text)
-            },
-        })
+  const {
+    isAvailable: isSttAvailable,
+    isRecording,
+    transcript,
+    error: sttError,
+    errorCode: sttErrorCode,
+    startRecording,
+    stopRecording,
+  } = useVoiceInput({
+    locale,
+    onFinalTranscript: (text) => {
+      // Final transcript received → send message
+      onSendRef.current(text);
+    },
+  });
 
-    // ── TTS ──────────────────────────────────────────────────────────────────
+  // ── TTS ──────────────────────────────────────────────────────────────────
 
-    const { isPlaying, isGenerating, play, stop: stopTTS } = useTTS(ttsConfig)
+  const { isPlaying, isGenerating, play, stop: stopTTS } = useTTS(ttsConfig);
 
-    // Track isPlaying transitions to implement STT-TTS feedback loop prevention.
-    // wasPlayingRef holds the previous value of isPlaying across renders.
-    const wasPlayingRef = useRef(false)
+  // Track isPlaying transitions to implement STT-TTS feedback loop prevention.
+  // wasPlayingRef holds the previous value of isPlaying across renders.
+  const wasPlayingRef = useRef(false);
 
-    useEffect(() => {
-        const wasPlaying = wasPlayingRef.current
-        wasPlayingRef.current = isPlaying
+  useEffect(() => {
+    const wasPlaying = wasPlayingRef.current;
+    wasPlayingRef.current = isPlaying;
 
-        if (!wasPlaying && isPlaying) {
-            // Rising edge: TTS just started - immediately stop STT to prevent
-            // the microphone from picking up the assistant's audio output.
-            stopRecording()
-        } else if (wasPlaying && !isPlaying) {
-            // Falling edge: TTS just finished - re-enable STT if auto-listen is on.
-            if (voiceAutoListenRef.current && isVoiceMode) {
-                // Small delay to avoid echo / UI flash before mic reopens.
-                setIsAutoListening(true)
-                const timer = setTimeout(() => {
-                    setIsAutoListening(false)
-                    startRecording()
-                }, 400)
-                return () => clearTimeout(timer)
-            }
-        }
-    }, [isPlaying, isVoiceMode, startRecording, stopRecording])
-
-    // ── Voice mode toggle ─────────────────────────────────────────────────────
-
-    // Track whether mic permission has been primed this session.
-    // We call getUserMedia once on first voice mode activation (user gesture) so
-    // the browser's permission dialog appears at a deliberate moment rather than
-    // buried inside recognition.start() on the first hold-to-talk press.
-    // The stream is released immediately - we only need the permission grant, NOT
-    // a live track. Chromium stores the grant persistently in its permission store
-    // so recognition.start() never re-prompts regardless of whether a MediaStream
-    // is currently open. Holding a stream alive while SpeechRecognition is active
-    // causes audio device contention that silently starves the recogniser of audio.
-    const micPermissionGranted = useRef(false)
-
-    const toggleVoiceMode = useCallback(async () => {
-        if (isVoiceMode) {
-            // Deactivating: stop STT/TTS.
-            stopRecording()
-            stopTTS()
-            setIsAutoListening(false)
-            setIsVoiceMode(false)
-            return
-        }
-        // Activating: prime mic permission on first use (user gesture required).
-        if (!micPermissionGranted.current) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-                // Release immediately - we only needed the permission grant.
-                stream.getTracks().forEach((t) => t.stop())
-                micPermissionGranted.current = true
-            } catch {
-                // Permission denied or not supported - don't enter voice mode.
-                return
-            }
-        }
-        setIsVoiceMode(true)
-    }, [isVoiceMode, stopRecording, stopTTS])
-
-    // Stop everything when voice mode is turned off externally or on unmount
-    useEffect(() => {
-        if (!isVoiceMode) {
-            stopRecording()
-            stopTTS()
-            setIsAutoListening(false)
-        }
-    }, [isVoiceMode, stopRecording, stopTTS])
-
-    useEffect(() => {
-        return () => {
-            stopRecording()
-            stopTTS()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // ── Hold-to-talk pointer handlers ─────────────────────────────────────────
-
-    const onMicPointerDown = useCallback((e: React.PointerEvent) => {
-        e.currentTarget.setPointerCapture(e.pointerId)
-        if (!isRecording) startRecording()
-    }, [isRecording, startRecording])
-
-    const onMicPointerUp = useCallback((_e: React.PointerEvent) => {
-        if (isRecording) stopRecording()
-    }, [isRecording, stopRecording])
-
-    // ── Assistant message callback ────────────────────────────────────────────
-
-    const onAssistantMessage = useCallback((text: string) => {
-        if (!isVoiceMode) return
-        // Auto-play TTS. STT is stopped automatically via the isPlaying rising-edge
-        // effect above when useTTS sets isPlaying=true.
-        void play(text, locale)
-    }, [isVoiceMode, play, locale])
-
-    return {
-        isVoiceMode,
-        toggleVoiceMode,
-        isRecording,
-        transcript,
-        isSttAvailable,
-        sttError,
-        sttErrorCode,
-        isGenerating,
-        isPlaying,
-        isAutoListening,
-        stopTTS,
-        onMicPointerDown,
-        onMicPointerUp,
-        onAssistantMessage,
+    if (!wasPlaying && isPlaying) {
+      // Rising edge: TTS just started - immediately stop STT to prevent
+      // the microphone from picking up the assistant's audio output.
+      stopRecording();
+    } else if (wasPlaying && !isPlaying) {
+      // Falling edge: TTS just finished - re-enable STT if auto-listen is on.
+      if (voiceAutoListenRef.current && isVoiceMode) {
+        // Small delay to avoid echo / UI flash before mic reopens.
+        setIsAutoListening(true);
+        const timer = setTimeout(() => {
+          setIsAutoListening(false);
+          startRecording();
+        }, 400);
+        return () => clearTimeout(timer);
+      }
     }
+  }, [isPlaying, isVoiceMode, startRecording, stopRecording]);
+
+  // ── Voice mode toggle ─────────────────────────────────────────────────────
+
+  // Track whether mic permission has been primed this session.
+  // We call getUserMedia once on first voice mode activation (user gesture) so
+  // the browser's permission dialog appears at a deliberate moment rather than
+  // buried inside recognition.start() on the first hold-to-talk press.
+  // The stream is released immediately - we only need the permission grant, NOT
+  // a live track. Chromium stores the grant persistently in its permission store
+  // so recognition.start() never re-prompts regardless of whether a MediaStream
+  // is currently open. Holding a stream alive while SpeechRecognition is active
+  // causes audio device contention that silently starves the recogniser of audio.
+  const micPermissionGranted = useRef(false);
+
+  const toggleVoiceMode = useCallback(async () => {
+    if (isVoiceMode) {
+      // Deactivating: stop STT/TTS.
+      stopRecording();
+      stopTTS();
+      setIsAutoListening(false);
+      setIsVoiceMode(false);
+      localStorage.setItem(CHAT_MODE_KEY, "text");
+      return;
+    }
+    // Activating: prime mic permission on first use (user gesture required).
+    if (!micPermissionGranted.current) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Release immediately - we only needed the permission grant.
+        stream.getTracks().forEach((t) => t.stop());
+        micPermissionGranted.current = true;
+      } catch {
+        // Permission denied or not supported - don't enter voice mode.
+        return;
+      }
+    }
+    setIsVoiceMode(true);
+    localStorage.setItem(CHAT_MODE_KEY, "voice");
+  }, [isVoiceMode, stopRecording, stopTTS]);
+
+  // Stop everything when voice mode is turned off externally or on unmount
+  useEffect(() => {
+    if (!isVoiceMode) {
+      stopRecording();
+      stopTTS();
+      setIsAutoListening(false);
+    }
+  }, [isVoiceMode, stopRecording, stopTTS]);
+
+  useEffect(() => {
+    return () => {
+      stopRecording();
+      stopTTS();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Hold-to-talk pointer handlers ─────────────────────────────────────────
+
+  const onMicPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      if (!isRecording) startRecording();
+    },
+    [isRecording, startRecording],
+  );
+
+  const onMicPointerUp = useCallback(
+    (_e: React.PointerEvent) => {
+      if (isRecording) stopRecording();
+    },
+    [isRecording, stopRecording],
+  );
+
+  // ── Assistant message callback ────────────────────────────────────────────
+
+  const onAssistantMessage = useCallback(
+    (text: string) => {
+      if (!isVoiceMode) return;
+      // Auto-play TTS. STT is stopped automatically via the isPlaying rising-edge
+      // effect above when useTTS sets isPlaying=true.
+      void play(text, locale);
+    },
+    [isVoiceMode, play, locale],
+  );
+
+  return {
+    isVoiceMode,
+    toggleVoiceMode,
+    isRecording,
+    transcript,
+    isSttAvailable,
+    sttError,
+    sttErrorCode,
+    isGenerating,
+    isPlaying,
+    isAutoListening,
+    stopTTS,
+    onMicPointerDown,
+    onMicPointerUp,
+    onAssistantMessage,
+  };
 }
