@@ -116,24 +116,33 @@ async function transcribeWithWhisper(blob: Blob, locale: string): Promise<string
 
   const baseUrl = getBackendBaseUrl();
   const localeParam = locale === "it" ? "it" : "en";
-  const resp = await fetch(`${baseUrl}/coaching/stt?locale=${localeParam}`, {
+  const url = `${baseUrl}/coaching/stt?locale=${localeParam}`;
+
+  console.log("[STT] Sending audio:", { size: blob.size, type: blob.type, filename, url });
+
+  const resp = await fetch(url, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   });
 
+  console.log("[STT] Response:", { status: resp.status, statusText: resp.statusText, ok: resp.ok });
+
   if (!resp.ok) {
     let code = "stt_failed";
     try {
-      const body = (await resp.json()) as { detail?: { code?: string } };
-      code = body?.detail?.code ?? "stt_failed";
-    } catch {
-      /* ignore */
+      const body = await resp.text();
+      console.log("[STT] Error body:", body);
+      const parsed = JSON.parse(body) as { detail?: { code?: string; message?: string } };
+      code = parsed?.detail?.code ?? "stt_failed";
+    } catch (e) {
+      console.log("[STT] Failed to parse error:", e);
     }
     throw new Error(code);
   }
 
   const data = (await resp.json()) as { text: string };
+  console.log("[STT] Success:", data.text?.substring(0, 50));
   return data.text ?? "";
 }
 
