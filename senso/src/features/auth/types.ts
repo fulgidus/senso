@@ -3,6 +3,8 @@ export type VoiceGender = "masculine" | "feminine" | "neutral" | "indifferent";
 export type User = {
   id: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   isAdmin?: boolean;
   role?: string;
   voiceGender?: VoiceGender;
