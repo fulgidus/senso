@@ -415,10 +415,10 @@ Plans:
 **Goal:** Wire onUnauthorized callback to all authenticated API calls in profile-api.ts and admin API modules so that 401 + failed refresh = redirect to /auth. Fixes the silent broken-screen bug on token expiry during normal navigation.
 **Requirements**: D-01 through D-08 (see 28-CONTEXT.md)
 **Depends on:** Phase 27
-**Plans:** 0 plans
+**Plans:** 9/9 plans complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 28 to break down)
+- [x] TBD (run /gsd-plan-phase 28 to break down) (completed 2026-04-11)
 
 ### Phase 29: Profile sealed and unsealed data sections with goals/habits migration
 

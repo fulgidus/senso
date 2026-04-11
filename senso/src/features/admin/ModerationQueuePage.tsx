@@ -8,15 +8,14 @@
  * - Confirm / Revert buttons with inline confirmation
  */
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Loader2 } from "lucide-react"
 import {
-    getModerationQueue,
-    confirmModerationAction,
-    revertModerationAction,
+    createAdminMerchantApi,
     type ModerationLogAdminDTO,
 } from "./adminMerchantApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 
 // ── Severity badge ────────────────────────────────────────────────────────────
 
@@ -86,6 +85,8 @@ function relativeDate(isoString: string): string {
 
 export function ModerationQueuePage() {
     const { t } = useTranslation()
+    const { onUnauthorized } = useAuthContext()
+    const adminMerchantApi = useMemo(() => createAdminMerchantApi(onUnauthorized), [onUnauthorized])
 
     const [items, setItems] = useState<ModerationLogAdminDTO[]>([])
     const [loading, setLoading] = useState(true)
@@ -100,7 +101,7 @@ export function ModerationQueuePage() {
         setLoading(true)
         setError(null)
         try {
-            const data = await getModerationQueue(statusFilter || undefined)
+            const data = await adminMerchantApi.getModerationQueue(statusFilter || undefined)
             setItems(data)
         } catch (err) {
             setError(err instanceof Error ? err.message : t("admin.moderation.loadError"))
@@ -117,7 +118,7 @@ export function ModerationQueuePage() {
         async (id: string) => {
             setProcessing(id)
             try {
-                await confirmModerationAction(id)
+                await adminMerchantApi.confirmModerationAction(id)
                 await load()
             } catch (err) {
                 setError(err instanceof Error ? err.message : t("admin.moderation.loadError"))
@@ -133,7 +134,7 @@ export function ModerationQueuePage() {
             setProcessing(id)
             setRevertConfirmId(null)
             try {
-                await revertModerationAction(id)
+                await adminMerchantApi.revertModerationAction(id)
                 await load()
             } catch (err) {
                 setError(err instanceof Error ? err.message : t("admin.moderation.loadError"))

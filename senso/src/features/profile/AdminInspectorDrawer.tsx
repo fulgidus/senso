@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ChevronDown, ChevronRight, Clipboard, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import {
-    getExtracted,
-    getTrace,
+    createIngestionFilesApi,
     type ExtractedDocumentDetail,
     type TraceStep,
 } from "@/api/ingestionFilesApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 // ─── JSON Tree ─────────────────────────────────────────────────────────────────
@@ -166,6 +166,11 @@ type Props = {
 export function AdminInspectorDrawer({ uploadId, token, onClose }: Props) {
     const { t } = useTranslation()
     const fmt = useLocaleFormat()
+    const { onUnauthorized } = useAuthContext()
+    const filesApi = useMemo(
+        () => createIngestionFilesApi(onUnauthorized),
+        [onUnauthorized],
+    )
 
     const [extracted, setExtracted] = useState<ExtractedDocumentDetail | null | undefined>(
         undefined,
@@ -175,7 +180,7 @@ export function AdminInspectorDrawer({ uploadId, token, onClose }: Props) {
 
     useEffect(() => {
         setLoading(true)
-        void Promise.all([getExtracted(token, uploadId), getTrace(token, uploadId)]).then(
+        void Promise.all([filesApi.getExtracted(token, uploadId), filesApi.getTrace(token, uploadId)]).then(
             ([ext, tr]) => {
                 setExtracted(ext)
                 setTrace(tr)

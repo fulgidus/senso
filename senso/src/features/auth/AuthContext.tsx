@@ -6,6 +6,7 @@ export type AuthContextValue = {
     user: User;
     signOut: () => Promise<void>;
     updateUser: (updated: Partial<User>) => void;
+    onUnauthorized: () => Promise<string | null>;
     cryptoKeys: CryptoKeyMaterial | null; // null until derived at login
     setCryptoKeys: (keys: CryptoKeyMaterial | null) => void;
     /** true while the bootstrap pollMessages() call is in-flight.

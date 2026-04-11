@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AlertTriangle, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, CheckCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
-    getUncategorized,
-    bulkUpdateCategoryByDescription,
+    createProfileApi,
     type UncategorizedTransactionDTO,
 } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 const VALID_CATEGORIES = [
@@ -115,6 +115,8 @@ function DirectionIcon({ type }: { type: ActorGroup["dominantType"] }) {
 export function UncategorizedScreen() {
     const { t } = useTranslation()
     const fmt = useLocaleFormat()
+    const { onUnauthorized } = useAuthContext()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
     const token = readAccessToken()
 
     const [transactions, setTransactions] = useState<UncategorizedTransactionDTO[]>([])
@@ -126,7 +128,7 @@ export function UncategorizedScreen() {
         if (!token) return
         setLoading(true)
         setLoadError(null)
-        void getUncategorized(token)
+        void profileApi.getUncategorized(token)
             .then((data) => setTransactions(data))
             .catch(() => setLoadError(t("uncategorized.errorLoad")))
             .finally(() => setLoading(false))
@@ -146,7 +148,7 @@ export function UncategorizedScreen() {
             }))
 
             try {
-                const result = await bulkUpdateCategoryByDescription(token, description, category)
+                const result = await profileApi.bulkUpdateCategoryByDescription(token, description, category)
                 setGroupStates((prev) => ({
                     ...prev,
                     [description]: {

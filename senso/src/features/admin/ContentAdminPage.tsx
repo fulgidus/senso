@@ -33,21 +33,12 @@ import {
     Unlink,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type {
-    AdminContentItemDTO,
-    ContentItemCreatePayload,
-    ContentItemUpdatePayload,
-} from "./adminContentApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import {
-    listAdminContent,
-    createContentItem,
-    updateContentItem,
-    deleteContentItem,
-    checkSlugExists,
-    searchLinkableItems,
-    getItemSiblings,
-    bulkPublish,
-    bulkDelete,
+    createAdminContentApi,
+    type AdminContentItemDTO,
+    type ContentItemCreatePayload,
+    type ContentItemUpdatePayload,
 } from "./adminContentApi"
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -151,7 +142,7 @@ function ItemForm({ initial, mode, itemId, saving, onSave, onCancel }: ItemFormP
         slugCheckTimer.current = setTimeout(async () => {
             setSlugChecking(true)
             try {
-                const exists = await checkSlugExists(form.slug, mode === "edit" ? itemId : undefined)
+                const exists = await adminContentApi.checkSlugExists(form.slug, mode === "edit" ? itemId : undefined)
                 setSlugCollision(exists)
             } catch {
                 // ignore check errors
@@ -416,7 +407,7 @@ function L10nGroupPanel({ item, onLink, onUnlink }: L10nGroupPanelProps) {
     useEffect(() => {
         if (item.localization_group) {
             setLoadingSiblings(true)
-            getItemSiblings(item.id)
+            adminContentApi.getItemSiblings(item.id)
                 .then(setSiblings)
                 .catch(() => setSiblings([]))
                 .finally(() => setLoadingSiblings(false))
@@ -433,7 +424,7 @@ function L10nGroupPanel({ item, onLink, onUnlink }: L10nGroupPanelProps) {
         searchTimer.current = setTimeout(async () => {
             setSearching(true)
             try {
-                const results = await searchLinkableItems({
+                const results = await adminContentApi.searchLinkableItems({
                     q: searchQuery,
                     contentType: item.type,
                     excludeLocale: item.locale,
@@ -542,6 +533,11 @@ function L10nGroupPanel({ item, onLink, onUnlink }: L10nGroupPanelProps) {
 export function ContentAdminPage() {
     const { t, i18n } = useTranslation()
     const locale = i18n.language.startsWith("en") ? "en" : "it"
+    const { onUnauthorized } = useAuthContext()
+    const adminContentApi = useMemo(
+        () => createAdminContentApi(onUnauthorized),
+        [onUnauthorized],
+    )
 
     // ── State ──
     const [items, setItems] = useState<AdminContentItemDTO[]>([])
@@ -579,7 +575,7 @@ export function ContentAdminPage() {
         setLoading(true)
         setError(null)
         try {
-            const data = await listAdminContent({
+            const data = await adminContentApi.listAdminContent({
                 locale: filterLocale || undefined,
                 type: filterType || undefined,
             })
@@ -635,7 +631,7 @@ export function ContentAdminPage() {
         async (data: ContentItemCreatePayload) => {
             setSaving(true)
             try {
-                await createContentItem(data)
+                await adminContentApi.createContentItem(data)
                 setShowCreate(false)
                 await loadItems()
             } catch (err) {
@@ -665,7 +661,7 @@ export function ContentAdminPage() {
                     reading_time_minutes: data.reading_time_minutes,
                     duration_seconds: data.duration_seconds,
                 }
-                await updateContentItem(id, update)
+                await adminContentApi.updateContentItem(id, update)
                 setEditingId(null)
                 await loadItems()
             } catch (err) {
@@ -682,7 +678,7 @@ export function ContentAdminPage() {
     const handleDelete = useCallback(
         async (id: string) => {
             try {
-                await deleteContentItem(id)
+                await adminContentApi.deleteContentItem(id)
                 setDeleteConfirm(null)
                 await loadItems()
             } catch (err) {
@@ -697,7 +693,7 @@ export function ContentAdminPage() {
     const handleTogglePublished = useCallback(
         async (item: AdminContentItemDTO) => {
             try {
-                await updateContentItem(item.id, {
+                await adminContentApi.updateContentItem(item.id, {
                     is_published: !item.is_published,
                 })
                 await loadItems()
@@ -724,9 +720,9 @@ export function ContentAdminPage() {
                 const groupId = target?.localization_group ?? crypto.randomUUID()
 
                 // Set group on both items
-                await updateContentItem(itemId, { localization_group: groupId })
+                await adminContentApi.updateContentItem(itemId, { localization_group: groupId })
                 if (!target?.localization_group) {
-                    await updateContentItem(targetId, { localization_group: groupId })
+                    await adminContentApi.updateContentItem(targetId, { localization_group: groupId })
                 }
                 await loadItems()
             } catch (err) {
@@ -742,7 +738,7 @@ export function ContentAdminPage() {
     const handleL10nUnlink = useCallback(
         async (itemId: string) => {
             try {
-                await updateContentItem(itemId, { localization_group: null })
+                await adminContentApi.updateContentItem(itemId, { localization_group: null })
                 await loadItems()
             } catch (err) {
                 setError(
@@ -761,11 +757,11 @@ export function ContentAdminPage() {
         try {
             const ids = Array.from(selected)
             if (action === "publish") {
-                await bulkPublish({ itemIds: ids, isPublished: true, applyToGroup: bulkApplyToGroup })
+                await adminContentApi.bulkPublish({ itemIds: ids, isPublished: true, applyToGroup: bulkApplyToGroup })
             } else if (action === "unpublish") {
-                await bulkPublish({ itemIds: ids, isPublished: false, applyToGroup: bulkApplyToGroup })
+                await adminContentApi.bulkPublish({ itemIds: ids, isPublished: false, applyToGroup: bulkApplyToGroup })
             } else if (action === "delete") {
-                await bulkDelete({ itemIds: ids, applyToGroup: bulkApplyToGroup })
+                await adminContentApi.bulkDelete({ itemIds: ids, applyToGroup: bulkApplyToGroup })
             }
             setSelected(new Set())
             setBulkAction(null)

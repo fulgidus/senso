@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { Link } from "react-router-dom"
 import { LogOut, Save, Shield, AtSign, Target } from "lucide-react"
@@ -12,7 +12,8 @@ import { UserAvatar } from "@/components/UserAvatar"
 import { getDisplayName } from "@/lib/user-avatar"
 import type { VoiceGender } from "@/features/auth/types"
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell"
-import { getPersonas, type Persona } from "@/features/coaching/coachingApi"
+import { createCoachingApi, type Persona } from "@/features/coaching/coachingApi"
+import { createAdminMerchantApi } from "@/features/admin/adminMerchantApi"
 import { useHapticFeedback } from "@/hooks/useHapticFeedback"
 import { useIsMobile } from "@/hooks/useIsMobile"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
@@ -134,7 +135,9 @@ function PreferencesSection() {
 }
 
 export function SettingsScreen() {
-    const { user, signOut, updateUser } = useAuthContext()
+    const { user, signOut, updateUser, onUnauthorized } = useAuthContext()
+    const coachingApi = useMemo(() => createCoachingApi(onUnauthorized), [onUnauthorized])
+    const adminMerchantApi = useMemo(() => createAdminMerchantApi(onUnauthorized), [onUnauthorized])
     const { theme, setTheme } = useTheme()
     const { t } = useTranslation()
     const haptic = useHapticFeedback()
@@ -161,19 +164,11 @@ export function SettingsScreen() {
     const handleClaimHandle = useCallback(async () => {
         const raw = handleInput.trim().replace(/^!/, "")
         if (!raw) return
-        const token = readAccessToken()
-        if (!token) return
         setHandleSaving(true)
         setHandleError(null)
         setHandleSuccess(false)
         try {
-            const { apiRequest } = await import("@/lib/api-client")
-            const { getBackendBaseUrl } = await import("@/lib/config")
-            const res = await apiRequest<{ adminHandle: string }>(getBackendBaseUrl(), "/admin/claim-handle", {
-                method: "POST",
-                token,
-                body: { adminHandle: `!${raw}` },
-            })
+            const res = await adminMerchantApi.claimHandle(`!${raw}`)
             updateUser({ adminHandle: res.adminHandle })
             setHandleSuccess(true)
         } catch {
@@ -181,11 +176,11 @@ export function SettingsScreen() {
         } finally {
             setHandleSaving(false)
         }
-    }, [handleInput, t, updateUser])
+    }, [handleInput, t, updateUser, adminMerchantApi])
 
     useEffect(() => {
-        void getPersonas().then(setPersonas).catch(() => setPersonas([]))
-    }, [])
+        void coachingApi.getPersonas().then(setPersonas).catch(() => setPersonas([]))
+    }, [coachingApi])
 
     const isDirty =
         firstName.trim() !== (user.firstName ?? "") ||

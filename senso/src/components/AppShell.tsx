@@ -17,10 +17,10 @@ import {
     User,
     X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { getNotifications } from "@/api/notificationsApi";
+import { createNotificationsApi } from "@/api/notificationsApi";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PageTransition } from "@/components/PageTransition";
 import { AdminHandleGateModal } from "@/components/AdminHandleGateModal";
@@ -298,8 +298,9 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-    const { user, signOut, pendingMessageCount, updateUser } = useAuthContext();
+    const { user, signOut, pendingMessageCount, updateUser, onUnauthorized } = useAuthContext();
     const { t } = useTranslation();
+    const notificationsApi = useMemo(() => createNotificationsApi(onUnauthorized), [onUnauthorized]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [topbarButtons, setTopbarButtons] = useState(readTopbarButtons);
     const [adminOpen, setAdminOpen] = useState(false);
@@ -310,10 +311,10 @@ export function AppShell({ children }: AppShellProps) {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const fetchUnread = useCallback(() => {
-        getNotifications(1)
+        notificationsApi.getNotifications(1)
             .then((r) => setUnreadCount(r.unread_count))
             .catch(() => { });
-    }, []);
+    }, [notificationsApi]);
 
     useEffect(() => {
         fetchUnread();

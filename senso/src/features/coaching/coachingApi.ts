@@ -246,6 +246,7 @@ export async function sendMessage(
   }
 }
 
+/* native fetch — onUnauthorized not applicable (SSE streaming) */
 export async function sendMessageStream(
   message: string,
   locale: "it" | "en" = "it",
@@ -407,6 +408,7 @@ export async function generateConversationName(firstUserMessage: string): Promis
  * Fetch TTS audio from POST /coaching/tts.
  * Uses native fetch (not apiRequest) because response is binary audio/mpeg.
  * Throws CoachingApiError("tts_unavailable", ..., 503) on failure.
+ * NOTE: native fetch — onUnauthorized not applicable (binary audio/mpeg response).
  */
 export async function fetchTTSAudio(text: string, locale: "it" | "en" = "it"): Promise<Blob> {
   const token = readAccessToken()
@@ -438,4 +440,128 @@ export async function getPersonas(): Promise<Persona[]> {
   } catch (err) {
     wrapError(err)
   }
+}
+
+// ── Factory (Pattern B: requireToken() internal, onUnauthorized bound at construction) ──
+
+export type CoachingApiClient = ReturnType<typeof createCoachingApi>
+
+export function createCoachingApi(onUnauthorized?: () => Promise<string | null>) {
+    return {
+        sendMessage: async (
+            message: string,
+            locale: "it" | "en" = "it",
+            personaId: string = "mentore-saggio",
+            sessionId?: string,
+        ): Promise<CoachingResponse> => {
+            const token = requireToken()
+            try {
+                return await apiRequest<CoachingResponse>(API_BASE, "/coaching/chat", {
+                    method: "POST",
+                    token,
+                    onUnauthorized,
+                    body: { message, session_id: sessionId ?? null, locale, persona_id: personaId },
+                })
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        getWelcomeMessage: async (locale: "it" | "en" = "it"): Promise<string> => {
+            const token = requireToken()
+            try {
+                const resp = await apiRequest<{ message: string }>(
+                    API_BASE,
+                    `/coaching/welcome?locale=${locale}`,
+                    { token, onUnauthorized },
+                )
+                return resp.message
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        listSessions: async (): Promise<SessionSummary[]> => {
+            const token = requireToken()
+            try {
+                return await apiRequest<SessionSummary[]>(API_BASE, "/coaching/sessions", {
+                    token,
+                    onUnauthorized,
+                })
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        getSessionMessages: async (sessionId: string): Promise<SessionMessage[]> => {
+            const token = requireToken()
+            try {
+                return await apiRequest<SessionMessage[]>(
+                    API_BASE,
+                    `/coaching/sessions/${sessionId}/messages`,
+                    { token, onUnauthorized },
+                )
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        renameSession: async (sessionId: string, name: string): Promise<SessionSummary> => {
+            const token = requireToken()
+            try {
+                return await apiRequest<SessionSummary>(
+                    API_BASE,
+                    `/coaching/sessions/${sessionId}`,
+                    { method: "PATCH", token, onUnauthorized, body: { name } },
+                )
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        deleteSession: async (sessionId: string): Promise<void> => {
+            const token = requireToken()
+            try {
+                await apiRequest<void>(
+                    API_BASE,
+                    `/coaching/sessions/${sessionId}`,
+                    { method: "DELETE", token, onUnauthorized },
+                )
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+
+        generateConversationName: async (firstUserMessage: string): Promise<string> => {
+            const token = requireToken()
+            try {
+                const resp = await apiRequest<{ name: string }>(
+                    API_BASE,
+                    "/coaching/name-conversation",
+                    {
+                        method: "POST",
+                        token,
+                        onUnauthorized,
+                        body: { message: firstUserMessage },
+                    },
+                )
+                return resp.name?.trim() ?? ""
+            } catch {
+                // Intentionally swallows errors — name generation is best-effort
+                return ""
+            }
+        },
+
+        getPersonas: async (): Promise<Persona[]> => {
+            const token = requireToken()
+            try {
+                return await apiRequest<Persona[]>(API_BASE, "/coaching/personas", {
+                    token,
+                    onUnauthorized,
+                })
+            } catch (err) {
+                wrapError(err)
+            }
+        },
+    }
 }

@@ -8,15 +8,14 @@
  * - Blacklisted row: opacity-50 + border-l-2 border-destructive
  */
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Search, Loader2 } from "lucide-react"
 import {
-    getMerchantMap,
-    blacklistMerchant,
-    unblacklistMerchant,
+    createAdminMerchantApi,
     type MerchantMapAdminDTO,
 } from "./adminMerchantApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 
 // ── Relative date helper ──────────────────────────────────────────────────────
 
@@ -65,6 +64,8 @@ function MethodBadge({ method }: { method: string }) {
 
 export function MerchantMapAdminPage() {
     const { t } = useTranslation()
+    const { onUnauthorized } = useAuthContext()
+    const adminMerchantApi = useMemo(() => createAdminMerchantApi(onUnauthorized), [onUnauthorized])
 
     const [items, setItems] = useState<MerchantMapAdminDTO[]>([])
     const [loading, setLoading] = useState(true)
@@ -84,7 +85,7 @@ export function MerchantMapAdminPage() {
         setLoading(true)
         setError(null)
         try {
-            const data = await getMerchantMap({
+            const data = await adminMerchantApi.getMerchantMap({
                 search: search || undefined,
                 method: method || undefined,
                 blacklisted: blacklistedFilter || undefined,
@@ -107,7 +108,7 @@ export function MerchantMapAdminPage() {
             if (reasonText.trim().length < 5) return
             setSaving(true)
             try {
-                await blacklistMerchant(id, reasonText.trim())
+                await adminMerchantApi.blacklistMerchant(id, reasonText.trim())
                 setExpandedId(null)
                 setReasonText("")
                 await load()
@@ -124,7 +125,7 @@ export function MerchantMapAdminPage() {
         async (id: string) => {
             setSaving(true)
             try {
-                await unblacklistMerchant(id)
+                await adminMerchantApi.unblacklistMerchant(id)
                 await load()
             } catch (err) {
                 setError(err instanceof Error ? err.message : t("admin.merchantMap.loadError"))

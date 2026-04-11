@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Navigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
-import { getProfileStatus, getProfile } from "@/lib/profile-api"
+import { createProfileApi } from "@/lib/profile-api"
 import { readAccessToken } from "@/features/auth/storage"
 
 /**
@@ -18,9 +18,10 @@ import { readAccessToken } from "@/features/auth/storage"
  * users never reach this component).
  */
 export function RootResolver() {
-    const { user } = useAuthContext()
+    const { user, onUnauthorized } = useAuthContext()
     const token = readAccessToken()
     const { t } = useTranslation()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
     const [target, setTarget] = useState<string | null>(null)
 
     useEffect(() => {
@@ -36,7 +37,7 @@ export function RootResolver() {
             return
         }
 
-        void Promise.all([getProfileStatus(token), getProfile(token).catch(() => null)])
+        void Promise.all([profileApi.getProfileStatus(token), profileApi.getProfile(token).catch(() => null)])
             .then(([statusData, profile]) => {
                 // Questionnaire path: profile confirmed → go to chat directly
                 if (profile?.confirmed) {
