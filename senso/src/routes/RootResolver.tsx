@@ -11,8 +11,10 @@ import { readAccessToken } from "@/features/auth/storage";
  * Logic gates, evaluated in order:
  *   1. !user.username                               → /setup
  *   2. profile.confirmed === true                   → /chat  (questionnaire path)
- *   3. profileStatus === "complete"                 → /chat  (document upload path)
- *   4. otherwise                                    → /onboarding
+ *   3. profileStatus in (complete, generating_insights, categorizing, queued)
+ *                                                   → /chat  (document upload path - processing OK)
+ *   4. uploads exist but not started                → /onboarding/processing#start
+ *   5. otherwise                                    → /onboarding
  *
  * Auth check is already handled at the AppRoutes level (unauthenticated
  * users never reach this component).
@@ -47,12 +49,19 @@ export function RootResolver() {
           setTarget("/chat");
           return;
         }
-        // Document upload path: categorization complete → go to chat
-        if (statusData.status === "complete") {
+        // Document upload path: any processing status OK for chat (data exists)
+        const processingStatuses = ["complete", "generating_insights", "categorizing", "queued"];
+        if (processingStatuses.includes(statusData.status)) {
           setTarget("/chat");
-        } else {
-          setTarget("/onboarding");
+          return;
         }
+        // Uploads exist but not processed → trigger processing
+        if (statusData.currentUploadsFingerprint && statusData.status === "not_started") {
+          setTarget("/onboarding/processing#start");
+          return;
+        }
+        // Otherwise, start onboarding
+        setTarget("/onboarding");
       })
       .catch(() => {
         // On error, fall through to onboarding (safe default)
