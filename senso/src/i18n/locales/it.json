@@ -755,6 +755,36 @@
     "tabs": {
       "prev": "Tab precedente",
       "next": "Tab successiva"
+    },
+    "preferences": {
+      "tabLabel": "Preferenze",
+      "unsealedHeading": "Visibile all'AI",
+      "unsealedHint": "Il tuo coach usa queste informazioni per risponderti meglio",
+      "sealedHeading": "Solo per te",
+      "sealedHint": "Il coach non ha accesso a questi dati",
+      "savedIndicator": "Salvato 🔒",
+      "saveError": "Impossibile salvare. Controlla la connessione.",
+      "lockedHeading": "Dati privati bloccati",
+      "lockedBody": "Completa l'autenticazione per sbloccare i dati privati",
+      "saveButton": "Salva",
+      "ageBracketLabel": "Fascia d'età",
+      "genderAtBirthLabel": "Sesso alla nascita",
+      "electedGenderLabel": "Genere",
+      "householdSizeLabel": "Componenti del nucleo familiare",
+      "hasDependentsLabel": "Hai persone a carico?",
+      "employmentStatusLabel": "Situazione lavorativa",
+      "regionLabel": "Regione di residenza",
+      "firstNameLabel": "Nome",
+      "lastNameLabel": "Cognome",
+      "dobLabel": "Data di nascita",
+      "emailsLabel": "Email di contatto",
+      "phonesLabel": "Telefono",
+      "chatContactsLabel": "Contatti chat",
+      "addEmail": "Aggiungi email",
+      "addPhone": "Aggiungi telefono",
+      "addChatContact": "Aggiungi contatto chat",
+      "labelPlaceholder": "es. Lavoro",
+      "providerPlaceholder": "Piattaforma"
     }
   },
   "timeline": {
