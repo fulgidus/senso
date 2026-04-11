@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-last_updated: "2026-04-11T08:17:29.506Z"
-last_activity: 2026-04-10
+last_updated: "2026-04-11T09:42:29.114Z"
+last_activity: 2026-04-11
 progress:
   total_phases: 31
-  completed_phases: 29
-  total_plans: 117
-  completed_plans: 117
+  completed_phases: 30
+  total_plans: 126
+  completed_plans: 126
 ---
 
 # Project State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 
 ## Current Position
 
-Phase: 28 of 31 (auth token renewal flow fix broken expiry handling)
+Phase: 29 of 31 (profile sealed and unsealed data sections with goals habits migration)
 Plan: Not started
 
 **Phase 24 (Voice Stack Fix) complete 2026-04-10.**
@@ -289,4 +289,4 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last activity: 2026-04-10
+Last activity: 2026-04-11
