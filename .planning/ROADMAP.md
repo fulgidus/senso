@@ -441,9 +441,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 30-01-PLAN.md - Learn-to-chat enriched coach flow (AboutChatPage rewrite)
-- [ ] 30-02-PLAN.md - Chat mode localStorage persistence + STT Chromium regression test
-- [ ] 30-03-PLAN.md - Bug fixes: nuke endpoint full reset + content admin i18n cleanup
+- [x] 30-01-PLAN.md - Learn-to-chat enriched coach flow (AboutChatPage rewrite) (completed 2026-04-11)
+- [x] 30-02-PLAN.md - Chat mode localStorage persistence + STT Chromium regression test (completed 2026-04-11)
+- [x] 30-03-PLAN.md - Bug fixes: nuke endpoint full reset + content admin i18n cleanup (completed 2026-04-11)
 
 ---
 
