@@ -623,11 +623,13 @@ async def stt_transcribe(
         except HTTPException:
             raise
         except Exception as exc:
+            import traceback, logging
+            logging.error(f"STT ElevenLabs failed: {exc}\n{traceback.format_exc()}")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail={
                     "code": "stt_failed",
-                    "message": f"Transcription failed: {exc}",
+                    "message": f"ElevenLabs error: {type(exc).__name__}: {exc}",
                 },
             )
 
