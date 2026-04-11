@@ -282,10 +282,19 @@ class CoachingService:
             loader=FileSystemLoader(str(PROMPTS_DIR)),
             autoescape=False,
         )
-        # Load static assets once at init
-        self._ethos = (PERSONAS_DIR / "ethos.md").read_text(encoding="utf-8")
-        self._boundaries = (PERSONAS_DIR / "boundaries.md").read_text(encoding="utf-8")
-        self._allowlist = (PERSONAS_DIR / "allowlist.md").read_text(encoding="utf-8")
+        # Load static assets once at init — both locales
+        self._ethos = {
+            "it": (PERSONAS_DIR / "ethos.md").read_text(encoding="utf-8"),
+            "en": (PERSONAS_DIR / "ethos.en.md").read_text(encoding="utf-8"),
+        }
+        self._boundaries = {
+            "it": (PERSONAS_DIR / "boundaries.md").read_text(encoding="utf-8"),
+            "en": (PERSONAS_DIR / "boundaries.en.md").read_text(encoding="utf-8"),
+        }
+        self._allowlist = {
+            "it": (PERSONAS_DIR / "allowlist.md").read_text(encoding="utf-8"),
+            "en": (PERSONAS_DIR / "allowlist.en.md").read_text(encoding="utf-8"),
+        }
         with open(SCHEMAS_DIR / "coaching_response.schema.json", encoding="utf-8") as f:
             self._response_schema = json.load(f)
         with open(SCHEMAS_DIR / "capabilities.schema.json", encoding="utf-8") as f:
@@ -326,7 +335,7 @@ class CoachingService:
         which is the correct invalidation boundary (soul edits → redeploy).
         """
         if persona_id not in _soul_hash_cache:
-            soul_text = self._load_soul(persona_id)
+            soul_text = self._load_soul(persona_id)  # hash uses default locale
             _soul_hash_cache[persona_id] = hashlib.sha3_256(
                 soul_text.encode()
             ).hexdigest()
@@ -405,7 +414,7 @@ class CoachingService:
                 f"Solo testo - nessun JSON."
             )
 
-        soul_text = self._load_soul(persona_id)
+        soul_text = self._load_soul(persona_id, locale)
         system_prompt = self._render_system(soul_text, locale)
 
         try:
@@ -468,7 +477,7 @@ class CoachingService:
         )
 
         # Load persona soul
-        soul_text = self._load_soul(persona_id)
+        soul_text = self._load_soul(persona_id, locale)
 
         # Fetch user profile (raises ProfileError → caller converts to HTTP 422)
         profile_service = ProfileService(self.db)
@@ -877,25 +886,37 @@ class CoachingService:
             "call_trace": trace_dict,
         }
 
-    def _load_soul(self, persona_id: str) -> str:
+    def _load_soul(self, persona_id: str, locale: str = "it") -> str:
         for persona in self._persona_config.get("personas", []):
             if persona["id"] == persona_id:
-                soul_path = PERSONAS_DIR / persona["soulFile"]
-                return soul_path.read_text(encoding="utf-8")
+                soul_file = persona["soulFile"]
+                # Try locale-specific version first (e.g. soul/mentore-saggio.en.md)
+                if locale != "it":
+                    localized = soul_file.replace(".md", f".{locale}.md")
+                    localized_path = PERSONAS_DIR / localized
+                    if localized_path.exists():
+                        return localized_path.read_text(encoding="utf-8")
+                return (PERSONAS_DIR / soul_file).read_text(encoding="utf-8")
         # Fallback: default persona
         for persona in self._persona_config.get("personas", []):
             if persona["id"] == _DEFAULT_PERSONA_ID:
-                soul_path = PERSONAS_DIR / persona["soulFile"]
-                return soul_path.read_text(encoding="utf-8")
+                soul_file = persona["soulFile"]
+                if locale != "it":
+                    localized = soul_file.replace(".md", f".{locale}.md")
+                    localized_path = PERSONAS_DIR / localized
+                    if localized_path.exists():
+                        return localized_path.read_text(encoding="utf-8")
+                return (PERSONAS_DIR / soul_file).read_text(encoding="utf-8")
         return ""
 
     def _render_system(self, soul: str, locale: str) -> str:
+        loc = locale if locale in ("it", "en") else "it"
         tmpl = self._jinja_env.get_template("system_base.j2")
         return tmpl.render(
-            ethos=self._ethos,
+            ethos=self._ethos[loc],
             soul=soul,
-            boundaries=self._boundaries,
-            allowlist=self._allowlist,
+            boundaries=self._boundaries[loc],
+            allowlist=self._allowlist[loc],
             locale=locale,
         )
 
