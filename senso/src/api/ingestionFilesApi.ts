@@ -113,3 +113,64 @@ export async function getTrace(token: string, uploadId: string): Promise<TraceSt
         throw err
     }
 }
+
+// ── Factory (Pattern A: token as param, onUnauthorized bound at construction) ──
+
+export type IngestionFilesApiClient = ReturnType<typeof createIngestionFilesApi>
+
+export function createIngestionFilesApi(onUnauthorized?: () => Promise<string | null>) {
+    return {
+        listUploads: (token: string) =>
+            apiRequest<UploadFile[]>(API_BASE, "/ingestion/uploads", {
+                token,
+                onUnauthorized,
+            }),
+
+        deleteUpload: (token: string, uploadId: string) =>
+            apiRequest<void>(API_BASE, `/ingestion/uploads/${uploadId}`, {
+                method: "DELETE",
+                token,
+                onUnauthorized,
+            }),
+
+        retryUpload: (token: string, uploadId: string) =>
+            apiRequest<{ upload_id: string; status: string }>(
+                API_BASE,
+                `/ingestion/uploads/${uploadId}/retry`,
+                { method: "POST", token, onUnauthorized, body: { hint: null } },
+            ),
+
+        getExtracted: async (
+            token: string,
+            uploadId: string,
+        ): Promise<ExtractedDocumentDetail | null> => {
+            try {
+                return await apiRequest<ExtractedDocumentDetail>(
+                    API_BASE,
+                    `/ingestion/uploads/${uploadId}/extracted`,
+                    { token, onUnauthorized },
+                )
+            } catch (err) {
+                if (err instanceof ApiClientError && err.status === 404) return null
+                throw err
+            }
+        },
+
+        getTrace: async (token: string, uploadId: string): Promise<TraceStep[]> => {
+            try {
+                return await apiRequest<TraceStep[]>(
+                    API_BASE,
+                    `/admin/ingestion/uploads/${uploadId}/trace`,
+                    { token, onUnauthorized },
+                )
+            } catch (err) {
+                if (
+                    err instanceof ApiClientError &&
+                    (err.status === 403 || err.status === 404)
+                )
+                    return []
+                throw err
+            }
+        },
+    }
+}

@@ -6,6 +6,7 @@ function getBase(): string {
   return getBackendBaseUrl()
 }
 
+/* native fetch — onUnauthorized not applicable (FormData multipart) */
 export async function uploadFile(
   token: string,
   file: File,
@@ -92,9 +93,59 @@ export async function reportUpload(
   )
 }
 
+/* native fetch — onUnauthorized not applicable */
 export async function deleteUpload(token: string, uploadId: string): Promise<void> {
   await fetch(`${getBase()}/ingestion/uploads/${uploadId}`, {
     method: "DELETE",
     headers: { authorization: `Bearer ${token}` },
   })
+}
+
+// ── Factory (Pattern A: token as param, onUnauthorized bound at construction) ──
+
+export type IngestionApiClient = ReturnType<typeof createIngestionApi>
+
+export function createIngestionApi(onUnauthorized?: () => Promise<string | null>) {
+    function req<T>(path: string, opts: Record<string, unknown> = {}): Promise<T> {
+        return apiRequest<T>(getBase(), path, { ...opts, onUnauthorized })
+    }
+
+    return {
+        // uploadFile: excluded — uses native fetch (FormData multipart upload)
+        // deleteUpload: excluded — uses native fetch
+
+        listUploads: (token: string) =>
+            req<UploadStatus[]>("/ingestion/uploads", { token }),
+
+        getUpload: (token: string, uploadId: string) =>
+            req<UploadStatus>(`/ingestion/uploads/${uploadId}`, { token }),
+
+        getExtracted: (token: string, uploadId: string) =>
+            req<ExtractedDocument>(`/ingestion/uploads/${uploadId}/extracted`, { token }),
+
+        confirmUpload: (token: string, uploadId: string) =>
+            req<{ confirmed: boolean }>(`/ingestion/uploads/${uploadId}/confirm`, {
+                method: "POST",
+                token,
+            }),
+
+        retryUpload: (token: string, uploadId: string, hint?: string) =>
+            req<{ status: string }>(`/ingestion/uploads/${uploadId}/retry`, {
+                method: "POST",
+                token,
+                body: { hint: hint ?? null },
+            }),
+
+        reportUpload: (token: string, uploadId: string, note?: string) =>
+            req<{ reported: boolean }>(`/ingestion/uploads/${uploadId}/report`, {
+                method: "POST",
+                token,
+                body: { note: note ?? null },
+            }),
+
+        /** Confirm all uploads for the current user and trigger profile categorization.
+         *  Replaces the raw apiRequest import in OnboardingRoutes.tsx. */
+        confirmAll: (token: string) =>
+            req<void>("/ingestion/confirm-all", { method: "POST", token }),
+    }
 }
