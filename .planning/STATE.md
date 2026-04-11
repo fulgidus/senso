@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Executing Phase 30
-last_updated: "2026-04-11T12:56:44.535Z"
+last_updated: "2026-04-11T12:58:18.272Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 32
   completed_phases: 31
-  total_plans: 131
+  total_plans: 132
   completed_plans: 129
 ---
 
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 30 of 32 (learn to chat enriched coach flow chat mode persistence and open bug triage)
-Plan: 1 of 2
+Plan: 1 of 3
 
 **Phase 24 (Voice Stack Fix) complete 2026-04-10.**
 Gap phases 25–29 planned. Phase 25 has 2 execution plans ready. Phases 26–29 have CONTEXT.md files.
@@ -275,7 +275,7 @@ Recent decisions affecting current work:
 - Phase 26 added: Enriched coach messages rendering fix - backend response format null issue
 - Phase 27 added: Admin username enforcement
 - Phase 28 added: Auth token renewal flow fix - broken expiry handling
-- Phase 29 added: Profile sealed and unsealed data sections with goals/habits migration
+- Phase 30 added: Learn-to-chat enriched coach flow, chat mode persistence, and open bug triage — /chat/about/:slug autofill → real enriched session; voice/text mode localStorage; nuke endpoint full reset; content admin i18n cleanup
 
 ### Design Decisions (2026-04-01 session)
 

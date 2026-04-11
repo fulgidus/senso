@@ -435,13 +435,15 @@ Plans:
 
 ### Phase 30: Learn-to-chat enriched coach flow, chat mode persistence, and open bug triage
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Replace the /chat/about/:slug autofill behavior with a real enriched coach-initiated conversation using content metadata. Persist voice/text chat mode in localStorage. Fix nuke endpoint (orphaned sessions, profile not reset) and content admin i18n column headers.
+**Requirements**: D-1 through D-11 (see 30-CONTEXT.md)
 **Depends on:** Phase 29
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 30 to break down)
+- [ ] 30-01-PLAN.md - Learn-to-chat enriched coach flow (AboutChatPage rewrite)
+- [ ] 30-02-PLAN.md - Chat mode localStorage persistence + STT Chromium regression test
+- [ ] 30-03-PLAN.md - Bug fixes: nuke endpoint full reset + content admin i18n cleanup
 
 ---
 
