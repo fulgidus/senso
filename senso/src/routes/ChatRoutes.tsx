@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { ChatScreen } from "@/features/coaching/ChatScreen"
-import { getProfile } from "@/lib/profile-api"
-import { listSessions } from "@/features/coaching/coachingApi"
+import { createProfileApi } from "@/lib/profile-api"
+import { createCoachingApi } from "@/features/coaching/coachingApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { readAccessToken } from "@/features/auth/storage"
 
 // ── Loading screen ───────────────────────────────────────────────────────────
@@ -25,6 +26,8 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
     const token = readAccessToken()
     const navigate = useNavigate()
     const { t } = useTranslation()
+    const { onUnauthorized } = useAuthContext()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
     const [state, setState] = useState<"checking" | "ready" | "rejected">("checking")
 
     useEffect(() => {
@@ -33,7 +36,7 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
             return
         }
         let cancelled = false
-        getProfile(token)
+        profileApi.getProfile(token)
             .then((profile) => {
                 if (cancelled) return
                 if (profile?.confirmed) {
@@ -59,9 +62,11 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
 
 function SessionResolver() {
     const [target, setTarget] = useState<string | null>(null)
+    const { onUnauthorized } = useAuthContext()
+    const coachingApi = useMemo(() => createCoachingApi(onUnauthorized), [onUnauthorized])
 
     useEffect(() => {
-        listSessions()
+        coachingApi.listSessions()
             .then((sessions) => {
                 if (sessions.length > 0) {
                     // Sessions are sorted by updated_at desc - first is most recent

@@ -1,7 +1,8 @@
 import { Loader2, ShieldCheck } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { readAccessToken } from "@/features/auth/storage";
+import { useAuthContext } from "@/features/auth/AuthContext";
+import { createAdminMerchantApi } from "@/features/admin/adminMerchantApi";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface AdminHandleGateModalProps {
@@ -12,6 +13,11 @@ interface AdminHandleGateModalProps {
 export function AdminHandleGateModal({ onSaved }: AdminHandleGateModalProps) {
     const { t } = useTranslation();
     const reducedMotion = useReducedMotion();
+    const { onUnauthorized } = useAuthContext();
+    const adminMerchantApi = useMemo(
+        () => createAdminMerchantApi(onUnauthorized),
+        [onUnauthorized],
+    );
 
     const [inputValue, setInputValue] = useState("");
     const [saving, setSaving] = useState(false);
@@ -25,24 +31,11 @@ export function AdminHandleGateModal({ onSaved }: AdminHandleGateModalProps) {
         const raw = inputValue.trim().replace(/^!/, "");
         if (!raw || raw.length < 3) return;
 
-        const token = readAccessToken();
-        if (!token) return;
-
         setSaving(true);
         setError(null);
 
         try {
-            const { apiRequest } = await import("@/lib/api-client");
-            const { getBackendBaseUrl } = await import("@/lib/config");
-            const res = await apiRequest<{ adminHandle: string }>(
-                getBackendBaseUrl(),
-                "/admin/claim-handle",
-                {
-                    method: "POST",
-                    token,
-                    body: { adminHandle: `!${raw}` },
-                },
-            );
+            const res = await adminMerchantApi.claimHandle(`!${raw}`);
             onSaved(res.adminHandle);
         } catch (err: unknown) {
             // Detect 409 (taken) vs 422 (reserved/invalid) vs other
@@ -64,7 +57,7 @@ export function AdminHandleGateModal({ onSaved }: AdminHandleGateModalProps) {
         } finally {
             setSaving(false);
         }
-    }, [inputValue, t, onSaved]);
+    }, [inputValue, t, onSaved, adminMerchantApi]);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {

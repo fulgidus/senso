@@ -1,18 +1,15 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useCallback, useMemo, useState } from "react"
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useAuthContext } from "@/features/auth/AuthContext"
 import { readAccessToken } from "@/features/auth/storage"
-import { getProfileStatus, triggerCategorization } from "@/lib/profile-api"
-import { apiRequest } from "@/lib/api-client"
-import { getBackendBaseUrl } from "@/lib/config"
+import { getProfileStatus, triggerCategorization, createProfileApi } from "@/lib/profile-api"
+import { createIngestionApi } from "@/features/ingestion/api"
 import { IngestionScreen } from "@/features/ingestion/IngestionScreen"
 import { ProcessingScreen } from "@/features/profile/ProcessingScreen"
 import { OnboardingChoiceScreen } from "@/features/profile/OnboardingChoiceScreen"
 import { QuestionnaireScreen } from "@/features/profile/QuestionnaireScreen"
 import { Button } from "@/components/ui/button"
-
-const API_BASE = getBackendBaseUrl()
 
 // ── Stale profile modal (shared by resolver + upload confirm) ────────────────
 
@@ -155,16 +152,18 @@ function ChoicePage() {
 // ── /onboarding/upload ───────────────────────────────────────────────────────
 
 function UploadPage() {
-    const { user } = useAuthContext()
+    const { user, onUnauthorized } = useAuthContext()
     const token = readAccessToken()
     const navigate = useNavigate()
     const [showStale, setShowStale] = useState(false)
+    const ingestionApi = useMemo(() => createIngestionApi(onUnauthorized), [onUnauthorized])
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
 
     const handleConfirmAll = useCallback(async () => {
         if (!token) return
         try {
-            await apiRequest(API_BASE, "/ingestion/confirm-all", { method: "POST", token })
-            const statusData = await getProfileStatus(token)
+            await ingestionApi.confirmAll(token)
+            const statusData = await profileApi.getProfileStatus(token)
             if (
                 statusData.status === "complete" &&
                 statusData.uploadsFingerprint !== null &&
@@ -175,7 +174,7 @@ function UploadPage() {
                 navigate("/onboarding/processing#start", { replace: true })
             }
         } catch { /* stay */ }
-    }, [token, navigate])
+    }, [token, navigate, ingestionApi, profileApi])
 
     return (
         <>

@@ -12,7 +12,7 @@ import {
 } from "@/features/auth/session";
 import { ApiClientError } from "@/lib/api-client";
 import type { User, CryptoKeyMaterial } from "@/features/auth/types";
-import { pollMessages, type PolledMessageDTO } from "@/features/messages/messagesApi";
+import { createMessagesApi, type PolledMessageDTO } from "@/features/messages/messagesApi";
 
 type AuthMode = "signup" | "login";
 
@@ -158,7 +158,7 @@ export function useAuth() {
                 // setIsPolling wraps the call so MessagesPage shows a spinner instead of a false
                 // empty state during the bootstrap window. (Review amendment #1)
                 setIsPolling(true);
-                pollMessages()
+                createMessagesApi(onUnauthorized).pollMessages()
                     .then((msgs) => {
                         const safe = Array.isArray(msgs) ? msgs : [];
                         setPolledMessages(safe);
@@ -175,7 +175,7 @@ export function useAuth() {
                 setState((current) => ({ ...current, loading: false, error: t(key) }));
             }
         },
-        [state.mode, t],
+        [state.mode, t, onUnauthorized],
     );
 
     const beginGoogle = useCallback(async () => {
