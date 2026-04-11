@@ -39,17 +39,21 @@ export function AuthScreen({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-6 py-12">
-      <section className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+      <section className="w-full rounded-3xl border border-border bg-card p-6 shadow-xl shadow-primary/5 md:p-8 relative overflow-hidden">
+        {/* Subtle gradient accent */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-primary" />
         <header className="space-y-2">
           <h1 className="text-[28px] leading-[1.2] font-semibold">{heading}</h1>
           <p className="text-base leading-[1.5] text-muted-foreground">{body}</p>
         </header>
 
-        <div className="mt-6 grid grid-cols-2 gap-2 rounded-lg bg-secondary p-1">
+        <div className="mt-6 grid grid-cols-2 gap-2 rounded-full bg-secondary p-1.5">
           <button
             type="button"
-            className={`h-11 rounded-md text-sm font-semibold ${
-              mode === "login" ? "bg-accent text-white" : "text-foreground"
+            className={`h-11 rounded-full text-sm font-semibold transition-all ${
+              mode === "login"
+                ? "bg-gradient-primary text-primary-foreground shadow-md shadow-primary/25"
+                : "text-foreground hover:text-accent-foreground"
             }`}
             onClick={() => onModeChange("login")}
           >
@@ -57,8 +61,10 @@ export function AuthScreen({
           </button>
           <button
             type="button"
-            className={`h-11 rounded-md text-sm font-semibold ${
-              mode === "signup" ? "bg-accent text-white" : "text-foreground"
+            className={`h-11 rounded-full text-sm font-semibold transition-all ${
+              mode === "signup"
+                ? "bg-gradient-primary text-primary-foreground shadow-md shadow-primary/25"
+                : "text-foreground hover:text-accent-foreground"
             }`}
             onClick={() => onModeChange("signup")}
           >
@@ -70,7 +76,7 @@ export function AuthScreen({
           <label className="block space-y-2">
             <span className="text-sm leading-[1.5] font-semibold">{t("auth.email")}</span>
             <input
-              className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-base transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -81,7 +87,7 @@ export function AuthScreen({
           <label className="block space-y-2">
             <span className="text-sm leading-[1.5] font-semibold">{t("auth.password")}</span>
             <input
-              className="h-11 w-full rounded-md border border-input bg-background px-3 text-base"
+              className="h-12 w-full rounded-xl border border-input bg-background px-4 text-base transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -90,7 +96,12 @@ export function AuthScreen({
             />
           </label>
 
-          <Button className="h-11 w-full text-sm font-semibold" disabled={loading}>
+          <Button
+            variant="gradient"
+            size="lg"
+            className="w-full text-base font-semibold"
+            disabled={loading}
+          >
             {loading
               ? isLogin
                 ? t("auth.loggingIn")
@@ -103,7 +114,8 @@ export function AuthScreen({
 
         <Button
           variant="outline"
-          className="mt-4 h-11 w-full text-sm font-semibold opacity-50 cursor-not-allowed"
+          size="lg"
+          className="mt-4 w-full text-base font-semibold opacity-50 cursor-not-allowed rounded-full"
           disabled
           title={t("auth.googleTitle")}
         >
@@ -128,14 +140,14 @@ export function AuthScreen({
           <div className="flex flex-col gap-2 sm:flex-row">
             <Link
               to="/learn"
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:border-primary/30"
             >
               <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
               {t("auth.guestLearn")}
             </Link>
             <Link
               to="/about"
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground hover:border-primary/30"
             >
               <Info className="h-4 w-4 shrink-0 text-muted-foreground" />
               {t("auth.guestAbout")}
