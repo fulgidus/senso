@@ -12,7 +12,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { getDisplayName } from "@/lib/user-avatar";
 import type { VoiceGender } from "@/features/auth/types";
 import { readTopbarButtons, writeTopbarButtons } from "@/components/AppShell";
-import { createCoachingApi, type Persona } from "@/features/coaching/coachingApi";
+import { createCoachingApi, getPersonaTheme, type Persona } from "@/features/coaching/coachingApi";
 import { createAdminMerchantApi } from "@/features/admin/adminMerchantApi";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -31,6 +31,7 @@ export function SettingsScreen() {
   const coachingApi = useMemo(() => createCoachingApi(onUnauthorized), [onUnauthorized]);
   const adminMerchantApi = useMemo(() => createAdminMerchantApi(onUnauthorized), [onUnauthorized]);
   const { theme, setTheme } = useTheme();
+  const resolvedTheme: "light" | "dark" = theme === "dark" ? "dark" : "light";
   const { t } = useTranslation();
   const haptic = useHapticFeedback();
 
@@ -46,6 +47,8 @@ export function SettingsScreen() {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [strictPrivacyMode, setStrictPrivacyMode] = useState(user.strictPrivacyMode ?? false);
   const [privacySaving, setPrivacySaving] = useState(false);
+  const [personaSaving, setPersonaSaving] = useState(false);
+  const [personaSaved, setPersonaSaved] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [handleInput, setHandleInput] = useState(user.adminHandle?.replace(/^!/, "") ?? "");
   const [handleSaving, setHandleSaving] = useState(false);
@@ -79,14 +82,34 @@ export function SettingsScreen() {
 
   const isDirty =
     voiceGender !== (user.voiceGender ?? "indifferent") ||
-    voiceAutoListen !== (user.voiceAutoListen ?? false) ||
-    defaultPersonaId !== (user.defaultPersonaId ?? "mentore-saggio");
+    voiceAutoListen !== (user.voiceAutoListen ?? false);
 
   const handleReset = useCallback(() => {
     setVoiceGender(user.voiceGender ?? "indifferent");
     setVoiceAutoListen(user.voiceAutoListen ?? false);
-    setDefaultPersonaId(user.defaultPersonaId ?? "mentore-saggio");
   }, [user]);
+
+  const handlePersonaSelect = useCallback(
+    async (personaId: string) => {
+      if (personaId === defaultPersonaId) return;
+      setDefaultPersonaId(personaId);
+      setPersonaSaving(true);
+      try {
+        const token = readAccessToken();
+        if (!token) return;
+        const updated = await updateMe(token, { defaultPersonaId: personaId });
+        updateUser(updated);
+        setPersonaSaved(true);
+        setTimeout(() => setPersonaSaved(false), 2000);
+      } catch {
+        // Silently revert to previous on error
+        setDefaultPersonaId(defaultPersonaId);
+      } finally {
+        setPersonaSaving(false);
+      }
+    },
+    [defaultPersonaId, updateUser],
+  );
 
   const handleSave = async () => {
     setSaving(true);
@@ -98,10 +121,8 @@ export function SettingsScreen() {
       const updated = await updateMe(token, {
         voiceGender,
         voiceAutoListen,
-        defaultPersonaId,
       });
       updateUser(updated);
-      setDefaultPersonaId(updated.defaultPersonaId ?? "mentore-saggio");
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
@@ -218,9 +239,14 @@ export function SettingsScreen() {
       <section className="rounded-2xl border border-border bg-card p-6 space-y-4">
         <div className="pb-4 border-b border-border space-y-3">
           <div>
-            <h2 className="text-base font-semibold text-foreground">
-              {t("settings.defaultCoach")}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-semibold text-foreground">
+                {t("settings.defaultCoach")}
+              </h2>
+              {personaSaved && (
+                <span className="text-xs text-primary ml-auto">{t("preferences.saved")}</span>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">{t("settings.defaultCoachHint")}</p>
           </div>
           <div className="space-y-2">
@@ -228,24 +254,27 @@ export function SettingsScreen() {
               .filter((persona) => persona.available)
               .map((persona) => {
                 const selected = persona.id === defaultPersonaId;
-                const theme = persona.theme?.light;
+                const personaTheme = getPersonaTheme(persona, resolvedTheme);
                 return (
                   <button
                     key={persona.id}
                     type="button"
-                    onClick={() => setDefaultPersonaId(persona.id)}
+                    onClick={() => void handlePersonaSelect(persona.id)}
+                    disabled={personaSaving}
                     className="w-full rounded-xl border px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                     style={{
                       borderColor: selected
-                        ? (theme?.bubble_border ?? "var(--primary)")
+                        ? (personaTheme?.bubble_border ?? "var(--primary)")
                         : undefined,
-                      backgroundColor: selected ? (theme?.bubble_bg ?? undefined) : undefined,
+                      backgroundColor: selected
+                        ? (personaTheme?.bubble_bg ?? undefined)
+                        : undefined,
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base"
-                        style={{ backgroundColor: theme?.avatar_bg }}
+                        style={{ backgroundColor: personaTheme?.avatar_bg }}
                       >
                         {persona.icon}
                       </div>
