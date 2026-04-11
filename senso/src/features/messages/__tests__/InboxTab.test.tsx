@@ -23,6 +23,7 @@ const mockAuthCtx: AuthContextValue = {
   },
   signOut: async () => {},
   updateUser: () => {},
+  onUnauthorized: async () => null,
   cryptoKeys: null,
   setCryptoKeys: () => {},
   isPolling: false,

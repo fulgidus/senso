@@ -274,8 +274,8 @@ describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
       return mockMediaRecorderInstance;
     }) as unknown as typeof MediaRecorder;
 
-    (MockMediaRecorder as unknown as { isTypeSupported: (t: string) => boolean })
-      .isTypeSupported = vi.fn().mockReturnValue(true);
+    (MockMediaRecorder as unknown as { isTypeSupported: (t: string) => boolean }).isTypeSupported =
+      vi.fn().mockReturnValue(true);
 
     Object.defineProperty(window, "MediaRecorder", {
       value: MockMediaRecorder,
@@ -302,26 +302,28 @@ describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
   it("isAvailable is true when Web Speech API is absent but MediaRecorder is available", async () => {
     const { result } = renderHook(() => useVoiceInput({ onFinalTranscript: vi.fn() }));
     // flush detectBackend useEffect
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => {
+      await Promise.resolve();
+    });
     expect(result.current.isAvailable).toBe(true);
   });
 
   it(
     "MediaRecorder path calls POST /coaching/stt on stop — " +
-    "regression for stt-server-side-whisper.md debug session",
+      "regression for stt-server-side-whisper.md debug session",
     async () => {
       const onFinalTranscript = vi.fn();
-      const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
         ok: true,
         json: async () => ({ text: "Ciao dal MediaRecorder" }),
       } as Response);
 
-      const { result } = renderHook(() =>
-        useVoiceInput({ locale: "it", onFinalTranscript })
-      );
+      const { result } = renderHook(() => useVoiceInput({ locale: "it", onFinalTranscript }));
 
       // flush detectBackend effect
-      await act(async () => { await Promise.resolve(); });
+      await act(async () => {
+        await Promise.resolve();
+      });
 
       // Start recording
       await act(async () => {
@@ -337,7 +339,9 @@ describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
 
       // Simulate data arrival then stop
       act(() => {
-        mrInstance.ondataavailable?.({ data: new Blob([new Uint8Array(100)], { type: "audio/webm" }) });
+        mrInstance.ondataavailable?.({
+          data: new Blob([new Uint8Array(100)], { type: "audio/webm" }),
+        });
       });
 
       await act(async () => {
@@ -349,28 +353,28 @@ describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
 
       expect(fetchSpy).toHaveBeenCalledWith(
         expect.stringContaining("/coaching/stt"),
-        expect.objectContaining({ method: "POST" })
+        expect.objectContaining({ method: "POST" }),
       );
       expect(onFinalTranscript).toHaveBeenCalledWith("Ciao dal MediaRecorder");
 
       fetchSpy.mockRestore();
-    }
+    },
   );
 
   it(
     "getUserMedia stream tracks are stopped after recording — " +
-    "no micStreamRef held (regression: stt-hold-to-speak-chromium-no-audio.md)",
+      "no micStreamRef held (regression: stt-hold-to-speak-chromium-no-audio.md)",
     async () => {
       const fakeTrackStop = vi.fn();
       (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue({
         getTracks: () => [{ stop: fakeTrackStop, kind: "audio" }],
       });
 
-      const { result } = renderHook(() =>
-        useVoiceInput({ onFinalTranscript: vi.fn() })
-      );
+      const { result } = renderHook(() => useVoiceInput({ onFinalTranscript: vi.fn() }));
 
-      await act(async () => { await Promise.resolve(); });
+      await act(async () => {
+        await Promise.resolve();
+      });
 
       await act(async () => {
         result.current.startRecording();
@@ -390,6 +394,6 @@ describe("useVoiceInput - MediaRecorder backend (D-11 regression)", () => {
 
       // After onstop, stream tracks must be stopped — no live stream held
       expect(fakeTrackStop).toHaveBeenCalled();
-    }
+    },
   );
 });
