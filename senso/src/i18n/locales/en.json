@@ -120,7 +120,9 @@
     "stepInsights": "Generating insights",
     "stepProfile": "Building your profile",
     "txnCount": "{{count}} transactions",
-    "transactionsLabel": "transactions processed"
+    "transactionsLabel": "transactions processed",
+    "headingNotStarted": "No processing in progress",
+    "bodyNotStarted": "There are no files to process. Upload your financial documents to get started."
   },
   "profile": {
     "heading": "Your financial profile",

@@ -120,7 +120,9 @@
     "stepInsights": "Generazione approfondimenti",
     "stepProfile": "Costruzione del profilo",
     "txnCount": "{{count}} transazioni",
-    "transactionsLabel": "transazioni elaborate"
+    "transactionsLabel": "transazioni elaborate",
+    "headingNotStarted": "Nessuna elaborazione in corso",
+    "bodyNotStarted": "Non ci sono file da elaborare. Carica i tuoi documenti finanziari per iniziare."
   },
   "profile": {
     "heading": "Il tuo profilo finanziario",
