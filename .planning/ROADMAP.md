@@ -422,13 +422,16 @@ Plans:
 
 ### Phase 29: Profile sealed and unsealed data sections with goals/habits migration
 
-**Goal:** Move goals/dos/donts preferences from SettingsScreen to a new Preferenze tab in ProfileScreen. Add a "sealed notes" section (NaCl client-side encryption via Phase 13 keypair) for private data the AI cannot access. Backend: add sealed_notes TEXT column to user_profiles. Frontend: ProfileScreen Preferenze tab with "Visibile all'AI" (unsealed) and "Solo per te" (sealed) subsections.
+**Goal:** Move goals/dos/donts preferences from SettingsScreen to a new Preferenze tab in ProfileScreen. Add a "sealed notes" section (NaCl client-side encryption via Phase 13 keypair) for private data the AI cannot access. Backend: add sealed_profile TEXT + 7 unsealed demographics columns to user_profiles. Frontend: ProfileScreen Preferenze tab with "Visibile all'AI" (unsealed) and "Solo per te" (sealed) subsections.
 **Requirements**: D-01 through D-11 (see 29-CONTEXT.md)
 **Depends on:** Phase 28
-**Plans:** 0 plans
+**Plans:** 3 plans
+**Status:** Complete (2026-04-11)
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 29 to break down)
+- [x] 29-01: Backend — Two-Tier Profile Data Model and API (completed 2026-04-11)
+- [x] 29-02: Frontend Foundation — Crypto, API Client, User Type, Display Utilities (completed 2026-04-11)
+- [x] 29-03: Frontend UI — ProfileScreen Carousel, PreferenzaTab, SettingsScreen Cleanup (completed 2026-04-11)
 
 ---
 
