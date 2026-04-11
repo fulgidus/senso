@@ -6,6 +6,7 @@ style: |
   @import url('https://cdn.jsdelivr.net/npm/@fontsource-variable/geist/index.min.css');
   section { font-family: 'Geist Variable', system-ui, sans-serif; background: #112D4E; color: #F9F7F7; }
   h1, h2 { color: #5B9BD5; }
+  section.lead { text-align: center; }
   h3 { color: #3F72AF; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.12em; }
   strong { color: #5B9BD5; }
   em { color: #a8c4e0; }
@@ -13,7 +14,7 @@ style: |
   blockquote { color: #3F72AF; border-left: 4px solid #3F72AF; padding: 8px 20px; background: rgba(91,155,213,0.1); border-radius: 0 6px 6px 0; }
   th { background: #1e4472; color: #5B9BD5; text-align: left; }
   td { color: #1B3B95; border-color: #1e4472; }
-  table { font-size: 0.82em; }
+  table { font-size: 0.82em; margin: 0 auto; }
   section.lt { background: #F9F7F7; color: #112D4E; }
   section.lt h1, section.lt h2 { color: #112D4E; }
   section.lt strong { color: #3F72AF; }
@@ -31,9 +32,21 @@ style: |
 
 ### Sistema Educativo per Numeri, Spese e Obiettivi
 
-> Finalmente qualcuno che ti dice la verità sui tuoi soldi.
+<br/>
+<br/>
+<br/>
+<br/>
 
-`PUNKATHON 2026` · OGR Torino · 11 Aprile
+<div style="text-align: center; font-size: 1.2em; color: #a8c4e0; font-weight: bold;">
+Finalmente qualcuno che ti dice la verità sui tuoi soldi
+</div>
+
+<br/>
+<br/>
+<br/>
+<br/>
+
+S.E.N.S.O.` · Alessio G. Corsi · `PUNKATHON 2026` · OGR Torino · 11 Aprile 2026
 
 ---
 
@@ -54,7 +67,7 @@ style: |
 
 ---
 
-## La Soluzione
+# La Soluzione
 
 Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
@@ -80,7 +93,7 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 <!-- _class: lt -->
 
-## 4 Mentori, 1 Etica
+# 4 Coach, 1 Etica
 
 *Tono diverso. Principi finanziari identici\*. Safety boundaries condivisi.*
 
@@ -95,9 +108,9 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 ---
 
-### Architettura
+## Architettura
 
-## Stack Tecnico
+### Stack Tecnico
 
 | Layer         | Tecnologie                                                                              |
 | ------------- | --------------------------------------------------------------------------------------- |
@@ -115,13 +128,13 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 
 ## Il Progetto in Numeri
 
-|                 |           |                  |         |
-| --------------: | :-------- | ---------------: | :------ |
-| Fasi completate | **30**/31 |  Test funzionali | **349** |
-|          Commit | **558**   |         Tool LLM | **7**   |
-|  Personas coach | **4**     | Moduli ingestion | **7**   |
+|                 |           |                  |          |
+| --------------: | :-------- | ---------------: | :------- |
+| Fasi completate | **31**/32 |  Test funzionali | **350+** |
+|          Commit | **560+**  |         Tool LLM | **7**    |
+|  Personas coach | **4**     | Moduli ingestion | **7**    |
 
-### Evoluzione
+## Evoluzione
 
 - *"Quanto Mi Costa Davvero"* calcolatore BNPL
 - *"Primo Stipendio"* simulatore IRPEF ·
@@ -134,14 +147,16 @@ Un **mentore vocale AI** che ti conosce e ti parla con i **tuoi numeri reali**.
 <!-- _paginate: false -->
 <!-- _class: lead -->
 
-# Non insegniamo finanza.
+## Non insegniamo finanza.
 
-## Aiutiamo a prendere decisioni migliori.
+### Aiutiamo a prendere decisioni migliori.
 
-S.E.N.S.O. è una PWA - scansiona, installa, usa.
+###### S.E.N.S.O. è una PWA - scansiona, installa, usa.
 
-| ![w:160](qr-prototype.png) |    ![w:160](qr-repo.png)    |
+| ![w:300](qr-prototype.png) |    ![w:300](qr-repo.png)    |
 | :------------------------: | :-------------------------: |
 | *senso.dev.vps.fulgid.us*  | *github.com/fulgidus/senso* |
+
+<div style="height: max-content;">&nbsp;</div>
 
 `S.E.N.S.O.` · Alessio G. Corsi · `PUNKATHON 2026` · OGR Torino · 11 Aprile 2026
