@@ -131,6 +131,7 @@ export async function pollMessages(): Promise<PolledMessageDTO[]> {
  * Upload an encrypted attachment blob and return its storage address.
  * The blob must already be encrypted (encryptAttachment) before calling this.
  */
+/* native fetch — onUnauthorized not applicable (FormData multipart attachment upload) */
 export async function uploadAttachment(blob: Blob, filename: string): Promise<UploadedAttachment> {
     const token = requireToken();
     const form = new FormData();
@@ -163,4 +164,65 @@ export async function getAttachmentDownloadUrl(
         { token: requireToken() },
     );
     return { presignedUrl: result.presigned_url };
+}
+
+// ── Factory (Pattern B: requireToken() internal, onUnauthorized bound at construction) ──
+
+export type MessagesApiClient = ReturnType<typeof createMessagesApi>
+
+export function createMessagesApi(onUnauthorized?: () => Promise<string | null>) {
+    function req<T>(path: string, opts: Record<string, unknown> = {}): Promise<T> {
+        return apiRequest<T>(API_BASE(), path, {
+            ...opts,
+            token: requireToken(),
+            onUnauthorized,
+        })
+    }
+
+    return {
+        getRecipientPublicKeys: async (username: string): Promise<RecipientPublicKeysDTO> => {
+            const encoded = encodeURIComponent(username)
+            const res = await req<{
+                username: string
+                public_key_b64: string
+                signing_key_b64: string
+            }>(`/messages/users/${encoded}/public-keys`, { method: "GET" })
+            return {
+                username: res.username,
+                publicKeyB64: res.public_key_b64,
+                signingKeyB64: res.signing_key_b64,
+            }
+        },
+
+        sendMessage: (
+            recipientHashes: string[],
+            encryptedPayload: string,
+        ): Promise<SendMessageResponse> =>
+            req<SendMessageResponse>("/messages/send", {
+                method: "POST",
+                body: {
+                    recipient_hashes: recipientHashes,
+                    encrypted_payload: encryptedPayload,
+                },
+            }),
+
+        pollMessages: async (): Promise<PolledMessageDTO[]> => {
+            const res = await req<{ messages?: PolledMessageDTO[] }>("/messages/poll", {
+                method: "POST",
+                body: {},
+            })
+            return res.messages ?? []
+        },
+
+        getAttachmentDownloadUrl: async (
+            attachmentId: string,
+        ): Promise<{ presignedUrl: string }> => {
+            const result = await req<{ presigned_url: string }>(
+                `/attachments/${attachmentId}/download`,
+            )
+            return { presignedUrl: result.presigned_url }
+        },
+
+        // uploadAttachment: excluded — uses native fetch (FormData multipart)
+    }
 }

@@ -50,3 +50,28 @@ export async function markAllNotificationsRead(): Promise<void> {
         token: requireToken(),
     })
 }
+
+// ── Factory (Pattern B: requireToken() internal, onUnauthorized bound at construction) ──
+
+export type NotificationsApiClient = ReturnType<typeof createNotificationsApi>
+
+export function createNotificationsApi(onUnauthorized?: () => Promise<string | null>) {
+    function req<T>(path: string, opts: Record<string, unknown> = {}): Promise<T> {
+        return apiRequest<T>(API_BASE, path, {
+            ...opts,
+            token: requireToken(),
+            onUnauthorized,
+        })
+    }
+
+    return {
+        getNotifications: (limit = 20) =>
+            req<NotificationsListDTO>(`/notifications?limit=${limit}`),
+
+        markNotificationRead: (notificationId: string) =>
+            req<void>(`/notifications/${notificationId}/read`, { method: "POST" }),
+
+        markAllNotificationsRead: () =>
+            req<void>("/notifications/read-all", { method: "POST" }),
+    }
+}
