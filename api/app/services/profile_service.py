@@ -175,7 +175,18 @@ class ProfileService:
     def trigger_categorization_for_user(
         self, user_id: str, background_tasks: BackgroundTasks
     ) -> dict:
-        """Create/reset the categorization job and queue background work."""
+        """Create/reset the categorization job and queue background work.
+
+        Idempotent: if a job is already queued or running, returns early without
+        spawning a second background task. This prevents the double-trigger race
+        where confirm-all AND the ProcessingPage #start hash both call this.
+        """
+        from app.db.repository import get_categorization_job  # noqa: PLC0415
+
+        existing = get_categorization_job(self.db, user_id)
+        if existing and existing.status in ("queued", "categorizing", "generating_insights"):
+            return {"status": existing.status}  # already running — do nothing
+
         upsert_categorization_job(
             self.db,
             user_id,
