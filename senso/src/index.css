@@ -49,75 +49,84 @@
 }
 
 :root {
-  color-scheme: light;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.25 0.025 252);
-  --card: #dbe2ef;
-  --card-foreground: oklch(0.153 0.006 107.1);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.153 0.006 107.1);
-  --primary: #3f72af;
-  --primary-foreground: #f9f7f7;
-  --secondary: #dbe2ef;
-  --secondary-foreground: #112d4e;
-  --muted: oklch(0.966 0.005 106.5);
-  --muted-foreground: oklch(0.58 0.031 107.3);
-  --accent: #3f72af;
-  --accent-foreground: #f9f7f7;
-  --destructive: #112d4e;
-  --border: #dbe2ef;
-  --input: #dbe2ef;
-  --ring: #3f72af;
-  --chart-1: #3f72af;
-  --chart-2: #5b9bd5;
-  --chart-3: #2a5080;
-  --chart-4: #1e4472;
-  --chart-5: #112d4e;
-  --radius: 0.45rem;
-  --sidebar: #f9f7f7;
-  --sidebar-foreground: #112d4e;
-  --sidebar-primary: #3f72af;
-  --sidebar-primary-foreground: #f9f7f7;
-  --sidebar-accent: #dbe2ef;
-  --sidebar-accent-foreground: #112d4e;
-  --sidebar-border: #dbe2ef;
-  --sidebar-ring: #3f72af;
+  color-scheme: dark;
+  /* Light mode: Revolut-style vibrant fintech */
+  --background: #fafafa;
+  --foreground: #0a0a0f;
+  --card: #ffffff;
+  --card-foreground: #0a0a0f;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0f;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f3ff;
+  --secondary-foreground: #5b21b6;
+  --muted: #f5f3ff;
+  --muted-foreground: #71717a;
+  --accent: #f0abfc;
+  --accent-foreground: #701a75;
+  --destructive: #ef4444;
+  --border: #e9e5f5;
+  --input: #e9e5f5;
+  --ring: #a855f7;
+  --chart-1: #7c3aed;
+  --chart-2: #a855f7;
+  --chart-3: #d946ef;
+  --chart-4: #22d3ee;
+  --chart-5: #10b981;
+  --radius: 0.875rem;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #0a0a0f;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f3ff;
+  --sidebar-accent-foreground: #5b21b6;
+  --sidebar-border: #e9e5f5;
+  --sidebar-ring: #a855f7;
+  
+  /* Gradient tokens for buttons, cards, accents */
+  --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d946ef 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(217, 70, 239, 0.08) 100%);
 }
 
 .dark {
   color-scheme: dark;
-  /* palette mirror: #112D4E navy bg → #F9F7F7 text, #3F72AF → lighter #5B9BD5 primary */
-  --background: #112d4e;
-  --foreground: #f9f7f7;
-  --card: #1a3a5c;
-  --card-foreground: #f9f7f7;
-  --popover: #1a3a5c;
-  --popover-foreground: #f9f7f7;
-  --primary: #5b9bd5;
-  --primary-foreground: #112d4e;
-  --secondary: #1e4472;
-  --secondary-foreground: #f9f7f7;
-  --muted: #1e4472;
-  --muted-foreground: #a8c4e0;
-  --accent: #2a5080;
-  --accent-foreground: #f9f7f7;
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: #1e4472;
-  --input: #1e4472;
-  --ring: #5b9bd5;
-  --chart-1: #5b9bd5;
-  --chart-2: #3f72af;
-  --chart-3: #2a5080;
-  --chart-4: #1e4472;
-  --chart-5: #dbe2ef;
-  --sidebar: #1a3a5c;
-  --sidebar-foreground: #f9f7f7;
-  --sidebar-primary: #5b9bd5;
-  --sidebar-primary-foreground: #112d4e;
-  --sidebar-accent: #2a5080;
-  --sidebar-accent-foreground: #f9f7f7;
-  --sidebar-border: #1e4472;
-  --sidebar-ring: #5b9bd5;
+  /* Revolut-style dark: deep void with vibrant purple→magenta accents */
+  --background: #0a0a0f;
+  --foreground: #fafafa;
+  --card: #141419;
+  --card-foreground: #fafafa;
+  --popover: #141419;
+  --popover-foreground: #fafafa;
+  --primary: #a855f7;
+  --primary-foreground: #0a0a0f;
+  --secondary: #1f1f28;
+  --secondary-foreground: #ddd6fe;
+  --muted: #18181f;
+  --muted-foreground: #a1a1aa;
+  --accent: #d946ef;
+  --accent-foreground: #fafafa;
+  --destructive: #f87171;
+  --border: #272730;
+  --input: #272730;
+  --ring: #d946ef;
+  --chart-1: #a855f7;
+  --chart-2: #c084fc;
+  --chart-3: #d946ef;
+  --chart-4: #22d3ee;
+  --chart-5: #34d399;
+  --sidebar: #0a0a0f;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #a855f7;
+  --sidebar-primary-foreground: #0a0a0f;
+  --sidebar-accent: #1f1f28;
+  --sidebar-accent-foreground: #ddd6fe;
+  --sidebar-border: #272730;
+  --sidebar-ring: #d946ef;
+  
+  /* Dark mode gradient tokens — more saturated */
+  --gradient-primary: linear-gradient(135deg, #a855f7 0%, #c084fc 40%, #d946ef 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(168, 85, 247, 0.35) 0%, rgba(217, 70, 239, 0.12) 100%);
 }
 
 @layer base {
