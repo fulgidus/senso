@@ -1,19 +1,21 @@
 """
-Document extraction pipelines for image and PDF files.
+Document extraction pipelines for unknown-format PDF and image files.
+
+These pipelines are only reached AFTER registry module matching fails in
+_extract() (ingestion_service.py). Modules handle known constant-format
+data (CSV, XLSX, known PDF layouts) and produce structured output directly.
+
+When no module matches, we land here:
 
 PDF pipeline (extract_with_pdf_pipeline):
-  1. Extract text via liteparse (text layer, then OCR fallback within liteparse)
-  2. If good text → try registry module match → run module
-  3. If no module match → run adaptive pipeline (classify → gen module → tests → register)
-  4. If adaptive fails → LLM text extraction
-  5. Last resort → LLM vision (vision:ocr:lg)
+  1. LiteParse text extraction (text layer + OCR fallback)
+  2. LLM text structuring (send LiteParse text to LLM with structured schema)
+  3. LLM vision OCR (vision:ocr:lg — send raw bytes to multimodal LLM)
 
 Image pipeline (extract_with_image_pipeline):
-  1. Extract text via liteparse (OCR mode)
-  2. If good text → try registry module match → run module
-  3. If no module match → adaptive pipeline on OCR text
-  4. Fallback → LLM text extraction
-  5. Last resort → LLM vision
+  1. LiteParse OCR (local text extraction)
+  2. LLM text structuring (send OCR text to LLM with structured schema)
+  3. LLM vision OCR (vision:ocr:lg — last resort)
 
 OCR_CHAR_THRESHOLD: minimum chars to consider extracted text "usable"
 """
@@ -81,23 +83,8 @@ def _is_usable(text: str) -> bool:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-def _try_module_match(file_path: Path, text: str, registry) -> ExtractionResult | None:
-    """
-    Try to match file against registry. If matched, run extract() and return result.
-    Returns None if no match or module fails.
-    """
-    entry = registry.match(file_path, text[:4096])
-    if entry is None:
-        return None
-    try:
-        raw = entry.extract_fn(file_path)
-        if isinstance(raw, ExtractionResult):
-            return raw
-        doc = ExtractedDocument(**raw)
-        return ExtractionResult(document=doc, confidence=0.85, tier_used="module")
-    except Exception as exc:
-        logger.warning("Module %r failed on %s: %s", entry.name, file_path.name, exc)
-        return None
+# Module matching is handled upstream in ingestion_service._extract().
+# These pipelines only handle the unknown-format fallback path.
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -163,44 +150,33 @@ def extract_with_pdf_pipeline(
     registry,
 ) -> ExtractionResult:
     """
-    Full PDF pipeline. Raises LLMError only if the absolute last resort (vision) fails.
-    liteparse handles both embedded-text-layer extraction and scanned-page OCR
-    internally, so there is no separate Tesseract step.
-    """
-    from app.ingestion.adaptive import run_adaptive_pipeline
+    PDF pipeline for documents that did NOT match any registry module.
+    Modules are already tried in _extract() before this is called.
 
-    # Step 1: Extract text (liteparse tries text layer then OCR automatically)
+    Steps:
+      1. LiteParse text extraction (text layer + OCR)
+      2. LLM text structuring (send LiteParse text to LLM for structured extraction)
+      3. LLM vision (last resort - send raw bytes to multimodal LLM)
+    """
+    # Step 1: Extract text with LiteParse
     text = extract_pdf_text_layer(file_path)
     if _is_usable(text):
-        logger.debug("PDF %s: text usable (%d chars)", file_path.name, len(text))
+        logger.debug("PDF %s: LiteParse text usable (%d chars)", file_path.name, len(text))
 
-        # Step 2: Module match
-        result = _try_module_match(file_path, text, registry)
-        if result is not None:
-            result.tier_used = "pdf_text_layer_module"  # type: ignore[assignment]
-            result.raw_text = text
-            return result
-
-        # Step 3: Adaptive pipeline
-        result = run_adaptive_pipeline(file_path, text, llm_client, registry)
-        if result.confidence >= 0.3:
-            return result
-
-        # Step 4: LLM text extraction
-        result = _llm_text_fallback(text, llm_client, "pdf_llm_text")
+        # Step 2: LLM text structuring — LiteParse gave us text, LLM structures it
+        result = _llm_text_fallback(text, llm_client, "pdf_liteparse_llm_text")
         if result is not None:
             return result
-
     else:
         logger.debug(
-            "PDF %s: text extraction yielded %d chars, falling back to LLM vision",
+            "PDF %s: LiteParse yielded %d chars (below threshold), skipping to vision",
             file_path.name,
             len(text),
         )
 
-    # Step 5: Last resort - LLM vision
-    logger.info("PDF %s: all text paths exhausted, trying LLM vision", file_path.name)
-    return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision")
+    # Step 3: Last resort — LLM vision OCR
+    logger.info("PDF %s: text path exhausted, trying LLM vision OCR", file_path.name)
+    return _llm_vision_fallback(file_path, text or None, llm_client, "pdf_llm_vision_ocr")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -214,35 +190,28 @@ def extract_with_image_pipeline(
     registry,
 ) -> ExtractionResult:
     """
-    Pipeline for non-PDF image files (JPEG, PNG, etc).
-    Raises LLMError only if last-resort vision fails.
-    """
-    from app.ingestion.adaptive import run_adaptive_pipeline
+    Image pipeline for documents that did NOT match any registry module.
+    Modules are already tried in _extract() before this is called.
 
-    # Step 1: liteparse OCR
+    Steps:
+      1. LiteParse OCR (local text extraction)
+      2. LLM text structuring (send LiteParse OCR text to LLM)
+      3. LLM vision OCR (last resort - send raw bytes to multimodal LLM)
+    """
+    # Step 1: LiteParse OCR
     ocr_text = extract_text_with_tesseract(file_path)
     if _is_usable(ocr_text):
-        # Step 2: Module match
-        result = _try_module_match(file_path, ocr_text, registry)
-        if result is not None:
-            result.tier_used = "image_ocr_module"  # type: ignore[assignment]
-            result.raw_text = ocr_text
-            return result
+        logger.debug("Image %s: LiteParse OCR usable (%d chars)", file_path.name, len(ocr_text))
 
-        # Step 3: Adaptive pipeline
-        result = run_adaptive_pipeline(file_path, ocr_text, llm_client, registry)
-        if result.confidence >= 0.3:
-            return result
-
-        # Step 4: LLM text
-        result = _llm_text_fallback(ocr_text, llm_client, "image_llm_text")
+        # Step 2: LLM text structuring
+        result = _llm_text_fallback(ocr_text, llm_client, "image_liteparse_llm_text")
         if result is not None:
             return result
 
-    # Step 5: LLM vision (last resort)
-    logger.info("Image %s: OCR text insufficient, trying LLM vision", file_path.name)
+    # Step 3: LLM vision OCR (last resort)
+    logger.info("Image %s: LiteParse OCR insufficient, trying LLM vision OCR", file_path.name)
     return _llm_vision_fallback(
-        file_path, ocr_text or None, llm_client, "image_llm_vision"
+        file_path, ocr_text or None, llm_client, "image_llm_vision_ocr"
     )
 
 
