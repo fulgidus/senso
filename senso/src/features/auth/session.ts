@@ -186,6 +186,7 @@ export async function updateMe(
         strictPrivacyMode?: boolean | null;
     },
 ): Promise<User> {
+    /* no onUnauthorized — auth primitive */
     const raw = await apiRequest<RawUser>(backendBaseUrl, "/auth/me", {
         method: "PATCH",
         token: accessToken,
@@ -205,7 +206,7 @@ async function refresh(refreshToken: string): Promise<RefreshPayload> {
     const payload = await apiRequest<RefreshPayload>(backendBaseUrl, "/auth/refresh", {
         method: "POST",
         body: { refreshToken },
-        // NOTE: No onUnauthorized here - prevents infinite refresh loops.
+    /* no onUnauthorized — auth primitive, 401 here means refresh loop; see makeOnUnauthorized */
     });
     writeTokens(payload);
     return payload;
@@ -240,6 +241,7 @@ export function makeOnUnauthorized(navigate?: (to: string) => void): () => Promi
 }
 
 async function getMe(accessToken: string): Promise<MePayload> {
+    /* no onUnauthorized — auth primitive */
     const raw = await apiRequest<{ user: RawUser }>(backendBaseUrl, "/auth/me", {
         token: accessToken,
     });

@@ -182,6 +182,7 @@ function AppRoutes() {
                 user,
                 signOut: auth.signOut,
                 updateUser: auth.updateUser,
+                onUnauthorized: auth.onUnauthorized,
                 cryptoKeys: auth.cryptoKeys,
                 setCryptoKeys: auth.setCryptoKeys,
                 isPolling: auth.isPolling,
