@@ -18,6 +18,10 @@ MATCH_THRESHOLD = 0.3  # minimum score to consider a match
 
 # MIME types for XLSX files
 _XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+_PDF_MIME = "application/pdf"
+_CSV_MIMES = {"text/csv", "text/plain"}
+_PDF_SUFFIXES = {".pdf"}
+_CSV_SUFFIXES = {".csv", ".txt"}
 
 
 @dataclass
@@ -58,15 +62,44 @@ def _extract_xlsx_text(file_path: Path, max_cells: int = 200) -> str:
         return ""
 
 
+def _get_pdf_preview(file_path: Path, max_chars: int = 3000) -> str:
+    """Extract real text from a PDF via liteparse for fingerprinting.
+    Raw PDF bytes contain structural keywords (/type, /state, /filter …)
+    that produce false-positive matches against CSV-oriented modules."""
+    try:
+        from app.ingestion.liteparse_extractor import extract_text_with_liteparse  # noqa: PLC0415
+        text = extract_text_with_liteparse(file_path, ocr_enabled=False)
+        if len(text) < 50:
+            # sparse / scanned PDF – try OCR for at least a usable preview
+            text = extract_text_with_liteparse(file_path, ocr_enabled=True)
+        return text[:max_chars]
+    except Exception as exc:
+        logger.debug("PDF preview extraction failed for %s: %s", file_path.name, exc)
+        return ""
+
+
 def _get_scan_text(file_path: Path, mime_type: str) -> str:
     """Return the text to use for keyword fingerprint scoring.
 
-    - XLSX: extract cell text (ZIP bytes contain no readable keywords)
-    - PDF / plain text / CSV: read first FINGERPRINT_SCAN_BYTES as UTF-8
+    - XLSX:        extract cell text via openpyxl (ZIP bytes have no readable keywords)
+    - PDF:         extract text layer via liteparse (raw bytes contain PDF structural
+                   keywords like /type, /state that cause false-positive matches)
+    - CSV / plain: read first FINGERPRINT_SCAN_BYTES as UTF-8 (already human-readable)
     - Other binary: return empty string → falls through to adaptive pipeline
     """
-    if mime_type == _XLSX_MIME or file_path.suffix.lower() in (".xlsx", ".xlsm"):
+    suffix = file_path.suffix.lower()
+    if mime_type == _XLSX_MIME or suffix in (".xlsx", ".xlsm"):
         return _extract_xlsx_text(file_path)
+    if mime_type == _PDF_MIME or suffix in _PDF_SUFFIXES:
+        return _get_pdf_preview(file_path)
+    if mime_type in _CSV_MIMES or suffix in _CSV_SUFFIXES:
+        try:
+            return file_path.read_bytes()[:FINGERPRINT_SCAN_BYTES].decode(
+                "utf-8", errors="ignore"
+            )
+        except Exception:
+            return ""
+    # Unknown format – try raw UTF-8 bytes, fall back to empty
     try:
         return file_path.read_bytes()[:FINGERPRINT_SCAN_BYTES].decode(
             "utf-8", errors="ignore"
