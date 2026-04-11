@@ -433,6 +433,16 @@ Plans:
 - [x] 29-02: Frontend Foundation — Crypto, API Client, User Type, Display Utilities (completed 2026-04-11)
 - [x] 29-03: Frontend UI — ProfileScreen Carousel, PreferenzaTab, SettingsScreen Cleanup (completed 2026-04-11)
 
+### Phase 30: Learn-to-chat enriched coach flow, chat mode persistence, and open bug triage
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 29
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 30 to break down)
+
 ---
 
 ## Milestone 2: Quality, Intelligence & Real Testing

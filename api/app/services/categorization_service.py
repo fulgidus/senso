@@ -705,10 +705,19 @@ class CategorizationService:
                     route=route,
                     timeout=8.0,
                 )
-                # Robust JSON extraction: strip markdown fences if model wraps output
+                # Robust JSON extraction for unreliable models
                 cleaned = raw.strip()
+                # Strip markdown fences
                 if cleaned.startswith("```"):
                     cleaned = cleaned.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+                # Fix missing comma between JSON keys (common Llama bug)
+                # e.g. {"category": "groceries" "confidence": 0.8}
+                import re
+                cleaned = re.sub(r'"\s+"', '", "', cleaned)
+                # Extract first JSON object if wrapped in text
+                json_match = re.search(r'\{[^{}]+\}', cleaned)
+                if json_match:
+                    cleaned = json_match.group(0)
                 parsed = json.loads(cleaned)
                 category = parsed.get("category", "uncategorized")
                 confidence = float(parsed.get("confidence", 0.0))

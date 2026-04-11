@@ -53,13 +53,13 @@
         "classification": {
           "sm": {
             "provider": "openrouter",
-            "model": "meta-llama/llama-4-scout",
-            "timeout": 15
+            "model": "google/gemini-2.0-flash-lite-001",
+            "timeout": 10
           },
           "md": {
             "provider": "openrouter",
-            "model": "meta-llama/llama-4-scout",
-            "timeout": 20
+            "model": "google/gemini-2.0-flash-001",
+            "timeout": 15
           },
           "lg": {
             "provider": "openrouter",
