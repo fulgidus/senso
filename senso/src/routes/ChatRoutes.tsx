@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
@@ -69,8 +69,12 @@ function SessionResolver() {
   const [target, setTarget] = useState<string | null>(null);
   const { onUnauthorized } = useAuthContext();
   const coachingApi = useMemo(() => createCoachingApi(onUnauthorized), [onUnauthorized]);
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
     coachingApi
       .listSessions()
       .then((sessions) => {
@@ -85,7 +89,7 @@ function SessionResolver() {
         // On error, go to new chat
         setTarget("/chat/new");
       });
-  }, []);
+  }, [coachingApi]);
 
   if (!target) return <LoadingScreen />;
   return <Navigate to={target} replace />;
