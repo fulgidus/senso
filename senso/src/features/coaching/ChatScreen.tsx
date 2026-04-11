@@ -1913,10 +1913,10 @@ export function ChatScreen({
                   <div className="flex flex-col items-end gap-1 max-w-[90%]">
                     <div className="flex items-end gap-2">
                       <div
-                        className={`rounded-2xl rounded-tr-sm px-4 py-3 text-sm ${
+                        className={`rounded-2xl rounded-tr-sm px-4 py-3 text-sm shadow-md ${
                           msg.status === "failed"
                             ? "bg-destructive/10 text-destructive border border-destructive/30"
-                            : "bg-primary text-primary-foreground"
+                            : "bg-gradient-primary text-primary-foreground shadow-primary/30"
                         }`}
                       >
                         <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -1960,10 +1960,10 @@ export function ChatScreen({
         {showScrollBtn && (
           <button
             onClick={() => listEndRef.current?.scrollIntoView({ behavior: "smooth" })}
-            className="absolute bottom-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors"
+            className="absolute bottom-3 right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-lg shadow-primary/40 hover:shadow-xl hover:shadow-primary/50 hover:brightness-110 transition-all active:scale-[0.98]"
             aria-label={t("coaching.scrollToBottom")}
           >
-            <ChevronsDown className="h-4 w-4" />
+            <ChevronsDown className="h-5 w-5" />
           </button>
         )}
       </div>
@@ -2054,8 +2054,9 @@ export function ChatScreen({
               <Button
                 onClick={() => void handleSend()}
                 disabled={isLoading || loadingHistory || !inputText.trim()}
-                size="sm"
-                className="shrink-0"
+                size="default"
+                variant="gradient"
+                className="shrink-0 h-10 px-5"
               >
                 {isLoading ? t("coaching.sendingButton") : t("coaching.sendButton")}
               </Button>
