@@ -448,6 +448,17 @@ def _add_missing_columns() -> None:
         )
         """,
         "CREATE INDEX IF NOT EXISTS ix_user_memory_owner_hash ON user_memory(owner_hash)",
+        # ── Round 23: Phase 29 — two-tier profile data ─────────────────────────
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS sealed_profile TEXT",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS age_bracket VARCHAR(10)",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS gender_at_birth VARCHAR(20)",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS elected_gender VARCHAR(50)",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS household_size SMALLINT",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS has_dependents BOOLEAN",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS employment_status VARCHAR(30)",
+        "ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS region_of_residence VARCHAR(50)",
+        # Null out PII name fields — names now live in the sealed profile
+        "UPDATE users SET first_name = NULL, last_name = NULL WHERE first_name IS NOT NULL OR last_name IS NOT NULL",
     ]
     with engine.connect() as conn:
         for stmt in migrations:

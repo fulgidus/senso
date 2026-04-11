@@ -664,6 +664,17 @@ class CategorizationService:
     # Phase 9: 3-tier LLM escalation + timeline inference
     # ────────────────────────────────────────────────────────────────
 
+    # JSON schema for structured classification output
+    _CLASSIFICATION_SCHEMA: dict = {
+        "type": "object",
+        "properties": {
+            "category": {"type": "string"},
+            "confidence": {"type": "number"},
+        },
+        "required": ["category", "confidence"],
+        "additionalProperties": False,
+    }
+
     def _classify_with_escalation(self, txn: Transaction) -> tuple[str, float, str]:
         """Try sm→md→lg LLM classification. Returns (category, confidence, route).
         Returns ("uncategorized", 0.0, "none") if all tiers fail."""
@@ -690,10 +701,15 @@ class CategorizationService:
                     ),
                     system="You are a financial transaction classifier. Respond only with valid JSON.",
                     json_mode=True,
+                    response_schema=self._CLASSIFICATION_SCHEMA,
                     route=route,
                     timeout=8.0,
                 )
-                parsed = json.loads(raw)
+                # Robust JSON extraction: strip markdown fences if model wraps output
+                cleaned = raw.strip()
+                if cleaned.startswith("```"):
+                    cleaned = cleaned.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+                parsed = json.loads(cleaned)
                 category = parsed.get("category", "uncategorized")
                 confidence = float(parsed.get("confidence", 0.0))
                 if category in VALID_CATEGORIES and confidence >= min_confidence:

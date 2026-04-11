@@ -14,6 +14,7 @@ from sqlalchemy import (
     Integer,
     JSON,
     Numeric,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -367,6 +368,15 @@ class UserProfile(Base):
     goals: list = Column(JSON, nullable=False, default=list)
     dos: list = Column(JSON, nullable=False, default=list)
     donts: list = Column(JSON, nullable=False, default=list)
+    # Phase 29: two-tier profile data
+    sealed_profile: str | None = Column(Text, nullable=True, default=None)  # NaCl sealed-box ciphertext
+    age_bracket: str | None = Column(String(10), nullable=True, default=None)  # e.g. "26-30"
+    gender_at_birth: str | None = Column(String(20), nullable=True, default=None)
+    elected_gender: str | None = Column(String(50), nullable=True, default=None)
+    household_size: int | None = Column(SmallInteger, nullable=True, default=None)
+    has_dependents: bool | None = Column(Boolean, nullable=True, default=None)
+    employment_status: str | None = Column(String(30), nullable=True, default=None)
+    region_of_residence: str | None = Column(String(50), nullable=True, default=None)
 
     user = relationship("User", back_populates="profile")
 
