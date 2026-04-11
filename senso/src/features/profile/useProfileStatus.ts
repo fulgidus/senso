@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
-import { getProfileStatus, type CategorizationStatus, type ProgressDetail } from "@/lib/profile-api"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { createProfileApi, type CategorizationStatus, type ProgressDetail } from "@/lib/profile-api"
+import { useAuthContext } from "@/features/auth/AuthContext"
 
 type UseProfileStatusOptions = {
     token: string | null
@@ -18,6 +19,8 @@ export function useProfileStatus({
     onComplete,
     enabled = true,
 }: UseProfileStatusOptions): ProfileStatusState {
+    const { onUnauthorized } = useAuthContext()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
     const [state, setState] = useState<ProfileStatusState>({
         status: "queued",
         errorMessage: null,
@@ -36,7 +39,7 @@ export function useProfileStatus({
     const poll = async () => {
         if (!token || completedRef.current) return
         try {
-            const data = await getProfileStatus(token)
+            const data = await profileApi.getProfileStatus(token)
             setState({
                 status: data.status,
                 errorMessage: data.errorMessage ?? null,

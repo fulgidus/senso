@@ -9,15 +9,8 @@ import { useAuthContext } from "@/features/auth/AuthContext"
 import { useTheme } from "@/components/theme-provider"
 import { UserAvatar } from "@/components/UserAvatar"
 import {
-    sendMessage,
+    createCoachingApi,
     sendMessageStream,
-    getWelcomeMessage,
-    listSessions,
-    getSessionMessages,
-    renameSession,
-    deleteSession,
-    generateConversationName,
-    getPersonas,
     CoachingApiError,
     type CoachingResponse,
     type ReasoningStep,
@@ -995,7 +988,11 @@ function getGreetingKey(): string {
 // ── ChatScreen ────────────────────────────────────────────────────────────────
 
 export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessionId: propSessionId, onSessionCreated, forceNew = false }: ChatScreenProps) {
-    const { user } = useAuthContext()
+    const { user, onUnauthorized } = useAuthContext()
+    const coachingApi = useMemo(
+        () => createCoachingApi(onUnauthorized),
+        [onUnauthorized],
+    )
     const { t } = useTranslation()
     const { theme } = useTheme()
     const haptic = useHapticFeedback()
@@ -1059,7 +1056,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         setLoadingHistory(true)
         setMessages([])
         try {
-            const msgs = await getSessionMessages(id)
+            const msgs = await coachingApi.getSessionMessages(id)
             setMessages(msgs.map(parseStoredMessage))
         } catch {
             setMessages([])
@@ -1118,7 +1115,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
 
     const fetchSessions = useCallback(async () => {
         try {
-            const list = await listSessions()
+            const list = await coachingApi.listSessions()
             setSessions(list)
             return list
         } catch (err) {
@@ -1144,7 +1141,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         void (async () => {
             // Fetch personas to get TTS config (best-effort; default used on failure)
             try {
-                const personas = await getPersonas()
+                const personas = await coachingApi.getPersonas()
                 setPersonas(personas)
                 const initialPersonaId = user.defaultPersonaId ?? "mentore-saggio"
                 const active = personas.find((p) => p.id === initialPersonaId) ?? personas.find((p) => p.id === "mentore-saggio") ?? personas[0]
@@ -1177,7 +1174,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                     setLoadingHistory(false)
                     setWelcomeLoading(true)
                     try {
-                        const msg = await getWelcomeMessage(locale)
+                        const msg = await coachingApi.getWelcomeMessage(locale)
                         setMessages([{ role: "assistant", content: msg, isWelcome: true }])
                     } catch {
                         const fallback = t(getGreetingKey())
@@ -1197,7 +1194,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                 setLoadingHistory(false)
                 setWelcomeLoading(true)
                 try {
-                    const msg = await getWelcomeMessage(locale)
+                    const msg = await coachingApi.getWelcomeMessage(locale)
                     setMessages([{ role: "assistant", content: msg, isWelcome: true }])
                 } catch {
                     const fallback = t(getGreetingKey())
@@ -1239,7 +1236,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
         setError(null)
         setWelcomeLoading(true)
         try {
-            const msg = await getWelcomeMessage(locale)
+            const msg = await coachingApi.getWelcomeMessage(locale)
             setMessages([{ role: "assistant", content: msg, isWelcome: true }])
         } catch {
             const fallback = t(getGreetingKey())
@@ -1263,7 +1260,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     // ── Rename ─────────────────────────────────────────────────────────────────
 
     const handleRename = useCallback(async (id: string, name: string) => {
-        const updated = await renameSession(id, name)
+        const updated = await coachingApi.renameSession(id, name)
         setSessions((prev) => prev.map((s) => (s.id === id ? updated : s)))
         if (id === sessionId) setSessionName(updated.name)
     }, [sessionId])
@@ -1271,7 +1268,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
     // ── Delete ─────────────────────────────────────────────────────────────────
 
     const handleDelete = useCallback(async (id: string) => {
-        await deleteSession(id)
+        await coachingApi.deleteSession(id)
         const newList = sessions.filter((s) => s.id !== id)
         setSessions(newList)
         if (id === sessionId) {
@@ -1369,7 +1366,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                     },
                 })
             } catch {
-                const fallback = await sendMessage(trimmed, locale, activePersonaId, sessionId)
+                const fallback = await coachingApi.sendMessage(trimmed, locale, activePersonaId, sessionId)
                 finalResponse = fallback
                 setMessages((prev) => {
                     const next = [...prev]
@@ -1419,7 +1416,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                         namingInFlight.current = false
                         if (name && name.trim()) {
                             try {
-                                const updated = await renameSession(newSessionId, name)
+                                const updated = await coachingApi.renameSession(newSessionId, name)
                                 setSessions((prev) =>
                                     prev.map((s) => (s.id === newSessionId ? updated : s)),
                                 )
@@ -1547,7 +1544,7 @@ export function ChatScreen({ onNavigateBack, locale = "it", initialTopic, sessio
                         },
                     })
                 } catch {
-                    const fallback = await sendMessage(failedMsg.content, locale, activePersonaId, sessionId)
+                    const fallback = await coachingApi.sendMessage(failedMsg.content, locale, activePersonaId, sessionId)
                     finalResponse = fallback
                     setMessages((prev) => {
                         const next = [...prev]

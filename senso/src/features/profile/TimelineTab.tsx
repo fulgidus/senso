@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     AlertTriangle,
     Clock,
@@ -12,11 +12,10 @@ import {
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
-    addTimelineContext,
-    dismissTimelineEvent,
-    getTimeline,
+    createProfileApi,
     type TimelineEventDTO,
 } from "@/lib/profile-api"
+import { useAuthContext } from "@/features/auth/AuthContext"
 
 const EVENT_TYPE_ICONS: Record<string, React.ElementType> = {
     income_shift: TrendingUp,
@@ -75,7 +74,7 @@ function TimelineEventCard({
         if (!state.dismissReason) return
         setState((s) => ({ ...s, saving: true, saveError: null }))
         try {
-            await dismissTimelineEvent(
+            await profileApi.dismissTimelineEvent(
                 token,
                 event.id,
                 state.dismissReason,
@@ -91,7 +90,7 @@ function TimelineEventCard({
         if (!state.contextText.trim()) return
         setState((s) => ({ ...s, saving: true, saveError: null }))
         try {
-            await addTimelineContext(token, event.id, state.contextText)
+            await profileApi.addTimelineContext(token, event.id, state.contextText)
             onContextSaved(event.id)
         } catch {
             setState((s) => ({ ...s, saving: false, saveError: t("timeline.errorSave") }))
@@ -264,6 +263,8 @@ type Props = {
 
 export function TimelineTab({ token }: Props) {
     const { t } = useTranslation()
+    const { onUnauthorized } = useAuthContext()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
     const [events, setEvents] = useState<TimelineEventDTO[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -273,7 +274,7 @@ export function TimelineTab({ token }: Props) {
         (includeDismissed = false) => {
             setLoading(true)
             setError(null)
-            void getTimeline(token, includeDismissed)
+            void profileApi.getTimeline(token, includeDismissed)
                 .then((data) => setEvents(data))
                 .catch(() => setError(t("timeline.errorLoad")))
                 .finally(() => setLoading(false))

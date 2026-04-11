@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import * as RadixSlider from "@radix-ui/react-slider"
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
 import {
-  submitQuestionnaire,
+  createProfileApi,
   makeIncomeSource,
   computeNetFromRal,
   CCNL_PRESETS,
@@ -12,6 +12,7 @@ import {
   type IncomeSource,
   type IncomeSourceType,
 } from "@/lib/profile-api"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 
 type Props = {
@@ -736,6 +737,8 @@ function IncomeSourceEditor({
 export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBack }: Props) {
   const { t } = useTranslation()
   const fmt = useLocaleFormat()
+  const { onUnauthorized } = useAuthContext()
+  const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
   const effectiveGender: "masculine" | "feminine" | "neutral" =
     _user.voiceGender && _user.voiceGender !== "indifferent"
       ? (_user.voiceGender as "masculine" | "feminine" | "neutral")
@@ -866,7 +869,7 @@ export function QuestionnaireScreen({ user: _user, token, mode, onComplete, onBa
     setLoading(true)
     setError(null)
     try {
-      await submitQuestionnaire(token, mode, {
+      await profileApi.submitQuestionnaire(token, mode, {
         employmentType: answers.employmentType ?? "other",
         jobOther: answers.jobOther ?? null,
         monthlyNetIncome: derivedMonthlyNet,

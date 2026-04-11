@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { RefreshCw, Search, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { listUploads, deleteUpload, retryUpload, type UploadFile } from "@/api/ingestionFilesApi"
+import { createIngestionFilesApi, type UploadFile } from "@/api/ingestionFilesApi"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
 
@@ -48,6 +49,11 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
 export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const { t } = useTranslation()
   const fmt = useLocaleFormat()
+  const { onUnauthorized } = useAuthContext()
+  const filesApi = useMemo(
+    () => createIngestionFilesApi(onUnauthorized),
+    [onUnauthorized],
+  )
   const [files, setFiles] = useState<UploadFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +63,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const loadFiles = () => {
     setLoading(true)
     setError(null)
-    listUploads(token)
+    filesApi.listUploads(token)
       .then((result) => setFiles(result))
       .catch(() => setError(t("files.loadError")))
       .finally(() => setLoading(false))
@@ -74,7 +80,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const handleRetry = async (file: UploadFile) => {
     setItemLoading(file.id, true)
     try {
-      await retryUpload(token, file.id)
+      await filesApi.retryUpload(token, file.id)
       loadFiles()
     } finally {
       setItemLoading(file.id, false)
@@ -84,7 +90,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
   const handleDelete = async (fileId: string) => {
     setItemLoading(fileId, true)
     try {
-      await deleteUpload(token, fileId)
+      await filesApi.deleteUpload(token, fileId)
       setFiles((prev) => prev.filter((f) => f.id !== fileId))
     } finally {
       setItemLoading(fileId, false)

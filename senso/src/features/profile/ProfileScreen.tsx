@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { AlertTriangle, Eye, EyeOff, Lightbulb, Loader2, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useLocaleFormat } from "@/hooks/useLocaleFormat"
@@ -22,16 +22,12 @@ import {
 import { Button } from "@/components/ui/button"
 import type { User } from "@/features/auth/types"
 import {
-    confirmProfile,
-    getProfile,
-    getProfileStatus,
-    getUncategorized,
-    triggerCategorization,
-    getTimeline,
+    createProfileApi,
     type InsightCard,
     type UserProfile,
 } from "@/lib/profile-api"
 import { ApiClientError } from "@/lib/api-client"
+import { useAuthContext } from "@/features/auth/AuthContext"
 import { TimelineTab } from "@/features/profile/TimelineTab"
 import { ConnectorsTab } from "@/features/profile/ConnectorsTab"
 import { usePullToRefresh } from "@/hooks/usePullToRefresh"
@@ -90,6 +86,8 @@ type Props = {
 export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateToChat, onNoProfile, onRetrigger }: Props) {
     const { t } = useTranslation()
     const fmt = useLocaleFormat()
+    const { onUnauthorized } = useAuthContext()
+    const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized])
 
     const DATA_SOURCE_LABELS: Record<string, string> = {
         bank_statement: t("profile.sourceBank"),
@@ -135,8 +133,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     const handlePullRefresh = useCallback(async () => {
         try {
             const [p, statusData] = await Promise.all([
-                getProfile(token),
-                getProfileStatus(token),
+                profileApi.getProfile(token),
+                profileApi.getProfileStatus(token),
             ])
             setProfile(p)
             setIncomeEdit(String(p.incomeSummary?.amount ?? ""))
@@ -168,8 +166,8 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     useEffect(() => {
         setLoading(true)
         void Promise.all([
-            getProfile(token),
-            getProfileStatus(token),
+            profileApi.getProfile(token),
+            profileApi.getProfileStatus(token),
         ])
             .then(([p, statusData]) => {
                 setProfile(p)
@@ -193,12 +191,12 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
             .finally(() => setLoading(false))
 
         // Fetch uncategorized count (non-blocking - ignore errors)
-        void getUncategorized(token)
+        void profileApi.getUncategorized(token)
             .then((items) => setUncategorizedCount(items.length))
             .catch(() => undefined)
 
         // Check for new timeline events (non-blocking - for notification badge)
-        void getTimeline(token, false)
+        void profileApi.getTimeline(token, false)
             .then((evts) => setHasNewTimelineEvents(evts.some((e) => !e.is_user_dismissed)))
             .catch(() => undefined)
     }, [token, onNoProfile])
@@ -208,7 +206,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
         setSaving(true)
         setSaveError(null)
         try {
-            const updated = await confirmProfile(token, {
+            const updated = await profileApi.confirmProfile(token, {
                 incomeOverride: incomeEdit ? parseFloat(incomeEdit) : null,
                 expensesOverride: expensesEdit ? parseFloat(expensesEdit) : null,
             })
@@ -225,7 +223,7 @@ export function ProfileScreen({ user: _user, token, onAddDocuments, onNavigateTo
     const handleRetrigger = async () => {
         setRetriggerLoading(true)
         try {
-            await triggerCategorization(token)
+            await profileApi.triggerCategorization(token)
             onRetrigger?.()
         } catch {
             setRetriggerLoading(false)
