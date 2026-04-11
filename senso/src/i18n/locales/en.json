@@ -524,7 +524,11 @@
     "adminHandleClaim": "Save handle",
     "adminHandleClaimed": "active",
     "adminHandleSuccess": "Handle set successfully.",
-    "adminHandleError": "Could not save handle. It may already be taken."
+    "adminHandleError": "Could not save handle. It may already be taken.",
+    "preferencesMovedBody": "Your financial preferences are now in your Profile.",
+    "preferencesMovedCta": "Go to preferences in Profile",
+    "nameMovedBody": "Your name is now in the private section of your Profile.",
+    "nameMovedCta": "Go to Profile"
   },
   "about": {
     "pageTitle": "How S.E.N.S.O. works",
@@ -712,6 +716,40 @@
       "bulkDelete": "Delete",
       "bulkClear": "Clear selection",
       "bulkError": "Bulk operation failed."
+    },
+    "preferences": {
+      "tabLabel": "Preferences",
+      "unsealedHeading": "Visible to AI",
+      "unsealedHint": "Your coach uses this information to answer you better",
+      "sealedHeading": "Just for you",
+      "sealedHint": "The coach has no access to this data",
+      "savedIndicator": "Saved \uD83D\uDD12",
+      "saveError": "Unable to save. Check your connection.",
+      "lockedHeading": "Private data locked",
+      "lockedBody": "Complete authentication to unlock private data",
+      "saveButton": "Save",
+      "ageBracketLabel": "Age range",
+      "genderAtBirthLabel": "Sex at birth",
+      "electedGenderLabel": "Gender",
+      "householdSizeLabel": "Household members",
+      "hasDependentsLabel": "Do you have dependents?",
+      "employmentStatusLabel": "Employment status",
+      "regionLabel": "Region of residence",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "dobLabel": "Date of birth",
+      "emailsLabel": "Contact emails",
+      "phonesLabel": "Phone",
+      "chatContactsLabel": "Chat contacts",
+      "addEmail": "Add email",
+      "addPhone": "Add phone",
+      "addChatContact": "Add chat contact",
+      "labelPlaceholder": "e.g. Work",
+      "providerPlaceholder": "Platform"
+    },
+    "tabs": {
+      "prev": "Previous tab",
+      "next": "Next tab"
     }
   },
   "timeline": {

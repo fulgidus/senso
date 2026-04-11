@@ -1,111 +1,51 @@
-import { useState } from "react"
-import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
-import { updateMe } from "@/features/auth/session"
-import { readAccessToken } from "@/features/auth/storage"
-import { useIsMobile } from "@/hooks/useIsMobile"
-import type { VoiceGender } from "@/features/auth/types"
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { updateMe } from "@/features/auth/session";
+import { readAccessToken } from "@/features/auth/storage";
+import type { VoiceGender } from "@/features/auth/types";
 
 type Props = {
-  onComplete: (firstName: string, lastName: string | null) => void
-}
+  onComplete: () => void;
+};
 
-type Step = "name" | "gender"
+type Step = "gender";
 
 export function ProfileSetupScreen({ onComplete }: Props) {
-  const [step, setStep] = useState<Step>("name")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [voiceGender, setVoiceGender] = useState<VoiceGender | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { t } = useTranslation()
-
-  const trimmedFirst = firstName.trim()
-  const canSubmitName = trimmedFirst.length > 0 && !loading
-  const isMobile = useIsMobile()
-
-  const handleNameNext = () => {
-    if (!canSubmitName) return
-    setStep("gender")
-  }
+  const [step] = useState<Step>("gender");
+  const [voiceGender, setVoiceGender] = useState<VoiceGender | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const handleGenderSubmit = async (selectedGender: VoiceGender | null) => {
-    setLoading(true)
-    setError(null)
-    const token = readAccessToken()
+    setLoading(true);
+    setError(null);
+    const token = readAccessToken();
     if (!token) {
-      setError(t("profileSetup.errorSession"))
-      setLoading(false)
-      return
+      setError(t("profileSetup.errorSession"));
+      setLoading(false);
+      return;
     }
     try {
       await updateMe(token, {
-        firstName: trimmedFirst,
-        lastName: lastName.trim() || null,
         voiceGender: selectedGender ?? "indifferent",
-      })
-      onComplete(trimmedFirst, lastName.trim() || null)
+      });
+      onComplete();
     } catch {
-      setError(t("profileSetup.errorSave"))
+      setError(t("profileSetup.errorSave"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
       <div className="mx-auto max-w-[480px]">
         <h1 className="mb-2 text-2xl font-bold text-foreground">{t("profileSetup.heading")}</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          {t("profileSetup.subtitle")}
-        </p>
+        <p className="mb-8 text-sm text-muted-foreground">{t("profileSetup.subtitle")}</p>
 
-        {step === "name" ? (
-          <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground" htmlFor="firstName">
-                {t("profileSetup.firstName")} <span className="text-destructive">*</span>
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                autoFocus
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                onKeyDown={(e) => { if (!isMobile && e.key === "Enter") handleNameNext() }}
-                placeholder={t("profileSetup.firstNamePlaceholder")}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground" htmlFor="lastName">
-                {t("profileSetup.lastName")}{" "}
-                <span className="text-xs text-muted-foreground">{t("profileSetup.lastNameOptional")}</span>
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                onKeyDown={(e) => { if (!isMobile && e.key === "Enter") handleNameNext() }}
-                placeholder={t("profileSetup.lastNamePlaceholder")}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            {error && <p className="text-sm text-destructive">{error}</p>}
-
-            <Button
-              className="w-full"
-              disabled={!canSubmitName}
-              onClick={handleNameNext}
-            >
-              {t("profileSetup.continue")}
-            </Button>
-          </div>
-        ) : (
+        {step === "gender" && (
           <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
             <div>
               <h2 className="text-base font-semibold text-foreground mb-1">
@@ -141,26 +81,20 @@ export function ProfileSetupScreen({ onComplete }: Props) {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                className="flex-1"
-                onClick={() => setStep("name")}
-                disabled={loading}
-              >
-                {t("questionnaire.back")}
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={loading}
-                onClick={() => void handleGenderSubmit(voiceGender)}
-              >
-                {loading ? t("profileSetup.saving") : voiceGender ? t("profileSetup.continue") : t("profileSetup.genderSkip")}
-              </Button>
-            </div>
+            <Button
+              className="w-full"
+              disabled={loading}
+              onClick={() => void handleGenderSubmit(voiceGender)}
+            >
+              {loading
+                ? t("profileSetup.saving")
+                : voiceGender
+                  ? t("profileSetup.continue")
+                  : t("profileSetup.genderSkip")}
+            </Button>
           </div>
         )}
       </div>
     </main>
-  )
+  );
 }

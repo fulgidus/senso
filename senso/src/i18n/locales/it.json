@@ -524,7 +524,11 @@
     "adminHandleClaim": "Salva handle",
     "adminHandleClaimed": "attivo",
     "adminHandleSuccess": "Handle impostato con successo.",
-    "adminHandleError": "Impossibile salvare l'handle. Forse è già in uso."
+    "adminHandleError": "Impossibile salvare l'handle. Forse è già in uso.",
+    "preferencesMovedBody": "Le tue preferenze finanziarie si trovano ora nel Profilo.",
+    "preferencesMovedCta": "Vai alle preferenze nel Profilo",
+    "nameMovedBody": "Il tuo nome si trova ora nella sezione privata del tuo Profilo.",
+    "nameMovedCta": "Vai al Profilo"
   },
   "about": {
     "pageTitle": "Come funziona S.E.N.S.O.",
@@ -712,6 +716,40 @@
       "bulkDelete": "Elimina",
       "bulkClear": "Deseleziona",
       "bulkError": "Errore nell'operazione di massa."
+    },
+    "preferences": {
+      "tabLabel": "Preferenze",
+      "unsealedHeading": "Visibile all'AI",
+      "unsealedHint": "Il tuo coach usa queste informazioni per risponderti meglio",
+      "sealedHeading": "Solo per te",
+      "sealedHint": "Il coach non ha accesso a questi dati",
+      "savedIndicator": "Salvato 🔒",
+      "saveError": "Impossibile salvare. Controlla la connessione.",
+      "lockedHeading": "Dati privati bloccati",
+      "lockedBody": "Completa l'autenticazione per sbloccare i dati privati",
+      "saveButton": "Salva",
+      "ageBracketLabel": "Fascia d'età",
+      "genderAtBirthLabel": "Sesso alla nascita",
+      "electedGenderLabel": "Genere",
+      "householdSizeLabel": "Componenti del nucleo familiare",
+      "hasDependentsLabel": "Hai persone a carico?",
+      "employmentStatusLabel": "Situazione lavorativa",
+      "regionLabel": "Regione di residenza",
+      "firstNameLabel": "Nome",
+      "lastNameLabel": "Cognome",
+      "dobLabel": "Data di nascita",
+      "emailsLabel": "Email di contatto",
+      "phonesLabel": "Telefono",
+      "chatContactsLabel": "Contatti chat",
+      "addEmail": "Aggiungi email",
+      "addPhone": "Aggiungi telefono",
+      "addChatContact": "Aggiungi contatto chat",
+      "labelPlaceholder": "es. Lavoro",
+      "providerPlaceholder": "Piattaforma"
+    },
+    "tabs": {
+      "prev": "Tab precedente",
+      "next": "Tab successiva"
     }
   },
   "timeline": {

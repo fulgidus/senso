@@ -1,26 +1,28 @@
-import { Navigate } from "react-router-dom"
-import { useAuthContext } from "@/features/auth/AuthContext"
-import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen"
+import { Navigate } from "react-router-dom";
+import { useAuthContext } from "@/features/auth/AuthContext";
+import { ProfileSetupScreen } from "@/features/profile/ProfileSetupScreen";
 
 /**
  * /setup route.
  *
- * - user.firstName exists → / (already set up, let root resolve)
- * - otherwise             → <ProfileSetupScreen />, onComplete → /
+ * Phase 29: Name entry removed. Setup only collects voice gender preference.
+ * User is redirected to / after setup completes (handled by AppShell bootstrap logic).
  */
 export function SetupPage() {
-  const { user, updateUser } = useAuthContext()
+  const { user } = useAuthContext();
 
-  if (user.firstName) {
-    return <Navigate to="/" replace />
+  // After Phase 29, setup is only needed for new users who haven't set voice gender yet.
+  // Username (set at signup) is the primary identity signal now.
+  if (user.username) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <ProfileSetupScreen
-      onComplete={(firstName, lastName) => {
-        updateUser({ firstName, lastName })
-        // navigate handled by the re-render: user.firstName now set → redirect to /
+      onComplete={() => {
+        // Re-render will resolve routing via AppShell bootstrap
+        window.location.replace("/");
       }}
     />
-  )
+  );
 }
