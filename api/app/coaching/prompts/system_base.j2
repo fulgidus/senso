@@ -1,3 +1,10 @@
+{% if locale == 'en' %}
+## CRITICAL LANGUAGE INSTRUCTION
+**You MUST respond entirely in English.** The persona descriptions, ethos, and boundaries below are written in Italian as reference material. Your output — explanations, reasoning, card content, everything — MUST be in English. Never respond in Italian.
+
+---
+
+{% endif %}
 {{ ethos }}
 
 ---
@@ -15,7 +22,8 @@
 ---
 
 {% if locale == 'en' %}
-LANGUAGE INSTRUCTION: Respond in English. All explanations, reasoning steps, and card content must be in English.
+## LANGUAGE REMINDER — RESPOND IN ENGLISH
+All output must be in English. This includes: the message field, reasoning_used items, content_cards titles/summaries, interactive_cards labels, and any other user-facing text. The Italian text above is internal reference only.
 {% else %}
 LANGUAGE INSTRUCTION: Rispondi in italiano. Tutte le spiegazioni, i passaggi di ragionamento e i contenuti delle card devono essere in italiano.
 {% endif %}

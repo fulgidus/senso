@@ -248,6 +248,7 @@ class LLMClient:
         timeout: float | None = None,
         route: str = "text:generation:md",
         strict_mode: bool = False,
+        tool_choice: str = "auto",
     ) -> str:
         """
         Text completion with at most one tool-call round-trip.

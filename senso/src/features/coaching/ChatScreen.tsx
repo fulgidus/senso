@@ -726,11 +726,9 @@ function AssistantBubble({
           borderColor: theme?.bubble_border,
         }}
       >
-        {msg.showPersonaCue && persona && (
-          <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>{persona.icon}</span>
-            <span>{persona.name}</span>
-          </div>
+        {/* Always show persona name on every assistant bubble */}
+        {persona && (
+          <div className="mb-1.5 text-xs font-medium text-muted-foreground">{persona.name}</div>
         )}
         {msg.isStreaming && !msg.content ? (
           <div className="flex items-center gap-2 text-muted-foreground" aria-live="polite">
