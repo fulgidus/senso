@@ -457,3 +457,120 @@ export async function bulkUpdateCategoryByDescription(
         },
     )
 }
+
+// ── Factory (Pattern A: token as param, onUnauthorized bound at construction) ──
+
+export type ProfileApiClient = ReturnType<typeof createProfileApi>
+
+export function createProfileApi(onUnauthorized?: () => Promise<string | null>) {
+    return {
+        getProfileStatus: (token: string) =>
+            apiRequest<CategorizationStatusResponse>(API_BASE, "/profile/status", {
+                token,
+                onUnauthorized,
+            }),
+
+        getProfile: (token: string) =>
+            apiRequest<UserProfile>(API_BASE, "/profile", { token, onUnauthorized }),
+
+        triggerCategorization: (token: string) =>
+            apiRequest<{ status: string }>(API_BASE, "/profile/trigger-categorization", {
+                method: "POST",
+                token,
+                onUnauthorized,
+            }),
+
+        confirmProfile: (
+            token: string,
+            payload: {
+                incomeOverride?: number | null
+                expensesOverride?: number | null
+                incomeSourceOverride?: string | null
+            },
+        ) =>
+            apiRequest<UserProfile>(API_BASE, "/profile/confirm", {
+                method: "POST",
+                token,
+                body: payload,
+                onUnauthorized,
+            }),
+
+        submitQuestionnaire: (
+            token: string,
+            mode: "quick" | "thorough",
+            answers: QuestionnaireAnswers,
+        ) =>
+            apiRequest<{ status: string }>(API_BASE, "/profile/questionnaire", {
+                method: "POST",
+                token,
+                body: { mode, answers },
+                onUnauthorized,
+            }),
+
+        getTimeline: (token: string, includeDismissed = false) =>
+            apiRequest<TimelineEventDTO[]>(
+                API_BASE,
+                `/profile/timeline?include_dismissed=${includeDismissed}`,
+                { token, onUnauthorized },
+            ),
+
+        dismissTimelineEvent: (
+            token: string,
+            eventId: string,
+            reason: string,
+            detail?: string,
+        ) =>
+            apiRequest<void>(API_BASE, `/profile/timeline/${eventId}/dismiss`, {
+                method: "POST",
+                token,
+                body: { reason, detail },
+                onUnauthorized,
+            }),
+
+        addTimelineContext: (token: string, eventId: string, text: string) =>
+            apiRequest<void>(API_BASE, `/profile/timeline/${eventId}/context`, {
+                method: "POST",
+                token,
+                body: { text },
+                onUnauthorized,
+            }),
+
+        getUncategorized: (token: string) =>
+            apiRequest<UncategorizedTransactionDTO[]>(API_BASE, "/profile/uncategorized", {
+                token,
+                onUnauthorized,
+            }),
+
+        updateTransactionCategory: (
+            token: string,
+            transactionId: string,
+            category: string,
+        ) =>
+            apiRequest<void>(
+                API_BASE,
+                `/profile/transactions/${transactionId}/category`,
+                {
+                    method: "PATCH",
+                    token,
+                    body: { category },
+                    onUnauthorized,
+                },
+            ),
+
+        bulkUpdateCategoryByDescription: (
+            token: string,
+            description: string,
+            category: string,
+        ) =>
+            apiRequest<{ updated: number; category: string }>(
+                API_BASE,
+                `/profile/transactions/by-description/category`,
+                {
+                    method: "PATCH",
+                    token,
+                    body: { description, category },
+                    onUnauthorized,
+                },
+            ),
+    }
+}
