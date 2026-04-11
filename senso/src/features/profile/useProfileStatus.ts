@@ -84,14 +84,11 @@ export function useProfileStatus({
     if (!enabled || !token) return;
     completedRef.current = false;
 
-    // 3s initial delay before first poll (UI-SPEC)
-    const initialDelay = setTimeout(() => {
-      void poll();
-      intervalRef.current = setInterval(() => void poll(), 5000);
-    }, 3000);
+    // Immediate first poll - don't wait 3s
+    void poll();
+    intervalRef.current = setInterval(() => void poll(), 3000); // Poll every 3s instead of 5s
 
     return () => {
-      clearTimeout(initialDelay);
       clearPolling();
     };
   }, [token, enabled]); // eslint-disable-line react-hooks/exhaustive-deps

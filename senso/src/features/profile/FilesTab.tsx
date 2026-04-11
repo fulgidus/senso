@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useState } from "react"
-import { RefreshCw, Search, Trash2 } from "lucide-react"
-import { useTranslation } from "react-i18next"
-import { createIngestionFilesApi, type UploadFile } from "@/api/ingestionFilesApi"
-import { useAuthContext } from "@/features/auth/AuthContext"
-import { useLocaleFormat } from "@/hooks/useLocaleFormat"
-import { ConfirmDialog } from "@/components/ConfirmDialog"
+import { useEffect, useMemo, useState } from "react";
+import { RefreshCw, Search, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { createIngestionFilesApi, type UploadFile } from "@/api/ingestionFilesApi";
+import { useAuthContext } from "@/features/auth/AuthContext";
+import { useLocaleFormat } from "@/hooks/useLocaleFormat";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 type Props = {
-  token: string
-  isAdmin: boolean
-  onInspect?: (uploadId: string) => void
-}
+  token: string;
+  isAdmin: boolean;
+  onInspect?: (uploadId: string) => void;
+};
 
 function formatFileSize(bytes: number): string {
   if (bytes >= 1024 * 1024) {
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
-  return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024).toFixed(1)} KB`;
 }
 
 function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
@@ -26,7 +26,7 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
     processing: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
     done: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
     failed: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
-  }
+  };
 
   const labelMap: Record<string, string> = {
     pending: t("files.statusPending"),
@@ -34,68 +34,66 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
     processing: t("files.statusProcessing"),
     done: t("files.statusDone"),
     failed: t("files.statusFailed"),
-  }
+  };
 
-  const cls = classMap[status] ?? "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-  const label = labelMap[status] ?? status
+  const cls = classMap[status] ?? "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+  const label = labelMap[status] ?? status;
 
   return (
     <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>
       {label}
     </span>
-  )
+  );
 }
 
 export function FilesTab({ token, isAdmin, onInspect }: Props) {
-  const { t } = useTranslation()
-  const fmt = useLocaleFormat()
-  const { onUnauthorized } = useAuthContext()
-  const filesApi = useMemo(
-    () => createIngestionFilesApi(onUnauthorized),
-    [onUnauthorized],
-  )
-  const [files, setFiles] = useState<UploadFile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({})
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const { t } = useTranslation();
+  const fmt = useLocaleFormat();
+  const { onUnauthorized } = useAuthContext();
+  const filesApi = useMemo(() => createIngestionFilesApi(onUnauthorized), [onUnauthorized]);
+  const [files, setFiles] = useState<UploadFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const loadFiles = () => {
-    setLoading(true)
-    setError(null)
-    filesApi.listUploads(token)
+    setLoading(true);
+    setError(null);
+    filesApi
+      .listUploads(token)
       .then((result) => setFiles(result))
       .catch(() => setError(t("files.loadError")))
-      .finally(() => setLoading(false))
-  }
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    loadFiles()
+    loadFiles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
+  }, [token]);
 
   const setItemLoading = (id: string, val: boolean) =>
-    setActionLoading((prev) => ({ ...prev, [id]: val }))
+    setActionLoading((prev) => ({ ...prev, [id]: val }));
 
   const handleRetry = async (file: UploadFile) => {
-    setItemLoading(file.id, true)
+    setItemLoading(file.id, true);
     try {
-      await filesApi.retryUpload(token, file.id)
-      loadFiles()
+      await filesApi.retryUpload(token, file.id);
+      loadFiles();
     } finally {
-      setItemLoading(file.id, false)
+      setItemLoading(file.id, false);
     }
-  }
+  };
 
   const handleDelete = async (fileId: string) => {
-    setItemLoading(fileId, true)
+    setItemLoading(fileId, true);
     try {
-      await filesApi.deleteUpload(token, fileId)
-      setFiles((prev) => prev.filter((f) => f.id !== fileId))
+      await filesApi.deleteUpload(token, fileId);
+      setFiles((prev) => prev.filter((f) => f.id !== fileId));
     } finally {
-      setItemLoading(fileId, false)
+      setItemLoading(fileId, false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -104,7 +102,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
           <div key={i} className="h-14 animate-pulse rounded-xl bg-muted" />
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -118,28 +116,26 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
           {t("files.retry")}
         </button>
       </div>
-    )
+    );
   }
 
   if (files.length === 0) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">{t("files.empty")}</p>
-    )
+    return <p className="py-8 text-center text-sm text-muted-foreground">{t("files.empty")}</p>;
   }
 
   return (
     <>
       <ul className="space-y-2">
         {files.map((file) => {
-          const busy = actionLoading[file.id] ?? false
+          const busy = actionLoading[file.id] ?? false;
           const canRetry =
-            file.extraction_status === "failed" || file.extraction_status === "pending"
-          const uploadDate = fmt.date(new Date(file.uploaded_at))
+            file.extraction_status === "failed" || file.extraction_status === "pending";
+          const uploadDate = fmt.date(new Date(file.uploaded_at));
 
           return (
             <li
               key={file.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-2 card-glow px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
             >
               {/* File info */}
               <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -193,7 +189,7 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
                 )}
               </div>
             </li>
-          )
+          );
         })}
       </ul>
 
@@ -204,10 +200,13 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
         confirmVariant="destructive"
         confirmLabel={t("common.delete")}
         onConfirm={() => {
-          if (deleteTargetId) { void handleDelete(deleteTargetId); setDeleteTargetId(null) }
+          if (deleteTargetId) {
+            void handleDelete(deleteTargetId);
+            setDeleteTargetId(null);
+          }
         }}
         onCancel={() => setDeleteTargetId(null)}
       />
     </>
-  )
+  );
 }

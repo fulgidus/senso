@@ -248,7 +248,7 @@ function ContentCardItem({ card }: { card: ContentCard }) {
   // Video card with expandable player
   if (card.card_type === "video" && card.video_id) {
     return (
-      <div className="snap-start shrink-0 w-64 border border-border rounded-lg overflow-hidden bg-card">
+      <div className="snap-start shrink-0 w-64 card-glow rounded-lg overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
         {videoExpanded ? (
           <div className="aspect-video w-full">
             <iframe
@@ -316,7 +316,7 @@ function ContentCardItem({ card }: { card: ContentCard }) {
   const isClickable = !!card.url;
   const inner = (
     <div
-      className={`snap-start shrink-0 w-56 border border-border rounded-lg overflow-hidden bg-card ${isClickable ? "hover:border-primary/30 transition-colors" : ""}`}
+      className={`snap-start shrink-0 w-56 card-glow rounded-lg overflow-hidden ${isClickable ? "hover:border-primary/30" : ""}`}
     >
       <div className="px-3 py-2 flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50">
         <BookOpen className="h-3 w-3" />
@@ -553,7 +553,7 @@ function PersonaSwitcher({
         onClick={onClose}
         aria-hidden
       />
-      <div className="relative z-10 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-border bg-background shadow-xl max-h-[80vh] overflow-y-auto">
+      <div className="relative z-10 w-full sm:max-w-md card-glow max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h2 className="text-base font-semibold text-foreground">
             {t("coaching.personaPickerTitle")}
@@ -870,7 +870,7 @@ function ConversationsModal({
         aria-hidden
       />
       {/* Panel */}
-      <div className="relative z-10 w-full sm:max-w-md bg-background rounded-t-2xl sm:rounded-2xl border border-border shadow-xl flex flex-col max-h-[80vh]">
+      <div className="relative z-10 w-full sm:max-w-md card-glow flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
           <h2 className="font-semibold text-sm">{t("coaching.modalTitle")}</h2>
           <button

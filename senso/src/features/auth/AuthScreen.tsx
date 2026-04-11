@@ -39,7 +39,7 @@ export function AuthScreen({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-6 py-12">
-      <section className="w-full rounded-3xl border border-border bg-card p-6 shadow-xl shadow-primary/5 md:p-8 relative overflow-hidden">
+      <section className="w-full card-glow-strong p-6 md:p-8 relative overflow-hidden">
         {/* Subtle gradient accent */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-primary" />
         <header className="space-y-2">

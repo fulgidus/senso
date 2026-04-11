@@ -143,6 +143,74 @@
   }
 }
 
+@layer components {
+  /* ── Gen Z Fintech Card Styles ── */
+  
+  /* Base elevated card with subtle shadow */
+  .card-elevated {
+    @apply rounded-2xl border border-border bg-card shadow-lg;
+  }
+  
+  /* Card with gradient border glow on hover (dark mode only) */
+  .card-glow {
+    @apply relative rounded-2xl border border-border bg-card shadow-lg transition-all duration-300;
+  }
+  
+  .card-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-glow);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .card-glow:hover::before {
+    opacity: 1;
+  }
+  
+  /* Stronger glow variant for featured cards */
+  .card-glow-strong {
+    @apply relative rounded-2xl border border-border bg-card shadow-xl transition-all duration-300;
+    box-shadow: 0 0 0 1px var(--border), 0 4px 20px -4px rgba(168, 85, 247, 0.15);
+  }
+  
+  .card-glow-strong:hover {
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.3), 0 8px 40px -4px rgba(168, 85, 247, 0.25);
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+  
+  /* Gradient border card (always visible) */
+  .card-gradient-border {
+    position: relative;
+    border-radius: var(--radius-xl);
+    background: var(--card);
+  }
+  
+  .card-gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: var(--gradient-primary);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
 /* ── MARP Slide Viewer - Phase 17 ── */
 
 .marp-viewer {

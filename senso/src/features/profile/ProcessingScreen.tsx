@@ -89,7 +89,7 @@ export function ProcessingScreen({ token, onBack, onComplete }: Props) {
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
       {/* Processing card - narrower, centered */}
       <div className="mx-auto max-w-[480px]">
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="card-glow-strong p-6">
           {isFailed || isNotStarted ? (
             <>
               <h2 className="mb-2 text-xl font-semibold text-foreground">

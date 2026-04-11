@@ -71,7 +71,7 @@ function getCategoryChartData(
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="card-glow p-5">
       <div className="mb-3 h-4 w-3/4 animate-pulse rounded bg-muted" />
       <div className="mb-2 h-3 w-full animate-pulse rounded bg-muted" />
       <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
@@ -494,7 +494,7 @@ export function ProfileScreen({
           <div className="space-y-8">
             {/* Summary Card */}
             {activeTab === "summary" && (
-              <section id="income" className="rounded-2xl border border-border bg-card p-6">
+              <section id="income" className="card-glow p-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {/* Income */}
                   <div>
@@ -602,7 +602,7 @@ export function ProfileScreen({
 
             {/* Spending Breakdown */}
             {activeTab === "charts" && chartData.length > 0 && (
-              <section id="spending" className="rounded-2xl border border-border bg-card p-6">
+              <section id="spending" className="card-glow p-6">
                 <h3 className="mb-4 text-xl font-semibold text-foreground">
                   {t("profile.spendingBreakdown")}
                 </h3>
@@ -649,10 +649,7 @@ export function ProfileScreen({
 
             {/* Income vs Expenses (only if income available, charts tab) */}
             {activeTab === "charts" && incomeAvailable && profile.monthlyExpenses !== null && (
-              <section
-                id="income-vs-expenses"
-                className="rounded-2xl border border-border bg-card p-6"
-              >
+              <section id="income-vs-expenses" className="card-glow p-6">
                 <h3 className="mb-4 text-xl font-semibold text-foreground">
                   {t("profile.incomeVsExpenses")}
                 </h3>
@@ -726,7 +723,7 @@ export function ProfileScreen({
                 ) : (
                   <div className="grid gap-4 lg:grid-cols-3">
                     {profile.insightCards.map((card: InsightCard, idx: number) => (
-                      <div key={idx} className="rounded-2xl border border-border bg-card p-5">
+                      <div key={idx} className="card-glow p-5">
                         <Lightbulb className="mb-2 h-4 w-4 text-primary" />
                         <p className="mb-1 text-base font-semibold text-foreground">
                           {card.headline}
@@ -758,7 +755,7 @@ export function ProfileScreen({
 
             {/* Confirm / Correct Section (summary tab) */}
             {activeTab === "summary" && (
-              <section id="confirm" className="rounded-2xl border border-border bg-card p-6">
+              <section id="confirm" className="card-glow-strong p-6">
                 <h3 className="mb-4 text-xl font-semibold text-foreground">
                   {t("profile.confirmHeading")}
                 </h3>
