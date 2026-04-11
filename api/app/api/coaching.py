@@ -614,8 +614,9 @@ async def stt_transcribe(
                 filename = "audio.webm" if filename.endswith(".ogg") else filename
             else:
                 content_type = _base_ct
+            # ElevenLabs Scribe API uses 'file' param, not 'audio'
             result = client.speech_to_text.convert(
-                audio=(filename, io.BytesIO(audio_bytes), content_type),
+                file=(filename, io.BytesIO(audio_bytes), content_type),
                 model_id="scribe_v1",
                 language_code=language,
             )
