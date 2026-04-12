@@ -40,7 +40,7 @@ services:
 
   llm-stub:
     build:
-      context: api/tests
+      context: be/tests
       dockerfile: Dockerfile.llm-stub
     ports:
       - "4010:4010"

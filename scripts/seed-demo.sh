@@ -11,7 +11,7 @@ set -euo pipefail
 API_URL="${API_URL:-http://localhost:8000}"
 DEMO_EMAIL="${DEMO_EMAIL:-demo@sen.so}"
 DEMO_PASSWORD="${DEMO_PASSWORD:-demodemo!}"
-SAMPLES_DIR="$(dirname "$0")/../api/app/ingestion/samples"
+SAMPLES_DIR="$(dirname "$0")/../be/app/ingestion/samples"
 WITH_CSV=false
 
 for arg in "$@"; do

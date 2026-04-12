@@ -2,12 +2,6 @@
     "sqltools.useNodeRuntime": true,
     "sqltools.connections": [
         {
-            "previewLimit": 50,
-            "driver": "SQLite",
-            "name": "test",
-            "database": "./api/test.db"
-        },
-        {
             "ssh": "Disabled",
             "previewLimit": 50,
             "server": "localhost",

@@ -46,7 +46,7 @@ Finalmente qualcuno che ti dice la verità sui tuoi soldi
 <br/>
 <br/>
 
-S.E.N.S.O.` · Alessio G. Corsi · `PUNKATHON 2026` · OGR Torino · 11 Aprile 2026
+`S.E.N.S.O.` · Alessio G. Corsi · `PUNKATHON 2026` · OGR Torino · 11 Aprile 2026
 
 ---
 

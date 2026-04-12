@@ -14,7 +14,7 @@ services:
       retries: 15
 
   minio:
-    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
@@ -28,7 +28,7 @@ services:
       retries: 15
 
   minio-init:
-    image: minio/mc
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       minio:
         condition: service_healthy
@@ -45,9 +45,9 @@ services:
         exit 0
       "
 
-  api:
+  backend:
     build:
-      context: ./api
+      context: ./be
       dockerfile: Dockerfile
     env_file:
       - .env
@@ -86,13 +86,12 @@ services:
 
   frontend:
     build:
-      context: ./senso
+      context: ./fe
       dockerfile: Dockerfile
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:8000}
-        CACHEBUST: ${CACHEBUST:-dev}
     depends_on:
-      api:
+      backend:
         condition: service_healthy
     expose:
       - "3001"
