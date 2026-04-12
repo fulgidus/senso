@@ -29,7 +29,7 @@ export function DebugScreen() {
       // After restart-ingestion succeeds, navigate to /profile after 1s so user
       // can see ingestion progress in the profile monitoring section.
       if (action === "restart") {
-        setTimeout(() => void navigate("/profile"), 1000);
+        setTimeout(() => void navigate("/profile/summary"), 1000);
       }
     } catch {
       setResults((prev) => ({ ...prev, [action]: t("debug.error") }));

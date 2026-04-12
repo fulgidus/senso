@@ -239,7 +239,7 @@ def _prepare_chat_result(
         try:
             welcome_text = service.get_welcome(
                 user_id=current_user.id,
-                first_name=None,
+                first_name=current_user.first_name,
                 voice_gender=current_user.voice_gender or "indifferent",
                 locale=body.locale,
                 persona_id=body.persona_id,
@@ -495,7 +495,7 @@ def get_welcome(
     service = get_coaching_service(db=db)
     message = service.get_welcome(
         user_id=current_user.id,
-        first_name=None,
+        first_name=current_user.first_name,
         voice_gender=current_user.voice_gender or "indifferent",
         locale=locale,
         persona_id=persona_id,

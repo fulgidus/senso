@@ -251,7 +251,7 @@ function ProcessingPage() {
       user={user}
       token={token}
       onBack={() => navigate("/onboarding/upload")}
-      onComplete={() => navigate("/profile", { replace: true })}
+      onComplete={() => navigate("/profile/summary", { replace: true })}
     />
   );
 }

@@ -331,7 +331,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const NAV_ITEMS: NavItem[] = [
     {
-      to: "/profile",
+      to: "/profile/summary",
       label: t("nav.profile"),
       icon: <User className="h-5 w-5" />,
     },

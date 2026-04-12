@@ -207,19 +207,20 @@ function AppRoutes() {
               </ErrorBoundary>
             }
           />
-          <Route
-            path="/profile"
-            element={
-              <ErrorBoundary>
-                <ProfilePage user={user} />
-              </ErrorBoundary>
-            }
-          />
+          <Route path="/profile" element={<Navigate to="/profile/summary" replace />} />
           <Route
             path="/profile/uncategorized"
             element={
               <ErrorBoundary>
                 <UncategorizedScreen />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/profile/:tab"
+            element={
+              <ErrorBoundary>
+                <ProfilePage user={user} />
               </ErrorBoundary>
             }
           />

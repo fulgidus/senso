@@ -208,7 +208,10 @@ export function UncategorizedScreen() {
   if (loadError) {
     return (
       <main className="mx-auto w-full max-w-4xl px-6 py-6">
-        <Link to="/profile" className="mb-4 inline-block text-sm text-primary hover:underline">
+        <Link
+          to="/profile/summary"
+          className="mb-4 inline-block text-sm text-primary hover:underline"
+        >
           ← {t("nav.profile")}
         </Link>
         <div className="mt-8 flex flex-col items-center gap-4 text-center">
@@ -226,7 +229,10 @@ export function UncategorizedScreen() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-6">
-      <Link to="/profile" className="mb-4 inline-block text-sm text-primary hover:underline">
+      <Link
+        to="/profile/summary"
+        className="mb-4 inline-block text-sm text-primary hover:underline"
+      >
         ← {t("nav.profile")}
       </Link>
 

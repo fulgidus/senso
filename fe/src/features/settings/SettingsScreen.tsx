@@ -188,8 +188,7 @@ export function SettingsScreen() {
         <section className="rounded-xl border border-border bg-muted/30 p-4">
           <p className="text-sm text-muted-foreground">{t("settings.nameMovedBody")}</p>
           <Link
-            to="/profile"
-            state={{ tab: "preferences" }}
+            to="/profile/personal"
             className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             {t("settings.nameMovedCta")} <ArrowRight className="h-3 w-3" />
@@ -416,8 +415,7 @@ export function SettingsScreen() {
         </div>
         <p className="text-sm text-muted-foreground">{t("settings.preferencesMovedBody")}</p>
         <Link
-          to="/profile"
-          state={{ tab: "preferences" }}
+          to="/profile/personal"
           className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           {t("settings.preferencesMovedCta")} <ArrowRight className="h-3 w-3" />

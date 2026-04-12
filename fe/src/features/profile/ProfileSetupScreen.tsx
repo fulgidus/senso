@@ -9,14 +9,20 @@ type Props = {
   onComplete: () => void;
 };
 
-type Step = "gender";
+type Step = "name" | "gender";
 
 export function ProfileSetupScreen({ onComplete }: Props) {
-  const [step] = useState<Step>("gender");
+  const [step, setStep] = useState<Step>("name");
+  const [firstName, setFirstName] = useState("");
   const [voiceGender, setVoiceGender] = useState<VoiceGender | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+
+  const handleNameSubmit = () => {
+    if (!firstName.trim()) return;
+    setStep("gender");
+  };
 
   const handleGenderSubmit = async (selectedGender: VoiceGender | null) => {
     setLoading(true);
@@ -29,6 +35,7 @@ export function ProfileSetupScreen({ onComplete }: Props) {
     }
     try {
       await updateMe(token, {
+        firstName: firstName.trim(),
         voiceGender: selectedGender ?? "indifferent",
       });
       onComplete();
@@ -44,6 +51,34 @@ export function ProfileSetupScreen({ onComplete }: Props) {
       <div className="mx-auto max-w-[480px]">
         <h1 className="mb-2 text-2xl font-bold text-foreground">{t("profileSetup.heading")}</h1>
         <p className="mb-8 text-sm text-muted-foreground">{t("profileSetup.subtitle")}</p>
+
+        {step === "name" && (
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+            <div>
+              <h2 className="text-base font-semibold text-foreground mb-1">
+                {t("profileSetup.nameHeading")}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">{t("profileSetup.nameSubtitle")}</p>
+              <input
+                autoFocus
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleNameSubmit();
+                }}
+                placeholder={t("profileSetup.namePlaceholder")}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            <Button className="w-full" disabled={!firstName.trim()} onClick={handleNameSubmit}>
+              {t("profileSetup.continue")}
+            </Button>
+          </div>
+        )}
 
         {step === "gender" && (
           <div className="rounded-2xl border border-border bg-card p-6 space-y-5">

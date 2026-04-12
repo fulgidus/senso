@@ -1213,7 +1213,11 @@ class CategorizationService:
                     ):
                         valid_cards.append(card)
                 return valid_cards
-        except (LLMError, json.JSONDecodeError, Exception) as exc:
+            else:
+                logger.warning("Insight generation returned non-list: %s", type(cards).__name__)
+        except json.JSONDecodeError as exc:
+            logger.warning("Insight generation JSON parse failed: %s — raw: %.500s", exc, raw)
+        except Exception as exc:
             logger.warning("Insight generation failed: %s", exc)
 
         return []

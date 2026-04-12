@@ -306,11 +306,11 @@ export function FileList({
         </table>
       </div>
 
-      {/* Confirm all / All confirmed - only show when there are eligible files */}
+      {/* Confirm all / Start processing - always enabled when there are eligible files */}
       {hasAnySuccess && (
         <div className="flex justify-end">
-          <Button disabled={allEligibleConfirmed} onClick={onConfirmAll} className="min-w-36">
-            {allEligibleConfirmed ? t("ingestion.allEligibleConfirmed") : t("ingestion.confirmAll")}
+          <Button onClick={onConfirmAll} className="min-w-36">
+            {allEligibleConfirmed ? t("ingestion.startProcessing") : t("ingestion.confirmAll")}
           </Button>
         </div>
       )}

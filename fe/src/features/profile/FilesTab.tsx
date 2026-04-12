@@ -24,6 +24,7 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
     pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
     queued: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
     processing: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+    success: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
     done: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
     failed: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
   };
@@ -32,6 +33,7 @@ function StatusBadge({ status, t }: { status: string; t: (key: string) => string
     pending: t("files.statusPending"),
     queued: t("files.statusQueued"),
     processing: t("files.statusProcessing"),
+    success: t("files.statusDone"),
     done: t("files.statusDone"),
     failed: t("files.statusFailed"),
   };
@@ -129,8 +131,8 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
         {files.map((file) => {
           const busy = actionLoading[file.id] ?? false;
           const canRetry =
-            file.extraction_status === "failed" || file.extraction_status === "pending";
-          const uploadDate = fmt.date(file.uploaded_at);
+            file.extractionStatus === "failed" || file.extractionStatus === "pending";
+          const uploadDate = fmt.date(file.uploadedAt);
 
           return (
             <li
@@ -141,16 +143,16 @@ export function FilesTab({ token, isAdmin, onInspect }: Props) {
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span
                   className="truncate text-sm font-medium text-foreground"
-                  title={file.original_filename}
+                  title={file.originalFilename}
                 >
-                  {file.original_filename.length > 40
-                    ? `${file.original_filename.slice(0, 40)}…`
-                    : file.original_filename}
+                  {file.originalFilename.length > 40
+                    ? `${file.originalFilename.slice(0, 40)}…`
+                    : file.originalFilename}
                 </span>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <StatusBadge status={file.extraction_status} t={t} />
+                  <StatusBadge status={file.extractionStatus} t={t} />
                   <span>{uploadDate}</span>
-                  <span>{formatFileSize(file.size_bytes)}</span>
+                  <span>{formatFileSize(file.sizeBytes)}</span>
                 </div>
               </div>
 

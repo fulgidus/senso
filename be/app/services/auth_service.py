@@ -264,6 +264,8 @@ class AuthService:
         user = repository.get_user_by_id(self.db, user_id)
         if user is None:
             raise AuthError("user_not_found", "User not found", status_code=404)
+        if payload.first_name is not None:
+            user.first_name = payload.first_name.strip() or None
         if payload.voice_gender is not None:
             user.voice_gender = payload.voice_gender
         if payload.voice_auto_listen is not None:

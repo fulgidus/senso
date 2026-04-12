@@ -18,13 +18,13 @@ const API_BASE = getBackendBaseUrl();
 
 export type UploadFile = {
   id: string;
-  original_filename: string;
-  content_type: string;
-  size_bytes: number;
-  uploaded_at: string;
-  extraction_status: string; // "pending"|"queued"|"processing"|"done"|"failed"
-  extraction_method: string | null;
-  module_source: string | null;
+  originalFilename: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+  extractionStatus: string; // "pending"|"queued"|"processing"|"done"|"failed"
+  extractionMethod: string | null;
+  moduleSource: string | null;
   confirmed: boolean;
 };
 

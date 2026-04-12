@@ -126,6 +126,57 @@ function TimelineEventCard({
         <p className="mb-3 text-sm text-muted-foreground">{event.description}</p>
       )}
 
+      {/* Evidence details */}
+      {event.evidence_json &&
+        Object.keys(event.evidence_json).length > 0 &&
+        (() => {
+          const ev = event.evidence_json as Record<string, unknown>;
+          return (
+            <div className="mb-3 rounded-lg bg-secondary/50 px-3 py-2 space-y-1">
+              {ev.amount != null && (
+                <p className="text-sm font-medium text-foreground">
+                  {t("timeline.evidenceAmount")}: €
+                  {Math.abs(Number(ev.amount)).toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              )}
+              {ev.category != null && (
+                <p className="text-xs text-muted-foreground">
+                  {t("timeline.evidenceCategory")}: {String(ev.category).replace(/_/g, " ")}
+                </p>
+              )}
+              {ev.avg_monthly != null && (
+                <p className="text-xs text-muted-foreground">
+                  {t("timeline.evidenceAvgMonthly")}: €
+                  {Number(ev.avg_monthly).toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              )}
+              {ev.description != null && (
+                <p className="text-xs text-muted-foreground italic">{String(ev.description)}</p>
+              )}
+              {ev.count != null && (
+                <p className="text-xs text-muted-foreground">
+                  {t("timeline.evidenceCount", { count: Number(ev.count) })}
+                </p>
+              )}
+              {ev.monthly_total != null && (
+                <p className="text-xs text-muted-foreground">
+                  {t("timeline.evidenceMonthlyTotal")}: €
+                  {Number(ev.monthly_total).toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
       {/* Distilled user context */}
       {event.user_context_distilled && (
         <p className="mb-3 text-sm italic text-muted-foreground">{event.user_context_distilled}</p>

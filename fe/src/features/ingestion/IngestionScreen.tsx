@@ -29,7 +29,6 @@ export function IngestionScreen({ user, onConfirmAll }: Props) {
     allConfirmed,
     upload,
     confirmOne,
-    confirmAll,
     retry,
     report,
     remove,
@@ -100,7 +99,6 @@ export function IngestionScreen({ user, onConfirmAll }: Props) {
           onRemove={(id) => void remove(id)}
           onConfirmOne={(id) => void confirmOne(id)}
           onConfirmAll={() => {
-            void confirmAll();
             onConfirmAll?.();
           }}
         />

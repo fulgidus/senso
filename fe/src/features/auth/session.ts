@@ -174,6 +174,7 @@ export async function startGoogle(): Promise<GoogleStartResult> {
 export async function updateMe(
   accessToken: string,
   data: {
+    firstName?: string | null;
     voiceGender?: VoiceGender | null;
     voiceAutoListen?: boolean | null;
     defaultPersonaId?: string | null;
@@ -185,6 +186,7 @@ export async function updateMe(
     method: "PATCH",
     token: accessToken,
     body: {
+      first_name: data.firstName,
       voice_gender: data.voiceGender,
       voice_auto_listen: data.voiceAutoListen,
       default_persona_id: data.defaultPersonaId,

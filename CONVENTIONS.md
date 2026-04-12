@@ -26,3 +26,13 @@ This ensures consistent environment, shared networking between services, and rep
 - Migrations and backfills: use **raw SQL only** (`engine.connect()` + `sa.text()`).
 - Application CRUD: use **ORM sessions only** (`SessionLocal()` / `get_db()`).
 - If a startup routine needs both data manipulation and DDL (e.g., backfill rows then add a constraint), do them in **separate `with engine.connect()` blocks** - never hold one connection open while opening another against the same table.
+
+## UI Error State Convention
+
+**A UI component that fails to load data must show an error state, not an empty set.** Skeleton placeholders are only for the *loading* phase. Once the fetch completes:
+
+- **Success with data** → render content.
+- **Success with empty result** → render an explicit "no data yet" message with guidance (e.g., "Upload documents to see insights here").
+- **Fetch error** → render an error indicator with a retry action.
+
+Never conflate "still loading", "loaded but empty", and "failed" into the same visual. The user must always know *why* a section is blank.
