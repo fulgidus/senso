@@ -212,23 +212,38 @@ async function refresh(refreshToken: string): Promise<RefreshPayload> {
  *  3. Return the new token string so `apiRequest` can retry.
  *  4. On any failure (no refresh token, or refresh 401): clear local tokens,
  *     navigate to `/auth`, and return `null`.
+ *
+ * Includes a mutex so that parallel 401s (e.g. two API calls expiring at the
+ * same time) share a single refresh request instead of racing — the backend
+ * revokes the refresh token on first use, so concurrent refresh() calls
+ * with the same token cause a "token_revoked" 401 cascade.
  */
 export function makeOnUnauthorized(navigate?: (to: string) => void): () => Promise<string | null> {
-  return async () => {
-    const storedRefreshToken = readRefreshToken();
-    if (!storedRefreshToken) {
-      clearTokens();
-      navigate?.("/auth");
-      return null;
-    }
-    try {
-      const payload = await refresh(storedRefreshToken);
-      return payload.accessToken;
-    } catch {
-      clearTokens();
-      navigate?.("/auth");
-      return null;
-    }
+  let inflightRefresh: Promise<string | null> | null = null;
+
+  return () => {
+    if (inflightRefresh) return inflightRefresh;
+
+    inflightRefresh = (async () => {
+      const storedRefreshToken = readRefreshToken();
+      if (!storedRefreshToken) {
+        clearTokens();
+        navigate?.("/auth");
+        return null;
+      }
+      try {
+        const payload = await refresh(storedRefreshToken);
+        return payload.accessToken;
+      } catch {
+        clearTokens();
+        navigate?.("/auth");
+        return null;
+      }
+    })().finally(() => {
+      inflightRefresh = null;
+    });
+
+    return inflightRefresh;
   };
 }
 

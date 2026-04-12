@@ -31,12 +31,17 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
   const { onUnauthorized } = useAuthContext();
   const profileApi = useMemo(() => createProfileApi(onUnauthorized), [onUnauthorized]);
   const [state, setState] = useState<"checking" | "ready" | "rejected">("checking");
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+
     if (!token) {
+      hasRunRef.current = true;
       setState("rejected");
       return;
     }
+    hasRunRef.current = true;
     let cancelled = false;
     Promise.all([
       profileApi.getProfile(token).catch(() => null),
@@ -51,6 +56,11 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
           ["complete", "generating_insights", "categorizing", "queued"].includes(status.status);
         if (profile?.confirmed || processingOk) {
           setState("ready");
+        } else if (!profile && !status) {
+          // Both calls failed (e.g. network blip during token refresh)
+          // — don't redirect, stay in checking state and retry once.
+          hasRunRef.current = false;
+          setState("checking");
         } else {
           navigate("/", { replace: true, state: { toast: t("app.profileRequired") } });
           setState("rejected");
@@ -64,7 +74,7 @@ function useProfileReady(): { ready: boolean; checking: boolean } {
     return () => {
       cancelled = true;
     };
-  }, [token, navigate, t]);
+  }, [token, navigate, t, profileApi]);
 
   return { ready: state === "ready", checking: state === "checking" };
 }
