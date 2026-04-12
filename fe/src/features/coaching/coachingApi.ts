@@ -99,6 +99,7 @@ export interface CoachingResponse {
   new_insight?: NewInsight | null;
   transaction_evidence?: TransactionEvidence | null;
   goal_progress?: GoalProgress | null;
+  tools_used?: string[];
   debug?: DebugPayload;
 }
 

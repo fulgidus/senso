@@ -4,7 +4,6 @@ import { useLocaleFormat } from "@/hooks/useLocaleFormat";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 import { Button } from "@/components/ui/button";
 import { SHOW_REASONING, LLM_DEBUG } from "@/lib/config";
-import { A2UISurface } from "@/components/A2UISurface";
 import { useAuthContext } from "@/features/auth/AuthContext";
 import { useTheme } from "@/components/theme-provider";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -53,7 +52,6 @@ import {
   ChevronsDown,
 } from "lucide-react";
 import { useKeyboardHeight } from "@/hooks/useKeyboardHeight";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useTTS, type TTSConfig } from "./useTTS";
 import { useVoiceMode } from "./useVoiceMode";
@@ -81,7 +79,7 @@ interface ChatScreenProps {
 }
 
 interface DisplayMessage {
-  role: "user" | "assistant" | "tool";
+  role: "user" | "assistant";
   content: string;
   response?: CoachingResponse;
   isWelcome?: boolean;
@@ -89,7 +87,7 @@ interface DisplayMessage {
   personaId?: string | null;
   showPersonaCue?: boolean;
   status?: "sent" | "failed";
-  toolName?: string;
+  toolsUsed?: string[];
 }
 
 type RestoreToastState = {
@@ -358,33 +356,6 @@ function InteractiveCardComponent({ card }: { card: InteractiveCard }) {
       <Button size="sm" variant="outline">
         {card.cta_label ?? t("coaching.reminder.defaultCta")}
       </Button>
-    </div>
-  );
-}
-
-function DetailsToggle({ a2ui }: { a2ui: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const { t } = useTranslation();
-
-  return (
-    <div className="mt-2">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="text-sm text-muted-foreground flex items-center gap-1"
-      >
-        {expanded ? t("coaching.hideDetails") : t("coaching.showDetails")}
-        <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`} />
-      </button>
-      {expanded && (
-        <div className="mt-2">
-          <A2UISurface
-            jsonl={a2ui}
-            onAction={(action) => {
-              window.dispatchEvent(new CustomEvent("senso:a2ui-action", { detail: { action } }));
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }
@@ -779,9 +750,6 @@ function AssistantBubble({
               </div>
             )}
 
-            {/* 7. Details panel — collapsed toggle */}
-            {resp.details_a2ui && <DetailsToggle a2ui={resp.details_a2ui} />}
-
             {/* D-05: new_insight NOT rendered — persistence is backend-only */}
 
             {LLM_DEBUG && resp.debug && <DebugPanel debug={resp.debug} />}
@@ -989,6 +957,7 @@ function parseStoredMessage(m: SessionMessage): DisplayMessage {
         content: parsed.message ?? m.content,
         response: parsed as CoachingResponse,
         personaId: m.persona_id ?? null,
+        toolsUsed: parsed.tools_used?.length ? parsed.tools_used : undefined,
       };
     } catch {
       return { role: "assistant", content: m.content, personaId: m.persona_id ?? null };
@@ -1145,28 +1114,6 @@ export function ChatScreen({
       setLoadingHistory(false);
     }
   }, []);
-
-  // Pull-to-refresh: reload current session messages on pull-down
-  const handleChatRefresh = useCallback(async () => {
-    if (sessionId) {
-      await loadSessionHistory(sessionId);
-    }
-  }, [sessionId, loadSessionHistory]);
-
-  const ptr = usePullToRefresh({
-    onRefresh: handleChatRefresh,
-    disabled: isLoading || loadingHistory,
-  });
-
-  // Merged ref: assign to listRef (scroll tracking) AND PTR containerRef
-  const mergedListRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      listRef.current = el;
-      ptr.containerRef(el);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ptr.containerRef],
-  );
 
   // Wrapper that auto-dismisses transient errors after 8 seconds.
   // profile_required errors are kept persistent (they have a navigation CTA).
@@ -1429,14 +1376,17 @@ export function ChatScreen({
               }
             },
             onToolUse: (event) => {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  role: "tool" as const,
-                  content: "",
-                  toolName: event.tool_name,
-                },
-              ]);
+              setMessages((prev) => {
+                const next = [...prev];
+                const idx = findLastStreamingAssistantIndex(next);
+                if (idx === -1) return prev;
+                const msg = next[idx];
+                next[idx] = {
+                  ...msg,
+                  toolsUsed: [...(msg.toolsUsed ?? []), event.tool_name],
+                };
+                return next;
+              });
             },
             onDelta: (chunk) => {
               setMessages((prev) => {
@@ -1456,7 +1406,12 @@ export function ChatScreen({
                 const next = [...prev];
                 const index = findLastStreamingAssistantIndex(next);
                 if (index === -1) {
-                  next.push({ role: "assistant", content: response.message, response });
+                  next.push({
+                    role: "assistant",
+                    content: response.message,
+                    response,
+                    toolsUsed: response.tools_used?.length ? response.tools_used : undefined,
+                  });
                   return next;
                 }
                 next[index] = {
@@ -1466,6 +1421,11 @@ export function ChatScreen({
                   isStreaming: false,
                   personaId: activePersonaId,
                   showPersonaCue: next[index].showPersonaCue,
+                  toolsUsed: next[index].toolsUsed?.length
+                    ? next[index].toolsUsed
+                    : response.tools_used?.length
+                      ? response.tools_used
+                      : undefined,
                 };
                 return next;
               });
@@ -1867,24 +1827,10 @@ export function ChatScreen({
       {/* Message list */}
       <div className="relative flex-1">
         <div
-          ref={mergedListRef}
+          ref={listRef}
           className="h-full overflow-y-auto px-4 py-4 space-y-4"
           onScroll={updateStickiness}
         >
-          {/* Pull-to-refresh visual indicator */}
-          {(ptr.isPulling || ptr.isRefreshing) && (
-            <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
-              {ptr.isRefreshing ? (
-                <>
-                  <Loader2 className="animate-spin mr-1 h-4 w-4" />
-                  {t("common.updating")}
-                </>
-              ) : (
-                <span>{t("common.pullToRefresh")}</span>
-              )}
-            </div>
-          )}
-
           {(loadingHistory || welcomeLoading) && (
             <div className="flex items-start gap-2">
               <SensoAvatar />
@@ -1896,62 +1842,61 @@ export function ChatScreen({
             </div>
           )}
 
-          {messages.map((msg, i) => {
-            if (msg.role === "tool" && msg.toolName) {
-              return (
-                <div key={i} className="flex justify-start">
-                  <ToolUsagePill toolName={msg.toolName} />
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
+            >
+              {/* Tool usage pills rendered BEFORE the assistant bubble */}
+              {msg.role === "assistant" && msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-1">
+                  {msg.toolsUsed.map((tool, ti) => (
+                    <ToolUsagePill key={ti} toolName={tool} />
+                  ))}
                 </div>
-              );
-            }
-            return (
-              <div
-                key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.role === "user" ? (
-                  <div className="flex flex-col items-end gap-1 max-w-[90%]">
-                    <div className="flex items-end gap-2">
-                      <div
-                        className={`rounded-2xl rounded-tr-sm px-4 py-3 text-sm shadow-md ${
-                          msg.status === "failed"
-                            ? "bg-destructive/10 text-destructive border border-destructive/30"
-                            : "bg-gradient-primary text-primary-foreground shadow-primary/30"
-                        }`}
-                      >
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                      </div>
-                      <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
+              )}
+              {msg.role === "user" ? (
+                <div className="flex flex-col items-end gap-1 max-w-[90%]">
+                  <div className="flex items-end gap-2">
+                    <div
+                      className={`rounded-2xl rounded-tr-sm px-4 py-3 text-sm shadow-md ${
+                        msg.status === "failed"
+                          ? "bg-destructive/10 text-destructive border border-destructive/30"
+                          : "bg-gradient-primary text-primary-foreground shadow-primary/30"
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
-                    {msg.status === "failed" && (
-                      <button
-                        onClick={() => handleRetry(i)}
-                        disabled={isLoading}
-                        className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors mr-9 disabled:opacity-50"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        {t("coaching.retryLastMessage")}
-                      </button>
-                    )}
+                    <UserAvatar user={user} size="sm" className="shrink-0 mb-0.5" />
                   </div>
-                ) : (
-                  <AssistantBubble
-                    msg={{
-                      ...msg,
-                      showPersonaCue: msg.showPersonaCue ?? getPersonaCueForIndex(messages, i),
-                    }}
-                    locale={locale}
-                    ttsConfig={ttsConfig}
-                    thinkingLabel={t(`coaching.thinking.${effectiveGender}`, { name: personaName })}
-                    persona={
-                      personas.find((persona) => persona.id === msg.personaId) ?? activePersona
-                    }
-                    resolvedTheme={resolvedTheme}
-                  />
-                )}
-              </div>
-            );
-          })}
+                  {msg.status === "failed" && (
+                    <button
+                      onClick={() => handleRetry(i)}
+                      disabled={isLoading}
+                      className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors mr-9 disabled:opacity-50"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      {t("coaching.retryLastMessage")}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <AssistantBubble
+                  msg={{
+                    ...msg,
+                    showPersonaCue: msg.showPersonaCue ?? getPersonaCueForIndex(messages, i),
+                  }}
+                  locale={locale}
+                  ttsConfig={ttsConfig}
+                  thinkingLabel={t(`coaching.thinking.${effectiveGender}`, { name: personaName })}
+                  persona={
+                    personas.find((persona) => persona.id === msg.personaId) ?? activePersona
+                  }
+                  resolvedTheme={resolvedTheme}
+                />
+              )}
+            </div>
+          ))}
 
           <div ref={listEndRef} />
         </div>

@@ -203,6 +203,8 @@ def _prepare_chat_result(
         )
         db.flush()
 
+    is_new_session = not body.session_id
+
     prior_messages = [{"role": m.role, "content": m.content} for m in session.messages]
     messages = prior_messages + [{"role": "user", "content": body.message}]
 
@@ -231,6 +233,35 @@ def _prepare_chat_result(
         )
 
     user_msg_id = str(uuid_utils_lib.uuid7())
+
+    # For new sessions, persist the welcome greeting so it survives page reload
+    if is_new_session:
+        try:
+            welcome_text = service.get_welcome(
+                user_id=current_user.id,
+                first_name=None,
+                voice_gender=current_user.voice_gender or "indifferent",
+                locale=body.locale,
+                persona_id=body.persona_id,
+            )
+        except Exception:
+            welcome_text = None
+        if welcome_text:
+            welcome_payload = json.dumps(
+                {"message": welcome_text, "tools_used": []}, ensure_ascii=False
+            )
+            db.add(
+                ChatMessage(
+                    id=str(uuid_utils_lib.uuid7()),
+                    session_id=session.id,
+                    sender_id=None,
+                    persona_id=body.persona_id,
+                    role="assistant",
+                    content=welcome_payload,
+                    created_at=datetime.now(UTC),
+                )
+            )
+
     db.add(
         ChatMessage(
             id=user_msg_id,
