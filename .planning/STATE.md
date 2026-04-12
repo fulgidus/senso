@@ -1,28 +1,38 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: Milestone complete
-last_updated: "2026-04-12T18:00:00.000Z"
+milestone: v2.0
+milestone_name: Platform Architecture
+status: Defining requirements
+last_updated: "2026-04-12T21:00:00.000Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 32
-  completed_phases: 32
-  total_plans: 132
-  completed_plans: 132
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md
+See: .planning/PROJECT.md (updated 2026-04-12)
+
+**Core value:** Pluggable AI coaching engine — any document-heavy advisory domain via Domain Manifest config.
+**Current focus:** Defining requirements for v2.0
 
 ## Current
 
-v1.0 MVP complete. All 32 phases shipped, 31/31 requirements validated.
-Platform cleaned of hackathon artifacts, reframed as modular AI financial education platform.
+v2.0 Platform Architecture milestone started. Defining requirements for full Chest/Domain refactor.
+
+## Accumulated Context
+
+- v1.0 shipped 32 phases, 132 plans, 31/31 requirements. Full financial coaching platform works end-to-end.
+- Architecture is finance-hardwired: DB columns, coaching tools, safety rules, categorization, UI all assume financial data.
+- Key v2.0 concept: "Chest" — unified typed knowledge containers. Domain Manifest = collection of Chests + behavior + personas + tools + filters + enrichment + UI.
+- Scorched earth: no users, no data, no migration concerns. Clean rebuild.
+- json-render (Vercel) identified as potential SDUI solution for domain-driven frontend. Needs deeper eval.
 
 ## Next
 
-No active milestone. Run `/gsd-new-milestone` to start v1.1.
+Define requirements → create roadmap → begin execution.
