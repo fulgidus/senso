@@ -2,7 +2,7 @@
 # Pre-push: full TypeScript type-check on the frontend.
 # Catches type errors that per-file staged linting misses.
 # Filters out dev-dependency type declaration errors (packages only in Docker).
-cd senso || exit 1
+cd fe || exit 1
 ERRORS=$(npx tsc -b --noEmit 2>&1 | grep -v "Cannot find module '@marp-team/marp-core'" | grep -v "Cannot find module 'vite-plugin-pwa'" | grep "error TS" || true)
 if [ -n "$ERRORS" ]; then
   echo "TypeScript errors found:"
