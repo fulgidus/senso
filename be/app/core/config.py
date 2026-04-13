@@ -47,6 +47,8 @@ class Settings:
     # Phase 23: E2E test reset guards (disabled by default - only enabled via docker-compose.test.yml)
     allow_test_reset: bool
     internal_token: str
+    # Liteparse sidecar URL
+    liteparse_url: str
 
     @property
     def google_enabled(self) -> bool:
@@ -153,4 +155,5 @@ def get_settings() -> Settings:
         tool_usage_granularity=os.getenv("TOOL_USAGE_GRANULARITY", "granular"),
         allow_test_reset=os.getenv("ALLOW_TEST_RESET", "false").lower() == "true",
         internal_token=os.getenv("INTERNAL_TOKEN", ""),
+        liteparse_url=os.getenv("LITEPARSE_URL", "http://liteparse:3002"),
     )

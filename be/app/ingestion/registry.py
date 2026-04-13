@@ -67,11 +67,11 @@ def _get_pdf_preview(file_path: Path, max_chars: int = 3000) -> str:
     Raw PDF bytes contain structural keywords (/type, /state, /filter …)
     that produce false-positive matches against CSV-oriented modules."""
     try:
-        from app.ingestion.liteparse_extractor import extract_text_with_liteparse  # noqa: PLC0415
-        text = extract_text_with_liteparse(file_path, ocr_enabled=False)
+        from app.ingestion.liteparse_extractor import extract_single  # noqa: PLC0415
+        text = extract_single(file_path, ocr=False)
         if len(text) < 50:
             # sparse / scanned PDF – try OCR for at least a usable preview
-            text = extract_text_with_liteparse(file_path, ocr_enabled=True)
+            text = extract_single(file_path, ocr=True)
         return text[:max_chars]
     except Exception as exc:
         logger.debug("PDF preview extraction failed for %s: %s", file_path.name, exc)

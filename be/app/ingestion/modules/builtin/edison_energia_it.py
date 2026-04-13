@@ -26,9 +26,9 @@ MODULE_VERSION: str = "1.0.0"
 
 def _extract_pdf_text(path: Path) -> str:
     """Extract text from PDF via liteparse (text layer + OCR fallback)."""
-    from app.ingestion.liteparse_extractor import extract_text_with_liteparse  # noqa: PLC0415
+    from app.ingestion.liteparse_extractor import extract_single  # noqa: PLC0415
 
-    return extract_text_with_liteparse(path)
+    return extract_single(path)
 
 
 def _parse_italian_decimal(s: str) -> Decimal:

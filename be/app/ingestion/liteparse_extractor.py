@@ -1,105 +1,106 @@
 """
-Text extraction via liteparse (@llamaindex/liteparse Python wrapper).
+Text extraction via the liteparse sidecar service.
 
-liteparse is a fast, local document parser that handles PDF, images, and
-Office formats without making any LLM calls. It wraps the
-@llamaindex/liteparse Node.js CLI and is the primary text-extraction step
-before any LLM processing happens.
+The sidecar (`liteparse/`) runs @llamaindex/liteparse inside a Node.js
+container and exposes a multipart HTTP API. The backend decrypts document
+bytes from S3, then ships them to the sidecar over the internal Docker
+network — no plaintext data ever touches persistent storage.
 
-For PDFs it tries the embedded text layer first (ocr_enabled=False); if the
-result is below OCR_CHAR_THRESHOLD it re-runs with ocr_enabled=True to handle
-scanned pages. Images always run with OCR enabled.
-
-Raises ImportError (caught at call site as a soft fallback signal) if the
-liteparse package or its Node.js CLI is unavailable.
+Sidecar URL is configured via the LITEPARSE_URL environment variable
+(default: http://liteparse:3002).
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import uuid
+from dataclasses import dataclass
 from pathlib import Path
+
+import httpx
+
+from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-# Supported image extensions that liteparse can handle via its OCR path.
-_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp", ".webp", ".gif"}
+
+# ── Public types ───────────────────────────────────────────────────────────────
+
+
+@dataclass
+class LiteparseFile:
+    data: bytes
+    filename: str
+    ocr: bool = True
+
+
+@dataclass
+class LiteparseResult:
+    id: str
+    parsed: str
+
+
+# ── Batch entry point ──────────────────────────────────────────────────────────
 
 
 def extract_text_with_liteparse(
-    file_path: Path,
-    *,
-    ocr_enabled: bool | None = None,
-) -> str:
+    files: list[LiteparseFile],
+) -> list[LiteparseResult]:
     """
-    Extract plain text from a document using liteparse.
+    Extract plain text from one or more documents via the liteparse sidecar.
 
-    Parameters
-    ----------
-    file_path:
-        Path to the document. Supported: PDF, images, DOCX, XLSX, PPTX, ODT, …
-    ocr_enabled:
-        Override OCR behaviour. When ``None`` (default) the function auto-selects:
-        - PDF  → tries without OCR first; falls back to OCR if text is sparse.
-        - Image → always enables OCR.
-        Pass ``True`` / ``False`` to force a specific mode.
-
-    Returns
-    -------
-    str
-        Extracted text, stripped. Empty string on any parse failure.
+    Sends decrypted in-memory bytes as a multipart upload — nothing is written
+    to persistent storage. Results are returned in the same order as inputs.
+    ``parsed`` is an empty string on failure.
     """
+    if not files:
+        return []
+
+    tagged = [(str(uuid.uuid4()), f) for f in files]
+    meta = json.dumps([{"id": fid, "ocr": f.ocr} for fid, f in tagged])
+    multipart: list[tuple[str, tuple[str, bytes]]] = [
+        (fid, (f.filename, f.data)) for fid, f in tagged
+    ]
+
     try:
-        from liteparse import LiteParse  # type: ignore[import]
-    except ImportError:
-        logger.warning(
-            "liteparse not installed - falling back to legacy extraction for %s",
-            file_path.name,
-        )
-        raise  # callers catch ImportError to trigger their own fallback
-
-    parser = LiteParse()
-    suffix = file_path.suffix.lower()
-    is_image = suffix in _IMAGE_SUFFIXES
-
-    if ocr_enabled is not None:
-        # Explicit override requested.
-        try:
-            result = parser.parse(str(file_path), ocr_enabled=ocr_enabled)
-            return result.text.strip()
-        except Exception as exc:
-            logger.debug(
-                "liteparse (ocr=%s) failed for %s: %s", ocr_enabled, file_path.name, exc
+        with httpx.Client(timeout=300) as client:
+            response = client.post(
+                f"{get_settings().liteparse_url}/parse",
+                data={"meta": meta},
+                files=multipart,
             )
-            return ""
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        logger.error("liteparse sidecar request failed: %s", exc)
+        return [LiteparseResult(id=fid, parsed="") for fid, _ in tagged]
 
-    if is_image:
-        # Images always need OCR.
-        try:
-            result = parser.parse(str(file_path), ocr_enabled=True)
-            return result.text.strip()
-        except Exception as exc:
-            logger.debug("liteparse (image OCR) failed for %s: %s", file_path.name, exc)
-            return ""
+    id_order = [fid for fid, _ in tagged]
+    results_by_id = {r["id"]: r["parsed"] for r in response.json()}
 
-    # PDF (or any other format): try text layer first, then OCR if sparse.
+    return [
+        LiteparseResult(id=fid, parsed=results_by_id.get(fid, ""))
+        for fid in id_order
+    ]
+
+
+# ── Single-file convenience wrapper ───────────────────────────────────────────
+
+
+def extract_single(file_path: Path, *, ocr: bool = True) -> str:
+    """
+    Convenience wrapper for the common single-file case.
+
+    Reads bytes from an already-decrypted on-disk file and returns extracted
+    text. Returns an empty string on any failure.
+    """
     try:
-        result = parser.parse(str(file_path), ocr_enabled=False)
-        text = result.text.strip()
-        if len(text) >= 50:  # OCR_CHAR_THRESHOLD from ocr.py
-            return text
-        logger.debug(
-            "liteparse text-only returned %d chars for %s - retrying with OCR",
-            len(text),
-            file_path.name,
-        )
-    except Exception as exc:
-        logger.debug("liteparse (no OCR) failed for %s: %s", file_path.name, exc)
-        text = ""
+        data = file_path.read_bytes()
+    except OSError as exc:
+        logger.error("Cannot read file %s: %s", file_path, exc)
+        return ""
 
-    # Retry with OCR enabled.
-    try:
-        result = parser.parse(str(file_path), ocr_enabled=True)
-        return result.text.strip()
-    except Exception as exc:
-        logger.debug("liteparse (with OCR) failed for %s: %s", file_path.name, exc)
-        return text  # Return whatever we got from the first pass (may be empty).
+    results = extract_text_with_liteparse(
+        [LiteparseFile(data=data, filename=file_path.name, ocr=ocr)]
+    )
+    return results[0].parsed if results else ""

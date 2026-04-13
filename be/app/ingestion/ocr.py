@@ -27,7 +27,7 @@ import logging
 from pathlib import Path
 
 from app.ingestion.llm import LLMClient, LLMError
-from app.ingestion.liteparse_extractor import extract_text_with_liteparse
+from app.ingestion.liteparse_extractor import extract_single
 from app.ingestion.prompts.loader import (
     get_schema,
     render_llm_text_ocr_system,
@@ -53,8 +53,8 @@ def extract_pdf_text_layer(file_path: Path) -> str:
     Returns empty string on any error (including if liteparse is not installed).
     """
     try:
-        return extract_text_with_liteparse(file_path)
-    except ImportError:
+        return extract_single(file_path, ocr=False) or extract_single(file_path, ocr=True)
+    except Exception:
         logger.warning(
             "liteparse unavailable - skipping text extraction for %s", file_path.name
         )
@@ -68,8 +68,8 @@ def extract_text_with_tesseract(file_path: Path) -> str:
     Returns empty string on any error (including if liteparse is not installed).
     """
     try:
-        return extract_text_with_liteparse(file_path, ocr_enabled=True)
-    except ImportError:
+        return extract_single(file_path, ocr=True)
+    except Exception:
         logger.warning("liteparse unavailable - skipping OCR for %s", file_path.name)
         return ""
 
