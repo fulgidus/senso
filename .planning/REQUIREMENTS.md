@@ -27,8 +27,8 @@
 
 ### Data Layer
 
-- [ ] **DATA-01**: DB schema uses JSONB chest_items table with typed accessor classes per domain
-- [ ] **DATA-02**: GIN indexes + expression indexes on JSONB for domain-specific hot query paths
+- [ ] **DATA-01**: Domain Manifest JSON Schema fields drive dynamic SQLAlchemy model generation — each Chest gets a typed table (`{domain_id}__{chest_id}`) with top-level scalar fields as typed columns and nested objects as JSONB; tables created via `CREATE TABLE IF NOT EXISTS` at startup; DomainManager routing flag enables/disables domains without DDL
+- [ ] **DATA-02**: Typed columns on hot query paths get conventional B-tree indexes; residual JSONB columns (nested objects/arrays) get GIN indexes; index definitions declared in ChestDef or derived from JSON Schema annotations
 - [ ] **DATA-03**: PII encryption is a feature flag — on/off per deployment via manifest config
 - [ ] **DATA-04**: Webhook connector receives, validates (HMAC), and routes inbound data to appropriate Chests
 - [ ] **DATA-05**: File upload pipeline routes extracted data into domain-specific Chests (not finance-hardwired tables)
