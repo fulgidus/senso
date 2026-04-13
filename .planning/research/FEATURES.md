@@ -1,144 +1,122 @@
-# Feature Research
+# Research: Domain-Agnostic AI Coaching Platform Features
 
-**Domain:** AI financial education/coaching assistant for ages 18-30 (voice-first)
-**Researched:** 2026-03-23
-**Confidence:** MEDIUM-HIGH
+## Summary
+Domain-agnostic AI coaching platforms require three critical architectural layers: an orchestration layer for workflow management, a composable intelligence layer for pluggable AI capabilities, and a server-driven UI layer for dynamic domain rendering. The differentiation lies in governance sophistication, true multi-model orchestration, and schema-driven automation.
 
-## Feature Landscape
+## Findings
 
-### Table Stakes (Users Expect These)
+### 1. Multi-Domain Knowledge Management
 
-Features users assume exist. Missing these = product feels incomplete.
+**1.1 Enterprise Search with RAG Integration** — All major platforms (Rasa, Botpress, Voiceflow) implement vector-based knowledge retrieval with external data source integration. [Rasa Enterprise Search](https://www.rasa.com/docs/pro/customize/enterprise-search/)
 
-| Feature                                                       | Why Expected                                                               | Complexity | Notes                                                                            |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------- |
-| Personal finance data ingestion (bank connections or uploads) | All successful products start from real transaction data, not generic tips | MEDIUM     | For SENSO v1, upload-based ingestion is acceptable; direct connectors can follow |
-| Automatic transaction categorization + spending breakdown     | Core expectation in modern money apps (Rocket Money, Monarch, Copilot)     | MEDIUM     | Needs good merchant normalization + fallback manual correction                   |
-| Recurring charges/subscription detection                      | Users now expect “find where my money leaks” by default                    | MEDIUM     | High perceived value; can be rules-based before advanced ML                      |
-| Budget/cashflow visibility with alerts                        | Preventing overdraft/surprise bills is baseline utility                    | MEDIUM     | Keep lightweight in v1 (simple monthly margin + risk alerts)                     |
-| Goal setup and progress tracking                              | “Save for X” framing is standard and sticky                                | MEDIUM     | Must connect directly to coaching recommendations                                |
-| Personalized coaching response grounded in user numbers       | In AI coaching category, generic advice breaks trust immediately           | HIGH       | Must show reasoning trace (“based on income/spend/debt”) every time              |
-| Safety and compliance guardrails                              | Financial advice products must avoid harmful/regulated overreach           | HIGH       | Include disclaimers, refusal policy, and escalation boundaries                   |
+**1.2 Knowledge Base Segmentation** — Domain-specific knowledge isolation through namespaces, scopes, or tenant boundaries. Voiceflow supports 190+ integrations with domain-specific data sources. [Voiceflow Knowledge Base](https://www.voiceflow.com/features/knowledge-base-generative-ai)
 
-### Differentiators (Competitive Advantage)
+**1.3 Schema Registry Pattern** — Centralized type definitions and validation rules across domains. Enables consistent data models while allowing domain-specific extensions.
 
-Features that set the product apart. Not required, but valuable.
+**1.4 Contextual Knowledge Injection** — Domain context passed to AI models rather than global knowledge flooding. Cisco's enterprise AI uses 8,000+ domain-specific acronym definitions. [Cisco Enterprise AI](https://blogs.cisco.com/ai/non-obvious-patterns-in-building-enterprise-ai-assistants)
 
-| Feature                                                             | Value Proposition                                                                                 | Complexity | Notes                                                                   |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------- |
-| Voice-first “Can I buy this?” decision coach                        | Fast, emotionally resonant interaction for 18-30 audience; stronger demo impact than dashboard UX | HIGH       | SENSO’s primary wedge; keep a text fallback for reliability             |
-| Transparent recommendation anatomy (numbers + reasoning + tradeoff) | Builds trust and teaches financial thinking, not just yes/no verdicts                             | MEDIUM     | Must be enforced by response schema, not prompt-only                    |
-| Persona-driven mentor styles with shared safety core                | Engagement lift without changing financial correctness                                            | MEDIUM     | Distinguish tone from policy: one decision engine, many delivery styles |
-| Action cards per answer (Learn + Act)                               | Converts insight into immediate behavior change (education + concrete next step)                  | MEDIUM     | Pair each recommendation with 1 learning resource + 1 practical action  |
-| Adaptive “roadmap” coaching over time                               | Moves from one-off Q&A to ongoing habit formation                                                 | HIGH       | Defer full autonomy; start with weekly “next best action” summaries     |
-| Gamified self-awareness loops (quiz/challenge style)                | Proven engagement pattern with younger users (e.g., Money IQ style)                               | MEDIUM     | Best after core trust loop is stable                                    |
+**1.5 Multi-Modal Knowledge Sources** — Support for structured data, documents, APIs, and real-time feeds as knowledge inputs with unified querying interfaces.
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### 2. Schema-Driven API Generation
 
-Features that seem good but create problems.
+**2.1 Auto-Generated CRUD Endpoints** — Prisma generators create complete FastAPI/Express endpoints from database schemas. Zero boilerplate for standard operations. [Prisma Express Generator](https://github.com/multipliedtwice/prisma-generator-express)
 
-| Feature                                                                             | Why Requested                                         | Why Problematic                                                                  | Alternative                                                           |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Full dashboard-first analytics suite in MVP                                         | Feels “complete” and familiar to fintech judges/users | Dilutes core value (decision coaching), high build cost, weak differentiation    | Minimal profile snapshot + conversational decision flow               |
-| Fully autonomous money movement in v1 (auto-transfer/auto-pay without confirmation) | “AI autopilot” sounds advanced                        | Safety/trust/regulatory risk too high for first release                          | Recommendation mode + explicit user confirmation actions              |
-| Investment-picking/market timing advice for launch                                  | Frequently requested in finance apps                  | High legal/suitability risk and weak alignment with immediate spending decisions | Focus on budgeting, debt/rate understanding, emergency fund behaviors |
-| Heavy open-banking integration during hackathon MVP                                 | Seen as “real fintech” requirement                    | Integration friction jeopardizes demo reliability                                | File-upload ingestion first, connectors post-validation               |
+**2.2 Type-Safe Client Generation** — GraphQL CodeGen and OpenAPI tools auto-generate type-safe client libraries. Changes in schema automatically propagate to client types. [RTK Query CodeGen](https://redux-toolkit.js.org/rtk-query/usage/code-generation)
 
-## Feature Dependencies
+**2.3 Documentation Auto-Generation** — OpenAPI specs generated from schema definitions with automatic validation rules. FastSchema uses Ogen for spec generation. [FastSchema OpenAPI](https://fastschema.com/docs/framework/resource/openapi-spec.html)
 
-```text
-[Data ingestion + parsing]
-    └──requires──> [Profile normalization]
-                        └──requires──> [Personalized coaching grounded in numbers]
-                                                └──requires──> [Reasoning trace output]
+**2.4 Validation Layer Generation** — Zod/Pydantic validators auto-generated from schemas. Runtime validation matches compile-time types without manual synchronization.
 
-[Recurring/subscription detection] ──enhances──> ["Can I buy this?" decision quality]
+**2.5 Migration and Versioning Automation** — Schema changes trigger automated migration scripts and backward-compatible API versioning.
 
-[Knowledge base retrieval] ──requires──> [Action cards: Learn]
-[Service/partner catalog matching] ──requires──> [Action cards: Act]
+### 3. Pluggable AI Platform Architecture
 
-[Persona style layer] ──requires──> [Safety boundaries + policy guardrails]
+**3.1 Three-Layer Architecture (Orchestration/Intelligence/Experience)** — Bain & Company identifies this as the standard pattern for agentic AI platforms. Separation enables independent evolution of each layer. [Bain Agentic AI](https://www.bain.com/insights/the-three-layers-of-an-agentic-ai-platform/)
 
-[Voice UX] ──conflicts (in MVP scope/time)──> [Complex dashboard analytics buildout]
-```
+**3.2 Model-Agnostic Intelligence Layer** — Standardized AI interfaces by capability (classification, extraction, generation) rather than by provider. Enables hot-swapping of AI models without workflow changes. [Kinetic Composable AI](https://www.kineticdata.com/blog/composable-ai-architecture-how-to-build-modular-ai-systems-that-you-actually-control)
 
-### Dependency Notes
+**3.3 Plugin/Extension System** — Dynamic capability loading through standardized interfaces. Tools, skills, and integrations deployed independently of core platform. [Zylos Plugin Architecture](https://zylos.ai/research/2026-02-21-ai-agent-plugin-extension-architecture)
 
-- **Personalized coaching requires normalized profile data:** without clean income/expense/debt structure, answers become generic and low-trust.
-- **Reasoning trace requires structured decision output:** must serialize “inputs used, constraints, recommendation, tradeoff.”
-- **Action cards require retrieval + matching subsystems:** educational links and concrete actions should come from different pipelines.
-- **Persona layer requires shared policy core:** tone can vary; financial boundaries cannot.
-- **Voice-first conflicts with dashboard-heavy MVP:** both are UX-heavy; prioritize one to preserve demo reliability.
+**3.4 Orchestration-First Design** — Workflow logic, governance, and context management handled by orchestration layer, not embedded in AI models. Critical for enterprise deployment.
 
-## MVP Definition
+**3.5 Multi-Model Coordination** — Ability to route different tasks to optimal models based on cost, accuracy, latency, and compliance requirements within single workflows.
 
-### Launch With (v1)
+### 4. Server-Driven UI (SDUI) Patterns
 
-Minimum viable product - what’s needed to validate the concept.
+**4.1 Component Registry with Type Safety** — Airbnb's Ghost Platform uses SectionComponentType enum to map data models to UI components. Type-safe rendering across platforms. [Airbnb Ghost Platform](https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5)
 
-- [ ] Document upload ingestion (CSV + payslip/receipt image) with structured profile extraction - prerequisite for personalization
-- [ ] “Can I buy this?” voice/text query with grounded answer - core user moment
-- [ ] Mandatory reasoning transparency block in every answer - trust + educational value
-- [ ] Action cards: one learning resource + one concrete next action - behavior change loop
-- [ ] Safety boundaries + refusal patterns + disclaimers - prevents harmful guidance
-- [ ] Lightweight session/auth persistence - preserves continuity for demo and early users
+**4.2 Layout Engine with Breakpoint Support** — ILayout interface with responsive rendering. Supports FormFactor-specific layouts (compact/wide) for cross-platform consistency.
 
-### Add After Validation (v1.x)
+**4.3 Action Definition in Schema** — IAction interface defines user interaction handlers in server response. Actions include navigation, API calls, and custom business logic.
 
-Features to add once core is working.
+**4.4 Nested Component Composition** — Components can contain other components. Enables complex UI composition from simple building blocks.
 
-- [ ] Recurring/subscription detector with reminder alerts - add once ingestion accuracy is stable
-- [ ] Goal tracking with monthly progress nudges - add once coaching retention is proven
-- [ ] Expanded persona set + personalization controls - add once baseline response quality is consistent
-- [ ] Basic bank connector(s) for top institutions - add once upload-first funnel validates demand
+**4.5 Version Management and Rollback** — Schema versioning enables A/B testing, gradual rollouts, and instant rollbacks of UI changes without client updates.
 
-### Future Consideration (v2+)
+**4.6 Cross-Platform Rendering** — Single schema renders to native iOS (Swift), Android (Kotlin), and Web (TypeScript) components. DivKit demonstrates this pattern. [DivKit SDUI](https://divkit.tech/)
 
-Features to defer until product-market fit is established.
+### 5. Domain-Configurable Safety/Behavior Patterns
 
-- [ ] Semi-autonomous action execution (user-approved automations) - requires mature trust/compliance controls
-- [ ] Gamified weekly money challenges/quiz loops - useful growth lever after core utility is strong
-- [ ] Deep partner marketplace optimization/funnel analytics - monetize after behavior-change value is proven
+**5.1 Dynamic Guardrail Models** — DynaGuard enables user-defined policies for domain-specific safety evaluation. Moves beyond static harm categories. [DynaGuard](https://taruschirag.github.io/DynaGuard/)
 
-## Feature Prioritization Matrix
+**5.2 Controllable Safety Alignment** — CoSA framework adapts models to diverse safety requirements without retraining. Domain-specific safety configs applied at runtime.
 
-| Feature                                   | User Value  | Implementation Cost | Priority |
-| ----------------------------------------- | ----------- | ------------------- | -------- |
-| Upload-based financial profile extraction | HIGH        | MEDIUM              | P1       |
-| Grounded purchase decision coaching       | HIGH        | HIGH                | P1       |
-| Reasoning transparency block              | HIGH        | MEDIUM              | P1       |
-| Learn + Act action cards                  | HIGH        | MEDIUM              | P1       |
-| Safety/policy guardrails                  | HIGH        | HIGH                | P1       |
-| Recurring/subscription detection          | HIGH        | MEDIUM              | P2       |
-| Goal tracking                             | MEDIUM-HIGH | MEDIUM              | P2       |
-| Persona expansion/gamification            | MEDIUM      | MEDIUM              | P3       |
-| Autonomous financial actions              | MEDIUM      | HIGH                | P3       |
+**5.3 Rule-Based Behavior Modulation** — OpenAI's Rule Based Rewards uses collections of rules for desired/undesired behaviors. Domain experts define rules without ML expertise.
 
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+**5.4 Multi-Domain Policy Management** — POLY-GUARD dataset covers eight safety-critical domains (finance, law, healthcare) with domain-specific guidelines.
 
-## Competitor Feature Analysis
+**5.5 Contextual Persona Boundaries** — Safety and behavior rules tied to conversation context, user roles, and domain-specific compliance requirements.
 
-| Feature                 | Competitor A (Cleo)                         | Competitor B (Rocket Money)   | Our Approach (SENSO)                                         |
-| ----------------------- | ------------------------------------------- | ----------------------------- | ------------------------------------------------------------ |
-| Conversational coaching | Strong personality + chat/voice positioning | Limited; more utility tooling | Voice-first mentor with explicit financial reasoning         |
-| Spending visibility     | Present                                     | Strong core offering          | Keep concise (profile + margin), avoid dashboard bloat in v1 |
-| Subscription detection  | Not primary marketing focus                 | Core strength                 | Add in v1.x, tied to coaching prompts                        |
-| Goal automation         | Autopilot roadmap framing                   | Autopilot savings feature     | Start with recommendation-first roadmap, manual confirmation |
-| Educational loop        | Present via “Money IQ” style engagement     | Secondary                     | Embed learning resource in every decision response           |
+## Feature Classification
+
+### Table Stakes (Required for Market Entry)
+- **Basic RAG/Knowledge Retrieval** (Low Complexity) — Every platform needs document search and basic AI integration
+- **API Auto-Generation** (Medium Complexity) — Standard CRUD generation from schemas is expected
+- **Component-Based UI** (Medium Complexity) — Modular UI composition is industry standard
+- **Multi-Model Support** (Medium Complexity) — Platform lock-in to single AI provider is unacceptable
+- **Audit Logging** (Low Complexity) — Basic tracking of AI decisions and user actions
+
+### Differentiators (Competitive Advantages)
+- **True Multi-Model Orchestration** (High Complexity) — Routing tasks to optimal models within single workflows based on cost/accuracy/compliance
+- **Schema-Driven Domain Manifests** (High Complexity) — Complete domain definition through declarative schemas (data models + UI + behavior + safety rules)
+- **Dynamic Safety Policy Engine** (Very High Complexity) — Runtime adaptation of AI behavior based on domain-specific safety requirements without model retraining
+- **Cross-Platform SDUI with Actions** (High Complexity) — Server-defined UI that includes interaction handlers, not just static rendering
+- **Governance-First Architecture** (High Complexity) — Human-in-the-loop, compliance tracking, and exception handling as platform capabilities, not bolt-ons
+- **Real-Time Schema Evolution** (Very High Complexity) — Hot-swapping of domain definitions, UI schemas, and AI models without downtime
+
+### Anti-Features (Avoid These Patterns)
+- **AI Model Lock-In** — Hardcoding specific AI provider APIs breaks composability
+- **Monolithic Domain Embedding** — Baking domain logic into core platform code prevents extensibility
+- **Client-Side Schema Coupling** — Requiring client updates for domain changes breaks the SDUI value proposition
+- **Static Safety Policies** — One-size-fits-all safety that can't adapt to domain-specific requirements
+- **Vendor-Controlled Governance** — Audit and compliance capabilities that depend on vendor roadmaps
 
 ## Sources
 
-- Project context: `/home/fulgidus/Documents/senso/.planning/PROJECT.md` (HIGH)
-- Product concept: `/home/fulgidus/Documents/senso/CONCEPT.md` (HIGH)
-- Cleo main + Autopilot + Money IQ pages (official): https://web.meetcleo.com, https://web.meetcleo.com/autopilot, https://web.meetcleo.com/moneyiq (HIGH)
-- Rocket Money feature pages (official): https://www.rocketmoney.com/feature/spending-insights, https://www.rocketmoney.com/feature/manage-subscriptions, https://www.rocketmoney.com/feature/autopilot-savings (HIGH)
-- Copilot product page (official): https://www.copilot.money (MEDIUM-HIGH; marketing copy, limited technical detail)
-- Monarch product pages (official): https://www.monarchmoney.com, https://www.monarchmoney.com/features/budgeting, https://www.monarchmoney.com/features/planning (HIGH)
-- Market overview reference: NerdWallet “Best Budget Apps for 2026” https://www.nerdwallet.com/article/finance/best-budget-apps (MEDIUM; broad comparative source)
+**Kept:**
+- Airbnb Ghost Platform (https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5) — Comprehensive SDUI implementation with cross-platform rendering, action handling, and component registry patterns
+- Kinetic Composable AI (https://www.kineticdata.com/blog/composable-ai-architecture-how-to-build-modular-ai-systems-that-you-actually-control) — Three-layer architecture pattern and orchestration-first design principles for enterprise AI
+- Rasa Enterprise Search (https://www.rasa.com/docs/pro/customize/enterprise-search/) — RAG implementation for multi-domain knowledge management with vector store integration
+- DynaGuard (https://taruschirag.github.io/DynaGuard/) — Dynamic guardrail models with user-defined policies for domain-specific safety
+- Zylos Plugin Architecture (https://zylos.ai/research/2026-02-21-ai-agent-plugin-extension-architecture) — Comprehensive analysis of AI agent extension patterns and modular capability loading
+- DivKit SDUI (https://divkit.tech/) — Open-source cross-platform server-driven UI framework with JSON schema approach
 
----
-*Feature research for: AI financial education assistant (18-30)*
-*Researched: 2026-03-23*
+**Dropped:**
+- Generic AI platform comparisons — Focused on marketing features rather than architectural patterns
+- Outdated chatbot frameworks — Legacy approaches that predate modern LLM capabilities
+- Academic papers without implementation details — Theoretical work without practical application patterns
+
+## Gaps
+
+**Schema Evolution Patterns** — Limited information on how platforms handle breaking changes to domain schemas in production. Need research on zero-downtime migration strategies.
+
+**Performance Characteristics** — Insufficient data on latency and throughput implications of composable vs monolithic architectures at scale.
+
+**Domain Migration Tooling** — No clear patterns for migrating existing domain-specific AI systems into composable architectures without business disruption.
+
+## Next Steps
+
+1. **Prototype Schema-Driven Domain Manifest** — Define SENSO's "Chest" concept as comprehensive domain schema including data models, UI components, AI personas, and safety rules
+2. **Evaluate SDUI Frameworks** — Technical deep-dive on DivKit vs custom implementation for SENSO's cross-platform needs
+3. **Design Composable AI Layer** — Map SENSO's coaching, extraction, and analysis capabilities to pluggable AI interfaces
+4. **Research Schema Migration Patterns** — How to evolve domain manifests safely in production

@@ -92,46 +92,46 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 | --- | --- | --- |
-| CORE-01 | - | Pending |
-| CORE-02 | - | Pending |
-| CORE-03 | - | Pending |
-| CORE-04 | - | Pending |
-| CORE-05 | - | Pending |
-| CORE-06 | - | Pending |
-| CORE-07 | - | Pending |
-| AI-01 | - | Pending |
-| AI-02 | - | Pending |
-| AI-03 | - | Pending |
-| AI-04 | - | Pending |
-| AI-05 | - | Pending |
-| AI-06 | - | Pending |
-| AI-07 | - | Pending |
-| DATA-01 | - | Pending |
-| DATA-02 | - | Pending |
-| DATA-03 | - | Pending |
-| DATA-04 | - | Pending |
-| DATA-05 | - | Pending |
-| DATA-06 | - | Pending |
-| DATA-07 | - | Pending |
-| FE-01 | - | Pending |
-| FE-02 | - | Pending |
-| FE-03 | - | Pending |
-| FE-04 | - | Pending |
-| FE-05 | - | Pending |
-| FE-06 | - | Pending |
-| FIN-01 | - | Pending |
-| FIN-02 | - | Pending |
-| FIN-03 | - | Pending |
-| FIN-04 | - | Pending |
-| FIN-05 | - | Pending |
-| FIN-06 | - | Pending |
-| FIN-07 | - | Pending |
-| FIN-08 | - | Pending |
+| CORE-01 | 33 | Pending |
+| CORE-02 | 33 | Pending |
+| CORE-03 | 33 | Pending |
+| CORE-04 | 35 | Pending |
+| CORE-05 | 33 | Pending |
+| CORE-06 | 40 | Pending |
+| CORE-07 | 36 | Pending |
+| AI-01 | 36 | Pending |
+| AI-02 | 36 | Pending |
+| AI-03 | 36 | Pending |
+| AI-04 | 37 | Pending |
+| AI-05 | 36 | Pending |
+| AI-06 | 37 | Pending |
+| AI-07 | 36 | Pending |
+| DATA-01 | 34 | Pending |
+| DATA-02 | 34 | Pending |
+| DATA-03 | 34 | Pending |
+| DATA-04 | 35 | Pending |
+| DATA-05 | 35 | Pending |
+| DATA-06 | 34 | Pending |
+| DATA-07 | 35 | Pending |
+| FE-01 | 38 | Pending |
+| FE-02 | 38 | Pending |
+| FE-03 | 38 | Pending |
+| FE-04 | 38 | Pending |
+| FE-05 | 38 | Pending |
+| FE-06 | 38 | Pending |
+| FIN-01 | 39 | Pending |
+| FIN-02 | 39 | Pending |
+| FIN-03 | 39 | Pending |
+| FIN-04 | 39 | Pending |
+| FIN-05 | 39 | Pending |
+| FIN-06 | 39 | Pending |
+| FIN-07 | 39 | Pending |
+| FIN-08 | 39 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 35 total
-- Mapped to phases: 0
-- Unmapped: 35 ⚠️
+- Mapped to phases: 35
+- Unmapped: 0 ✅
 
 ---
 *Requirements defined: 2026-04-12*
